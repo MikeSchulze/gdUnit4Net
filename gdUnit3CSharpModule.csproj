@@ -1,0 +1,28 @@
+<Project Sdk="Godot.NET.Sdk/3.3.0">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
+    <!--Force nullable warnings, you can disable if you want-->
+    <Nullable>enable</Nullable>
+    <RootNamespace>GdUnit3</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageVersion>2.3.0</PackageVersion>
+    <Title>GdUnit3CSharpModule</Title>
+    <Authors>MikeSchulze</Authors>
+    <Description>The Godot C# extension for GdUnit3.</Description>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit3</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--Required for GdUnit3-->
+    <PackageReference Include="GodotSharp" Version="3.2.3" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+        <!-- Content Include=".gitignore" -->
+        <Content Include="LICENSE" />
+        <None Include="LICENSE" Pack="true" PackagePath="" />
+    </ItemGroup>
+</Project>

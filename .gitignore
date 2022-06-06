@@ -1,0 +1,16 @@
+# Project-specific ignores
+.history
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# System/tool-specific ignores
+.directory
+*~
+.DS_Store
+.vscode/
+
+.fake
+.ionide
