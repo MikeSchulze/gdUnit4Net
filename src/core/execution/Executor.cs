@@ -7,6 +7,8 @@ namespace GdUnit3.Executions
 {
     internal sealed class Executor : Godot.Reference, IExecutor
     {
+
+        [Godot.Signal] private delegate void ExecutionCompleted();
         private List<ITestEventListener> _eventListeners = new List<ITestEventListener>();
 
         private class GdTestEventListenerDelegator : ITestEventListener
@@ -20,10 +22,11 @@ namespace GdUnit3.Executions
             public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
         }
 
-        public void AddGdTestEventListener(Godot.Object listener)
+        public IExecutor AddGdTestEventListener(Godot.Object listener)
         {
             // I want to using anonymus implementation to remove the extra delegator class
             _eventListeners.Add(new GdTestEventListenerDelegator(listener));
+            return this;
         }
 
         public void AddTestEventListener(ITestEventListener listener)
@@ -33,9 +36,6 @@ namespace GdUnit3.Executions
 
         public bool ReportOrphanNodesEnabled { get; set; } = true;
 
-
-        // this method is called form gdScript and can't handle 'Task'
-        // we used explicit 'async void' to avoid  'Attempted to convert an unmarshallable managed type to Variant Task'
         public async void Execute(Godot.Node node)
         {
             try
