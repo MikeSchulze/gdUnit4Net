@@ -5,7 +5,7 @@ using System;
 
 namespace GdUnit3.Executions
 {
-    internal sealed class TestCase
+    public sealed class TestCase
     {
         public TestCase(MethodInfo methodInfo)
         {

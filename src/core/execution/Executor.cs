@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace GdUnit3.Executions
 {
-    internal sealed class Executor : Godot.Reference, IExecutor
+    public sealed class Executor : Godot.Reference, IExecutor
     {
 
         [Godot.Signal] private delegate void ExecutionCompleted();
@@ -59,7 +59,7 @@ namespace GdUnit3.Executions
             }
         }
 
-        public async Task ExecuteInternally(TestSuite testSuite)
+        internal async Task ExecuteInternally(TestSuite testSuite)
         {
             if (!ReportOrphanNodesEnabled)
                 Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");

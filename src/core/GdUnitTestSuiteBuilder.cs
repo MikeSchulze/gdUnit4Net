@@ -8,9 +8,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace GdUnit3.Core
 {
-    internal class GdUnitTestSuiteBuilder
+    public class GdUnitTestSuiteBuilder
     {
-        internal static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
+
+        private static Dictionary<String, Type> clazzCache = new Dictionary<string, Type>();
+
+        public static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
         {
             var result = new Dictionary<string, object>();
             result.Add("path", testSuitePath);
@@ -73,11 +76,12 @@ namespace GdUnit3.Core
             }
         }
 
-        internal static Type? ParseType(String classPath)
+        public static Type? ParseType(String classPath)
         {
             if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
                 Console.Error.WriteLine($"Class `{classPath}` not exists .");
+                Godot.GD.PrintS("Build Error", $"Class `{classPath}` not exists .");
                 return null;
             }
             try
@@ -87,20 +91,46 @@ namespace GdUnit3.Core
                 if (namespaceSyntax != null)
                 {
                     ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
-                    return Type.GetType(namespaceSyntax.Name.ToString() + "." + classSyntax.Identifier.ValueText);
+                    return FindTypeOnAssembly(namespaceSyntax.Name.ToString() + "." + classSyntax.Identifier.ValueText);
                 }
                 ClassDeclarationSyntax programClassSyntax = root.Members.OfType<ClassDeclarationSyntax>().First();
-                return Type.GetType(programClassSyntax.Identifier.ValueText);
+                return FindTypeOnAssembly(programClassSyntax.Identifier.ValueText);
             }
 #pragma warning disable CS0168
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
+                Godot.GD.PrintS("Build Error", $"Can't parse namespace of {classPath}. Error: {e.Message}");
 #pragma warning restore CS0168
                 // ignore exception
                 return null;
             }
         }
+
+        private static Type? FindTypeOnAssembly(String clazz)
+        {
+            if (clazzCache.ContainsKey(clazz))
+            {
+                // Godot.GD.PrintS("Use class cache");
+                return clazzCache[clazz];
+            }
+            Type? type = Type.GetType(clazz);
+            if (type != null)
+                return type;
+            // if the class not found on current assembly lookup over all ohter loaded assemblies
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = assembly.GetType(clazz);
+                if (type != null)
+                {
+                    // Godot.GD.PrintS("found on assemblyName", $"Name={name.Name} Version={name.Version} Location={assembly.Location}");
+                    clazzCache.Add(clazz, type);
+                    return type;
+                }
+            }
+            return null;
+        }
+
 
         private static string LoadTestSuiteTemplate()
         {
