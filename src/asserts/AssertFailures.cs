@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -182,6 +183,13 @@ namespace GdUnit3.Asserts
 
         public static string IsBetween(object? current, object from, object to) =>
             string.Format("{0}\n  {1}\n in range between\n  {2} <> {3}",
+                FormatFailure("Expecting:"),
+                FormatCurrent(current),
+                FormatExpected(from),
+                FormatExpected(to));
+
+        public static string IsNotBetween(object? current, object from, object to) =>
+            string.Format("{0}\n  {1}\n be NOT in range between\n  {2} <> {3}",
                 FormatFailure("Expecting:"),
                 FormatCurrent(current),
                 FormatExpected(from),

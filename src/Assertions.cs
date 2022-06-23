@@ -23,7 +23,6 @@ namespace GdUnit3
         /// An Assertion to verify string values
         /// </summary>
         /// <param name="current">The current string value to verify</param>
-        /// <param name="expectResult"></param>
         /// <returns></returns>
         public static IStringAssert AssertString(string? current) => new StringAssert(current);
 
@@ -31,7 +30,6 @@ namespace GdUnit3
         /// An Assertion to verify integer values
         /// </summary>
         /// <param name="current">The current integer value to verify</param>
-        /// <param name="expectResult"></param>
         /// <returns></returns>
         public static IIntAssert AssertInt(int current) => new IntAssert(current);
 
@@ -39,7 +37,6 @@ namespace GdUnit3
         /// An Assertion to verify double values
         /// </summary>
         /// <param name="current">The current double value to verify</param>
-        /// <param name="expectResult"></param>
         /// <returns></returns>
         public static IDoubleAssert AssertFloat(double current) => new DoubleAssert(current);
 
@@ -47,7 +44,6 @@ namespace GdUnit3
         /// An Assertion to verify object values
         /// </summary>
         /// <param name="current">The current double value to verify</param>
-        /// <param name="expectResult"></param>
         /// <returns></returns>        
         public static IObjectAssert AssertObject(object? current) => new ObjectAssert(current);
 
@@ -55,10 +51,16 @@ namespace GdUnit3
         /// An Assertion to verify array values
         /// </summary>
         /// <param name="current">The current array value to verify</param>
-        /// <param name="expectResult"></param>
         /// <returns></returns>  
         public static IArrayAssert AssertArray(IEnumerable? current) => new ArrayAssert(current);
 
+
+        /// <summary>
+        /// An Assertion to verify Godot.Vector2 values
+        /// </summary>
+        /// <param name="current">The current vector2 value to verify</param>
+        /// <returns></returns>
+        public static IVector2Assert AssertVec2(Godot.Vector2 current) => new Vector2Assert(current);
 
         /// <summary>
         /// An Assertion used by test generation to notify the test is not yet implemented
@@ -88,6 +90,7 @@ namespace GdUnit3
         public static IDoubleAssert AssertThat(double current) => AssertFloat(current);
         public static IObjectAssert AssertThat(object current) => AssertObject(current);
         public static IArrayAssert AssertThat(IEnumerable current) => AssertArray(current);
+        public static IVector2Assert AssertThat(Godot.Vector2 current) => AssertVec2(current);
 
 
         /// <summary>
