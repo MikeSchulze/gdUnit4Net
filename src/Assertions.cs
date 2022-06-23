@@ -63,6 +63,13 @@ namespace GdUnit3
         public static IVector2Assert AssertVec2(Godot.Vector2 current) => new Vector2Assert(current);
 
         /// <summary>
+        /// An Assertion to verify Godot.Vector3 values
+        /// </summary>
+        /// <param name="current">The current vector3 value to verify</param>
+        /// <returns></returns>
+        public static IVector3Assert AssertVec3(Godot.Vector3 current) => new Vector3Assert(current);
+
+        /// <summary>
         /// An Assertion used by test generation to notify the test is not yet implemented
         /// </summary>
         /// <returns></returns>
@@ -81,7 +88,9 @@ namespace GdUnit3
                 return (IAssertBase<T>)AssertFloat(Convert.ToDouble(current));
             if (typeof(IEnumerable) == typeof(T))
                 return (IAssertBase<T>)AssertArray(current as IEnumerable);
-            return (IAssertBase<T>)AssertObject(current as object);
+            if (typeof(object) == typeof(T))
+                return (IAssertBase<T>)AssertObject(current as object);
+            throw new Exceptions.TestFailedException($"No assert found for type {typeof(T)}, is current not supported!", -1);
         }
 
         public static IStringAssert AssertThat(string current) => AssertString(current);
@@ -91,6 +100,7 @@ namespace GdUnit3
         public static IObjectAssert AssertThat(object current) => AssertObject(current);
         public static IArrayAssert AssertThat(IEnumerable current) => AssertArray(current);
         public static IVector2Assert AssertThat(Godot.Vector2 current) => AssertVec2(current);
+        public static IVector3Assert AssertThat(Godot.Vector3 current) => AssertVec3(current);
 
 
         /// <summary>
