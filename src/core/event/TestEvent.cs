@@ -65,7 +65,7 @@ namespace GdUnit3
         {
             return new TestEvent(TYPE.TESTCASE_BEFORE, resourcePath, suiteName, testName);
         }
-        
+
         public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary? statistics = null, IEnumerable<TestReport>? reports = null)
         {
             return new TestEvent(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
@@ -97,6 +97,7 @@ namespace GdUnit3
         public TestEvent.TYPE Type { get; private set; }
         public string SuiteName => _data["suite_name"] as string;
         public string TestName => _data["test_name"] as string;
+        public string ResourcePath => _data["resource_path"] as string;
 
         public IDictionary Statistics => _data["statistics"] as IDictionary;
 

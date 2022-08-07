@@ -25,7 +25,7 @@ namespace GdUnit3.Tests
         [TestCase]
         public void GetProperty()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             AssertObject(runner.GetProperty<Godot.ColorRect>("_box1")).IsInstanceOf<Godot.ColorRect>();
             AssertThrown(() => runner.GetProperty<Godot.ColorRect>("_invalid"))
                 .IsInstanceOf<System.MissingFieldException>()
@@ -35,7 +35,7 @@ namespace GdUnit3.Tests
         [TestCase]
         public void InvokeSceneMethod()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             AssertString(runner.Invoke("add", 10, 12).ToString()).IsEqual("22");
             AssertThrown(() => runner.Invoke("sub", 12, 10))
                 .IsInstanceOf<System.MissingMethodException>()
@@ -45,7 +45,7 @@ namespace GdUnit3.Tests
         [TestCase(Timeout = 1200)]
         public async Task AwaitForMilliseconds()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
             await runner.AwaitMillis(1000);
@@ -57,7 +57,7 @@ namespace GdUnit3.Tests
         [TestCase(Timeout = 2000)]
         public async Task SimulateFrames()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
             // initial is white
@@ -80,7 +80,7 @@ namespace GdUnit3.Tests
         [TestCase(Timeout = 1000)]
         public async Task SimulateFramesWithDelay()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
             // initial is white
@@ -98,7 +98,7 @@ namespace GdUnit3.Tests
         [TestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
         public async Task RunScene_ColorCycle()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             runner.MoveWindowToForeground();
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
@@ -126,7 +126,7 @@ namespace GdUnit3.Tests
         [TestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
         public async Task RunScene_SimulateKeyPressed()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             // inital no spell is fired
             AssertObject(runner.FindNode("Spell")).IsNull();
@@ -154,7 +154,7 @@ namespace GdUnit3.Tests
         [TestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 2000)]
         public async Task RunScene_SimulateMouseEvents()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             runner.MoveWindowToForeground();
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
@@ -197,7 +197,7 @@ namespace GdUnit3.Tests
         [TestCase(Description = "Example to wait for a specific method result", Timeout = 3000)]
         public async Task AwaitMethod()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             // wait until 'color_cycle()' returns 'black'
             await runner.AwaitMethod<string>("color_cycle").IsEqual("black");
@@ -213,7 +213,7 @@ namespace GdUnit3.Tests
         [TestCase(Description = "Example to wait for a specific method result and used timefactor of 10", Timeout = 1000)]
         public async Task AwaitMethod_withTimeFactor()
         {
-            ISceneRunner runner = ISceneRunner.Load("res://addons/gdUnit3/test/mocker/resources/scenes/TestScene.tscn", true);
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             runner.SetTimeFactor(10);
             // wait until 'color_cycle()' returns 'black' (using small timeout we expect the method will now processes 10 times faster)

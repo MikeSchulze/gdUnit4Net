@@ -1,7 +1,7 @@
 name: CI GdUnit3 on Godot Mono 3.3.x
 
 on:
-  push:
+  pull_request:
     paths-ignore:
       - '**.yml'
       - '**.jpg'
@@ -9,57 +9,90 @@ on:
       - '**.md'
   workflow_dispatch:
 
-jobs:
-  testing:
-    strategy:
-      matrix:
-        godot: [mono-3.4.4]
+env:
+  GODOT_BIN: "/usr/local/bin/godot"
 
-    name: GdUnit3 Selftest on Godot ${{ matrix.godot }}
+concurrency:
+  group: ci-pr-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  unit-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        godot-build: ['mono-']
+        godot-version: [ 3.4.4] # 3.4.3 is missing on barichello/godot-ci
+
+    name: "CI on Godot ${{ matrix.godot-build }}v${{ matrix.godot-version }}"
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 6
+    continue-on-error: false
     container:
-      image: barichello/godot-ci:${{ matrix.godot }}
+      image: barichello/godot-ci:${{ matrix.godot-build }}${{ matrix.godot-version }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          lfs: true
-          path: mono
-      
-      - name: Checkout GdUnit3
+      - name: "Checkout GdUnit3 Plugin"
+        if: ${{ !cancelled() }}
         uses: actions/checkout@v3
         with:
           repository: MikeSchulze/gdUnit3
 
-      - name: Setup .NET
+      - name: "Checkout GdUnit3Mono"
+        if: ${{ !cancelled() }}
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          path: mono
+
+      - name: "Patch Project"
+        if: ${{ !cancelled() }}
+        run: |
+          rm -rf gdUnit3.csproj
+          rm -rf gdUnit3.sln
+          cp ./mono/gdUnit3Mono.csproj gdUnit3.csproj
+          rm -rf addons/gdUnit3/test/
+          mv mono/test ./test
+          
+        # sed -i 's+config/name="gdUnit3"+config/name="gdUnit3Mono"+g' project.godot
+
+      - name: "Update Project"
+        if: ${{ !cancelled() }}
+        timeout-minutes: 1
+        continue-on-error: true # we still ignore the timeout, the script is not quit and we run into a timeout
+        run: |
+          ${{ env.GODOT_BIN }} -e --path . -s res://addons/gdUnit3/src/core/scan_project.gd --no-window
+
+      - name: "Setup .NET"
+        if: ${{ !cancelled() }}
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.x
 
-      - name: Compile
+      - name: "Compile C#"
+        timeout-minutes: 1
         run: |
           dotnet restore gdUnit3.csproj
           mkdir -p .mono/assemblies/Debug
           cp /usr/local/bin/GodotSharp/Api/Release/* .mono/assemblies/Debug
           dotnet build -verbosity:m
 
-      - name: Run Selftest
+      - name: "Run Unit Test"
+        if: ${{ !cancelled() }}
         timeout-minutes: 10
-        env:
-          GODOT_BIN: "/usr/local/bin/godot"
-        shell: bash
-        run: ./runtest.sh -a res://mono/test
+        uses: ./.github/actions/unit-test
+        with:
+          godot-bin: ${{ env.GODOT_BIN }}
+          test-includes: "res://test"
 
-      - name: Publish Test Reports
-        if: always()
+      - name: "Publish Unit Test Reports"
+        if: ${{ !cancelled() }}
         uses: ./.github/actions/publish-test-report
         with:
-          report-name: Test Report (${{ matrix.godot }})
+          report-name: ${{ matrix.godot-build }}${{ matrix.godot-version }}
 
-      - name: Collect Test Artifacts
-        uses: actions/upload-artifact@v2
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/upload-test-report
         with:
-          name: Report_${{ matrix.godot }}
-          path: reports/**
+          report-name: ${{ matrix.godot-build }}${{ matrix.godot-version }}

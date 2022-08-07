@@ -28,6 +28,8 @@ namespace GdUnit3.Asserts
         private static Dictionary<Type, Func<object, string>> formatters = new Dictionary<Type, Func<object, string>>{
                 {typeof(string), (value) => value?.ToString() ?? "<Null>"},
                 {typeof(object), (value) =>  value?.GetType().Name ?? "<Null>"},
+                {typeof(Godot.Vector2), (value) =>  Godot.GD.Str(value)},
+                {typeof(Godot.Vector3), (value) =>  Godot.GD.Str(value)},
         };
 
         private static string SimpleClassName(Type type)

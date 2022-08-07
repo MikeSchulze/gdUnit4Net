@@ -7,7 +7,7 @@
     <RootNamespace>GdUnit3</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2.3.0-beta.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
+    <PackageVersion>2.3.1-beta.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
     <Title>GdUnit3CSharpModule</Title>
     <Authors>MikeSchulze</Authors>
     <Description>The Godot C# extension for GdUnit3.</Description>

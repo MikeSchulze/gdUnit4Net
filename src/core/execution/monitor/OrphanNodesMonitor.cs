@@ -27,7 +27,7 @@ namespace GdUnit3.Executions.Monitors
                 OrphanCount += GetMonitoredOrphanCount() - OrphanNodesStart;
         }
 
-        private int GetMonitoredOrphanCount() => (int)GetMonitor(Monitor.ObjectOrphanNodeCount);
+        private int GetMonitoredOrphanCount() => (int)GetMonitor(Godot.Performance.Monitor.ObjectOrphanNodeCount);
 
         private bool ReportOrphanNodesEnabled { get; set; }
 
