@@ -10,6 +10,7 @@
     <PackageVersion>2.3.1-beta.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
     <Title>GdUnit3CSharpModule</Title>
     <Authors>MikeSchulze</Authors>
+    <Version>2.3.1</Version>
     <Description>The Godot C# extension for GdUnit3.</Description>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit3Mono</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -21,10 +22,17 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+    <!-- Content Include=".gitignore" -->
+    <Content Include="LICENSE" />
+    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Remove="test\**" />
+    <Content Remove="test\**" />
+    <Compile Remove="test\**" />
+    <EmbeddedResource Remove="test\**" />
+    <None Remove="logs\**" />
+    <None Remove="addons\**" />
+    <Content Remove="addons\**" />
+    <Compile Remove="addons\**" />
+    <EmbeddedResource Remove="addons\**" />
   </ItemGroup>
-  <ItemGroup>
-        <!-- Content Include=".gitignore" -->
-        <Content Include="LICENSE" />
-        <None Include="LICENSE" Pack="true" PackagePath="" />
-    </ItemGroup>
 </Project>
