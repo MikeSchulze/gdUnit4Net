@@ -27,7 +27,7 @@ func _on_test_pressed(button_id :int):
 	# special case for button 3 we wait 1s to change to gray
 	if button_id == 3:
 		yield(get_tree().create_timer(1), "timeout")
-	emit_signal("panel_color_change", box, Color.gray)
+	emit_signal("panel_color_change", box, Color.aqua)
 
 func _on_panel_color_changed(box :ColorRect, color :Color):
 	box.color = color

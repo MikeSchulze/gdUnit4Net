@@ -16,15 +16,12 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
-    <!--Required for GdUnit3-->
-    <PackageReference Include="GodotSharp" Version="3.2.3">
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
     <!-- Content Include=".gitignore" -->
     <Content Include="LICENSE" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
+    <!-- Exclude on release
     <None Remove="test\**" />
     <Content Remove="test\**" />
     <Compile Remove="test\**" />
@@ -34,5 +31,6 @@
     <Content Remove="addons\**" />
     <Compile Remove="addons\**" />
     <EmbeddedResource Remove="addons\**" />
+    -->
   </ItemGroup>
 </Project>

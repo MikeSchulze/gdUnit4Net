@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace GdUnit3
 {
-    public class GdUnit3MonoAPI : Reference
+    public partial class GdUnit3MonoAPI : Reference
     {
         public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
         {
@@ -25,6 +25,7 @@ namespace GdUnit3
             return type != null ? Attribute.IsDefined(type, typeof(TestSuiteAttribute)) : false;
         }
 
+
         public static Godot.Node? ParseTestSuite(string classPath)
         {
             try
@@ -33,20 +34,10 @@ namespace GdUnit3
                 Type? type = GdUnitTestSuiteBuilder.ParseType(classPath);
                 if (type == null)
                     return null;
-                var testSuite = new Godot.Node();
-                testSuite.SetMeta("CS_TESTSUITE", true);
-                testSuite.SetMeta("ResourcePath", classPath);
-                testSuite.Name = type.Name;
+                var testSuite = new CsNode(type.Name, classPath);
                 LoadTestCases(type)
                     .ToList()
-                    .ForEach(testCase =>
-                    {
-                        var child = new Godot.Node();
-                        child.Name = testCase.Name;
-                        child.SetMeta("LineNumber", testCase.Line);
-                        child.SetMeta("ResourcePath", classPath);
-                        testSuite.AddChild(child);
-                    });
+                    .ForEach(testCase => testSuite.AddChild(new CsNode(testCase.Name, classPath, testCase.Line)));
                 return testSuite;
             }
 #pragma warning disable CS0168

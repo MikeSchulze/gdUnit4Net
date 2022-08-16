@@ -172,26 +172,26 @@ namespace GdUnit3.Tests
 
             // wait until next frame
             await runner.AwaitIdleFrame();
-            // verify box one is changed to gray
-            AssertObject(box1.Color).IsEqual(Colors.Gray);
+            // verify box one is changed to Aqua
+            AssertObject(box1.Color).IsEqual(Colors.Aqua);
             AssertObject(box2.Color).IsEqual(Colors.White);
             AssertObject(box3.Color).IsEqual(Colors.White);
 
             // set mouse position to button two and simulate is pressed
             runner.SetMousePos(new Vector2(160, 20))
                 .SimulateMouseButtonPressed(ButtonList.Left);
-            // verify box two is changed to gray
-            AssertObject(box1.Color).IsEqual(Colors.Gray);
-            AssertObject(box2.Color).IsEqual(Colors.Gray);
+            // verify box two is changed to Aqua
+            AssertObject(box1.Color).IsEqual(Colors.Aqua);
+            AssertObject(box2.Color).IsEqual(Colors.Aqua);
             AssertObject(box3.Color).IsEqual(Colors.White);
 
             // set mouse position to button three and simulate is pressed
             runner.SetMousePos(new Vector2(260, 20))
                 .SimulateMouseButtonPressed(ButtonList.Left);
-            // verify box three is changed to red and after around 1s to gray
+            // verify box three is changed to red and after around 1s to Aqua
             AssertObject(box3.Color).IsEqual(Colors.Red);
-            await runner.AwaitSignal("panel_color_change", box3, Colors.Gray).WithTimeout(1100);
-            AssertObject(box3.Color).IsEqual(Colors.Gray);
+            await runner.AwaitSignal("panel_color_change", box3, Colors.Aqua).WithTimeout(1100);
+            AssertObject(box3.Color).IsEqual(Colors.Aqua);
         }
 
         [TestCase(Description = "Example to wait for a specific method result", Timeout = 3000)]

@@ -15,6 +15,7 @@ addons/
 logs/
 project.godot
 GdUnitRunner.cfg
+reports/
 
 # System/tool-specific ignores
 .directory

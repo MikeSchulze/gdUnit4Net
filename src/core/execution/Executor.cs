@@ -36,18 +36,12 @@ namespace GdUnit3.Executions
 
         public bool ReportOrphanNodesEnabled { get; set; } = true;
 
-        public async void Execute(Godot.Node node)
+        public async void Execute(CsNode testSuite)
         {
             try
             {
-                var resourcePath = node.GetMeta("ResourcePath") as string;
-                if (resourcePath == null)
-                {
-                    Godot.GD.PushWarning("Skip TestSuite, no 'ResourcePath' is defined.");
-                    return;
-                }
-                var includedTests = node.GetChildren().Cast<Godot.Node>().ToList().Select(node => node.Name).ToList();
-                await ExecuteInternally(new TestSuite(resourcePath, includedTests));
+                var includedTests = testSuite.GetChildren().Cast<Godot.Node>().ToList().Select(node => node.Name).ToList();
+                await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
             }
             catch (Exception e)
             {
@@ -55,7 +49,7 @@ namespace GdUnit3.Executions
             }
             finally
             {
-                node.Free();
+                testSuite.Free();
             }
         }
 

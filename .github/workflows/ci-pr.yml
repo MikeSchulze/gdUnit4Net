@@ -1,4 +1,4 @@
-name: CI GdUnit3 on Godot Mono 3.3.x
+name: CI-PR
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         godot-build: ['mono-']
-        godot-version: [ 3.4.4] # 3.4.3 is missing on barichello/godot-ci
+        godot-version: [3.3.3, 3.3.4, 3.4.1, 3.4.2, 3.4.4, 3.4.5, 3.5] # 3.4.3 is missing on barichello/godot-ci
 
     name: "CI on Godot ${{ matrix.godot-build }}v${{ matrix.godot-version }}"
     runs-on: ubuntu-latest
@@ -49,19 +49,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           rm -rf gdUnit3.csproj
-          rm -rf gdUnit3.sln
-          cp ./mono/gdUnit3Mono.csproj gdUnit3.csproj
           rm -rf addons/gdUnit3/test/
+          cp ./mono/gdUnit3Mono.csproj gdUnit3.csproj
           mv mono/test ./test
-          
-        # sed -i 's+config/name="gdUnit3"+config/name="gdUnit3Mono"+g' project.godot
 
-      - name: "Update Project"
-        if: ${{ !cancelled() }}
-        timeout-minutes: 1
-        continue-on-error: true # we still ignore the timeout, the script is not quit and we run into a timeout
-        run: |
-          ${{ env.GODOT_BIN }} -e --path . -s res://addons/gdUnit3/src/core/scan_project.gd --no-window
+        # cp ./mono/gdUnit3Mono.sln gdUnit3.sln
+        # sed -i 's+config/name="gdUnit3"+config/name="gdUnit3Mono"+g' project.godot
 
       - name: "Setup .NET"
         if: ${{ !cancelled() }}
@@ -72,10 +65,14 @@ jobs:
       - name: "Compile C#"
         timeout-minutes: 1
         run: |
-          dotnet restore gdUnit3.csproj
-          mkdir -p .mono/assemblies/Debug
-          cp /usr/local/bin/GodotSharp/Api/Release/* .mono/assemblies/Debug
-          dotnet build -verbosity:m
+          ${{ env.GODOT_BIN }} project.godot --build-solutions --quit --no-window
+
+      - name: "Update Project"
+        if: ${{ !cancelled() }}
+        timeout-minutes: 1
+        continue-on-error: true # we still ignore the timeout, the script is not quit and we run into a timeout
+        run: |
+          ${{ env.GODOT_BIN }} -e --path . -s res://addons/gdUnit3/src/core/scan_project.gd --no-window
 
       - name: "Run Unit Test"
         if: ${{ !cancelled() }}
