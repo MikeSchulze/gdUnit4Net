@@ -2,14 +2,14 @@ using System;
 
 namespace GdUnit3.Asserts
 {
-    internal class NumberAssert<V> : AssertBase<V>, INumberAssert<V> where V : IComparable
+    internal class NumberAssert<V> : AssertBase<V>, INumberAssert<V> where V : IComparable, IComparable<V>
     {
         public NumberAssert(V current) : base(current)
         { }
 
         public INumberAssert<V> IsBetween(V from, V to)
         {
-            if (from.CompareTo(Current) > 0 || Current?.CompareTo(to) > 0)
+            if (Current?.CompareTo(from) < 0 || Current?.CompareTo(to) > 0)
                 ThrowTestFailureReport(AssertFailures.IsBetween(Current, from, to), Current, new V[] { from, to });
             return this;
         }

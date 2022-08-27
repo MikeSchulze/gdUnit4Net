@@ -31,14 +31,14 @@ namespace GdUnit3
         /// </summary>
         /// <param name="current">The current integer value to verify</param>
         /// <returns></returns>
-        public static IIntAssert AssertInt(int current) => new IntAssert(current);
+        public static INumberAssert<int> AssertInt(int current) => new NumberAssert<int>(current);
 
         /// <summary>
         /// An Assertion to verify double values
         /// </summary>
         /// <param name="current">The current double value to verify</param>
         /// <returns></returns>
-        public static IDoubleAssert AssertFloat(double current) => new DoubleAssert(current);
+        public static INumberAssert<double> AssertFloat(double current) => new NumberAssert<double>(current);
 
         /// <summary>
         /// An Assertion to verify object values
@@ -53,7 +53,6 @@ namespace GdUnit3
         /// <param name="current">The current array value to verify</param>
         /// <returns></returns>  
         public static IArrayAssert AssertArray(IEnumerable? current) => new ArrayAssert(current);
-
 
         /// <summary>
         /// An Assertion to verify Godot.Vector2 values
@@ -75,32 +74,31 @@ namespace GdUnit3
         /// <returns></returns>
         public static bool AssertNotYetImplemented() => throw new Exceptions.TestFailedException("Test not yet implemented!", -1);
 
+        public static IStringAssert AssertThat(string current) => new StringAssert(current);
+        public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
 
-        public static IAssertBase<T> AssertThat<T>(T? current)
-        {
-            if (typeof(string) == typeof(T))
-                return (IAssertBase<T>)AssertString(Convert.ToString(current));
-            if (typeof(bool) == typeof(T))
-                return (IAssertBase<T>)AssertBool(Convert.ToBoolean(current));
-            if (typeof(int) == typeof(T))
-                return (IAssertBase<T>)AssertInt(Convert.ToInt32(current));
-            if (typeof(double) == typeof(T))
-                return (IAssertBase<T>)AssertFloat(Convert.ToDouble(current));
-            if (typeof(IEnumerable) == typeof(T))
-                return (IAssertBase<T>)AssertArray(current as IEnumerable);
-            if (typeof(object) == typeof(T))
-                return (IAssertBase<T>)AssertObject(current as object);
-            throw new Exceptions.TestFailedException($"No assert found for type {typeof(T)}, is current not supported!", -1);
-        }
+        /// <summary>
+        /// numeric asserts
+        /// </summary>
+        /// <param name="current"></param>
+        /// <returns></returns>
+        public static INumberAssert<sbyte> AssertThat(sbyte current) => new NumberAssert<sbyte>(current);
+        public static INumberAssert<byte> AssertThat(byte current) => new NumberAssert<byte>(current);
+        public static INumberAssert<short> AssertThat(short current) => new NumberAssert<short>(current);
+        public static INumberAssert<ushort> AssertThat(ushort current) => new NumberAssert<ushort>(current);
+        public static INumberAssert<int> AssertThat(int current) => new NumberAssert<int>(current);
+        public static INumberAssert<uint> AssertThat(uint current) => new NumberAssert<uint>(current);
+        public static INumberAssert<long> AssertThat(long current) => new NumberAssert<long>(current);
+        public static INumberAssert<ulong> AssertThat(ulong current) => new NumberAssert<ulong>(current);
+        public static INumberAssert<float> AssertThat(float current) => new NumberAssert<float>(current);
+        public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
+        public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
-        public static IStringAssert AssertThat(string current) => AssertString(current);
-        public static IBoolAssert AssertThat(bool current) => AssertBool(current);
-        public static IIntAssert AssertThat(int current) => AssertInt(current);
-        public static IDoubleAssert AssertThat(double current) => AssertFloat(current);
-        public static IObjectAssert AssertThat(object current) => AssertObject(current);
-        public static IArrayAssert AssertThat(IEnumerable current) => AssertArray(current);
-        public static IVector2Assert AssertThat(Godot.Vector2 current) => AssertVec2(current);
-        public static IVector3Assert AssertThat(Godot.Vector3 current) => AssertVec3(current);
+
+        public static IObjectAssert AssertThat(object? current) => new ObjectAssert(current);
+        public static IArrayAssert AssertThat(IEnumerable? current) => new ArrayAssert(current);
+        public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
+        public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
 
 
         /// <summary>

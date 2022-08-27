@@ -5,7 +5,7 @@ namespace GdUnit3.Tests.Asserts
     using static Assertions;
 
     [TestSuite]
-    public class IntAssertTest
+    public class NumberAssertTest
     {
         [TestCase]
         public void IsNull()

@@ -1,7 +1,9 @@
+using System;
+
 namespace GdUnit3.Asserts
 {
     /// <summary> Base interface for number assertions.</summary>
-    public interface INumberAssert<V> : IAssertBase<V>
+    public interface INumberAssert<V> : IAssertBase<V> where V : IComparable, IComparable<V>
     {
         /// <summary> Verifies that the current value is less than the given one.</summary>
         public INumberAssert<V> IsLess(V expected);
