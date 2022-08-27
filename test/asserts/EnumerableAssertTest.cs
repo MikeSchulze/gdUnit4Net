@@ -7,7 +7,7 @@ namespace GdUnit3.Tests.Asserts
     using static Assertions;
 
     [TestSuite]
-    public class ArrayAssertTest
+    public class EnumerableAssertTest
     {
         [TestCase]
         public void IsNull()

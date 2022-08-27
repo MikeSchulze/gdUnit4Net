@@ -6,16 +6,16 @@ using static GdUnit3.Assertions;
 
 namespace GdUnit3.Asserts
 {
-    internal sealed class ArrayAssert : AssertBase<IEnumerable>, IArrayAssert
+    internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAssert
     {
-        public ArrayAssert(IEnumerable? current) : base(current)
+        public EnumerableAssert(IEnumerable? current) : base(current)
         {
             Current = current?.Cast<object?>();
         }
 
         private new IEnumerable<object?>? Current { get; set; }
 
-        public IArrayAssert IsEqualIgnoringCase(IEnumerable expected)
+        public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
         {
             var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
             if (!result.Valid)
@@ -23,7 +23,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert IsNotEqualIgnoringCase(IEnumerable expected)
+        public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
         {
             var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
             if (result.Valid)
@@ -31,7 +31,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert IsEmpty()
+        public IEnumerableAssert IsEmpty()
         {
             var count = Current?.Count() ?? -1;
             if (count != 0)
@@ -39,7 +39,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert IsNotEmpty()
+        public IEnumerableAssert IsNotEmpty()
         {
             var count = Current?.Count() ?? -1;
             if (count == 0)
@@ -47,7 +47,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert HasSize(int expected)
+        public IEnumerableAssert HasSize(int expected)
         {
             var count = Current?.Count();
             if (count != expected)
@@ -55,7 +55,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert Contains(params object?[] expected)
+        public IEnumerableAssert Contains(params object?[] expected)
         {
             // we test for contains nothing
             if (expected.Length == 0)
@@ -66,7 +66,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert Contains(IEnumerable expected)
+        public IEnumerableAssert Contains(IEnumerable expected)
         {
             var Expected = expected.Cast<object>().ToArray();
             // we test for contains nothing
@@ -79,7 +79,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert ContainsExactly(params object?[] expected)
+        public IEnumerableAssert ContainsExactly(params object?[] expected)
         {
             // we test for contains nothing
             if (expected.Length == 0)
@@ -95,7 +95,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert ContainsExactly(IEnumerable expected)
+        public IEnumerableAssert ContainsExactly(IEnumerable expected)
         {
             var Expected = expected is string ? new object?[] { expected } : expected.Cast<object?>().ToArray();
             // we test for contains nothing
@@ -113,7 +113,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert ContainsExactlyInAnyOrder(params object?[] expected)
+        public IEnumerableAssert ContainsExactlyInAnyOrder(params object?[] expected)
         {
             // we test for contains nothing
             if (expected.Length == 0)
@@ -128,7 +128,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert ContainsExactlyInAnyOrder(IEnumerable expected)
+        public IEnumerableAssert ContainsExactlyInAnyOrder(IEnumerable expected)
         {
             var Expected = expected.Cast<object?>().ToArray();
             // we test for contains nothing
@@ -144,12 +144,12 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public IArrayAssert Extract(string funcName, params object[] args)
+        public IEnumerableAssert Extract(string funcName, params object[] args)
         {
             return ExtractV(new ValueExtractor(funcName, args));
         }
 
-        public IArrayAssert ExtractV(params IValueExtractor[] extractors)
+        public IEnumerableAssert ExtractV(params IValueExtractor[] extractors)
         {
             Current = Current?.Select(v =>
             {
@@ -161,7 +161,7 @@ namespace GdUnit3.Asserts
             return this;
         }
 
-        public new IArrayAssert OverrideFailureMessage(string message)
+        public new IEnumerableAssert OverrideFailureMessage(string message)
         {
             base.OverrideFailureMessage(message);
             return this;

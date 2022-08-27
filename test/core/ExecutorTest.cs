@@ -80,17 +80,17 @@ namespace GdUnit3.Tests
             return expectedEvents;
         }
 
-        private IArrayAssert AssertTestCaseNames(List<TestEvent> events) =>
+        private IEnumerableAssert AssertTestCaseNames(List<TestEvent> events) =>
             AssertArray(events).ExtractV(Extr("Type"), Extr("SuiteName"), Extr("TestName"), Extr("TotalCount"));
 
-        private IArrayAssert AssertEventCounters(List<TestEvent> events) =>
+        private IEnumerableAssert AssertEventCounters(List<TestEvent> events) =>
             AssertArray(events).ExtractV(Extr("Type"), Extr("TestName"), Extr("ErrorCount"), Extr("FailedCount"), Extr("OrphanCount"));
 
-        private IArrayAssert AssertEventStates(List<TestEvent> events) =>
+        private IEnumerableAssert AssertEventStates(List<TestEvent> events) =>
              AssertArray(events).ExtractV(Extr("Type"), Extr("TestName"), Extr("IsSuccess"), Extr("IsWarning"), Extr("IsFailed"), Extr("IsError"));
 
 
-        private IArrayAssert AssertReports(List<TestEvent> events)
+        private IEnumerableAssert AssertReports(List<TestEvent> events)
         {
             var extractedEvents = events.ConvertAll(e =>
             {

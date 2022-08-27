@@ -52,7 +52,7 @@ namespace GdUnit3
         /// </summary>
         /// <param name="current">The current array value to verify</param>
         /// <returns></returns>  
-        public static IArrayAssert AssertArray(IEnumerable? current) => new ArrayAssert(current);
+        public static IEnumerableAssert AssertArray(IEnumerable? current) => new EnumerableAssert(current);
 
         /// <summary>
         /// An Assertion to verify Godot.Vector2 values
@@ -96,7 +96,7 @@ namespace GdUnit3
 
 
         public static IObjectAssert AssertThat(object? current) => new ObjectAssert(current);
-        public static IArrayAssert AssertThat(IEnumerable? current) => new ArrayAssert(current);
+        public static IEnumerableAssert AssertThat(IEnumerable? current) => new EnumerableAssert(current);
         public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
         public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
 
