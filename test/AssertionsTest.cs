@@ -64,11 +64,21 @@ namespace GdUnit3.Tests
             AssertObject(AssertThat(new byte[] { })).IsInstanceOf<IEnumerableAssert>();
             AssertObject(AssertThat(new System.Collections.ArrayList())).IsInstanceOf<IEnumerableAssert>();
             AssertObject(AssertThat(new System.Collections.BitArray(new bool[] { true, false }))).IsInstanceOf<IEnumerableAssert>();
-            AssertObject(AssertThat(new System.Collections.Hashtable())).IsInstanceOf<IEnumerableAssert>();
             AssertObject(AssertThat(new System.Collections.Generic.HashSet<byte>())).IsInstanceOf<IEnumerableAssert>();
             AssertObject(AssertThat(new System.Collections.Generic.List<byte>())).IsInstanceOf<IEnumerableAssert>();
             AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert>();
         }
 
+
+
+        [TestCase]
+        public void AssertThat_Dictionary()
+        {
+            AssertObject(AssertThat(new System.Collections.Hashtable())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
+        }
     }
 }

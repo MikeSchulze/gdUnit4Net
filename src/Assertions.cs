@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace GdUnit3
 {
@@ -97,9 +98,10 @@ namespace GdUnit3
 
         public static IObjectAssert AssertThat(object? current) => new ObjectAssert(current);
         public static IEnumerableAssert AssertThat(IEnumerable? current) => new EnumerableAssert(current);
+        public static IDictionaryAssert AssertThat(IDictionary? current) => new DictionaryAssert(current);
+        public static IDictionaryAssert AssertThat<K, V>(Godot.Collections.Dictionary<K, V>? current) => new DictionaryAssert(current?.ToDictionary(e => e.Key, e => e.Value));
         public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
         public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
-
 
         /// <summary>
         /// An Assertion to verify for expecting exceptions

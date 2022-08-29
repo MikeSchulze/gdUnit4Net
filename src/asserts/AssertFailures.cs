@@ -44,6 +44,31 @@ namespace GdUnit3.Asserts
             return sb.ToString();
         }
 
+        private static string FormatDictionary(IDictionary? dict, string color)
+        {
+            if (dict == null)
+                return "<Null>";
+
+            var keyValues = new ArrayList();
+            if (dict.Keys.Count == 0)
+            {
+                return string.Format("[color={0}]{1}[/color]", color, "<Empty>");
+            }
+
+            var keys = dict;
+            foreach (DictionaryEntry entry in dict)
+            {
+                var key = entry.Key;
+                var value = entry.Value;
+                var type = value.GetType();
+                var formatter = type != null && formatters.ContainsKey(type) ? formatters[type] : defaultFormatter;
+                keyValues.Add($"{{{key}, {formatter(value)}}}");
+            }
+            string pairs = string.Join("; ", keyValues.ToArray());
+            return string.Format("[color={0}]{1}[/color]", color, pairs);
+        }
+
+
         public static string FormatValue(object? value, string color, bool quoted, bool printType = true)
         {
             if (value == null)
@@ -52,13 +77,16 @@ namespace GdUnit3.Asserts
             if (value is Type)
                 return string.Format("[color={0}]<{1}>[/color]", color, value);
 
+            if (value is IDictionary)
+                return FormatDictionary(value as IDictionary, color);
+
             Type type = value.GetType();
+            var className = printType ? SimpleClassName(type) : "";
             if (type.IsArray || (value is IEnumerable && !(value is string)))
             {
                 var asArray = ((IEnumerable)value).Cast<object>()
                              .Select(x => x?.ToString() ?? "<Null>")
                              .ToArray();
-                var className = printType ? SimpleClassName(type) : "";
                 return asArray.Length == 0
                     ? className + (type.IsArray || value is Godot.Collections.Array ? "[]" : "")
                     : className + "[color=" + color + "][" + string.Join(", ", asArray) + "][/color]";
@@ -315,11 +343,30 @@ namespace GdUnit3.Asserts
             return message;
         }
 
+        public static string ContainsKeyValue(IDictionary expected) =>
+            string.Format("{0}\n  {1}",
+                FormatFailure("Expecting do contain entry:"),
+                FormatCurrent(expected, false));
+
+
+        public static string ContainsKeyValue(IDictionary expected, object? currentValue) =>
+             string.Format("{0}\n  {1}\n found key but value is\n  {2}",
+                FormatFailure("Expecting do contain entry:"),
+                FormatCurrent(expected, true),
+                FormatCurrent(currentValue, true));
+
         public static string NotContains(string current, string expected) =>
             string.Format("{0}\n  {1}\n do not contain\n  {2}",
                 FormatFailure("Expecting:"),
                 FormatCurrent(current, false),
                 FormatExpected(expected, false));
+
+        public static string NotContains(IEnumerable<object?>? current, IEnumerable<object?> expected, List<object?> found) =>
+            string.Format("{0}\n  {1}\n do NOT contains (in any order)\n  {2}\n but found elements:\n  {3}",
+                FormatFailure("Expecting:"),
+                FormatCurrent(current, false),
+                FormatExpected(expected, false),
+                FormatExpected(found, false));
 
         public static string NotContainsIgnoringCase(string current, string expected) =>
             string.Format("{0}\n  {1}\n do not contain (ignoring case)\n  {2}",
