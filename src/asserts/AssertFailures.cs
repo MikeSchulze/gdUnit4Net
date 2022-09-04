@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -436,6 +435,22 @@ namespace GdUnit3.Asserts
                         FormatCurrent(current));
         }
 
+        internal static string IsEmitted(object? current, string signal, object[] args) =>
+            string.Format("{0}\n  {1}\n by\n  {2}",
+                         FormatFailure("Expecting do emitting signal:"),
+                         FormatExpected($"{signal}({args.Formated()})"),
+                         FormatCurrent(current, true));
+        internal static string IsNotEmitted(object? current, string signal, object[] args) =>
+            string.Format("{0}\n  {1}\n by\n  {2}",
+                         FormatFailure("Expecting do NOT emitting signal:"),
+                         FormatExpected($"{signal}({args.Formated()})"),
+                         FormatCurrent(current, true));
+
+        internal static string IsSignalExists(object current, string signal) =>
+             string.Format("{0}\n  {1}\n on\n  {2}",
+                         FormatFailure("Expecting signal exists:"),
+                         FormatExpected($"{signal}()"),
+                         FormatCurrent(current, true));
 
         static string FindFirstDiff(IEnumerable<object?>? left, IEnumerable<object?>? right)
         {

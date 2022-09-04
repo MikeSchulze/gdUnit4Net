@@ -6,9 +6,9 @@ namespace GdUnit3.Asserts
     {
         protected V? Current { get; private set; }
 
-        private string? CustomFailureMessage { get; set; } = null;
+        protected string? CustomFailureMessage { get; set; } = null;
 
-        private string CurrentFailureMessage { get; set; } = "";
+        protected string CurrentFailureMessage { get; set; } = "";
 
         protected AssertBase(V? current)
         {
@@ -77,11 +77,11 @@ namespace GdUnit3.Asserts
             }
         }
 
-        protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0)
+        protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)
         {
             var failureMessage = CustomFailureMessage ?? message;
             CurrentFailureMessage = failureMessage;
-            throw new TestFailedException(failureMessage, stackFrameOffset);
+            throw new TestFailedException(failureMessage, stackFrameOffset, lineNumber);
         }
     }
 }

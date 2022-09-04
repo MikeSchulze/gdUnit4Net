@@ -75,6 +75,13 @@ namespace GdUnit3
         /// <returns></returns>
         public static bool AssertNotYetImplemented() => throw new Exceptions.TestFailedException("Test not yet implemented!", -1);
 
+        /// <summary>
+        /// An Assertion to verify Godot signals
+        /// </summary>
+        /// <param name="node">The object where is emitting the signal</param>
+        /// <returns></returns>
+        public static ISignalAssert AssertSignal(Godot.Object node) => new SignalAssert(node);
+
         public static IStringAssert AssertThat(string current) => new StringAssert(current);
         public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
 
@@ -148,6 +155,19 @@ namespace GdUnit3
         }
 
         /// ----------- Helpers -------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Adds the Node on actual SceneTree to be processed during test execution.
+        /// The node is auto freed and can be disabled by set autoFree = false.
+        /// </summary>
+        public static T AddNode<T>(T node, bool autoFree = true) where T : Godot.Node
+        {
+            if (autoFree)
+                AutoFree(node);
+            Godot.SceneTree? tree = Godot.Engine.GetMainLoop() as Godot.SceneTree;
+            tree!.Root.AddChild(node);
+            return node;
+        }
 
         ///<summary>
         /// A litle helper to auto freeing your created objects after test execution
