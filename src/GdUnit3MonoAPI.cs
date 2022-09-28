@@ -26,28 +26,7 @@ namespace GdUnit3
         }
 
 
-        public static Godot.Node? ParseTestSuite(string classPath)
-        {
-            try
-            {
-                classPath = NormalisizePath(classPath);
-                Type? type = GdUnitTestSuiteBuilder.ParseType(classPath);
-                if (type == null)
-                    return null;
-                var testSuite = new CsNode(type.Name, classPath);
-                LoadTestCases(type)
-                    .ToList()
-                    .ForEach(testCase => testSuite.AddChild(new CsNode(testCase.Name, classPath, testCase.Line)));
-                return testSuite;
-            }
-#pragma warning disable CS0168
-            catch (Exception e)
-            {
-#pragma warning restore CS0168
-                // ignore exception
-                return null;
-            }
-        }
+        public static Godot.Node? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
 
         public static GdUnit3.IExecutor Executor(Godot.Node listener) =>
             new GdUnit3.Executions.Executor().AddGdTestEventListener(listener);
@@ -57,6 +36,10 @@ namespace GdUnit3
 
         private static IEnumerable<GdUnit3.Executions.TestCase> LoadTestCases(Type type) => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-            .Select(mi => new GdUnit3.Executions.TestCase(mi));
+            .Select(mi =>
+            {
+                TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>();
+                return new GdUnit3.Executions.TestCase(mi, testCaseAttribute.Line);
+            });
     }
 }

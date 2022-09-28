@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,8 +20,8 @@ namespace GdUnit3.Core
             result.Add("path", testSuitePath);
             try
             {
-                Type? type = ParseType(sourcePath);
-                if (type == null)
+                ClassDefinition? classDefinition = ParseFullqualifiedClassName(sourcePath);
+                if (classDefinition == null)
                 {
                     result.Add("error", $"Can't parse class type from {sourcePath}:{lineNumber}.");
                     return result;
@@ -39,7 +40,7 @@ namespace GdUnit3.Core
 
                 if (!File.Exists(testSuitePath))
                 {
-                    string template = FillFromTemplate(LoadTestSuiteTemplate(), type, sourcePath);
+                    string template = FillFromTemplate(LoadTestSuiteTemplate(), classDefinition, sourcePath);
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(template);
                     //var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
                     var toWrite = AddTestCase(syntaxTree, methodToTest);
@@ -76,6 +77,54 @@ namespace GdUnit3.Core
             }
         }
 
+        internal class ClassDefinition
+        {
+            public ClassDefinition(string? nameSpace, string name)
+            {
+                Namespace = nameSpace;
+                Name = name;
+            }
+
+            public string? Namespace { get; }
+            public string Name { get; }
+            public string ClassName { get => Namespace == null ? Name : $"{Namespace}.{Name}"; }
+        }
+
+        internal static ClassDefinition? ParseFullqualifiedClassName(String classPath)
+        {
+            if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            {
+                Console.Error.WriteLine($"Class `{classPath}` not exists .");
+                Godot.GD.PrintS("Build Error", $"Class `{classPath}` not exists .");
+                return null;
+            }
+            try
+            {
+                var root = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).GetCompilationUnitRoot();
+                return ParseClassDefinition(root);
+            }
+#pragma warning disable CS0168
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
+                Godot.GD.PrintS("Build Error", $"Can't parse namespace of {classPath}. Error: {e.Message}");
+#pragma warning restore CS0168
+                // ignore exception
+                return null;
+            }
+        }
+
+        private static ClassDefinition ParseClassDefinition(CompilationUnitSyntax root)
+        {
+            NamespaceDeclarationSyntax namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            if (namespaceSyntax != null)
+            {
+                ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
+                return new ClassDefinition(namespaceSyntax.Name.ToString(), classSyntax.Identifier.ValueText);
+            }
+            return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
+        }
+
         public static Type? ParseType(String classPath)
         {
             if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
@@ -107,6 +156,65 @@ namespace GdUnit3.Core
             }
         }
 
+        public static Godot.Node? Load(string classPath)
+        {
+            if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            {
+                Console.Error.WriteLine($"Parse Error: Class `{classPath}` not exists .");
+                Godot.GD.PrintS("Parse Error:", $"Class `{classPath}` not exists .");
+                return null;
+            }
+            try
+            {
+                var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).WithFilePath(classPath).GetCompilationUnitRoot();
+                ClassDefinition classDefinition = ParseClassDefinition(syntaxTree);
+                var type = FindTypeOnAssembly(classDefinition.ClassName);
+                return type!.GetMethods()
+                    .Where(mi => mi.IsDefined(typeof(TestCaseAttribute)))
+                    .Select(mi =>
+                    {
+                        var lineNumber = TestCaseLineNumber(syntaxTree, mi.Name);
+                        // collect testcase if multipe TestCaseAttribute exists
+                        var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
+                            .Cast<TestCaseAttribute>()
+                            .Select((attr, Index) =>
+                            {
+                                if (attr.Arguments == null || attr.Arguments.Length == 0)
+                                    return null;
+
+                                // needs to investigate to use Roslyn analyzer to verify the Attribute matches with the method signature
+                                if (attr.Arguments.Length != mi.GetParameters().Count())
+                                {
+                                }
+                                var testCaseName = mi.Name;
+                                if (attr.TestName != null)
+                                    return attr.TestName;
+                                return $"{testCaseName} [{attr.Arguments.Formated()}]";
+                            })
+                            .Where(attr => attr != null)
+                            .Aggregate(new List<string>(), (acc, attributes) =>
+                            {
+                                acc.Add(attributes!);
+                                return acc;
+                            });
+                        // create test
+                        return new CsNode(mi.Name, classPath, lineNumber, testCases);
+                    })
+                    .Aggregate(new CsNode(classDefinition.Name, classPath), (acc, node) =>
+                    {
+                        acc.AddChild(node);
+                        return acc;
+                    });
+            }
+#pragma warning disable CS0168
+            catch (Exception e)
+            {
+#pragma warning restore CS0168
+                // ignore exception
+                return null;
+            }
+        }
+
         private static Type? FindTypeOnAssembly(String clazz)
         {
             if (clazzCache.ContainsKey(clazz))
@@ -123,7 +231,7 @@ namespace GdUnit3.Core
                 type = assembly.GetType(clazz);
                 if (type != null)
                 {
-                    // Godot.GD.PrintS("found on assemblyName", $"Name={name.Name} Version={name.Version} Location={assembly.Location}");
+                    // Godot.GD.PrintS("found on assemblyName", $"Name={type.Name} Location={assembly.Location}");
                     clazzCache.Add(clazz, type);
                     return type;
                 }
@@ -147,13 +255,13 @@ namespace GdUnit3.Core
         private const string TAG_SOURCE_RESOURCE_PATH = "${source_resource_path}";
 
 
-        private static string FillFromTemplate(string template, Type type, string classPath) =>
+        private static string FillFromTemplate(string template, ClassDefinition classDefinition, string classPath) =>
             template
-                .Replace(TAG_TEST_SUITE_NAMESPACE, String.IsNullOrEmpty(type.Namespace) ? "GdUnitDefaultTestNamespace" : type.Namespace)
-                .Replace(TAG_TEST_SUITE_CLASS, type.Name + "Test")
+                .Replace(TAG_TEST_SUITE_NAMESPACE, String.IsNullOrEmpty(classDefinition.Namespace) ? "GdUnitDefaultTestNamespace" : classDefinition.Namespace)
+                .Replace(TAG_TEST_SUITE_CLASS, classDefinition.Name + "Test")
                 .Replace(TAG_SOURCE_RESOURCE_PATH, classPath)
-                .Replace(TAG_SOURCE_CLASS_NAME, type.Name)
-                .Replace(TAG_SOURCE_CLASS_VARNAME, type.Name);
+                .Replace(TAG_SOURCE_CLASS_NAME, classDefinition.Name)
+                .Replace(TAG_SOURCE_CLASS_VARNAME, classDefinition.Name);
 
         internal static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -15,6 +16,13 @@ namespace GdUnit3.Core.Tests
         public void AfterEach()
         {
             ClearTempDir();
+        }
+
+        [TestCase]
+        public void ParseFullqualifiedClassName()
+        {
+            AssertThat(GdUnitTestSuiteBuilder.ParseFullqualifiedClassName("test/core/resources/sources/TestPerson.cs"))
+                .IsEqual(new GdUnitTestSuiteBuilder.ClassDefinition("GdUnit3.Example.Test.Resources", "TestPerson"));
         }
 
         [TestCase]
@@ -196,5 +204,22 @@ namespace GdUnit3.Example.Test.Resources
 	}
 }".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r\n", "\n");
 
+
+        [TestCase]
+        public void LoadTestSuite()
+        {
+            var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("test/core/ExampleTestSuite.cs"));
+            AssertThat(testSuite).IsNotNull();
+            AssertThat(testSuite!.Name).IsEqual("ExampleTestSuite");
+            AssertThat(testSuite!.GetChildren())
+                .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("TestCases"))
+                .ContainsExactly(
+                    Tuple("TestFoo", 38, new List<string>()),
+                    Tuple("TestBar", 44, new List<string>()),
+                    Tuple("Waiting", 50, new List<string>()),
+                    Tuple("TestFooBar", 56, new List<string>()),
+                    Tuple("TestCaseArguments", 64, new List<string> { "TestCaseArguments [1, 2, 3, 6]", "TestCaseArguments [3, 4, 5, 12]", "TestCaseArguments [6, 7, 8, 21]" }),
+                    Tuple("TestCasesWithCustomTestName", 72, new List<string> { "TestCaseA", "TestCaseB", "TestCaseC" }));
+        }
     }
 }

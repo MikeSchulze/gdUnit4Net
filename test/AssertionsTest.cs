@@ -69,8 +69,6 @@ namespace GdUnit3.Tests
             AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert>();
         }
 
-
-
         [TestCase]
         public void AssertThat_Dictionary()
         {
@@ -79,6 +77,13 @@ namespace GdUnit3.Tests
             AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
             AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
             AssertObject(AssertThat(new Godot.Collections.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
+        }
+
+        [TestCase]
+        public void AutoFree_OnNull()
+        {
+            Godot.Node obj = AutoFree((Godot.Node)null!);
+            AssertThat(obj).IsNull();
         }
     }
 }

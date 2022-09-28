@@ -27,21 +27,34 @@ namespace GdUnit3.Executions
             SubExecutionContexts = new List<ExecutionContext>();
             Disposables = new List<IDisposable>();
         }
-        public ExecutionContext(ExecutionContext context) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+
+        public ExecutionContext(ExecutionContext context, params object[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
         {
             ReportCollector = context.ReportCollector;
             context.SubExecutionContexts.Add(this);
-            CurrentTestCase = context.CurrentTestCase ?? null;
+            TestCaseName = context.TestCaseName;
+            CurrentTestCase = context.CurrentTestCase;
+            MethodArguments = methodArguments;
             IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-            CurrentIteration = CurrentTestCase?.Attributes.Iterations ?? 0;
+            CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
         }
 
         public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
         {
             context.SubExecutionContexts.Add(this);
+            TestCaseName = testCase.Name;
             CurrentTestCase = testCase;
-            CurrentIteration = testCase.Attributes.Iterations;
-            IsSkipped = CurrentTestCase.IsSkipped;
+            CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
+            IsSkipped = CurrentTestCase?.IsSkipped ?? false;
+        }
+
+        public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+        {
+            context.SubExecutionContexts.Add(this);
+            TestCaseName = BuildTestCaseName(testCase.Name, testCaseAttribute);
+            CurrentTestCase = testCase;
+            CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
+            IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         }
 
         public bool ReportOrphanNodesEnabled
@@ -76,6 +89,10 @@ namespace GdUnit3.Executions
         public TestCase? CurrentTestCase
         { get; set; }
 
+        public string TestCaseName
+        { get; set; } = "";
+
+        public object[] MethodArguments { get; private set; } = { };
 
         private long Duration => Stopwatch.ElapsedMilliseconds;
 
@@ -135,10 +152,10 @@ namespace GdUnit3.Executions
             FireTestEvent(TestEvent.After(TestSuite.ResourcePath, TestSuite.Name, BuildStatistics(OrphanCount(false)), CollectReports));
 
         public void FireBeforeTestEvent() =>
-            FireTestEvent(TestEvent.BeforeTest(TestSuite.ResourcePath, TestSuite.Name, CurrentTestCase?.Name ?? "Unknown"));
+            FireTestEvent(TestEvent.BeforeTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName));
 
         public void FireAfterTestEvent() =>
-            FireTestEvent(TestEvent.AfterTest(TestSuite.ResourcePath, TestSuite.Name, CurrentTestCase?.Name ?? "Unknown", BuildStatistics(OrphanCount(true)), CollectReports));
+            FireTestEvent(TestEvent.AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports));
 
 
         public static void RegisterDisposable(IDisposable disposable) =>
@@ -150,9 +167,16 @@ namespace GdUnit3.Executions
             Stopwatch.Stop();
         }
 
+        private static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
+        {
+            if (attribute.Arguments.Count() > 1)
+                return attribute.TestName != null ? attribute.TestName : $"{testName} [{attribute.Arguments.Formated()}]";
+            return testName;
+        }
+
         public void PrintDebug(string name = "")
         {
-            Godot.GD.PrintS(name, "test context", TestSuite.Name, CurrentTestCase?.Name, "error:" + IsError, "failed:" + IsFailed, "skipped:" + IsSkipped);
+            Godot.GD.PrintS(name, "test context", TestSuite.Name, TestCaseName, "error:" + IsError, "failed:" + IsFailed, "skipped:" + IsSkipped);
         }
     }
 

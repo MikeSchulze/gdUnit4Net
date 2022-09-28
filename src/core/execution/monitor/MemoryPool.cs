@@ -13,12 +13,13 @@ namespace GdUnit3.Executions.Monitors
             Thread.SetData(Thread.GetNamedDataSlot("MemoryPool"), this);
         }
 
-        public static T RegisterForAutoFree<T>(T obj) where T : Godot.Object
+        public static T RegisterForAutoFree<T>(T? obj) where T : Godot.Object
         {
             MemoryPool pool = (MemoryPool)Thread.GetData(Thread.GetNamedDataSlot("MemoryPool"));
-            pool._registeredObjects.Add(obj);
+            if (obj != null)
+                pool._registeredObjects.Add(obj);
             //Godot.GD.PrintS("MemoryPool.RegisterForAutoFree", pool._name, pool.GetHashCode(), "register", obj);
-            return obj;
+            return obj!;
         }
 
         public void ReleaseRegisteredObjects()

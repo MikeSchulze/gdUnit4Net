@@ -172,7 +172,7 @@ namespace GdUnit3
         ///<summary>
         /// A litle helper to auto freeing your created objects after test execution
         /// </summary>
-        public static T AutoFree<T>(T obj) where T : Godot.Object => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
+        public static T AutoFree<T>(T? obj) where T : Godot.Object => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 
         /// <summary>
         /// Buils a tuple by given values

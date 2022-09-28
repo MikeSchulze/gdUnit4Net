@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using GdUnit3.Executions;
-using Godot;
+using GdUnit3.Core;
 
 namespace GdUnit3
 {
 
     class TestReporter : ITestEventListener
     {
-        private Node _parent;
+
         private bool _isFailed = false;
 
-        public TestReporter(Godot.Node parent)
-        {
-            _parent = parent;
-        }
+        public TestReporter()
+        { }
 
         public void PublishEvent(TestEvent testEvent)
         {
@@ -35,7 +34,7 @@ namespace GdUnit3
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     //_console.print_color("	Run Test: %s > %s :" % [event.resource_path(), event.test_name()], Color.antiquewhite).prints_color("STARTED", Color.forestgreen)
-                    Console.Write($"	Run Test: {testEvent.ResourcePath} > {testEvent.TestName} :");
+                    Console.Write($"	Run Test: {testEvent.SuiteName} > {testEvent.TestName} :");
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"STARTED");
                     break;
@@ -43,7 +42,7 @@ namespace GdUnit3
                     //_console.print_color("	Run Test: %s > %s :" % [event.resource_path(), event.test_name()], Color.antiquewhite)
                     // _print_status(event)
                     // _print_failure_report(event.reports())
-                    Console.Write($"	Run Test: {testEvent.ResourcePath} > {testEvent.TestName} :");
+                    Console.Write($"	Run Test: {testEvent.SuiteName} > {testEvent.TestName} :");
                     WriteStatus(testEvent);
                     break;
                 case TestEvent.TYPE.TESTSUITE_AFTER:
@@ -55,8 +54,8 @@ namespace GdUnit3
                         //_parent.GetTree().Quit(1);
                     }
                     break;
-
             }
+            Console.ForegroundColor = ConsoleColor.White;
 
             void WriteStatus(TestEvent testEvent)
             {
@@ -97,26 +96,42 @@ namespace GdUnit3
     {
         public override async void _Ready()
         {
-            Godot.GD.PrintS($"This is From Console App {Assembly.GetExecutingAssembly()}");
-            List<TestSuite> testSuites = GetTestSuites(Assembly.GetExecutingAssembly());
-            Executor executor = new Executor();
-            executor.AddTestEventListener(new TestReporter(this));
+            Console.ForegroundColor = ConsoleColor.White;
+            var cmdArgs = Godot.OS.GetCmdlineArgs();
+            Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
 
+            var currentDir = Directory.GetCurrentDirectory() + "/test";
+            List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
+            using Executor executor = new Executor();
+            executor.AddTestEventListener(new TestReporter());
 
             foreach (var testSuite in testSuites)
             {
                 await executor.ExecuteInternally(testSuite);
             }
-            Godot.GD.PrintS("done");
+            Console.WriteLine("done");
 
             GetTree().Quit(0);
+        }
+
+        private static List<TestSuite> ScanTestSuites(DirectoryInfo currentDir, List<TestSuite> acc)
+        {
+            Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
+            foreach (var file in currentDir.GetFiles("*.cs"))
+            {
+                Type? type = GdUnitTestSuiteBuilder.ParseType(file.FullName);
+                if (type != null && IsTestSuite(type))
+                    acc.Add(new TestSuite(file.FullName));
+            }
+            foreach (var directory in currentDir.GetDirectories())
+                ScanTestSuites(directory, acc);
+            return acc;
         }
 
         public static List<TestSuite> GetTestSuites(Assembly assembly) =>
                     assembly.GetTypes()
                         .Where(type => type.IsClass && !type.IsAbstract && IsTestSuite(type))
                         .Select(type => new TestSuite(type)).ToList();
-
 
         public static bool IsTestSuite(Type type) =>
                 type.IsClass && !type.IsAbstract && Attribute.IsDefined(type, typeof(TestSuiteAttribute));

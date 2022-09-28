@@ -12,6 +12,10 @@ namespace GdUnit3
 
         public static Godot.Collections.Array ToGodotArray(this object[] args) => new Godot.Collections.Array(args);
 
+        public static Godot.Collections.Array<T> ToGodotArray<T>(this IEnumerable<T> elements) => new Godot.Collections.Array<T>(elements);
+
+        public static Godot.Collections.Array ToGodotArray(this IEnumerable elements) => new Godot.Collections.Array(elements);
+
         public static string Formated(this IEnumerable args) => new Godot.Collections.Array(args).ToString();
 
         public static string Formated(this object[] args) => $"{string.Join(", ", args)}";

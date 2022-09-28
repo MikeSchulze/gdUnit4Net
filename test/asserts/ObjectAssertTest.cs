@@ -9,7 +9,7 @@ namespace GdUnit3.Tests.Asserts
     [TestSuite]
     public class ObjectAssertTest
     {
-        class CustomClass : Godot.Object
+        class CustomClass : Godot.Reference
         {
             public class InnerClassA : Godot.Node { }
 

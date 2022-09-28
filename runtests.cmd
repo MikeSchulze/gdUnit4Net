@@ -7,7 +7,7 @@ IF NOT DEFINED GODOT_BIN (
 	EXIT /b -1
 )
 
-%GODOT_BIN% --no-window -d res://src/core/TestRunner.tscn --verbose %*
+%GODOT_BIN% --no-window -d res://TestRunner.tscn --verbose %*
 SET exit_code=%errorlevel%
 
 ECHO %exit_code%

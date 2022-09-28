@@ -16,7 +16,7 @@ namespace GdUnit3.Executions
         {
             if (!context.IsSkipped)
             {
-                context.MemoryPool.SetActive(StageName());
+                context.MemoryPool.SetActive(StageName);
                 context.OrphanMonitor.Start();
                 await base.Execute(context);
                 context.MemoryPool.ReleaseRegisteredObjects();

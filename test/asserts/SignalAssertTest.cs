@@ -18,8 +18,10 @@ namespace GdUnit3.Asserts
         {
             [Godot.Signal]
             delegate void SignalA();
+
             [Godot.Signal]
             delegate void SignalB(string value);
+
             [Godot.Signal]
             delegate void SignalC(string value, int count);
 

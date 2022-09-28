@@ -11,7 +11,7 @@ namespace GdUnit3.Executions
         public override async Task Execute(ExecutionContext context)
         {
             context.FireBeforeEvent();
-            context.MemoryPool.SetActive(StageName());
+            context.MemoryPool.SetActive(StageName);
             context.OrphanMonitor.Start(true);
             await base.Execute(context);
             context.OrphanMonitor.Stop();
