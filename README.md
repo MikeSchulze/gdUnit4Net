@@ -14,6 +14,13 @@
 </p>
 
 
+# --------------------------------------------------------
+# This is the initial repository and not yet ready for use
+# --------------------------------------------------------
+
+
+
+
 
 ## What is GdUnit4Mono
 GdUnit4Mono is the C# extention to enable GdUnit4 to run/write unit tests in C#.
