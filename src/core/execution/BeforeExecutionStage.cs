@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
     {

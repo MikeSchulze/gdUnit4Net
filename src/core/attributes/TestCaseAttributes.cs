@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class TestCaseAttribute : TestStageAttribute

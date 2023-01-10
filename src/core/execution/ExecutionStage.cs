@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     using Exceptions;
 

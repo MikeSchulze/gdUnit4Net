@@ -5,11 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     using Exceptions;
 
-    internal sealed class SignalAssert : AssertBase<Godot.Object>, ISignalAssert
+    internal sealed partial class SignalAssert : AssertBase<Godot.Object>, ISignalAssert
     {
 
         public SignalAssert(Godot.Object current) : base(current)
@@ -72,7 +72,7 @@ namespace GdUnit3.Asserts
             throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);
         }
 
-        internal sealed class SignalCollector : Godot.Reference, IDisposable
+        internal sealed partial class SignalCollector : Godot.RefCounted, IDisposable
         {
             private Dictionary<Godot.Object, Dictionary<string, List<object[]>>> _collectedSignals = new Dictionary<Godot.Object, Dictionary<string, List<object[]>>>();
 

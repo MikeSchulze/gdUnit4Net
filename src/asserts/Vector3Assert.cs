@@ -1,6 +1,6 @@
 using Godot;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     internal sealed class Vector3Assert : AssertBase<Godot.Vector3>, IVector3Assert
     {

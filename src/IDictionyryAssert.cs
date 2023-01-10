@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> An Assertion Tool to verify dictionary values </summary>
     public interface IDictionaryAssert : IAssertBase<IDictionary>

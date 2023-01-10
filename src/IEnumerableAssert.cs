@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> An Assertion tool to verify enumerables </summary>
     public interface IEnumerableAssert : IAssertBase<IEnumerable>

@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     using Asserts;
     using Executions;
@@ -96,11 +96,11 @@ namespace GdUnit3
     }
 }
 
-namespace GdUnit3.Core
+namespace GdUnit4.Core
 {
     using Godot;
     using Executions;
-    internal sealed class SceneRunner : GdUnit3.ISceneRunner
+    internal sealed class SceneRunner : GdUnit4.ISceneRunner
     {
         private SceneTree SceneTree { get; set; }
         private Node CurrentScene { get; set; }
@@ -123,19 +123,19 @@ namespace GdUnit3.Core
             SetTimeFactor(1.0);
         }
 
-        public GdUnit3.ISceneRunner SetMousePos(Vector2 position)
+        public GdUnit4.ISceneRunner SetMousePos(Vector2 position)
         {
             CurrentScene.GetViewport().WarpMouse(position);
             CurrentMousePos = position;
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateKeyPress(KeyList key_code, bool shift = false, bool control = false)
+        public GdUnit4.ISceneRunner SimulateKeyPress(Key keyCode, bool shift = false, bool control = false)
         {
             PrintCurrentFocus();
             var action = new InputEventKey();
             action.Pressed = true;
-            action.Scancode = ((uint)key_code);
+            action.KeyCode = keyCode;
             action.Shift = shift;
             action.Control = control;
 
@@ -144,19 +144,19 @@ namespace GdUnit3.Core
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateKeyPressed(KeyList key_code, bool shift = false, bool control = false)
+        public GdUnit4.ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false)
         {
-            SimulateKeyPress(key_code, shift, control);
-            SimulateKeyRelease(key_code, shift, control);
+            SimulateKeyPress(keyCode, shift, control);
+            SimulateKeyRelease(keyCode, shift, control);
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateKeyRelease(KeyList key_code, bool shift = false, bool control = false)
+        public GdUnit4.ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false)
         {
             PrintCurrentFocus();
             var action = new InputEventKey();
             action.Pressed = false;
-            action.Scancode = ((uint)key_code);
+            action.KeyCode = keyCode;
             action.Shift = shift;
             action.Control = control;
 
@@ -165,7 +165,7 @@ namespace GdUnit3.Core
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateMouseMove(Vector2 relative, Vector2 speed = default)
+        public GdUnit4.ISceneRunner SimulateMouseMove(Vector2 relative, Vector2 speed = default)
         {
             var action = new InputEventMouseMotion();
             action.Relative = relative;
@@ -176,14 +176,14 @@ namespace GdUnit3.Core
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateMouseButtonPressed(ButtonList buttonIndex)
+        public GdUnit4.ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex)
         {
             SimulateMouseButtonPress(buttonIndex);
             SimulateMouseButtonRelease(buttonIndex);
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateMouseButtonPress(ButtonList buttonIndex)
+        public GdUnit4.ISceneRunner SimulateMouseButtonPress(MouseButton buttonIndex)
         {
             PrintCurrentFocus();
             var action = new InputEventMouseButton();
@@ -198,7 +198,7 @@ namespace GdUnit3.Core
             return this;
         }
 
-        public GdUnit3.ISceneRunner SimulateMouseButtonRelease(ButtonList buttonIndex)
+        public GdUnit4.ISceneRunner SimulateMouseButtonRelease(MouseButton buttonIndex)
         {
             var action = new InputEventMouseButton();
             action.ButtonIndex = (int)buttonIndex;
@@ -212,7 +212,7 @@ namespace GdUnit3.Core
             return this;
         }
 
-        public GdUnit3.ISceneRunner SetTimeFactor(double timeFactor = 1.0)
+        public GdUnit4.ISceneRunner SetTimeFactor(double timeFactor = 1.0)
         {
             TimeFactor = Math.Min(9.0, timeFactor);
             ActivateTimeFactor();

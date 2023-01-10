@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3.Tests.Resources
+namespace GdUnit4.Tests.Resources
 {
     using static Assertions;
     // will be ignored because of missing `[TestSuite]` anotation

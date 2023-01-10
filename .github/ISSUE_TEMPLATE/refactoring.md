@@ -1,6 +1,6 @@
 ---
 name: Refactoring
-about: Create a refactoring issue to improve code base of GdUnit3Mono
+about: Create a refactoring issue to improve code base of GdUnit4Mono
 title: ''
 labels: refactoring
 assignees: MikeSchulze

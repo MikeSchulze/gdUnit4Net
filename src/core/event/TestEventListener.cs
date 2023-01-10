@@ -1,5 +1,5 @@
 
-namespace GdUnit3
+namespace GdUnit4
 {
     public interface ITestEventListener
     {

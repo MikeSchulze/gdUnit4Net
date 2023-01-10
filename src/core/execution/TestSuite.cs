@@ -4,11 +4,11 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using GdUnit3.Core;
+using GdUnit4.Core;
 using System.IO;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal sealed class TestSuite : IDisposable
     {

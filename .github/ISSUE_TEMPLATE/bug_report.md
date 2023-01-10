@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a issue to help improve GdUnit3Mono
+about: Create a issue to help improve GdUnit4Mono
 title: ''
 labels: bug
 assignees: MikeSchulze
@@ -8,7 +8,7 @@ assignees: MikeSchulze
 ---
 
 <!-- Please search existing issues for potential duplicates before filing yours:
-https://github.com/MikeSchulze/gdUnit3/issues?q=is%3Aissue
+https://github.com/MikeSchulze/gdUnit4/issues?q=is%3Aissue
 -->
 
 **The used Godot version:**

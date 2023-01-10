@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 
-namespace GdUnit3
+namespace GdUnit4
 {
-    public class CsNode : Godot.Node
+    public partial class CsNode : Godot.Node
     {
         private readonly string _resourcePath;
 
         public string ResourcePath() => _resourcePath;
 
-        // called from GdUnit3 GdScript to build test case nodes
+        // called from GdUnit4 GdScript to build test case nodes
         public Godot.Collections.Array<string> test_case_names() => TestCases.ToGodotArray<string>();
 
         public int LineNumber

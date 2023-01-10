@@ -1,4 +1,4 @@
-namespace GdUnit3.Tests.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using Executions;
     using Exceptions;

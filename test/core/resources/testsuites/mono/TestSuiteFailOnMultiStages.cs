@@ -1,4 +1,4 @@
-namespace GdUnit3.Tests.Resources
+namespace GdUnit4.Tests.Resources
 {
     using static Assertions;
 

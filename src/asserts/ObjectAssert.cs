@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
     {

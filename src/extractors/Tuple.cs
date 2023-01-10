@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     sealed class Tuple : ITuple
     {

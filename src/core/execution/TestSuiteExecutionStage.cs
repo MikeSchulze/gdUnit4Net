@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Reflection;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal sealed class TestSuiteExecutionStage : IExecutionStage
     {

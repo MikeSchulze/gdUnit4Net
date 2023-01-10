@@ -1,6 +1,6 @@
-namespace GdUnit3.Tests
+namespace GdUnit4.Tests
 {
-    using GdUnit3.Asserts;
+    using GdUnit4.Asserts;
     using static Assertions;
 
     [TestSuite]

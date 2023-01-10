@@ -3,9 +3,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using GdUnit3.Asserts;
+using GdUnit4.Asserts;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
     {

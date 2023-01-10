@@ -1,5 +1,5 @@
 name: unit-test
-description: "Run unit tests for GdUnit3 API"
+description: "Run unit tests for GdUnit4 API"
 
 inputs:
   test-includes:

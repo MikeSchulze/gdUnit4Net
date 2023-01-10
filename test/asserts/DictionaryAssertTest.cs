@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     using Exceptions;
     using static Assertions;
@@ -12,7 +12,7 @@ namespace GdUnit3.Asserts
     public class DictionaryAssertTest
     {
         // TestSuite generated from
-        private const string sourceClazzPath = "D:/develop/workspace/gdUnit3Mono/src/asserts/DictionaryAssert.cs";
+        private const string sourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/DictionaryAssert.cs";
 
 
         [TestCase]

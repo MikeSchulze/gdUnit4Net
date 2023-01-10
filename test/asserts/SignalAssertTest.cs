@@ -1,7 +1,7 @@
 // GdUnit generated TestSuite
 using System.Threading.Tasks;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     using static Assertions;
     using static Utils;
@@ -11,7 +11,7 @@ namespace GdUnit3.Asserts
     public class SignalAssertTest
     {
         // TestSuite generated from
-        private const string sourceClazzPath = "D:/develop/workspace/gdUnit3Mono/src/asserts/SignalAssert.cs";
+        private const string sourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/SignalAssert.cs";
 
 
         class TestEmitter : Godot.Node2D
@@ -55,8 +55,8 @@ namespace GdUnit3.Asserts
 
             await AssertThrown(AssertSignal(node).IsEmitted("SignalC", "abc", 101).WithTimeout(200))
                 .ContinueWith(result => result.Result?
-                    .IsInstanceOf<GdUnit3.Exceptions.TestFailedException>()
-                    .HasMessage("Expecting do emitting signal:\n  'SignalC(abc, 101)'\n by\n  <GdUnit3.Asserts.SignalAssertTest+TestEmitter>"));
+                    .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
+                    .HasMessage("Expecting do emitting signal:\n  'SignalC(abc, 101)'\n by\n  <GdUnit4.Asserts.SignalAssertTest+TestEmitter>"));
         }
 
         [TestCase]
@@ -70,7 +70,7 @@ namespace GdUnit3.Asserts
             node.Visible = false;
             await AssertThrown(AssertSignal(node).IsNotEmitted("visibility_changed").WithTimeout(200))
                 .ContinueWith(result => result.Result?
-                    .IsInstanceOf<GdUnit3.Exceptions.TestFailedException>()
+                    .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                     .HasMessage("Expecting do NOT emitting signal:\n  'visibility_changed()'\n by\n  <Godot.Node2D>"));
         }
 
@@ -87,7 +87,7 @@ namespace GdUnit3.Asserts
             //node.Visible = false;
             await AssertThrown(AssertSignal(node).IsEmitted("visibility_changed").WithTimeout(200))
                .ContinueWith(result => result.Result?
-                   .IsInstanceOf<GdUnit3.Exceptions.TestFailedException>()
+                   .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                    .HasMessage("Expecting do emitting signal:\n  'visibility_changed()'\n by\n  <Godot.Node2D>"));
 
             node.Show();
@@ -107,7 +107,7 @@ namespace GdUnit3.Asserts
                 .IsSignalExists("tree_exited");
 
             AssertThrown(() => AssertSignal(node).IsSignalExists("not_existing_signal"))
-                .IsInstanceOf<GdUnit3.Exceptions.TestFailedException>()
+                .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                 .HasMessage("Expecting signal exists:\n  'not_existing_signal()'\n on\n  <Godot.Node2D>");
         }
     }

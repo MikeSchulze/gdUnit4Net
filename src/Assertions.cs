@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     using Asserts;
 
@@ -177,7 +177,7 @@ namespace GdUnit3
         /// <summary>
         /// Buils a tuple by given values
         /// </summary>
-        public static ITuple Tuple(params object?[] args) => new GdUnit3.Asserts.Tuple(args);
+        public static ITuple Tuple(params object?[] args) => new GdUnit4.Asserts.Tuple(args);
 
         /// <summary>
         ///  Builds an extractor by given method name and optional arguments

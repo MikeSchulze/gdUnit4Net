@@ -1,7 +1,7 @@
 
 using System.IO;
 
-namespace GdUnit3.Tests
+namespace GdUnit4.Tests
 {
     using static Utils;
     using static Assertions;

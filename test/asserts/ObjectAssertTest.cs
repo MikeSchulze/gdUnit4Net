@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GdUnit3.Tests.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using Exceptions;
     using Executions;
@@ -9,7 +9,7 @@ namespace GdUnit3.Tests.Asserts
     [TestSuite]
     public class ObjectAssertTest
     {
-        class CustomClass : Godot.Reference
+        class CustomClass : Godot.RefCounted
         {
             public class InnerClassA : Godot.Node { }
 
@@ -92,7 +92,7 @@ namespace GdUnit3.Tests.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 91)
                 .HasMessage("Expected be instance of:\n"
-                    + "  <GdUnit3.Tests.Asserts.ObjectAssertTest+CustomClassB> but is <GdUnit3.Tests.Asserts.ObjectAssertTest+CustomClass>");
+                    + "  <GdUnit4.Tests.Asserts.ObjectAssertTest+CustomClassB> but is <GdUnit4.Tests.Asserts.ObjectAssertTest+CustomClass>");
         }
 
         [TestCase]
@@ -117,7 +117,7 @@ namespace GdUnit3.Tests.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 116)
                 .HasMessage("Expecting be NOT a instance of:\n"
-                    + "  <GdUnit3.Tests.Asserts.ObjectAssertTest+CustomClass>");
+                    + "  <GdUnit4.Tests.Asserts.ObjectAssertTest+CustomClass>");
         }
 
         [TestCase]

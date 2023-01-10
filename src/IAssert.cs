@@ -1,4 +1,4 @@
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> Main interface of all GdUnit asserts </summary>
     public interface IAssert

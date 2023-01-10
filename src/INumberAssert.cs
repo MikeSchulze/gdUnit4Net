@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> Base interface for number assertions.</summary>
     public interface INumberAssert<V> : IAssertBase<V> where V : IComparable, IComparable<V>

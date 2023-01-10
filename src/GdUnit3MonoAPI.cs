@@ -1,14 +1,14 @@
 using Godot;
 using System;
-using GdUnit3.Core;
+using GdUnit4.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 
-namespace GdUnit3
+namespace GdUnit4
 {
-    public partial class GdUnit3MonoAPI : Reference
+    public partial class GdUnit3MonoAPI : RefCounted
     {
         public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
         {
@@ -28,18 +28,18 @@ namespace GdUnit3
 
         public static Godot.Node? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
 
-        public static GdUnit3.IExecutor Executor(Godot.Node listener) =>
-            new GdUnit3.Executions.Executor().AddGdTestEventListener(listener);
+        public static GdUnit4.IExecutor Executor(Godot.Node listener) =>
+            new GdUnit4.Executions.Executor().AddGdTestEventListener(listener);
 
         private static string NormalisizePath(string path) =>
              (path.StartsWith("res://") || path.StartsWith("user://")) ? Godot.ProjectSettings.GlobalizePath(path) : path;
 
-        private static IEnumerable<GdUnit3.Executions.TestCase> LoadTestCases(Type type) => type.GetMethods()
+        private static IEnumerable<GdUnit4.Executions.TestCase> LoadTestCases(Type type) => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
             .Select(mi =>
             {
                 TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>();
-                return new GdUnit3.Executions.TestCase(mi, testCaseAttribute.Line);
+                return new GdUnit4.Executions.TestCase(mi, testCaseAttribute.Line);
             });
     }
 }

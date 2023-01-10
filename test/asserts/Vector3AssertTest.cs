@@ -1,8 +1,8 @@
 // GdUnit generated TestSuite
 using Godot;
-using GdUnit3;
+using GdUnit4;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     using static Assertions;
     using static Utils;

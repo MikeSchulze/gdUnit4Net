@@ -16,7 +16,7 @@
 
 
 ## What is GdUnit4Mono
-GdUnit4Mono is the C# extention to enable GdUnit3 to run/write unit tests in C#.
+GdUnit4Mono is the C# extention to enable GdUnit4 to run/write unit tests in C#.
  
  
 ## Features
@@ -32,7 +32,7 @@ GdUnit4Mono is the C# extention to enable GdUnit3 to run/write unit tests in C#.
  
 ## Short Example
  ```
-namespace GdUnit3.Tests
+namespace GdUnit4.Tests
 {
     using static Assertions;
 
@@ -83,7 +83,7 @@ namespace GdUnit3.Tests
 </p>
 
 <p align="left">
-  <a href="https://discord.gg/rdq36JwuaJ"><img src="https://discordapp.com/api/guilds/885149082119733269/widget.png?style=banner4" alt="Join GdUnit3 Server"/></a>
+  <a href="https://discord.gg/rdq36JwuaJ"><img src="https://discordapp.com/api/guilds/885149082119733269/widget.png?style=banner4" alt="Join GdUnit4 Server"/></a>
 </p>
 
 ### Thank you for supporting my project!

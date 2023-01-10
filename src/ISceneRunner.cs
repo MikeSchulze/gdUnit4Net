@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     using Godot;
 
@@ -30,29 +30,29 @@ namespace GdUnit3
         /// <summary>
         /// Simulates that a key has been pressed.
         /// </summary>
-        /// <param name="keyCode">the key code e.g. 'KeyList.Enter'</param>
+        /// <param name="keyCode">the key code e.g. 'Key.Enter'</param>
         /// <param name="shift">false by default set to true if simmulate shift is press</param>
         /// <param name="control">false by default set to true if simmulate control is press</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateKeyPressed(KeyList keyCode, bool shift = false, bool control = false);
+        ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false);
 
         /// <summary>
         /// Simulates that a key is pressed.
         /// </summary>
-        /// <param name="keyCode">the key code e.g. 'KeyList.Enter'</param>
+        /// <param name="keyCode">the key code e.g. 'Key.Enter'</param>
         /// <param name="shift">false by default set to true if simmulate shift is press</param>
         /// <param name="control">false by default set to true if simmulate control is press</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateKeyPress(KeyList keyCode, bool shift = false, bool control = false);
+        ISceneRunner SimulateKeyPress(Key keyCode, bool shift = false, bool control = false);
 
         /// <summary>
         /// Simulates that a key has been released.
         /// </summary>
-        /// <param name="keyCode">the key code e.g. 'KeyList.Enter'</param>
+        /// <param name="keyCode">the key code e.g. 'Key.Enter'</param>
         /// <param name="shift">false by default set to true if simmulate shift is press</param>
         /// <param name="control">false by default set to true if simmulate control is press</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateKeyRelease(KeyList keyCode, bool shift = false, bool control = false);
+        ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false);
 
         /// <summary>
         /// Simulates a mouse moved to relative position by given speed.
@@ -65,23 +65,23 @@ namespace GdUnit3
         /// <summary>
         /// Simulates a mouse button pressed.
         /// </summary>
-        /// <param name="button">The mouse button identifier, one of the ButtonList button or button wheel constants.</param>
+        /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseButtonPressed(ButtonList button);
+        ISceneRunner SimulateMouseButtonPressed(MouseButton button);
 
         /// <summary>
         /// Simulates a mouse button press. (holding)
         /// </summary>
-        /// <param name="button">The mouse button identifier, one of the ButtonList button or button wheel constants.</param>
+        /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseButtonPress(ButtonList button);
+        ISceneRunner SimulateMouseButtonPress(MouseButton button);
 
         /// <summary>
         /// Simulates a mouse button released.
         /// </summary>
-        /// <param name="button">The mouse button identifier, one of the ButtonList button or button wheel constants.</param>
+        /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseButtonRelease(ButtonList button);
+        ISceneRunner SimulateMouseButtonRelease(MouseButton button);
 
         /// <summary>
         /// Sets how fast or slow the scene simulation is processed (clock ticks versus the real).

@@ -1,6 +1,6 @@
-namespace GdUnit3.Tests.Resources
+namespace GdUnit4.Tests.Resources
 {
-    using static GdUnit3.Assertions;
+    using static GdUnit4.Assertions;
 
     // will be ignored because of missing `[TestSuite]` anotation
     public class NotATestSuite

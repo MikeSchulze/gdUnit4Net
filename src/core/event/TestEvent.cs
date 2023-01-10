@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GdUnit3
+namespace GdUnit4
 {
 
-    public class TestEvent : Godot.Reference
+    public partial class TestEvent : Godot.RefCounted
     {
 
         public enum TYPE

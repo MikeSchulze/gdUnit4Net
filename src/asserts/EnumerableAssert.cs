@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using static GdUnit3.Assertions;
+using static GdUnit4.Assertions;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAssert
     {

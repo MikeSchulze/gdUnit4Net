@@ -1,4 +1,4 @@
-namespace GdUnit3.Tests.SpaceB
+namespace GdUnit4.Tests.SpaceB
 {
 
     public class TestSuite

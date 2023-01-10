@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit3Mono", "gdUnit3Mono.csproj", "{FCA65C1C-15F7-4936-A218-FDDDFD00ABCB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Mono", "gdUnit4Mono.csproj", "{FCA65C1C-15F7-4936-A218-FDDDFD00ABCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

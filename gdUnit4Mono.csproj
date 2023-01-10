@@ -1,18 +1,18 @@
-<Project Sdk="Godot.NET.Sdk/3.3.0">
+<Project Sdk="Godot.NET.Sdk/4.0.0-beta.11">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
-    <RootNamespace>GdUnit3</RootNamespace>
+    <RootNamespace>GdUnit4</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageVersion>2.3.1-release.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
-    <Title>GdUnit3Mono</Title>
+    <Title>GdUnit4Mono</Title>
     <Authors>MikeSchulze</Authors>
-    <Version>2.3.1.1</Version>
-    <Description>The Godot C# extension for GdUnit3.</Description>
-    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit3Mono</RepositoryUrl>
+    <Version>4.1.0.0</Version>
+    <Description>The Godot C# extension for GdUnit4.</Description>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <!-- Exclude tests -->
     <DefaultItemExcludes>$(DefaultItemExcludes);test/**/*</DefaultItemExcludes>
@@ -20,7 +20,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
-    <!-- PackageReference Include="GodotSharp" Version="3.2.3" -->
+    <!-- Do onyl include this line for local builds, need to be exclude on release -->
+    <PackageReference Include="GodotSharp" Version="4.0.0-beta.11"/>
     <!-- Content Include=".gitignore" -->
     <Content Include="LICENSE" />
     <None Include="LICENSE" Pack="true" PackagePath="" />

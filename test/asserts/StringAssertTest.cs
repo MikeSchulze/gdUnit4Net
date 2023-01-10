@@ -1,9 +1,9 @@
-namespace GdUnit3.Tests.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using Exceptions;
     using Executions;
     using static Assertions;
-    using static GdUnit3.Asserts.IStringAssert.Compare;
+    using static GdUnit4.Asserts.IStringAssert.Compare;
 
     [TestSuite]
     public class StringAssertTest

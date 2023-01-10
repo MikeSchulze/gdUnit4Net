@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace GdUnit3.Core.Tests
+namespace GdUnit4.Core.Tests
 {
     using static Assertions;
     using static Utils;
@@ -22,15 +22,15 @@ namespace GdUnit3.Core.Tests
         public void ParseFullqualifiedClassName()
         {
             AssertThat(GdUnitTestSuiteBuilder.ParseFullqualifiedClassName("test/core/resources/sources/TestPerson.cs"))
-                .IsEqual(new GdUnitTestSuiteBuilder.ClassDefinition("GdUnit3.Example.Test.Resources", "TestPerson"));
+                .IsEqual(new GdUnitTestSuiteBuilder.ClassDefinition("GdUnit4.Example.Test.Resources", "TestPerson"));
         }
 
         [TestCase]
         public void ParseType()
         {
             AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/noSpace/TestSuiteWithoutNamespace.cs")).IsEqual(typeof(TestSuiteWithoutNamespace));
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(GdUnit3.Tests.SpaceA.TestSuite));
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(GdUnit3.Tests.SpaceB.TestSuite));
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceA.TestSuite));
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceB.TestSuite));
             // source file not exists
             AssertObject(GdUnitTestSuiteBuilder.ParseType("test/core/resources/testsuites/mono/spaceC/TestSuite.cs")).IsNull();
         }
@@ -155,9 +155,9 @@ namespace GdUnit3.Core.Tests
         private static string UpdatedTestSuite(string sourceClass) =>
 @"// GdUnit generated TestSuite
 using Godot;
-using GdUnit3;
+using GdUnit4;
 
-namespace GdUnit3.Example.Test.Resources
+namespace GdUnit4.Example.Test.Resources
 {
 	using static Assertions;
 	using static Utils;
@@ -184,9 +184,9 @@ namespace GdUnit3.Example.Test.Resources
         private static string NewCreatedTestSuite(string sourceClass) =>
 @"// GdUnit generated TestSuite
 using Godot;
-using GdUnit3;
+using GdUnit4;
 
-namespace GdUnit3.Example.Test.Resources
+namespace GdUnit4.Example.Test.Resources
 {
 	using static Assertions;
 	using static Utils;

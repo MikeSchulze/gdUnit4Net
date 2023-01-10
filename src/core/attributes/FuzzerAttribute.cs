@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
     public class FuzzerAttribute : System.Attribute, IValueProvider

@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     public class TestStageAttribute : Attribute
     {

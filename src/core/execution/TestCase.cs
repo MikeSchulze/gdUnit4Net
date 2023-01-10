@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Linq;
 using System;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal sealed class TestCase
     {

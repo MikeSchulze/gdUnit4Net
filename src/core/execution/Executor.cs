@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
-    public sealed class Executor : Godot.Reference, IExecutor
+    public sealed partial class Executor : Godot.RefCounted, IExecutor
     {
         [Godot.Signal]
         public delegate void ExecutionCompleted();

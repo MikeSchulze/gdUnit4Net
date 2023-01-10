@@ -1,4 +1,4 @@
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> An Assertion Tool to verify Godot.Vector2 values </summary>
     public interface IVector2Assert : IAssertBase<Godot.Vector2>

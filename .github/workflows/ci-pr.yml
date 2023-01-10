@@ -32,13 +32,13 @@ jobs:
       image: barichello/godot-ci:${{ matrix.godot-build }}${{ matrix.godot-version }}
 
     steps:
-      - name: "Checkout GdUnit3 Plugin"
+      - name: "Checkout GdUnit4 Plugin"
         if: ${{ !cancelled() }}
         uses: actions/checkout@v3
         with:
-          repository: MikeSchulze/gdUnit3
+          repository: MikeSchulze/gdUnit4
 
-      - name: "Checkout GdUnit3Mono"
+      - name: "Checkout GdUnit4Mono"
         if: ${{ !cancelled() }}
         uses: actions/checkout@v3
         with:
@@ -48,13 +48,13 @@ jobs:
       - name: "Patch Project"
         if: ${{ !cancelled() }}
         run: |
-          rm -rf gdUnit3.csproj
-          rm -rf addons/gdUnit3/test/
-          cp ./mono/gdUnit3Mono.csproj gdUnit3.csproj
+          rm -rf gdUnit4.csproj
+          rm -rf addons/gdUnit4/test/
+          cp ./mono/gdUnit4Mono.csproj gdUnit4.csproj
           mv mono/test ./test
 
-        # cp ./mono/gdUnit3Mono.sln gdUnit3.sln
-        # sed -i 's+config/name="gdUnit3"+config/name="gdUnit3Mono"+g' project.godot
+        # cp ./mono/gdUnit4Mono.sln gdUnit4.sln
+        # sed -i 's+config/name="gdUnit4"+config/name="gdUnit4Mono"+g' project.godot
 
       - name: "Setup .NET"
         if: ${{ !cancelled() }}
@@ -72,7 +72,7 @@ jobs:
         timeout-minutes: 1
         continue-on-error: true # we still ignore the timeout, the script is not quit and we run into a timeout
         run: |
-          ${{ env.GODOT_BIN }} -e --path . -s res://addons/gdUnit3/src/core/scan_project.gd --no-window
+          ${{ env.GODOT_BIN }} -e --path . -s res://addons/gdUnit4/src/core/scan_project.gd --no-window
 
       - name: "Run Unit Test"
         if: ${{ !cancelled() }}

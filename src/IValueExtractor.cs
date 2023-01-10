@@ -1,4 +1,4 @@
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     public interface IValueExtractor
     {

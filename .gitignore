@@ -2,6 +2,7 @@
 .history
 
 # Godot-specific ignores
+.godot
 .import/
 *.*.import
 
@@ -10,7 +11,7 @@
 data_*/
 mono_crash.*.json
 
-# GdUnit3 Plugin
+# GdUnit4 Plugin
 addons/
 logs/
 project.godot

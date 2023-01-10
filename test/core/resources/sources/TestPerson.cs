@@ -1,6 +1,6 @@
 using Godot;
 
-namespace GdUnit3.Example.Test.Resources
+namespace GdUnit4.Example.Test.Resources
 {
     public class TestPerson
     {

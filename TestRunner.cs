@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using GdUnit3.Executions;
-using GdUnit3.Core;
+using GdUnit4.Executions;
+using GdUnit4.Core;
 
-namespace GdUnit3
+namespace GdUnit4
 {
 
     class TestReporter : ITestEventListener
@@ -92,7 +92,7 @@ namespace GdUnit3
         }
     }
 
-    class TestRunner : Godot.Node
+    partial class TestRunner : Godot.Node
     {
         public override async void _Ready()
         {

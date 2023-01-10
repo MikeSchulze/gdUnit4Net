@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Collections.Generic;
 
-namespace GdUnit3.Executions.Monitors
+namespace GdUnit4.Executions.Monitors
 {
     public class MemoryPool
     {
@@ -34,9 +34,9 @@ namespace GdUnit3.Executions.Monitors
             // needs to manually exculde JavaClass see https://github.com/godotengine/godot/issues/44932
             if (Godot.Object.IsInstanceValid(obj) && !(obj is Godot.JavaClass))
             {
-                if (obj is Godot.Reference)
+                if (obj is Godot.RefCounted)
                 {
-                    //Godot.GD.PrintS("Freeing Reference", obj);
+                    //Godot.GD.PrintS("Freeing RefCounted", obj);
                     obj.Notification(Godot.Object.NotificationPredelete);
                 }
                 else

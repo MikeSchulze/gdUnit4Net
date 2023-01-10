@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-using GdUnit3.Asserts;
+using GdUnit4.Asserts;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
     {

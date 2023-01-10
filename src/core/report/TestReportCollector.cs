@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace GdUnit3
+namespace GdUnit4
 {
-    public sealed class TestReportCollector : Godot.Reference
+    public sealed partial class TestReportCollector : Godot.RefCounted
     {
         private List<TestReport> _reports = new List<TestReport>();
         public TestReportCollector()

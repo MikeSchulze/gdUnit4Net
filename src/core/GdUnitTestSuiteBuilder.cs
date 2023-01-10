@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GdUnit3.Core
+namespace GdUnit4.Core
 {
     public class GdUnitTestSuiteBuilder
     {
@@ -244,7 +244,7 @@ namespace GdUnit3.Core
         {
             if (Godot.ProjectSettings.HasSetting("gdunit3/templates/testsuite/CSharpScript"))
                 return (string)Godot.ProjectSettings.GetSetting("gdunit3/templates/testsuite/CSharpScript");
-            var script = Godot.ResourceLoader.Load("res://addons/gdUnit3/src/core/templates/test_suite/GdUnitTestSuiteDefaultTemplate.gd");
+            var script = Godot.ResourceLoader.Load("res://addons/gdUnit4/src/core/templates/test_suite/GdUnitTestSuiteDefaultTemplate.gd");
             return (string)script.Get("DEFAULT_TEMP_TS_CS");
         }
 

@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace GdUnit3.Executions
+namespace GdUnit4.Executions
 {
     internal interface IExecutionStage
     {

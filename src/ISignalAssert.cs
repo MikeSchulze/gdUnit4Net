@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     /// <summary> An Assertion Tool to verify Godot signals</summary>
     public interface ISignalAssert : IAssertBase<Godot.Object>

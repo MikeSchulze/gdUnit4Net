@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GdUnit3
+namespace GdUnit4
 {
     /// <summary>
     /// A extension to convert c# types to Godot types

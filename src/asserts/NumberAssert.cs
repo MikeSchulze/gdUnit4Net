@@ -1,6 +1,6 @@
 using System;
 
-namespace GdUnit3.Asserts
+namespace GdUnit4.Asserts
 {
     internal class NumberAssert<V> : AssertBase<V>, INumberAssert<V> where V : IComparable, IComparable<V>
     {
