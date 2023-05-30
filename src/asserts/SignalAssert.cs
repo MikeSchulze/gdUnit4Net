@@ -9,10 +9,10 @@ namespace GdUnit4.Asserts
 {
     using Exceptions;
 
-    internal sealed partial class SignalAssert : AssertBase<Godot.Object>, ISignalAssert
+    internal sealed partial class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
     {
 
-        public SignalAssert(Godot.Object current) : base(current)
+        public SignalAssert(Godot.GodotObject current) : base(current)
         {
             SignalCollector.Instance.RegisterEmitter(current);
         }
@@ -74,21 +74,27 @@ namespace GdUnit4.Asserts
 
         internal sealed partial class SignalCollector : Godot.RefCounted, IDisposable
         {
-            private Dictionary<Godot.Object, Dictionary<string, List<object[]>>> _collectedSignals = new Dictionary<Godot.Object, Dictionary<string, List<object[]>>>();
+            private Dictionary<Godot.GodotObject, Dictionary<string, List<object[]>>> _collectedSignals = new Dictionary<Godot.GodotObject, Dictionary<string, List<object[]>>>();
 
             private static SignalCollector INSTANCE = new SignalCollector();
 
             public static SignalCollector Instance => INSTANCE;
 
-            public void RegisterEmitter(Godot.Object emitter)
+            public void OnEmitterRenamedConnectedInScript()
+            {
+                Godot.GD.Print("Invoked: OnEmitterRenamedConnectedInScript");
+            }
+
+            public void RegisterEmitter(Godot.GodotObject emitter)
             {
                 // do not register the same emitter at twice
                 if (_collectedSignals.ContainsKey(emitter))
                     return;
                 _collectedSignals[emitter] = new Dictionary<string, List<object[]>>();
-                // connect to 'tree_exiting' of the emitter to finally release all acquired resources/connections.
-                if (!emitter.IsConnected("tree_exiting", this, nameof(SignalCollector.UnregisterEmitter)))
-                    emitter.Connect("tree_exiting", this, nameof(SignalCollector.UnregisterEmitter), new Godot.Collections.Array { this, emitter });
+                // connect to 'TreeExiting' of the emitter to finally release all acquired resources/connections.
+                Action<SignalCollector, Godot.GodotObject> action = UnregisterEmitter;
+                if (!emitter.IsConnected(Godot.Node.SignalName.TreeExiting, Godot.Callable.From(action)))
+                    ((Godot.Node)emitter).TreeExiting += () => UnregisterEmitter(this, emitter);
 
                 foreach (Godot.Collections.Dictionary signalDef in emitter.GetSignalList())
                 {
@@ -96,28 +102,34 @@ namespace GdUnit4.Asserts
                     // set inital collected to empty
                     if (!IsSignalCollecting(emitter, signalName))
                         _collectedSignals[emitter][signalName] = new List<object[]>();
-                    if (!emitter.IsConnected(signalName, this, nameof(SignalCollector.OnSignalEmmited)))
-                        emitter.Connect(signalName, this, nameof(SignalCollector.OnSignalEmmited), new Godot.Collections.Array { emitter, signalName });
+                    if (!emitter.IsConnected(signalName, new Godot.Callable(this, nameof(SignalCollector.OnSignalEmmited))))
+                    {
+                        var signalAwaiter = emitter.ToSignal(emitter, signalName);
+                        var signal = new Godot.Signal(emitter, signalName);
+
+                        // TODO connect to signal with arguments
+                        // emitter.Connect(signalName, new Godot.Callable(this, nameof(SignalCollector.OnSignalEmmited)), new Godot.Collections.Array { emitter, signalName });
+                    }
                 }
             }
 
-            private bool IsSignalCollecting(Godot.Object emitter, string signalName) =>
+            private bool IsSignalCollecting(Godot.GodotObject emitter, string signalName) =>
                 _collectedSignals.ContainsKey(emitter) && _collectedSignals[emitter].ContainsKey(signalName);
 
             // unregister all acquired resources/connections, otherwise it ends up in orphans
             // is called when the emitter is removed from the parent
-            private void UnregisterEmitter(SignalCollector collector, Godot.Object emitter)
+            public void UnregisterEmitter(SignalCollector collector, Godot.GodotObject emitter)
             {
                 if (IsInstanceValid(collector))
                 {
                     //WriteLine($"disconnect_signals: {emitter}");
                     foreach (Godot.Collections.Dictionary connection in collector.GetIncomingConnections())
                     {
-                        Godot.Object source = (Godot.Object)connection["source"];
+                        Godot.GodotObject source = (Godot.GodotObject)connection["source"];
                         string signalName = (string)connection["signal_name"];
                         string methodName = (string)connection["method_name"];
                         //WriteLine($"disconnect: {signalName} from {source} target {collector} -> {methodName}");
-                        source!.Disconnect(signalName, collector, methodName);
+                        source!.Disconnect(signalName, new Godot.Callable(collector, methodName));
                     }
                 }
                 if (IsInstanceValid(emitter))
@@ -125,7 +137,7 @@ namespace GdUnit4.Asserts
                 //DebugSignalList("UnregisterEmitter");
             }
 
-            private void ResetCollectedSignals(Godot.Object emitter)
+            private void ResetCollectedSignals(Godot.GodotObject emitter)
             {
                 //DebugSignalList("before claer");
                 if (_collectedSignals.ContainsKey(emitter))
@@ -134,7 +146,7 @@ namespace GdUnit4.Asserts
                 //DebugSignalList("after claer");
             }
 
-            private bool Match(Godot.Object emitter, string signalName, params object[] args)
+            private bool Match(Godot.GodotObject emitter, string signalName, params object[] args)
             {
                 //DebugSignalList("--match--");
                 foreach (var receivedArgs in _collectedSignals[emitter][signalName])
@@ -146,30 +158,30 @@ namespace GdUnit4.Asserts
             }
 
             // receives the signal from the emitter with all emitted signal arguments and additional the emitter and signal_name as last two arguements
-            private void OnSignalEmmited(Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName);
-            private void OnSignalEmmited(object arg1, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1 });
-            private void OnSignalEmmited(object arg1, object arg2, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5, arg6 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, Godot.Object emitter, string signalName) =>
+            private void OnSignalEmmited(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, Godot.GodotObject emitter, string signalName) =>
                 CollectSignal(emitter, signalName, new[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
 
-            private void CollectSignal(Godot.Object emitter, string signalName, params object[] signalArgs)
+            private void CollectSignal(Godot.GodotObject emitter, string signalName, params object[] signalArgs)
             {
                 //WriteLine($"CollectSignal: {emitter} Signal: {signalName} {signalArgs.Formated()}");
                 if (IsSignalCollecting(emitter, signalName))
@@ -195,7 +207,7 @@ namespace GdUnit4.Asserts
                 WriteLine("}");
             }
 
-            internal bool IsEmitted(CancellationTokenSource token, Godot.Object emitter, string signal, object[] args)
+            internal bool IsEmitted(CancellationTokenSource token, Godot.GodotObject emitter, string signal, object[] args)
             {
                 try
                 {
@@ -220,7 +232,7 @@ namespace GdUnit4.Asserts
                 }
             }
 
-            internal int Count(Godot.Object emitter, string signalName, object[] args)
+            internal int Count(Godot.GodotObject emitter, string signalName, object[] args)
             {
                 if (IsSignalCollecting(emitter, signalName))
                     return _collectedSignals[emitter][signalName].FindAll(signalArgs => Comparable.IsEqual(signalArgs, args).Valid).Count;

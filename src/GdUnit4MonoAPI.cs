@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace GdUnit4
 {
-    public partial class GdUnit3MonoAPI : RefCounted
+    public partial class GdUnit4MonoAPI : RefCounted
     {
         public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
         {
@@ -16,7 +16,7 @@ namespace GdUnit4
             // we need to return the original resource name of the test suite on Godot site e.g. `res://foo/..` or `user://foo/..`
             if (result.ContainsKey("path"))
                 result["path"] = testSuitePath;
-            return new Godot.Collections.Dictionary(result);
+            return result.ToGodotDictionary();
         }
 
         public static bool IsTestSuite(string classPath)

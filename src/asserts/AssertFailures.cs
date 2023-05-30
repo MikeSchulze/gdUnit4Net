@@ -19,7 +19,7 @@ namespace GdUnit4.Asserts
         {
             if (value != null)
             {
-                return ((Godot.Object)value).GetClass();
+                return ((Godot.GodotObject)value).GetClass();
             }
             return "Null";
         };
@@ -27,8 +27,8 @@ namespace GdUnit4.Asserts
         private static Dictionary<Type, Func<object, string>> formatters = new Dictionary<Type, Func<object, string>>{
                 {typeof(string), (value) => value?.ToString() ?? "<Null>"},
                 {typeof(object), (value) =>  value?.GetType().Name ?? "<Null>"},
-                {typeof(Godot.Vector2), (value) =>  Godot.GD.Str(value)},
-                {typeof(Godot.Vector3), (value) =>  Godot.GD.Str(value)},
+                {typeof(Godot.Vector2), (value) =>  ((Godot.Vector2)value).ToString()},
+                {typeof(Godot.Vector3), (value) =>  ((Godot.Vector3)value).ToString()},
         };
 
         private static string SimpleClassName(Type type)

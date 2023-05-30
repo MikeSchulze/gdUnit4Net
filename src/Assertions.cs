@@ -80,7 +80,7 @@ namespace GdUnit4
         /// </summary>
         /// <param name="node">The object where is emitting the signal</param>
         /// <returns></returns>
-        public static ISignalAssert AssertSignal(Godot.Object node) => new SignalAssert(node);
+        public static ISignalAssert AssertSignal(Godot.GodotObject node) => new SignalAssert(node);
 
         public static IStringAssert AssertThat(string current) => new StringAssert(current);
         public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
@@ -172,7 +172,7 @@ namespace GdUnit4
         ///<summary>
         /// A litle helper to auto freeing your created objects after test execution
         /// </summary>
-        public static T AutoFree<T>(T? obj) where T : Godot.Object => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
+        public static T AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 
         /// <summary>
         /// Buils a tuple by given values

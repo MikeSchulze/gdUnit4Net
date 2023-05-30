@@ -44,10 +44,10 @@ namespace GdUnit4
 
         public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color] \t {Message}";
 
-        public IDictionary<string, object> Serialize()
+        public IDictionary<string, Godot.Variant> Serialize()
         {
-            return new Dictionary<string, object>(){
-             {"type"        ,Type},
+            return new Dictionary<string, Godot.Variant>(){
+             {"type"        ,((int)Type)},
              {"line_number" ,LineNumber},
              {"message"     ,Message}
             };

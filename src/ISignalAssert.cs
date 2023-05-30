@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 namespace GdUnit4.Asserts
 {
     /// <summary> An Assertion Tool to verify Godot signals</summary>
-    public interface ISignalAssert : IAssertBase<Godot.Object>
+    public interface ISignalAssert : IAssertBase<Godot.GodotObject>
     {
         /// <summary>
         /// Verifies that given signal is emitted until waiting time

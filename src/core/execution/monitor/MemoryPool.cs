@@ -5,7 +5,7 @@ namespace GdUnit4.Executions.Monitors
 {
     public class MemoryPool
     {
-        private List<Godot.Object> _registeredObjects = new List<Godot.Object>();
+        private List<Godot.GodotObject> _registeredObjects = new List<Godot.GodotObject>();
 
         public void SetActive(string name)
         {
@@ -13,7 +13,7 @@ namespace GdUnit4.Executions.Monitors
             Thread.SetData(Thread.GetNamedDataSlot("MemoryPool"), this);
         }
 
-        public static T RegisterForAutoFree<T>(T? obj) where T : Godot.Object
+        public static T RegisterForAutoFree<T>(T? obj) where T : Godot.GodotObject
         {
             MemoryPool pool = (MemoryPool)Thread.GetData(Thread.GetNamedDataSlot("MemoryPool"));
             if (obj != null)
@@ -29,15 +29,15 @@ namespace GdUnit4.Executions.Monitors
             _registeredObjects.Clear();
         }
 
-        private void FreeInstance(Godot.Object obj)
+        private void FreeInstance(Godot.GodotObject obj)
         {
             // needs to manually exculde JavaClass see https://github.com/godotengine/godot/issues/44932
-            if (Godot.Object.IsInstanceValid(obj) && !(obj is Godot.JavaClass))
+            if (Godot.GodotObject.IsInstanceValid(obj) && !(obj is Godot.JavaClass))
             {
                 if (obj is Godot.RefCounted)
                 {
                     //Godot.GD.PrintS("Freeing RefCounted", obj);
-                    obj.Notification(Godot.Object.NotificationPredelete);
+                    obj.Notification((int)Godot.GodotObject.NotificationPredelete);
                 }
                 else
                 {

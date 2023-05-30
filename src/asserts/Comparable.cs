@@ -46,7 +46,7 @@ namespace GdUnit4
 
         private static List<Type> Excludes = new List<Type>() {
             typeof(IntPtr),
-            typeof(Godot.DynamicGodotObject)
+            //typeof(Godot.DynamicGodotObject)
         };
 
         public static Result IsEqual<T>(T? left, T? right, MODE compareMode = MODE.CASE_SENSITIVE, Result? r = null)

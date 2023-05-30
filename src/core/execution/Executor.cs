@@ -14,16 +14,16 @@ namespace GdUnit4.Executions
 
         private class GdTestEventListenerDelegator : ITestEventListener
         {
-            private readonly Godot.Object _listener;
+            private readonly Godot.GodotObject _listener;
 
-            public GdTestEventListenerDelegator(Godot.Object listener)
+            public GdTestEventListenerDelegator(Godot.GodotObject listener)
             {
                 _listener = listener;
             }
             public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
         }
 
-        public IExecutor AddGdTestEventListener(Godot.Object listener)
+        public IExecutor AddGdTestEventListener(Godot.GodotObject listener)
         {
             // I want to using anonymus implementation to remove the extra delegator class
             _eventListeners.Add(new GdTestEventListenerDelegator(listener));
@@ -48,7 +48,7 @@ namespace GdUnit4.Executions
                 var includedTests = testSuite.GetChildren()
                     .Cast<CsNode>()
                     .ToList()
-                    .Select(node => node.Name)
+                    .Select(node => node.Name.ToString())
                     .ToList();
                 await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
             }

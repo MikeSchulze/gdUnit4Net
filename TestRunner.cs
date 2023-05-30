@@ -6,8 +6,44 @@ using System.Reflection;
 using GdUnit4.Executions;
 using GdUnit4.Core;
 
+using Godot;
+
 namespace GdUnit4
 {
+
+    public class SignalCollectorTest : Godot.GodotObject
+    {
+
+
+        static void Main(string[] args)
+        {
+            Godot.GD.PrintS("Hello World");
+        }
+
+
+        public void ConnectAllSignals(Godot.GodotObject emitter)
+        {
+
+   
+
+            foreach (Godot.Collections.Dictionary signalDef in emitter.GetSignalList())
+            {
+                string signalName = (string)signalDef["name"];
+
+                var cb = new Godot.Callable(this, nameof(OnSignalEmmited));
+                //cb.Bind({ emitter, signalName });
+                if (!emitter.IsConnected(signalName, cb))
+                {
+                    emitter.Connect(signalName, cb);
+                }
+            }
+        }
+
+        private void OnSignalEmmited(Godot.GodotObject emitter, string signalName) => Godot.GD.PrintS(emitter, signalName);
+        private void OnSignalEmmited(object arg1, Godot.GodotObject emitter, string signalName) => Godot.GD.PrintS(emitter, signalName, new[] { arg1 });
+        private void OnSignalEmmited(object arg1, object arg2, Godot.GodotObject emitter, string signalName) => Godot.GD.PrintS(emitter, signalName, new[] { arg1, arg2 });
+    }
+
 
     class TestReporter : ITestEventListener
     {
