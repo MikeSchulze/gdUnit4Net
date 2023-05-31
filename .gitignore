@@ -22,7 +22,6 @@ reports/
 .directory
 *~
 .DS_Store
-.vscode/
 .vs/
 
 .fake
