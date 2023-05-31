@@ -96,9 +96,13 @@ namespace GdUnit4.Asserts
                 if (!emitter.IsConnected(Godot.Node.SignalName.TreeExiting, Godot.Callable.From(action)))
                     ((Godot.Node)emitter).TreeExiting += () => UnregisterEmitter(this, emitter);
 
+                
+
                 foreach (Godot.Collections.Dictionary signalDef in emitter.GetSignalList())
                 {
                     string signalName = (string)signalDef["name"];
+
+                    var signalTest = new Godot.Signal(emitter, signalName);
                     // set inital collected to empty
                     if (!IsSignalCollecting(emitter, signalName))
                         _collectedSignals[emitter][signalName] = new List<object[]>();

@@ -11,14 +11,9 @@ using Godot;
 namespace GdUnit4
 {
 
-    public class SignalCollectorTest : Godot.GodotObject
+    public partial class SignalCollectorTest : Godot.GodotObject
     {
 
-
-        static void Main(string[] args)
-        {
-            Godot.GD.PrintS("Hello World");
-        }
 
 
         public void ConnectAllSignals(Godot.GodotObject emitter)

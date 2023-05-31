@@ -8,9 +8,9 @@ namespace GdUnit4
     /// </summary>
     public static class GdUnitExtensions
     {
-        public static Godot.Collections.Array<T> ToGodotArray<T>(this IEnumerable<T> elements) => new Godot.Collections.Array<T>(elements);
+        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this IEnumerable<T> elements) => new Godot.Collections.Array<T>(elements);
 
-        public static Godot.Collections.Array<T> ToGodotArray<T>(this T[] args) => ToGodotArray((IEnumerable<T>)args);
+        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this T[] args) => ToGodotArray((IEnumerable<T>)args);
 
         public static Godot.Collections.Array ToGodotArray(this object[] args) => ToGodotArray((IEnumerable)args);
 

@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.0.0-beta.11">
+<Project Sdk="Godot.NET.Sdk/4.0.3">
   <PropertyGroup>
     <Title>GdUnit4Mono</Title>
     <Version>4.2.0.0</Version>
@@ -13,6 +13,7 @@
     <RootNamespace>GdUnit4</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
@@ -36,6 +37,7 @@
     <PackageReference Include="GodotSharp" Version="4.0.3"/>
     <!-- Content Include=".gitignore" -->
     <Content Include="LICENSE" />
+    <None Include="README.md" Pack="true" PackagePath=""/>
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>

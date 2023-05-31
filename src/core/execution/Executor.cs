@@ -8,7 +8,7 @@ namespace GdUnit4.Executions
     public sealed partial class Executor : Godot.RefCounted, IExecutor
     {
         [Godot.Signal]
-        public delegate void ExecutionCompleted();
+        public delegate void ExecutionCompletedEventHandler();
 
         private List<ITestEventListener> _eventListeners = new List<ITestEventListener>();
 
@@ -72,7 +72,7 @@ namespace GdUnit4.Executions
                 using (ExecutionContext context = new ExecutionContext(testSuite, _eventListeners, ReportOrphanNodesEnabled))
                 {
                     var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                    task.GetAwaiter().OnCompleted(() => EmitSignal(nameof(ExecutionCompleted)));
+                    task.GetAwaiter().OnCompleted(() => EmitSignal(nameof(ExecutionCompletedEventHandler)));
                     await task;
                 }
             }
