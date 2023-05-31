@@ -71,6 +71,7 @@ namespace GdUnit4
             private async Task IsReturnValue(Comperator comperator)
             {
                 var current = Instance.Call(MethodName, Args);
+                // https://github.com/godotengine/godot/issues/77624
                 Variant[] result = await Instance.ToSignal(Instance, "completed");
                 if (comperator(result[0]))
                     return;
