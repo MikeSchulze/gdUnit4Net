@@ -6,10 +6,15 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/.godot/mono/temp/bin/Debug/gdUnit4Mono.dll",
-            "args": [],
+            "program": "/Users/mschulze/Documents/develop/private/Godot_mono.app/Contents/MacOS/Godot",
+            "args": [
+                "--path", ".",
+                "-d",
+                "test.tscn",
+                "--quit-on-finish"
+            ],
             "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
             "stopAtEntry": false
         },
         {
