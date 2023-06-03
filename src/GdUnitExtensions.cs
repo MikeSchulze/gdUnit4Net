@@ -8,9 +8,10 @@ namespace GdUnit4
     /// </summary>
     public static class GdUnitExtensions
     {
-        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this IEnumerable<T> elements) => new Godot.Collections.Array<T>(elements);
+        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this IEnumerable elements) => new Godot.Collections.Array<T>(elements.ToGodotArray());
 
-        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this T[] args) => ToGodotArray((IEnumerable<T>)args);
+        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this T[] args) => new Godot.Collections.Array<T>(ToGodotArray((IEnumerable)args));
+
 
         public static Godot.Collections.Array ToGodotArray(this object[] args) => ToGodotArray((IEnumerable)args);
 
@@ -19,10 +20,11 @@ namespace GdUnit4
             var converted = new Godot.Collections.Array();
             foreach (var item in elements)
             {
-                converted.Add((Godot.Variant)item);
+                converted.Add(Godot.Variant.From(item));
             }
             return converted;
         }
+
 
         public static Godot.Collections.Dictionary ToGodotDictionary(this Dictionary<string, object> dict)
         {

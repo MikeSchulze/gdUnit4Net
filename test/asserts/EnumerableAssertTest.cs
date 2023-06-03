@@ -7,7 +7,7 @@ namespace GdUnit4.Tests.Asserts
     using static Assertions;
 
     [TestSuite]
-    public class EnumerableAssertTest
+    public partial class EnumerableAssertTest
     {
         [TestCase]
         public void IsNull()
@@ -59,7 +59,7 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(System.Array.Empty<int>()).IsEqual(System.Array.Empty<int>());
             AssertArray(new Godot.Collections.Array()).IsEqual(new Godot.Collections.Array());
             AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 4, 5 });
-            AssertArray(new Godot.Collections.Array(new int[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new int[] { 1, 2, 4, 5 }));
+            AssertArray(new Godot.Collections.Array(new Variant[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new Variant[] { 1, 2, 4, 5 }));
 
             AssertThrown(() => AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 3, 4, 2, 5 }))
                 .IsInstanceOf<TestFailedException>()
@@ -68,7 +68,7 @@ namespace GdUnit4.Tests.Asserts
                     + "  System.Int32[1, 2, 3, 4, 2, 5]\n"
                     + " but is\n"
                     + "  System.Int32[1, 2, 4, 5]");
-            AssertThrown(() => AssertArray(new Godot.Collections.Array(new int[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new int[] { 1, 2, 3, 4, 2, 5 })))
+            AssertThrown(() => AssertArray(new Godot.Collections.Array(new Variant[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new Variant[] { 1, 2, 3, 4, 2, 5 })))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 71)
                 .HasMessage("Expecting be equal:\n"
@@ -630,17 +630,17 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new object?[] { 1, false, 3.14, null, Colors.AliceBlue }).Extract("GetClass")
                 .ContainsExactly("n.a.", "n.a.", "n.a.", null, "n.a.");
             // extracting by a func without arguments
-            AssertArray(new object[] { new RefCounted(), 2, new AStar(), AutoFree(new Node()) }).Extract("GetClass")
-                .ContainsExactly("RefCounted", "n.a.", "AStar", "Node");
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("GetClass")
+                .ContainsExactly("RefCounted", "n.a.", "AStarGrid2D", "Node");
             // extracting by a func with arguments
-            AssertArray(new object[] { new RefCounted(), 2, new AStar(), AutoFree(new Node()) }).Extract("HasSignal", new object[] { "tree_entered" })
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("HasSignal", new object[] { "tree_entered" })
                 .ContainsExactly(false, "n.a.", false, true);
 
             // try extract on object via a func that not exists
-            AssertArray(new object[] { new RefCounted(), 2, new AStar(), AutoFree(new Node()) }).Extract("InvalidMethod")
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("InvalidMethod")
                 .ContainsExactly("n.a.", "n.a.", "n.a.", "n.a.");
             // try extract on object via a func that has no return value
-            AssertArray(new object[] { new RefCounted(), 2, new AStar(), AutoFree(new Node()) }).Extract("RemoveMeta", new object[] { "" })
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("RemoveMeta", new object[] { "" })
                 .ContainsExactly(null, "n.a.", null, null);
             // must fail we can't extract from a null instance
             AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
@@ -654,7 +654,7 @@ namespace GdUnit4.Tests.Asserts
                     + "  [AStar, Node]");
         }
 
-        class TestObj : Godot.RefCounted
+        partial class TestObj : Godot.RefCounted
         {
             string _name;
             object? _value;
@@ -680,6 +680,8 @@ namespace GdUnit4.Tests.Asserts
             public string GetX8() => "x8";
             public string GetX9() => "x9";
         }
+
+
 
         [TestCase]
         public void ExtractV()

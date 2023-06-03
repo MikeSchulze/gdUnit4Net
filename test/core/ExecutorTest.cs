@@ -41,7 +41,7 @@ namespace GdUnit4.Tests
             if (_verbose)
             {
                 Godot.GD.PrintS("-------------------------------");
-                Godot.GD.PrintS(e.Type, e.SuiteName, e.TestName, new Godot.Collections.Dictionary(e.Statistics));
+                Godot.GD.PrintS(e.Type, e.SuiteName, e.TestName, e.Statistics.ToGodotArray());
                 Godot.GD.PrintS("ErrorCount:", e.ErrorCount, "FailedCount:", e.FailedCount, "OrphanCount:", e.OrphanCount);
                 var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, NormalizedFailureMessage(r.Message)));
                 if (_verbose)

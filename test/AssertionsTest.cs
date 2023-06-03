@@ -76,7 +76,7 @@ namespace GdUnit4.Tests
             AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
             AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
             AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
-            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, Godot.Variant>())).IsInstanceOf<IDictionaryAssert>();
         }
 
         [TestCase]

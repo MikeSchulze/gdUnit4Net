@@ -40,7 +40,7 @@ namespace GdUnit4
         private static int GetWithTimeoutLineNumber()
         {
             StackTrace saveStackTrace = new StackTrace(true);
-            return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4).GetFileLineNumber() : -1;
+            return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4)!.GetFileLineNumber() : -1;
         }
 
         public sealed class GodotMethodAwaiter<V>
@@ -312,11 +312,11 @@ namespace GdUnit4.Core
             return CurrentScene.Call(name, args);
         }
 
-        public Variant GetProperty<T>(string name)
+        public T GetProperty<T>(string name)
         {
             var property = CurrentScene.Get(name);
             if (property.Obj != null)
-                return property;
+                return (T)property.Obj;
             throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
         }
 

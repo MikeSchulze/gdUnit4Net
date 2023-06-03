@@ -8,26 +8,26 @@ namespace GdUnit4.Asserts
 
 
     [TestSuite]
-    public class SignalAssertTest
+    public partial class SignalAssertTest
     {
         // TestSuite generated from
         private const string sourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/SignalAssert.cs";
 
 
-        class TestEmitter : Godot.Node2D
+        partial class TestEmitter : Godot.Node
         {
             [Godot.Signal]
-            delegate void SignalA();
+            public delegate void SignalAEventHandler();
 
             [Godot.Signal]
-            delegate void SignalB(string value);
+            public delegate void SignalBEventHandler(string value);
 
             [Godot.Signal]
-            delegate void SignalC(string value, int count);
+            public delegate void SignalCEventHandler(string value, int count);
 
             private int frame = 0;
 
-            public override void _Process(float delta)
+            public override void _Process(double delta)
             {
                 switch (frame)
                 {

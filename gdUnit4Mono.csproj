@@ -27,7 +27,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <!-- Exclude tests -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);test/**/*</DefaultItemExcludes>
+    <!-- DefaultItemExcludes>$(DefaultItemExcludes);test/**/*</DefaultItemExcludes -->
   </PropertyGroup>
 
   <ItemGroup>

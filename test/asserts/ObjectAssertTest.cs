@@ -6,33 +6,37 @@ namespace GdUnit4.Tests.Asserts
     using Executions;
     using static Assertions;
 
+
+    partial class CustomClass : Godot.RefCounted
+    {
+        public partial class InnerClassA : Godot.Node { }
+
+        public partial class InnerClassB : InnerClassA { }
+
+        public partial class InnerClassC : Godot.Node { }
+    }
+
+    partial class CustomClassB : CustomClass
+    {
+    }
+
     [TestSuite]
     public class ObjectAssertTest
     {
-        class CustomClass : Godot.RefCounted
-        {
-            public class InnerClassA : Godot.Node { }
 
-            public class InnerClassB : InnerClassA { }
-
-            public class InnerClassC : Godot.Node { }
-        }
-        class CustomClassB : CustomClass
-        {
-        }
 
         [TestCase]
         public void IsEqual()
         {
-            AssertObject(new Godot.CubeMesh()).IsEqual(new Godot.CubeMesh());
+            AssertObject(new Godot.BoxMesh()).IsEqual(new Godot.BoxMesh());
             AssertObject(new object()).IsEqual(new object());
 
             // should fail because the current is an CubeMesh and we expect equal to a Skin
-            AssertThrown(() => AssertObject(new Godot.CubeMesh()).IsEqual(new Godot.Skin()))
+            AssertThrown(() => AssertObject(new Godot.BoxMesh()).IsEqual(new Godot.Skin()))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 31)
                 .HasMessage("Expecting be equal:\n"
-                    + "  <Godot.Skin> but is <Godot.CubeMesh>");
+                    + "  <Godot.Skin> but is <Godot.BoxMesh>");
             AssertThrown(() => AssertObject(new object()).IsEqual(new List<int>()))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 36)
@@ -45,14 +49,14 @@ namespace GdUnit4.Tests.Asserts
         [TestCase]
         public void IsNotEqual()
         {
-            AssertObject(new Godot.CubeMesh()).IsNotEqual(new Godot.Skin());
+            AssertObject(new Godot.BoxMesh()).IsNotEqual(new Godot.Skin());
             AssertObject(new object()).IsNotEqual(new List<object>());
             // should fail because the current is an CubeMesh and we expect not equal to a CubeMesh
-            AssertThrown(() => AssertObject(new Godot.CubeMesh()).IsNotEqual(new Godot.CubeMesh()))
+            AssertThrown(() => AssertObject(new Godot.BoxMesh()).IsNotEqual(new Godot.BoxMesh()))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 51)
                 .HasMessage("Expecting be NOT equal:\n"
-                    + "  <Godot.CubeMesh> but is <Godot.CubeMesh>");
+                    + "  <Godot.BoxMesh> but is <Godot.BoxMesh>");
             AssertThrown(() => AssertObject(new object()).IsNotEqual(new object()))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 56)
@@ -64,8 +68,8 @@ namespace GdUnit4.Tests.Asserts
         public void IsInstanceOf()
         {
             // engine class test
-            AssertObject(AutoFree(new Godot.Path())).IsInstanceOf<Godot.Node>();
-            AssertObject(AutoFree(new Godot.Camera())).IsInstanceOf<Godot.Camera>();
+            AssertObject(AutoFree(new Godot.Path2D())).IsInstanceOf<Godot.Node>();
+            AssertObject(AutoFree(new Godot.Camera2D())).IsInstanceOf<Godot.Camera2D>();
             // script class test
             // inner class test
             AssertObject(AutoFree(new CustomClass.InnerClassA())).IsInstanceOf<Godot.Node>();
@@ -78,11 +82,11 @@ namespace GdUnit4.Tests.Asserts
             AssertObject(new CustomClassB()).IsInstanceOf<CustomClass>();
 
             // should fail because the current is not a instance of `Tree`
-            AssertThrown(() => AssertObject(AutoFree(new Godot.Path())).IsInstanceOf<Godot.Tree>())
+            AssertThrown(() => AssertObject(AutoFree(new Godot.Path2D())).IsInstanceOf<Godot.Tree>())
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 81)
                 .HasMessage("Expected be instance of:\n"
-                    + "  <Godot.Tree> but is <Godot.Path>");
+                    + "  <Godot.Tree> but is <Godot.Path2D>");
             AssertThrown(() => AssertObject(null).IsInstanceOf<Godot.Tree>())
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 86)
@@ -100,7 +104,7 @@ namespace GdUnit4.Tests.Asserts
         {
             AssertObject(null).IsNotInstanceOf<Godot.Node>();
             // engine class test
-            AssertObject(AutoFree(new Godot.Path())).IsNotInstanceOf<Godot.Tree>();
+            AssertObject(AutoFree(new Godot.Path2D())).IsNotInstanceOf<Godot.Tree>();
             // inner class test
             AssertObject(AutoFree(new CustomClass.InnerClassA())).IsNotInstanceOf<Godot.Tree>();
             AssertObject(AutoFree(new CustomClass.InnerClassB())).IsNotInstanceOf<CustomClass.InnerClassC>();
@@ -108,7 +112,7 @@ namespace GdUnit4.Tests.Asserts
             AssertObject(new CustomClass()).IsNotInstanceOf<CustomClassB>();
 
             // should fail because the current is not a instance of `Tree`
-            AssertThrown(() => AssertObject(AutoFree(new Godot.Path())).IsNotInstanceOf<Godot.Node>())
+            AssertThrown(() => AssertObject(AutoFree(new Godot.Path2D())).IsNotInstanceOf<Godot.Node>())
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 111)
                 .HasMessage("Expecting be NOT a instance of:\n"

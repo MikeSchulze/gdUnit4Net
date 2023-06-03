@@ -198,7 +198,7 @@ namespace GdUnit4
         /// <param name="name">The parameter name</param>
         /// <returns>The value of the property or throws a MissingFieldException</returns>
         /// <exception cref="MissingFieldException"/>
-        public Variant GetProperty<T>(string name);
+        public T GetProperty<T>(string name);
 
         /// <summary>
         /// Finds the node by given name.

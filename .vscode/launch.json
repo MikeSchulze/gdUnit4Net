@@ -6,12 +6,12 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "/Users/mschulze/Documents/develop/private/Godot_mono.app/Contents/MacOS/Godot",
+            "program": "${env:GODOT_BIN}",
             "args": [
-                "--path", ".",
+                "--path",
+                ".",
                 "-d",
-                "test.tscn",
-                "--quit-on-finish"
+                "TestImpl.tscn"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

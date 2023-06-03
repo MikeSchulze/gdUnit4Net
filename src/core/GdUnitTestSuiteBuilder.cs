@@ -156,7 +156,7 @@ namespace GdUnit4.Core
             }
         }
 
-        public static Godot.Node? Load(string classPath)
+        public static CsNode? Load(string classPath)
         {
             if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {

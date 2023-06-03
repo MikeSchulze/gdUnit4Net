@@ -84,7 +84,7 @@ namespace GdUnit4.Asserts
                 {"a1", "100"},
                 {"a2", "200"},
             };
-            expected = new Godot.Collections.Dictionary(current);
+            expected = current.Duplicate();
             AssertThat(current).IsEqual(expected);
 
             current.Add("a3", 300);
@@ -147,7 +147,7 @@ namespace GdUnit4.Asserts
             };
             AssertThat(current).IsNotEqual(expected);
 
-            expected = new Godot.Collections.Dictionary(current);
+            expected = current.Duplicate();
             AssertThrown(() => AssertThat(current).IsNotEqual(expected))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("Expecting be NOT equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}");
