@@ -30,7 +30,7 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasMessage(string message)
         {
-            string current = NormalizedFailureMessage(Current?.Message ?? "");
+            string current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
             if (!current.Equals(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
@@ -52,23 +52,10 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert StartsWithMessage(string message)
         {
-            var current = NormalizedFailureMessage(Current?.Message ?? "");
+            var current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
             if (!current.StartsWith(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
-        }
-
-        private static string NormalizedFailureMessage(string input)
-        {
-            using (var rtl = new Godot.RichTextLabel())
-            {
-                rtl.BbcodeEnabled = true;
-                rtl.ParseBbcode(input);
-                var text = rtl.Text;
-                // need to be manually free here, https://github.com/godotengine/godot/issues/56097
-                rtl.Free();
-                return text;
-            }
         }
 
         private void ThrowTestFailureReport(string message, object? current, object? expected)

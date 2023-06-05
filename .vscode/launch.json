@@ -11,11 +11,12 @@
                 "--path",
                 ".",
                 "-d",
-                "TestImpl.tscn"
+                "TestRunner.tscn"
             ],
             "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "stopAtEntry": false
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false
         },
         {
             "name": "Attach gdUnit4Mono",

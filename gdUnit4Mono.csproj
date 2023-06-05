@@ -1,11 +1,13 @@
-<Project Sdk="Godot.NET.Sdk/4.0.3">
+<Project Sdk="Godot.NET.Sdk/4.1.0-dev.4">
   <PropertyGroup>
     <Title>GdUnit4Mono</Title>
     <Version>4.2.0.0</Version>
     <Description>The Godot C# extension for GdUnit4.</Description>
     <Copyright>© 2023 Mike Schulze</Copyright>
     <Authors>Mike Schulze</Authors>
-    
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
@@ -14,10 +16,12 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    
+
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+  </PropertyGroup>
 
+  <PropertyGroup>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>GdUnit4Mono</PackageId>
     <PackageVersion>4.2.0-release.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
@@ -34,10 +38,10 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
     <!-- Do onyl include this line for local builds, need to be exclude on release -->
-    <PackageReference Include="GodotSharp" Version="4.0.3"/>
+    <PackageReference Include="GodotSharp" Version="4.1.0-dev.4" />
     <!-- Content Include=".gitignore" -->
     <Content Include="LICENSE" />
-    <None Include="README.md" Pack="true" PackagePath=""/>
+    <None Include="README.md" Pack="true" PackagePath="" />
     <None Include="LICENSE" Pack="true" PackagePath="" />
     <None Include="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>

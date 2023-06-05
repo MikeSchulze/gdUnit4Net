@@ -46,7 +46,7 @@ namespace GdUnit4.Asserts
 
         public IAssert HasFailureMessage(string message)
         {
-            var current = NormalizedFailureMessage(CurrentFailureMessage);
+            var current = Core.CoreUtils.NormalizedFailureMessage(CurrentFailureMessage);
             if (!current.Equals(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
@@ -60,21 +60,10 @@ namespace GdUnit4.Asserts
 
         public IAssert StartsWithFailureMessage(string message)
         {
-            var current = NormalizedFailureMessage(CurrentFailureMessage);
+            var current = Core.CoreUtils.NormalizedFailureMessage(CurrentFailureMessage);
             if (!current.StartsWith(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
-        }
-
-        private static string NormalizedFailureMessage(string? input)
-        {
-            using (var rtl = new Godot.RichTextLabel())
-            {
-                rtl.BbcodeEnabled = true;
-                rtl.ParseBbcode(input);
-                rtl.QueueFree();
-                return rtl.Text;
-            }
         }
 
         protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)

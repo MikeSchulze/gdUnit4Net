@@ -1,6 +1,6 @@
 using Godot;
-using Godot.Collections;
 using System;
+using System.Collections.Generic;
 
 
 
@@ -16,23 +16,21 @@ namespace GdUnit4
             foreach (Godot.Collections.Dictionary signalDef in emitter.GetSignalList())
             {
                 string signalName = (string)signalDef["name"];
-                var cb = new Callable(this, nameof(OnSignalEmitted)); // works
-                //var cb = Callable.From(OnSignalEmmited); // not works
-
-                //var signal = emitter.ToSignal(emitter, signalName);
-                // signal += () => OnSignalEmmited(emitter, signalName);
-                //signal.OnCompleted(() => GD.PrintS("OnCompleted", signalName, signal.));
-
-
-                emitter.Connect(signalName, cb);
+                var cb = Callable.From(() => OnSignalEmitted(emitter, signalName)); // not works
+                var error = emitter.Connect(signalName, cb);
             }
         }
 
-        private void OnSignalEmitted() => Godot.GD.PrintS("A");
-        private void OnSignalEmitted(Godot.GodotObject arg) => Godot.GD.PrintS("B", arg);
-        private void OnSignalEmitted(params Godot.GodotObject[] args) => Godot.GD.PrintS("C", args, args.Length);
 
-        private void OnSignalEmitted(Godot.GodotObject emitter, string signalName, params Godot.GodotObject[] args) => Godot.GD.PrintS(emitter, signalName, args);
+        private void OnSignalEmitted(Godot.GodotObject emitter, string signalName) => Godot.GD.PrintS("A", emitter, signalName);
+
+        private void OnSignalEmitted(Godot.GodotObject emitter, string signalName, Godot.Variant arg) => Godot.GD.PrintS("B", emitter, signalName, arg);
+
+        private void OnSignalEmitted(Godot.Variant arg, Godot.GodotObject emitter, string signalName) => Godot.GD.PrintS("C", emitter, signalName, arg);
+
+        private void OnSignalEmitted(Godot.GodotObject emitter, string signalName, params Godot.Variant[] args) => Godot.GD.PrintS("D", emitter, signalName, args);
+
+        private void OnSignalEmitted(Godot.GodotObject emitter, string signalName, IEnumerable<Godot.Variant> args) => Godot.GD.PrintS("E", emitter, signalName, args);
     }
 
 

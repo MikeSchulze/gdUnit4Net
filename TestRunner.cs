@@ -3,41 +3,35 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using GdUnit4.Asserts;
 using GdUnit4.Executions;
 using GdUnit4.Core;
-
-using Godot;
 
 namespace GdUnit4
 {
     class TestReporter : ITestEventListener
     {
 
+        private static GdUnitConsole Console = new GdUnitConsole();
+
         private bool _isFailed = false;
 
         public TestReporter()
         { }
 
-        public void PublishEvent(TestEvent testEvent)
-        {
-            //Console.WriteLine(testEvent);
-            PrintStatus(testEvent);
-        }
+        public void PublishEvent(TestEvent testEvent) => PrintStatus(testEvent);
 
         void PrintStatus(TestEvent testEvent)
         {
-            Console.ForegroundColor = ConsoleColor.White;
             switch (testEvent.Type)
             {
                 case TestEvent.TYPE.TESTSUITE_BEFORE:
-                    //_console.prints_color("Run Test Suite %s " % event.resource_path(), Color.antiquewhite)
                     Console.WriteLine($"Run Test Suite {testEvent.ResourcePath}");
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     //_console.print_color("	Run Test: %s > %s :" % [event.resource_path(), event.test_name()], Color.antiquewhite).prints_color("STARTED", Color.forestgreen)
                     Console.Write($"	Run Test: {testEvent.SuiteName} > {testEvent.TestName} :");
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"STARTED");
+                    Console.WriteLine($"STARTED", ConsoleColor.Green);
                     break;
                 case TestEvent.TYPE.TESTCASE_AFTER:
                     //_console.print_color("	Run Test: %s > %s :" % [event.resource_path(), event.test_name()], Color.antiquewhite)
@@ -56,52 +50,55 @@ namespace GdUnit4
                     }
                     break;
             }
-            Console.ForegroundColor = ConsoleColor.White;
 
             void WriteStatus(TestEvent testEvent)
             {
                 if (testEvent.IsSkipped)
                 {
-                    //_console.print_color("SKIPPED", Color.goldenrod, CmdConsole.BOLD | CmdConsole.ITALIC)
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("SKIPPED");
+                    Console.PrintColored("SKIPPED", ConsoleColor.DarkYellow, GdUnitConsole.BOLD | GdUnitConsole.ITALIC);
                 }
                 else if (testEvent.IsFailed || testEvent.IsError)
                 {
-                    //_console.print_color("FAILED", Color.crimson, CmdConsole.BOLD)
                     _isFailed = true;
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("FAILED");
+                    Console.PrintColored("FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
+                    Console.NewLine();
+                    WriteFailureReport(testEvent);
                 }
                 else if (testEvent.OrphanCount > 0)
                 {
-                    //_console.print_color("PASSED", Color.goldenrod, CmdConsole.BOLD | CmdConsole.UNDERLINE)
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.Write("PASSED");
+                    Console.PrintColored("PASSED", ConsoleColor.Yellow, GdUnitConsole.BOLD | GdUnitConsole.UNDERLINE);
                 }
                 else
                 {
-                    //_console.print_color("PASSED", Color.forestgreen, CmdConsole.BOLD)
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("PASSED");
+                    Console.PrintColored("PASSED", ConsoleColor.Green, GdUnitConsole.BOLD);
                 }
-                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("");
                 //Console.Write(" %s" % LocalTime.elapsed(testEvent.elapsed_time()), Color.cornflower)
 
             }
         }
+
+        private void WriteFailureReport(TestEvent testEvent)
+        {
+            foreach (TestReport report in testEvent.Reports)
+            {
+                Console.PrintColored(Core.CoreUtils.NormalizedFailureMessage(report.ToString()), ConsoleColor.DarkCyan);
+            }
+        }
+
     }
 
     partial class TestRunner : Godot.Node
     {
+
+
+
         public override async void _Ready()
         {
-            Console.ForegroundColor = ConsoleColor.White;
             var cmdArgs = Godot.OS.GetCmdlineArgs();
             Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
 
-            var currentDir = Directory.GetCurrentDirectory() + "/test";
+            var currentDir = Directory.GetCurrentDirectory() + "/test/asserts";
             List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
             using Executor executor = new Executor();
             executor.AddTestEventListener(new TestReporter());

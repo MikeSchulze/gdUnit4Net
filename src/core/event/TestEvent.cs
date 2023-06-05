@@ -47,7 +47,7 @@ namespace GdUnit4
             if (reports != null)
             {
                 var serializedReports = reports.Select(report => report.Serialize()).ToArray();
-                _data.Add("reports", serializedReports.ToGodotArray());
+                _data.Add("reports", serializedReports);
             }
         }
 

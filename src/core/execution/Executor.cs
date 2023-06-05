@@ -72,7 +72,7 @@ namespace GdUnit4.Executions
                 using (ExecutionContext context = new ExecutionContext(testSuite, _eventListeners, ReportOrphanNodesEnabled))
                 {
                     var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                    task.GetAwaiter().OnCompleted(() => EmitSignal(nameof(ExecutionCompletedEventHandler)));
+                    task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
                     await task;
                 }
             }
