@@ -36,8 +36,10 @@ namespace GdUnit4
             return converted;
         }
 
-        public static string Formated(this IEnumerable args) => ToGodotArray(args).ToString();
 
+        public static string Formated(this Godot.Collections.Array args) => $"{string.Join(", ", args)}";
+        public static string Formated(this Godot.Variant[] args) => $"{string.Join(", ", args)}";
+        public static string Formated(this IEnumerable args) => $"{string.Join(", ", args)}";
         public static string Formated(this object[] args) => $"{string.Join(", ", args)}";
     }
 }
