@@ -6,7 +6,6 @@ namespace GdUnit4.Core
 {
     public sealed class GdUnitConsole
     {
-
         public const int BOLD = 0x1;
         public const int ITALIC = 0x2;
         public const int UNDERLINE = 0x4;
@@ -16,50 +15,50 @@ namespace GdUnit4.Core
 
         static object lockObj = new object();
 
-        public GdUnitConsole Write(string message, ConsoleColor color = ConsoleColor.White)
-        {
-            lock (lockObj)
-            {
-                Console.Write(message);
-            }
-            return this;
-        }
-
-        public GdUnitConsole WriteLine(string message, ConsoleColor color = ConsoleColor.White)
-        {
-            lock (lockObj)
-            {
-                Color c = ToColor(color);
-                Console.WriteLine("\u001b[38;2;{0};{1};{2}m  {3} \u001b[0m", c.R, c.G, c.B, message);
-            }
-            return this;
-        }
-
         public GdUnitConsole NewLine()
         {
-            Console.WriteLine("");
+            Console.WriteLine();
             return this;
         }
 
         public GdUnitConsole PrintError(String message)
         {
-            return SetColor(ConsoleColor.DarkRed)
-                .WriteLine(message)
-                .EndColor()
-                .NewLine();
+            lock (lockObj)
+            {
+                return BeginColor(ConsoleColor.DarkRed)
+                    .WriteLine(message)
+                    .EndColor()
+                    .NewLine();
+            }
         }
 
-        public GdUnitConsole PrintColored(String message, ConsoleColor color, int flags = 0)
+        public GdUnitConsole Print(String message, ConsoleColor color = ConsoleColor.White, int flags = 0)
         {
-            return SetColor(color)
-                .Bold((flags & BOLD) == BOLD)
-                .Italic((flags & ITALIC) == ITALIC)
-                .Underline((flags & UNDERLINE) == UNDERLINE)
-                .Write(message)
-                .EndColor();
+            lock (lockObj)
+            {
+                return BeginColor(color)
+                    .Bold((flags & BOLD) == BOLD)
+                    .Italic((flags & ITALIC) == ITALIC)
+                    .Underline((flags & UNDERLINE) == UNDERLINE)
+                    .Write(message)
+                    .EndColor();
+            }
         }
 
-        private GdUnitConsole SetColor(ConsoleColor color)
+        public GdUnitConsole Println(String message, ConsoleColor color = ConsoleColor.White, int flags = 0)
+        {
+            lock (lockObj)
+            {
+                return BeginColor(color)
+                    .Bold((flags & BOLD) == BOLD)
+                    .Italic((flags & ITALIC) == ITALIC)
+                    .Underline((flags & UNDERLINE) == UNDERLINE)
+                    .WriteLine(message)
+                    .EndColor();
+            }
+        }
+
+        private GdUnitConsole BeginColor(ConsoleColor color)
         {
             Color c = ToColor(color);
             Console.Write("\u001b[38;2;{0};{1};{2}m", c.R, c.G, c.B);
@@ -98,6 +97,18 @@ namespace GdUnit4.Core
         {
             string? colorName = Enum.GetName(typeof(ConsoleColor), color);
             return Color.FromName(colorName!);
+        }
+
+        private GdUnitConsole Write(string message)
+        {
+            Console.Write(message);
+            return this;
+        }
+
+        private GdUnitConsole WriteLine(string message)
+        {
+            Console.WriteLine(message);
+            return this;
         }
     }
 }

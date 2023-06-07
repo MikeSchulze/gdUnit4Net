@@ -108,7 +108,7 @@ namespace GdUnit4.Executions
                     // Very important in order to propagate exceptions
                     await task;
                 else
-                    throw new ExecutionTimeoutException($"The execution has timed out after {timeout.TotalMilliseconds}ms.", ExecutionLineNumber(context));
+                    throw new ExecutionTimeoutException($"The execution has timed out after {timeout.Humanize()}.", ExecutionLineNumber(context));
             }
         }
 
