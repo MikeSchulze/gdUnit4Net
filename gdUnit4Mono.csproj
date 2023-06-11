@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <LangVersion>10.0</LangVersion>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <LangVersion>11.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
     <RootNamespace>GdUnit4</RootNamespace>

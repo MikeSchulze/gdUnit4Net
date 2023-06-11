@@ -42,7 +42,7 @@ namespace GdUnit4
 
         public bool IsWarning => Type == TYPE.WARN;
 
-        public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color] \t {Message}";
+        public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
 
         public IDictionary<string, Godot.Variant> Serialize()
         {

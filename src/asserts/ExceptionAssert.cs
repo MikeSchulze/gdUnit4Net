@@ -30,6 +30,7 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasMessage(string message)
         {
+            message = message.Replace("\r", "");
             string current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
             if (!current.Equals(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);

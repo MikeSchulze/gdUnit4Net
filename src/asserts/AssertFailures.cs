@@ -12,76 +12,96 @@ namespace GdUnit4.Asserts
         public const string ERROR_COLOR = "#CD5C5C";
         public const string VALUE_COLOR = "#1E90FF";
 
-        private static Func<object, string> defaultFormatter = (value) => value?.ToString() ?? "<Null>";
+        private static Func<object, string> classFormatter = value => value?.GetType().Name ?? "<Null>";
 
-        private static Func<object, string> classFormatter = (value) => value?.GetType().Name ?? "<Null>";
-        private static Func<object, string> godotClassFormatter = (value) =>
+        private static Func<object, string> godotClassFormatter = value =>
         {
             if (value != null)
             {
                 return ((Godot.GodotObject)value).GetClass();
             }
-            return "Null";
-        };
-
-        private static Dictionary<Type, Func<object, string>> formatters = new Dictionary<Type, Func<object, string>>{
-                {typeof(string), (value) => value?.ToString() ?? "<Null>"},
-                {typeof(object), (value) =>  value?.GetType().Name ?? "<Null>"},
-                {typeof(Godot.Vector2), (value) =>  ((Godot.Vector2)value).ToString()},
-                {typeof(Godot.Vector3), (value) =>  ((Godot.Vector3)value).ToString()},
+            return "<Null>";
         };
 
         private static string SimpleClassName(Type type)
         {
-            var sb = new StringBuilder();
-            var name = type.FullName.Replace("[", "").Replace("]", "");
+            var name = type.FullName?.Replace("[", "")?.Replace("]", "");
             if (!type.IsGenericType) return name;
-            sb.Append(name.Substring(0, name.IndexOf('`')));
-            sb.Append("<");
-            sb.Append(string.Join(", ", type.GetGenericArguments().Select(t => SimpleClassName(t))));
-            sb.Append(">");
-            return sb.ToString();
+
+            var genericArguments = string.Join(", ", type.GetGenericArguments().Select(t => SimpleClassName(t)));
+            return $"{name.Substring(0, name.IndexOf('`'))}<{genericArguments}>";
         }
 
-        private static string FormatDictionary(IDictionary? dict, string color)
+        private static string FormatDictionary(IDictionary dict, string color)
         {
-            if (dict == null)
-                return "<Null>";
+            if (dict.Keys.Count == 0)
+                return string.Format($"[color={color}]<Empty>[/color]");
 
             var keyValues = new ArrayList();
-            if (dict.Keys.Count == 0)
-            {
-                return string.Format("[color={0}]{1}[/color]", color, "<Empty>");
-            }
-
-            var keys = dict;
             foreach (DictionaryEntry entry in dict)
             {
                 var key = entry.Key;
                 var value = entry.Value;
-                var type = value.GetType();
-                var formatter = type != null && formatters.ContainsKey(type) ? formatters[type] : defaultFormatter;
-                keyValues.Add($"{{{key}, {formatter(value)}}}");
+                keyValues.Add($"{{{key.Formated()}, {value.Formated()}}}");
             }
             string pairs = string.Join("; ", keyValues.ToArray());
-            return string.Format("[color={0}]{1}[/color]", color, pairs);
+            return $"[color={color}]{pairs}[/color]";
         }
 
+        private static string FormatDictionary(IDictionary<Godot.Variant, Godot.Variant> dict, string color)
+        {
+            if (dict.Keys.Count == 0)
+                return string.Format($"[color={color}]<Empty>[/color]");
+
+            var keyValues = new ArrayList();
+            foreach (KeyValuePair<Godot.Variant, Godot.Variant> entry in dict)
+            {
+                var key = entry.Key.UnboxVariant();
+                var value = entry.Value.UnboxVariant();
+                keyValues.Add($"{{{key.Formated()}, {value.Formated()}}}");
+            }
+            string pairs = string.Join("; ", keyValues.ToArray());
+            return $"[color={color}]{pairs}[/color]";
+        }
+
+        private static string FormatEnumerable(IEnumerable enumerable, string color)
+        {
+            var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext() == false)
+                return string.Format($"[color={color}]<Empty>[/color]");
+
+            var keyValues = new ArrayList();
+            do
+            {
+                keyValues.Add(enumerator.Current.Formated());
+            } while (enumerator.MoveNext());
+            return $"[color={color}]{keyValues.Formated()}[/color]";
+        }
 
         public static string FormatValue(object? value, string color, bool quoted, bool printType = true)
         {
             if (value == null)
                 return "<Null>";
 
-            if (value is Type)
-                return string.Format("[color={0}]<{1}>[/color]", color, value);
+            if (value is string str)
+                return str;
 
-            if (value is IDictionary)
-                return FormatDictionary(value as IDictionary, color);
+            if (value is Type)
+                return string.Format($"[color={color}]<{value}>[/color]");
 
             Type type = value.GetType();
             var className = printType ? SimpleClassName(type) : "";
-            if (type.IsArray || (value is IEnumerable && !(value is string)))
+
+            if (value is IDictionary dict)
+                return FormatDictionary(dict, color);
+
+            if (value is Godot.Collections.Dictionary gDict)
+                return FormatDictionary(gDict, color);
+
+            if (value is IEnumerable values)
+                return FormatEnumerable(values, color);
+
+            if (type.IsArray)
             {
                 var asArray = ((IEnumerable)value).Cast<object>()
                              .Select(x => x?.ToString() ?? "<Null>")
@@ -93,10 +113,7 @@ namespace GdUnit4.Asserts
 
             if (type.IsClass && !(value is string) || value is Type)
                 return string.Format("[color={0}]<{1}>[/color]", color, SimpleClassName(type));
-
-            var formatter = type != null && formatters.ContainsKey(type) ? formatters[type] : defaultFormatter;
-            string pattern = quoted ? "'[color={0}]{1}[/color]'" : "[color={0}]{1}[/color]";
-            return string.Format(pattern, color, formatter(value));
+            return quoted ? $"'[color={color}]{value.Formated()}[/color]'" : $"[color={color}]{value.Formated()}[/color]";
         }
 
         private static string FormatCurrent(object? value, bool printType = true) => FormatValue(value, VALUE_COLOR, true, printType);
