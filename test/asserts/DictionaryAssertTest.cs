@@ -1,6 +1,7 @@
 // GdUnit generated TestSuite
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace GdUnit4.Asserts
 {
@@ -13,6 +14,16 @@ namespace GdUnit4.Asserts
         // TestSuite generated from
         private const string sourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/DictionaryAssert.cs";
 
+        [TestCase]
+        public void VerifyDictionaryTypes()
+        {
+            AssertThat(new Hashtable()).IsEmpty();
+            AssertThat(new Dictionary<string, long>()).IsEmpty();
+            AssertThat(new SortedDictionary<string, object>()).IsEmpty();
+            AssertThat(ImmutableDictionary.Create<string, long>()).IsEmpty();
+            AssertThat(new Godot.Collections.Dictionary()).IsEmpty();
+            AssertThat(new Godot.Collections.Dictionary<string, Godot.Variant>()).IsEmpty();
+        }
 
         [TestCase]
         public void OverrideFailureMessage()
@@ -21,7 +32,7 @@ namespace GdUnit4.Asserts
                     .OverrideFailureMessage("Custom failure message")
                     .IsNotNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 20)
+                .HasPropertyValue("LineNumber", 31)
                 .HasMessage("Custom failure message");
         }
 
@@ -45,7 +56,7 @@ namespace GdUnit4.Asserts
             current.Add("a3", 300);
             AssertThrown(() => AssertThat(current).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 46)
+                .HasPropertyValue("LineNumber", 57)
                 .HasMessage("""
                     Expecting be equal:
                       {"a1", "100"}; {"a2", "200"}

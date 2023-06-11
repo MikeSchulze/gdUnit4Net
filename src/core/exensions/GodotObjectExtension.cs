@@ -58,9 +58,9 @@ namespace GdUnit4
 
         public class CustomerComparer<TKey> : IComparer<TKey>
         {
-            public int Compare(TKey l, TKey r)
+            public int Compare(TKey? l, TKey? r)
             {
-                return l.ToString().CompareTo(r.ToString());
+                return Comparer<TKey>.Default.Compare(l, r);
             }
         }
 

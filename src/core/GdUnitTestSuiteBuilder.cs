@@ -34,9 +34,8 @@ namespace GdUnit4.Core
                 }
 
                 // create directory if not exists
-                var fi = new FileInfo(testSuitePath);
-                if (!fi.Exists)
-                    System.IO.Directory.CreateDirectory(fi.Directory.FullName);
+                if (!Directory.Exists(testSuitePath))
+                    Directory.CreateDirectory(testSuitePath);
 
                 if (!File.Exists(testSuitePath))
                 {
@@ -124,6 +123,7 @@ namespace GdUnit4.Core
             }
             return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
         }
+
 
         public static Type? ParseType(String classPath)
         {

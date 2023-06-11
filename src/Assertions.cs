@@ -106,7 +106,8 @@ namespace GdUnit4
         public static IObjectAssert AssertThat(object? current) => new ObjectAssert(current);
         public static IEnumerableAssert AssertThat(IEnumerable? current) => new EnumerableAssert(current);
         public static IDictionaryAssert AssertThat(IDictionary? current) => new DictionaryAssert(current);
-        public static IDictionaryAssert AssertThat<[Godot.MustBeVariant] K, [Godot.MustBeVariant] V>(Godot.Collections.Dictionary<K, V>? current) => new DictionaryAssert(current?.ToDictionary(e => e.Key, e => e.Value));
+        public static IDictionaryAssert AssertThat<[Godot.MustBeVariant] K, [Godot.MustBeVariant] V>(Godot.Collections.Dictionary<K, V>? current) where K : notnull
+                => new DictionaryAssert(current?.ToDictionary(e => e.Key, e => e.Value));
         public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
         public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
 
@@ -183,18 +184,5 @@ namespace GdUnit4
         ///  Builds an extractor by given method name and optional arguments
         /// </summary>
         public static IValueExtractor Extr(string methodName, params object[] args) => new ValueExtractor(methodName, args);
-
-        /// <summary>
-        ///  A helper to return given enumerable as string representation
-        /// </summary>
-        public static string AaString(IEnumerable values)
-        {
-            var items = new List<string>();
-            foreach (var value in values)
-            {
-                items.Add(value != null ? value.ToString() : "Null");
-            }
-            return string.Join(", ", items);
-        }
     }
 }
