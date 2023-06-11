@@ -39,7 +39,7 @@ namespace GdUnit4.Asserts
             return value;
         }
 
-        private object Extract(object instance, string name)
+        private object? Extract(object instance, string name)
         {
             var type = instance.GetType();
             var method = type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

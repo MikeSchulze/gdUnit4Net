@@ -39,7 +39,7 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasPropertyValue(string propertyName, object expected)
         {
-            var value = Current?.GetType().GetProperty(propertyName).GetValue(Current);
+            var value = Current?.GetType().GetProperty(propertyName)?.GetValue(Current);
             if (!Comparable.IsEqual(value, expected).Valid)
                 ThrowTestFailureReport(AssertFailures.HasValue(propertyName, value, expected), value, expected);
             return this;

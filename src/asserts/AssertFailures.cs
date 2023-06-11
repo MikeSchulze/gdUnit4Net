@@ -25,7 +25,7 @@ namespace GdUnit4.Asserts
 
         private static string SimpleClassName(Type type)
         {
-            var name = type.FullName?.Replace("[", "")?.Replace("]", "");
+            string name = type.FullName?.Replace("[", "")?.Replace("]", "")!;
             if (!type.IsGenericType) return name;
 
             var genericArguments = string.Join(", ", type.GetGenericArguments().Select(t => SimpleClassName(t)));
@@ -469,16 +469,18 @@ namespace GdUnit4.Asserts
                          FormatExpected($"{signal}()"),
                          FormatCurrent(current, true));
 
-        static string FindFirstDiff(IEnumerable<object?>? left, IEnumerable<object?>? right)
+        static string? FindFirstDiff(IEnumerable<object?>? left, IEnumerable<object?>? right)
         {
+            if (left is null || right is null)
+                return null;
             foreach (var it in left.Select((value, i) => new { Value = value, Index = i }))
             {
                 var l = it.Value;
                 var r = right?.ElementAt(it.Index);
                 if (!Comparable.IsEqual(l, r).Valid)
-                    return string.Format("at position {0}\n  {1} vs {2}", FormatCurrent(it.Index), FormatCurrent(l), FormatExpected(r));
+                    return $"at position {FormatCurrent(it.Index)}\n  {FormatCurrent(l)} vs {FormatExpected(r)}";
             }
-            return "";
+            return null;
         }
 
     }
