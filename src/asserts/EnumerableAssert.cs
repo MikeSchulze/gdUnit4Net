@@ -17,7 +17,7 @@ namespace GdUnit4.Asserts
 
         public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (!result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
             return this;
@@ -25,7 +25,7 @@ namespace GdUnit4.Asserts
 
         public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
             return this;
@@ -51,7 +51,7 @@ namespace GdUnit4.Asserts
         {
             var count = Current?.Count();
             if (count != expected)
-                ThrowTestFailureReport(AssertFailures.HasSize(count == null ? "unknown" : count, expected), Current, null);
+                ThrowTestFailureReport(AssertFailures.HasSize(count, expected), Current, null);
             return this;
         }
 

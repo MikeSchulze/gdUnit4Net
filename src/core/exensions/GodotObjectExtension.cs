@@ -16,7 +16,14 @@ namespace GdUnit4
     public static class GodotObjectExtensions
     {
 
-        public static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight)
+        public enum MODE
+        {
+            CASE_SENSITIVE,
+            CASE_INSENSITIVE
+        }
+
+
+        public static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight, MODE compareMode = MODE.CASE_SENSITIVE)
         {
             object? left = inLeft.UnboxVariant();
             object? right = inRight.UnboxVariant();
@@ -32,28 +39,39 @@ namespace GdUnit4
             var type = left.GetType();
             if (type.IsPrimitive || typeof(string).Equals(type) || left is IEquatable<T>)
             {
+                if (compareMode == MODE.CASE_INSENSITIVE && left is String ls && right is String rs)
+                    return ls.ToLower().Equals(rs.ToLower());
                 return left.Equals(right);
             }
-            return DeepEquals(left, right);
+            return DeepEquals(left, right, compareMode);
         }
+
 
         public static bool VariantEquals([NotNullWhen(true)] this KeyValuePair<object?, object?> left, KeyValuePair<object?, object?> right)
         {
             return false;
         }
 
-        public static bool VariantEquals([NotNullWhen(true)] this IEnumerable left, IEnumerable right)
+        public static bool VariantEquals([NotNullWhen(true)] this IEnumerable left, IEnumerable right, MODE compareMode)
         {
+            // Handle cases where both collections are null
+            if (left is null && right is null)
+                return true;
+
+            // Handle cases where one collection is null
+            if (left is null || right is null)
+                return false;
+
             IEnumerator itLeft = left.GetEnumerator();
             IEnumerator itRight = right.GetEnumerator();
 
             while (itLeft.MoveNext() && itRight.MoveNext())
             {
-                var keyEquals = itLeft.Current.VariantEquals(itRight.Current);
+                var keyEquals = itLeft.Current.VariantEquals(itRight.Current, compareMode);
                 if (!keyEquals)
                     return false;
             }
-            return true;
+            return !(itLeft.MoveNext() || itRight.MoveNext());
         }
 
         public class CustomerComparer<TKey> : IComparer<TKey>
@@ -64,7 +82,7 @@ namespace GdUnit4
             }
         }
 
-        public static bool VariantEquals<TKey, TValue>([NotNullWhen(true)] this IDictionary<TKey, TValue>? left, IDictionary<TKey, TValue>? right)
+        public static bool VariantEquals<TKey, TValue>([NotNullWhen(true)] this IDictionary<TKey, TValue>? left, IDictionary<TKey, TValue>? right, MODE compareMode)
         {
             if (left!.Count != right?.Count)
                 return false;
@@ -77,22 +95,22 @@ namespace GdUnit4
 
             while (itLeft.MoveNext() && itRight.MoveNext())
             {
-                var keyEquals = itLeft.Current.Key.VariantEquals(itRight.Current.Key);
-                var valueEquals = itLeft.Current.Value.VariantEquals(itRight.Current.Value);
+                var keyEquals = itLeft.Current.Key.VariantEquals(itRight.Current.Key, compareMode);
+                var valueEquals = itLeft.Current.Value.VariantEquals(itRight.Current.Value, compareMode);
                 if (!keyEquals || !valueEquals)
                     return false;
             }
             return true;
         }
 
-        public static bool VariantEquals([NotNullWhen(true)] this IDictionary left, IDictionary right)
+        public static bool VariantEquals([NotNullWhen(true)] this IDictionary left, IDictionary right, MODE compareMode)
         {
             if (left.Count != right.Count)
                 return false;
 
             foreach (var key in left.Keys)
             {
-                if (!right.Contains(key) || !left[key]!.VariantEquals(right[key]))
+                if (!right.Contains(key) || !left[key]!.VariantEquals(right[key], compareMode))
                 {
                     return false;
                 }
@@ -100,18 +118,18 @@ namespace GdUnit4
             return true;
         }
 
-        private static bool DeepEquals<T>(T left, T right)
+        private static bool DeepEquals<T>(T left, T right, MODE compareMode)
         {
             if (left is GodotObject lo && right is GodotObject ro)
             {
                 var l = GodotObject2Dictionary(lo, new Dictionary<object, bool>());
                 var r = GodotObject2Dictionary(ro, new Dictionary<object, bool>());
-                return l.VariantEquals(r);
+                return l.VariantEquals(r, compareMode);
             }
             if (left is IDictionary ld && right is IDictionary rd)
-                return ld.VariantEquals(rd);
+                return ld.VariantEquals(rd, compareMode);
             if (left is IEnumerable le && right is IEnumerable re)
-                return le.VariantEquals(re);
+                return le.VariantEquals(re, compareMode);
             if (left is System.ValueType lvt && right is System.ValueType rvt)
                 return left!.Equals(right);
             return left!.Equals(right);

@@ -32,7 +32,7 @@ namespace GdUnit4.Asserts
                 }
                 catch (Exception e)
                 {
-                    Godot.GD.PrintErr(e.Message, value, methodName);
+                    Console.WriteLine($"Can't ExtractValue {methodName}:{value}\n {e.StackTrace}");
                     return "n.a.";
                 }
             }
@@ -45,6 +45,8 @@ namespace GdUnit4.Asserts
             var method = type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (method != null)
             {
+                if (_args.Count() > 0 && instance is Godot.GodotObject go)
+                    return go.Callv(method.Name.ToSnakeCase(), _args.ToGodotArray()).UnboxVariant();
                 return method.Invoke(instance, _args.ToArray());
             }
             var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

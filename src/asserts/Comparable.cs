@@ -7,11 +7,6 @@ namespace GdUnit4
 {
     internal sealed class Comparable
     {
-        public enum MODE
-        {
-            CASE_SENSITIVE,
-            CASE_INSENSITIVE
-        }
 
         public class Result
         {
@@ -44,14 +39,9 @@ namespace GdUnit4
             { get; private set; }
         }
 
-        public static Result IsEqual<T>(T? left, T? right, MODE compareMode = MODE.CASE_SENSITIVE, Result? r = null)
+        public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.MODE compareMode = GodotObjectExtensions.MODE.CASE_SENSITIVE, Result? r = null)
         {
-            if (compareMode == MODE.CASE_INSENSITIVE
-                && left is String ls
-                && right is String rs)
-                return new Result(ls.ToLower().Equals(rs.ToLower()), left, right, r);
-
-            return new Result(left.VariantEquals(right), left, right, r);
+            return new Result(left.VariantEquals(right, compareMode), left, right, r);
         }
     }
 }

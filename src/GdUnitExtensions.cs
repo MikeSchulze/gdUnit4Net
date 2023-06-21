@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace GdUnit4
 {
@@ -16,12 +17,25 @@ namespace GdUnit4
 
         public static Godot.Collections.Array ToGodotArray(this object[] args) => ToGodotArray((IEnumerable)args);
 
+        public static Godot.Collections.Array ToGodotArray(this IEnumerable<object> elements) => ToGodotArray((IEnumerable)elements);
+
         public static Godot.Collections.Array ToGodotArray(this IEnumerable elements)
         {
             var converted = new Godot.Collections.Array();
             foreach (var item in elements)
             {
-                converted.Add(Godot.Variant.From(item));
+                try
+                {
+                    if (item is String s)
+                        converted.Add(Godot.Variant.CreateFrom(s));
+                    else
+                        converted.Add(Godot.Variant.From(item));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
+                    converted.Add(Godot.Variant.CreateFrom("n.a"));
+                }
             }
             return converted;
         }
@@ -35,6 +49,15 @@ namespace GdUnit4
             }
             return converted;
         }
+
+        public static string ToSnakeCase(this string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input!;
+            // Use regular expressions to match and replace camel case patterns
+            return Regex.Replace(input, @"(\p{Ll})(\p{Lu})", "$1_$2").ToLower();
+        }
+
 
         private static Dictionary<Type, Func<object?, string>> formatters = new Dictionary<Type, Func<object?, string>> {
                 {typeof(string), (value) => $"\"{value?.ToString()}\"" ?? "<Null>"},
@@ -55,6 +78,7 @@ namespace GdUnit4
 
         public static string Formated(this Godot.Collections.Array args) => $"{string.Join(", ", args)}";
         public static string Formated(this object? value) => Format(value);
+        public static string Formated(this String? value) => Format(value);
         public static string Formated(this Godot.Variant[] args) => $"{string.Join(", ", args)}";
         public static string Formated(this IEnumerable args) => $"{string.Join(", ", args)}";
         public static string Formated(this ArrayList args) => $"[{string.Join(", ", args.ToArray())}]";

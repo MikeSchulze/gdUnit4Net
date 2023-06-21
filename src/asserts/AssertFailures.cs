@@ -83,8 +83,8 @@ namespace GdUnit4.Asserts
             if (value == null)
                 return "<Null>";
 
-            if (value is string str)
-                return str;
+            if (value is string vs)
+                return quoted ? vs.Formated() : vs;
 
             if (value is Type)
                 return string.Format($"[color={color}]<{value}>[/color]");
@@ -251,11 +251,11 @@ namespace GdUnit4.Asserts
                 FormatFailure("Expecting be odd:"),
                 FormatCurrent(current));
 
-        public static string HasSize(object current, object expected) =>
+        public static string HasSize(object? current, object expected) =>
             string.Format("{0}\n  {1} but is {2}",
                 FormatFailure("Expecting size:"),
                 FormatExpected(expected),
-                FormatCurrent(current));
+                current == null ? "unknown" : FormatCurrent(current));
 
         public static string IsGreater(object current, object expected) =>
             string.Format("{0}\n  {1} but is {2}",

@@ -18,22 +18,28 @@ namespace GdUnit4.Tests.Asserts
             AssertThrown(() => AssertArray(new object[] { }).IsNull())
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 18)
-                .HasMessage("Expecting be <Null>:\n"
-                    + " but is\n"
-                    + "  System.Object[]");
+                .HasMessage("""
+                    Expecting be <Null>:
+                     but is
+                      <Empty>
+                    """);
             AssertThrown(() => AssertArray(new int[] { }).IsNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 24)
-                .HasMessage("Expecting be <Null>:\n"
-                    + " but is\n"
-                    + "  System.Int32[]");
+                .HasPropertyValue("LineNumber", 26)
+                .HasMessage("""
+                    Expecting be <Null>:
+                     but is
+                      <Empty>
+                    """);
             // with godot array
             AssertThrown(() => AssertArray(new Godot.Collections.Array()).IsNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 31)
-                .HasMessage("Expecting be <Null>:\n"
-                    + " but is\n"
-                    + "  Godot.Collections.Array[]");
+                .HasPropertyValue("LineNumber", 35)
+                .HasMessage("""
+                    Expecting be <Null>:
+                     but is
+                      <Empty>
+                    """);
         }
 
         [TestCase]
@@ -47,7 +53,7 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the current is null
             AssertThrown(() => AssertArray(null).IsNotNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 48)
+                .HasPropertyValue("LineNumber", 54)
                 .HasMessage("Expecting be NOT <Null>:");
         }
 
@@ -63,25 +69,31 @@ namespace GdUnit4.Tests.Asserts
 
             AssertThrown(() => AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 3, 4, 2, 5 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 64)
-                .HasMessage("Expecting be equal:\n"
-                    + "  System.Int32[1, 2, 3, 4, 2, 5]\n"
-                    + " but is\n"
-                    + "  System.Int32[1, 2, 4, 5]");
+                .HasPropertyValue("LineNumber", 70)
+                .HasMessage("""
+                    Expecting be equal:
+                      [1, 2, 3, 4, 2, 5]
+                     but is
+                      [1, 2, 4, 5]
+                    """);
             AssertThrown(() => AssertArray(new Godot.Collections.Array(new Variant[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new Variant[] { 1, 2, 3, 4, 2, 5 })))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 71)
-                .HasMessage("Expecting be equal:\n"
-                    + "  Godot.Collections.Array[1, 2, 3, 4, 2, 5]\n"
-                    + " but is\n"
-                    + "  Godot.Collections.Array[1, 2, 4, 5]");
+                .HasPropertyValue("LineNumber", 79)
+                .HasMessage("""
+                    Expecting be equal:
+                      [1, 2, 3, 4, 2, 5]
+                     but is
+                      [1, 2, 4, 5]
+                    """);
             AssertThrown(() => AssertArray(null).IsEqual(new object[] { }))
-               .IsInstanceOf<TestFailedException>()
-               .HasPropertyValue("LineNumber", 78)
-               .HasMessage("Expecting be equal:\n"
-                   + "  System.Object[]\n"
-                   + " but is\n"
-                   + "  <Null>");
+                .IsInstanceOf<TestFailedException>()
+                .HasPropertyValue("LineNumber", 88)
+                .HasMessage("""
+                    Expecting be equal:
+                      <Empty>
+                     but is
+                      <Null>
+                    """);
         }
 
         [TestCase]
@@ -92,19 +104,23 @@ namespace GdUnit4.Tests.Asserts
             AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
                     .IsEqualIgnoringCase(new string[] { "This", "is", "an", "Message" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 92)
-                .HasMessage("Expecting be equal (ignoring case):\n"
-                    + "  System.String[This, is, an, Message]\n"
-                    + " but is\n"
-                    + "  System.String[this, is, a, message]");
+                .HasPropertyValue("LineNumber", 104)
+                .HasMessage("""
+                    Expecting be equal (ignoring case):
+                      ["This", "is", "an", "Message"]
+                     but is
+                      ["this", "is", "a", "message"]
+                    """);
             AssertThrown(() => AssertArray(null)
                    .IsEqualIgnoringCase(new string[] { "This", "is" }))
-               .IsInstanceOf<TestFailedException>()
-               .HasPropertyValue("LineNumber", 100)
-               .HasMessage("Expecting be equal (ignoring case):\n"
-                   + "  System.String[This, is]\n"
-                   + " but is\n"
-                   + "  <Null>");
+                .IsInstanceOf<TestFailedException>()
+                .HasPropertyValue("LineNumber", 114)
+                .HasMessage("""
+                    Expecting be equal (ignoring case):
+                      ["This", "is"]
+                     but is
+                      <Null>
+                    """);
         }
 
         [TestCase]
@@ -115,11 +131,13 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array  contains same elements
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).IsNotEqual(new int[] { 1, 2, 3, 4, 5 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 116)
-                .HasMessage("Expecting be NOT equal:\n"
-                    + "  System.Int32[1, 2, 3, 4, 5]\n"
-                    + " but is\n"
-                    + "  System.Int32[1, 2, 3, 4, 5]");
+                .HasPropertyValue("LineNumber", 132)
+                .HasMessage("""
+                    Expecting be NOT equal:
+                      [1, 2, 3, 4, 5]
+                     but is
+                      [1, 2, 3, 4, 5]
+                    """);
         }
 
         [TestCase]
@@ -131,11 +149,13 @@ namespace GdUnit4.Tests.Asserts
             AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
                     .IsNotEqualIgnoringCase(new string[] { "This", "is", "a", "Message" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 131)
-                .HasMessage("Expecting be NOT equal (ignoring case):\n"
-                    + "  System.String[This, is, a, Message]\n"
-                    + " but is\n"
-                    + "  System.String[this, is, a, message]");
+                .HasPropertyValue("LineNumber", 149)
+                .HasMessage("""
+                    Expecting be NOT equal (ignoring case):
+                      ["This", "is", "a", "Message"]
+                     but is
+                      ["this", "is", "a", "message"]
+                    """);
         }
 
         [TestCase]
@@ -145,11 +165,11 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array is not empty it has a size of one
             AssertThrown(() => AssertArray(new int[] { 1 }).IsEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 146)
+                .HasPropertyValue("LineNumber", 166)
                 .HasMessage("Expecting be empty:\n but has size '1'");
             AssertThrown(() => AssertArray(null).IsEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 150)
+                .HasPropertyValue("LineNumber", 170)
                 .HasMessage("Expecting be empty:\n but is <Null>");
         }
 
@@ -161,7 +181,7 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array is empty
             AssertThrown(() => AssertArray(new int[] { }).IsNotEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 162)
+                .HasPropertyValue("LineNumber", 182)
                 .HasMessage("Expecting being NOT empty:\n but is empty");
         }
 
@@ -173,12 +193,12 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array has a size of 5
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).HasSize(4))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 174)
+                .HasPropertyValue("LineNumber", 194)
                 .HasMessage("Expecting size:\n  '4' but is '5'");
             AssertThrown(() => AssertArray(null).HasSize(4))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 178)
-                .HasMessage("Expecting size:\n  '4' but is 'unknown'");
+                .HasPropertyValue("LineNumber", 198)
+                .HasMessage("Expecting size:\n  '4' but is unknown");
         }
 
         [TestCase]
@@ -190,22 +210,26 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array not contains 'xxx' and 'yyy'
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee" }).Contains(new string[] { "bbb", "xxx", "yyy" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 191)
-                .HasMessage("Expecting contains elements:\n"
-                            + "  [aaa, bbb, ccc, ddd, eee]\n"
-                            + " do contains (in any order)\n"
-                            + "  [bbb, xxx, yyy]\n"
-                            + " but could not find elements:\n"
-                            + "  [xxx, yyy]");
+                .HasPropertyValue("LineNumber", 211)
+                .HasMessage("""
+                    Expecting contains elements:
+                      ["aaa", "bbb", "ccc", "ddd", "eee"]
+                     do contains (in any order)
+                      ["bbb", "xxx", "yyy"]
+                     but could not find elements:
+                      ["xxx", "yyy"]
+                    """);
             AssertThrown(() => AssertArray(null).Contains(new string[] { "bbb", "xxx", "yyy" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 200)
-                .HasMessage("Expecting contains elements:\n"
-                            + "  <Null>\n"
-                            + " do contains (in any order)\n"
-                            + "  [bbb, xxx, yyy]\n"
-                            + " but could not find elements:\n"
-                            + "  [bbb, xxx, yyy]");
+                .HasPropertyValue("LineNumber", 222)
+                .HasMessage("""
+                    Expecting contains elements:
+                      <Null>
+                     do contains (in any order)
+                      ["bbb", "xxx", "yyy"]
+                     but could not find elements:
+                      ["bbb", "xxx", "yyy"]
+                    """);
         }
 
         [TestCase]
@@ -217,13 +241,15 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array not contains 7 and 6
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee" }).Contains("bbb", "xxx", "yyy"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 218)
-                .HasMessage("Expecting contains elements:\n"
-                                + "  [aaa, bbb, ccc, ddd, eee]\n"
-                                + " do contains (in any order)\n"
-                                + "  [bbb, xxx, yyy]\n"
-                                + " but could not find elements:\n"
-                                + "  [xxx, yyy]");
+                .HasPropertyValue("LineNumber", 242)
+                .HasMessage("""
+                    Expecting contains elements:
+                      ["aaa", "bbb", "ccc", "ddd", "eee"]
+                     do contains (in any order)
+                      ["bbb", "xxx", "yyy"]
+                     but could not find elements:
+                      ["xxx", "yyy"]
+                    """);
         }
 
         [TestCase]
@@ -235,13 +261,15 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array not contains 7 and 6
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).Contains(new int[] { 2, 7, 6 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 236)
-                .HasMessage("Expecting contains elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [2, 7, 6]\n"
-                                + " but could not find elements:\n"
-                                + "  [7, 6]");
+                .HasPropertyValue("LineNumber", 262)
+                .HasMessage("""
+                    Expecting contains elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in any order)
+                      [2, 7, 6]
+                     but could not find elements:
+                      [7, 6]
+                    """);
         }
 
         [TestCase]
@@ -253,13 +281,15 @@ namespace GdUnit4.Tests.Asserts
             // should fail because the array not contains 7 and 6
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).Contains(2, 7, 6))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 254)
-                .HasMessage("Expecting contains elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [2, 7, 6]\n"
-                                + " but could not find elements:\n"
-                                + "  [7, 6]");
+                .HasPropertyValue("LineNumber", 282)
+                .HasMessage("""
+                    Expecting contains elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in any order)
+                      [2, 7, 6]
+                     but could not find elements:
+                      [7, 6]
+                    """);
         }
 
         [TestCase]
@@ -269,59 +299,69 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new string[] { "abc" }).ContainsExactly(new string[] { "abc" });
             AssertThrown(() => AssertArray(new string[] { "abc" }).ContainsExactly(new string[] { "abXc" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 270)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abXc]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [abc]\n"
-                                + " and could not find elements:\n"
-                                + "  [abXc]");
+                .HasPropertyValue("LineNumber", 300)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc"]
+                     do contains (in same order)
+                      ["abXc"]
+                     but some elements where not expected:
+                      ["abc"]
+                     and could not find elements:
+                      ["abXc"]
+                    """);
 
             // test agains many elements
             AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly(new string[] { "abc", "def", "xyz" });
             // should fail because if contains the same elements but in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly(new string[] { "abc", "xyz", "def" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 285)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, xyz, def]\n"
-                                + " but has different order at position '1'\n"
-                                + "  'def' vs 'xyz'");
+                .HasPropertyValue("LineNumber", 317)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "xyz"]
+                     do contains (in same order)
+                      ["abc", "xyz", "def"]
+                     but has different order at position '1'
+                      "def" vs "xyz"
+                    """);
 
             // should fail because it contains more elements and in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "foo", "bar", "xyz" }).ContainsExactly(new string[] { "abc", "xyz", "def" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 296)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, foo, bar, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, xyz, def]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [foo, bar]");
+                .HasPropertyValue("LineNumber", 330)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "foo", "bar", "xyz"]
+                     do contains (in same order)
+                      ["abc", "xyz", "def"]
+                     but some elements where not expected:
+                      ["foo", "bar"]
+                    """);
 
             // should fail because it contains less elements and in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly(new string[] { "abc", "def", "bar", "foo", "xyz" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 307)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, def, bar, foo, xyz]\n"
-                                + " but could not find elements:\n"
-                                + "  [bar, foo]");
+                .HasPropertyValue("LineNumber", 343)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "xyz"]
+                     do contains (in same order)
+                      ["abc", "def", "bar", "foo", "xyz"]
+                     but could not find elements:
+                      ["bar", "foo"]
+                    """);
             AssertThrown(() => AssertArray(null).ContainsExactly(new string[] { "abc", "def", "bar", "foo", "xyz" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 316)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  <Null>\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, def, bar, foo, xyz]\n"
-                                + " but could not find elements:\n"
-                                + "  [abc, def, bar, foo, xyz]");
+                .HasPropertyValue("LineNumber", 354)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      <Null>
+                     do contains (in same order)
+                      ["abc", "def", "bar", "foo", "xyz"]
+                     but could not find elements:
+                      ["abc", "def", "bar", "foo", "xyz"]
+                    """);
         }
 
         [TestCase]
@@ -331,47 +371,55 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new string[] { "abc" }).ContainsExactly("abc");
             AssertThrown(() => AssertArray(new string[] { "abc" }).ContainsExactly("abXc"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 332)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abXc]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [abc]\n"
-                                + " and could not find elements:\n"
-                                + "  [abXc]");
+                .HasPropertyValue("LineNumber", 372)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc"]
+                     do contains (in same order)
+                      ["abXc"]
+                     but some elements where not expected:
+                      ["abc"]
+                     and could not find elements:
+                      ["abXc"]
+                    """);
             // test agains many elements
             AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly("abc", "def", "xyz");
             // should fail because if contains the same elements but in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly("abc", "xyz", "def"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 346)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, xyz, def]\n"
-                                + " but has different order at position '1'\n"
-                                + "  'def' vs 'xyz'");
+                .HasPropertyValue("LineNumber", 388)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "xyz"]
+                     do contains (in same order)
+                      ["abc", "xyz", "def"]
+                     but has different order at position '1'
+                      "def" vs "xyz"
+                    """);
             // should fail because it contains more elements and in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "foo", "bar", "xyz" }).ContainsExactly("abc", "xyz", "def"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 356)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, foo, bar, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, xyz, def]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [foo, bar]");
+                .HasPropertyValue("LineNumber", 400)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "foo", "bar", "xyz"]
+                     do contains (in same order)
+                      ["abc", "xyz", "def"]
+                     but some elements where not expected:
+                      ["foo", "bar"]
+                    """);
             // should fail because it contains less elements and in a different order
             AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly("abc", "def", "bar", "foo", "xyz"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 366)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [abc, def, xyz]\n"
-                                + " do contains (in same order)\n"
-                                + "  [abc, def, bar, foo, xyz]\n"
-                                + " but could not find elements:\n"
-                                + "  [bar, foo]");
+                .HasPropertyValue("LineNumber", 412)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["abc", "def", "xyz"]
+                     do contains (in same order)
+                      ["abc", "def", "bar", "foo", "xyz"]
+                     but could not find elements:
+                      ["bar", "foo"]
+                    """);
         }
 
         [TestCase]
@@ -381,47 +429,55 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new int[] { 1 }).ContainsExactly(new int[] { 1 });
             AssertThrown(() => AssertArray(new int[] { 1 }).ContainsExactly(new int[] { 2 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 382)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1]\n"
-                                + " do contains (in same order)\n"
-                                + "  [2]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [1]\n"
-                                + " and could not find elements:\n"
-                                + "  [2]");
+                .HasPropertyValue("LineNumber", 430)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1]
+                     do contains (in same order)
+                      [2]
+                     but some elements where not expected:
+                      [1]
+                     and could not find elements:
+                      [2]
+                    """);
             // test agains array with many elements
             AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(new int[] { 1, 2, 3, 4, 5 });
             // should fail because if contains the same elements but in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 396)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5]\n"
-                                + " but has different order at position '1'\n"
-                                + "  '2' vs '4'");
+                .HasPropertyValue("LineNumber", 446)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5]
+                     but has different order at position '1'
+                      '2' vs '4'
+                    """);
             // should fail because it contains more elements and in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5, 6, 7 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 406)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5, 6, 7]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6, 7]");
+                .HasPropertyValue("LineNumber", 458)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5, 6, 7]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5]
+                     but some elements where not expected:
+                      [6, 7]
+                    """);
             // should fail because it contains less elements and in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5, 6, 7 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 416)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5, 6, 7]\n"
-                                + " but could not find elements:\n"
-                                + "  [6, 7]");
+                .HasPropertyValue("LineNumber", 470)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5, 6, 7]
+                     but could not find elements:
+                      [6, 7]
+                    """);
         }
 
         [TestCase]
@@ -431,47 +487,55 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new int[] { 1 }).ContainsExactly(1);
             AssertThrown(() => AssertArray(new int[] { 1 }).ContainsExactly(2))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 432)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1]\n"
-                                + " do contains (in same order)\n"
-                                + "  [2]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [1]\n"
-                                + " and could not find elements:\n"
-                                + "  [2]");
+                .HasPropertyValue("LineNumber", 488)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1]
+                     do contains (in same order)
+                      [2]
+                     but some elements where not expected:
+                      [1]
+                     and could not find elements:
+                      [2]
+                    """);
             // test agains array with many elements
             AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(1, 2, 3, 4, 5);
             // should fail because if contains the same elements but in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(1, 4, 3, 2, 5))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 446)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5]\n"
-                                + " but has different order at position '1'\n"
-                                + "  '2' vs '4'");
+                .HasPropertyValue("LineNumber", 504)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5]
+                     but has different order at position '1'
+                      '2' vs '4'
+                    """);
             // should fail because it contains more elements and in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5, 6, 7 }).ContainsExactly(1, 4, 3, 2, 5))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 456)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5, 6, 7]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6, 7]");
+                .HasPropertyValue("LineNumber", 516)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5, 6, 7]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5]
+                     but some elements where not expected:
+                      [6, 7]
+                    """);
             // should fail because it contains less elements and in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(1, 4, 3, 2, 5, 6, 7))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 466)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 3, 4, 5]\n"
-                                + " do contains (in same order)\n"
-                                + "  [1, 4, 3, 2, 5, 6, 7]\n"
-                                + " but could not find elements:\n"
-                                + "  [6, 7]");
+                .HasPropertyValue("LineNumber", 528)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 3, 4, 5]
+                     do contains (in same order)
+                      [1, 4, 3, 2, 5, 6, 7]
+                     but could not find elements:
+                      [6, 7]
+                    """);
         }
 
         [TestCase]
@@ -485,34 +549,40 @@ namespace GdUnit4.Tests.Asserts
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd" })
                     .ContainsExactlyInAnyOrder(new string[] { "xxx", "aaa", "yyy", "bbb", "ccc", "ddd" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 485)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [aaa, bbb, ccc, ddd]\n"
-                                + " do contains (in any order)\n"
-                                + "  [xxx, aaa, yyy, bbb, ccc, ddd]\n"
-                                + " but could not find elements:\n"
-                                + "  [xxx, yyy]");
+                .HasPropertyValue("LineNumber", 549)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["aaa", "bbb", "ccc", "ddd"]
+                     do contains (in any order)
+                      ["xxx", "aaa", "yyy", "bbb", "ccc", "ddd"]
+                     but could not find elements:
+                      ["xxx", "yyy"]
+                    """);
             //should fail because is contains the same elements but in a different order
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee", "fff" })
                     .ContainsExactlyInAnyOrder(new string[] { "fff", "aaa", "ddd", "bbb", "eee", }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 496)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [aaa, bbb, ccc, ddd, eee, fff]\n"
-                                + " do contains (in any order)\n"
-                                + "  [fff, aaa, ddd, bbb, eee]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [ccc]");
+                .HasPropertyValue("LineNumber", 562)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["aaa", "bbb", "ccc", "ddd", "eee", "fff"]
+                     do contains (in any order)
+                      ["fff", "aaa", "ddd", "bbb", "eee"]
+                     but some elements where not expected:
+                      ["ccc"]
+                    """);
             AssertThrown(() => AssertArray(null)
                     .ContainsExactlyInAnyOrder(new string[] { "fff", "aaa", "ddd", "bbb", "eee", }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 506)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  <Null>\n"
-                                + " do contains (in any order)\n"
-                                + "  [fff, aaa, ddd, bbb, eee]\n"
-                                + " but could not find elements:\n"
-                                + "  [fff, aaa, ddd, bbb, eee]");
+                .HasPropertyValue("LineNumber", 574)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      <Null>
+                     do contains (in any order)
+                      ["fff", "aaa", "ddd", "bbb", "eee"]
+                     but could not find elements:
+                      ["fff", "aaa", "ddd", "bbb", "eee"]
+                    """);
         }
 
         [TestCase]
@@ -526,24 +596,28 @@ namespace GdUnit4.Tests.Asserts
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd" })
                     .ContainsExactlyInAnyOrder("xxx", "aaa", "yyy", "bbb", "ccc", "ddd"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 526)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [aaa, bbb, ccc, ddd]\n"
-                                + " do contains (in any order)\n"
-                                + "  [xxx, aaa, yyy, bbb, ccc, ddd]\n"
-                                + " but could not find elements:\n"
-                                + "  [xxx, yyy]");
+                .HasPropertyValue("LineNumber", 596)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["aaa", "bbb", "ccc", "ddd"]
+                     do contains (in any order)
+                      ["xxx", "aaa", "yyy", "bbb", "ccc", "ddd"]
+                     but could not find elements:
+                      ["xxx", "yyy"]
+                    """);
             //should fail because is contains the same elements but in a different order
             AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee", "fff" })
                     .ContainsExactlyInAnyOrder("fff", "aaa", "ddd", "bbb", "eee"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 537)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [aaa, bbb, ccc, ddd, eee, fff]\n"
-                                + " do contains (in any order)\n"
-                                + "  [fff, aaa, ddd, bbb, eee]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [ccc]");
+                .HasPropertyValue("LineNumber", 609)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      ["aaa", "bbb", "ccc", "ddd", "eee", "fff"]
+                     do contains (in any order)
+                      ["fff", "aaa", "ddd", "bbb", "eee"]
+                     but some elements where not expected:
+                      ["ccc"]
+                    """);
         }
 
         [TestCase]
@@ -556,27 +630,31 @@ namespace GdUnit4.Tests.Asserts
             // should fail because is contains not exactly the same elements in any order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 4, 5 }).ContainsExactlyInAnyOrder(new int[] { 5, 3, 2, 4, 1, 9, 10 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 557)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 6, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [5, 3, 2, 4, 1, 9, 10]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6]\n"
-                                + " and could not find elements:\n"
-                                + "  [3, 9, 10]");
+                .HasPropertyValue("LineNumber", 631)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 6, 4, 5]
+                     do contains (in any order)
+                      [5, 3, 2, 4, 1, 9, 10]
+                     but some elements where not expected:
+                      [6]
+                     and could not find elements:
+                      [3, 9, 10]
+                    """);
             //should fail because is contains the same elements but in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 9, 10, 4, 5 }).ContainsExactlyInAnyOrder(new int[] { 5, 3, 2, 4, 1 }))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 569)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 6, 9, 10, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [5, 3, 2, 4, 1]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6, 9, 10]\n"
-                                + " and could not find elements:\n"
-                                + "  [3]");
+                .HasPropertyValue("LineNumber", 645)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 6, 9, 10, 4, 5]
+                     do contains (in any order)
+                      [5, 3, 2, 4, 1]
+                     but some elements where not expected:
+                      [6, 9, 10]
+                     and could not find elements:
+                      [3]
+                    """);
         }
 
         [TestCase]
@@ -589,27 +667,31 @@ namespace GdUnit4.Tests.Asserts
             // should fail because is contains not exactly the same elements in any order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 4, 5 }).ContainsExactlyInAnyOrder(5, 3, 2, 4, 1, 9, 10))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 590)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 6, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [5, 3, 2, 4, 1, 9, 10]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6]\n"
-                                + " and could not find elements:\n"
-                                + "  [3, 9, 10]");
+                .HasPropertyValue("LineNumber", 668)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 6, 4, 5]
+                     do contains (in any order)
+                      [5, 3, 2, 4, 1, 9, 10]
+                     but some elements where not expected:
+                      [6]
+                     and could not find elements:
+                      [3, 9, 10]
+                    """);
             //should fail because is contains the same elements but in a different order
             AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 9, 10, 4, 5 }).ContainsExactlyInAnyOrder(5, 3, 2, 4, 1))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 602)
-                .HasMessage("Expecting contains exactly elements:\n"
-                                + "  [1, 2, 6, 9, 10, 4, 5]\n"
-                                + " do contains (in any order)\n"
-                                + "  [5, 3, 2, 4, 1]\n"
-                                + " but some elements where not expected:\n"
-                                + "  [6, 9, 10]\n"
-                                + " and could not find elements:\n"
-                                + "  [3]");
+                .HasPropertyValue("LineNumber", 682)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      [1, 2, 6, 9, 10, 4, 5]
+                     do contains (in any order)
+                      [5, 3, 2, 4, 1]
+                     but some elements where not expected:
+                      [6, 9, 10]
+                     and could not find elements:
+                      [3]
+                    """);
         }
 
         [TestCase]
@@ -645,13 +727,15 @@ namespace GdUnit4.Tests.Asserts
             // must fail we can't extract from a null instance
             AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 646)
-                .HasMessage("Expecting contains exactly elements:\n"
-                    + "  <Null>\n"
-                    + " do contains (in same order)\n"
-                    + "  [AStar, Node]\n"
-                    + " but could not find elements:\n"
-                    + "  [AStar, Node]");
+                .HasPropertyValue("LineNumber", 728)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      <Null>
+                     do contains (in same order)
+                      ["AStar", "Node"]
+                     but could not find elements:
+                      ["AStar", "Node"]
+                    """);
         }
 
         partial class TestObj : Godot.RefCounted
@@ -702,13 +786,15 @@ namespace GdUnit4.Tests.Asserts
                     .ExtractV(Extr("GetName"), Extr("GetValue"), Extr("GetX"))
                     .ContainsExactly(Tuple("A", 10, null)))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 699)
-                .HasMessage("Expecting contains exactly elements:\n"
-                    + "  <Null>\n"
-                    + " do contains (in same order)\n"
-                    + "  [tuple(A, 10, Null)]\n"
-                    + " but could not find elements:\n"
-                    + "  [tuple(A, 10, Null)]");
+                .HasPropertyValue("LineNumber", 785)
+                .HasMessage("""
+                    Expecting contains exactly elements:
+                      <Null>
+                     do contains (in same order)
+                      [tuple(A, 10, Null)]
+                     but could not find elements:
+                      [tuple(A, 10, Null)]
+                    """);
         }
 
         [TestCase]
@@ -791,7 +877,7 @@ namespace GdUnit4.Tests.Asserts
                     .OverrideFailureMessage("Custom failure message")
                     .IsNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 788)
+                .HasPropertyValue("LineNumber", 876)
                 .HasMessage("Custom failure message");
         }
 
