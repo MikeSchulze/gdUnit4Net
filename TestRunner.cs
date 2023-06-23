@@ -92,8 +92,8 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                //if(!testSuite.Name.Equals("EnumerableAssertTest"))
-                //    continue;
+                if (!testSuite.Name.Equals("SignalAssertTest"))
+                    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)
                     break;

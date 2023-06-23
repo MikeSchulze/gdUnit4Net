@@ -60,38 +60,49 @@ namespace GdUnit4.Executions
             }
             catch (TestFailedException e)
             {
-                if (context.FailureReporting)
-                    context.ReportCollector.Consume(new TestReport(TestReport.TYPE.FAILURE, e.LineNumber, e.Message));
+                ReportAsFailure(context, e);
             }
             catch (TargetInvocationException e)
             {
                 var baseException = e.GetBaseException();
-                if (baseException is TestFailedException)
+                if (baseException is TestFailedException ex)
                 {
-                    var ex = baseException as TestFailedException;
-                    if (ex != null && context.FailureReporting)
-                        context.ReportCollector.Consume(new TestReport(TestReport.TYPE.FAILURE, ex.LineNumber, ex.Message));
+                    ReportAsFailure(context, ex);
                 }
                 else
                 {
                     // unexpected exceptions
-                    Godot.GD.PushError(baseException.Message);
-                    Godot.GD.PushError(baseException.StackTrace);
-
-                    StackTrace stack = new StackTrace(baseException, true);
-                    var lineNumber = stack.FrameCount > 1 ? stack.GetFrame(1).GetFileLineNumber() : -1;
-                    context.ReportCollector.Consume(new TestReport(TestReport.TYPE.ABORT, lineNumber, baseException.Message));
+                    ReportAsException(context, baseException);
                 }
             }
+            // unexpected exceptions
             catch (Exception e)
             {
-                // unexpected exceptions
+                ReportAsException(context, e);
+            }
+        }
+
+        private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
+        {
+            if (Godot.OS.IsStdOutVerbose())
+            {
                 Godot.GD.PushError(e.Message);
                 Godot.GD.PushError(e.StackTrace);
-                StackTrace stack = new StackTrace(e, true);
-                var lineNumber = stack.FrameCount > 1 ? stack.GetFrame(1).GetFileLineNumber() : -1;
-                context.ReportCollector.Consume(new TestReport(TestReport.TYPE.ABORT, lineNumber, e.Message));
             }
+            if (context.FailureReporting)
+                context.ReportCollector.Consume(new TestReport(TestReport.TYPE.FAILURE, e.LineNumber, e.Message));
+        }
+
+        private static void ReportAsException(ExecutionContext context, Exception e)
+        {
+            if (Godot.OS.IsStdOutVerbose())
+            {
+                Godot.GD.PushError(e.Message);
+                Godot.GD.PushError(e.StackTrace);
+            }
+            StackTrace stack = new StackTrace(e, true);
+            var lineNumber = stack.FrameCount > 1 ? stack.GetFrame(1)!.GetFileLineNumber() : -1;
+            context.ReportCollector.Consume(new TestReport(TestReport.TYPE.ABORT, lineNumber, e.Message));
         }
 
         private async Task ExecuteStage(ExecutionContext context)

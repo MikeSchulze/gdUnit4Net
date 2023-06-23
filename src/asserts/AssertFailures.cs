@@ -452,12 +452,12 @@ namespace GdUnit4.Asserts
                         FormatCurrent(current));
         }
 
-        internal static string IsEmitted(object? current, string signal, object[] args) =>
+        internal static string IsEmitted(object? current, string signal, Godot.Variant[] args) =>
             string.Format("{0}\n  {1}\n by\n  {2}",
                          FormatFailure("Expecting do emitting signal:"),
                          FormatExpected($"{signal}({args.Formated()})"),
                          FormatCurrent(current, true));
-        internal static string IsNotEmitted(object? current, string signal, object[] args) =>
+        internal static string IsNotEmitted(object? current, string signal, Godot.Variant[] args) =>
             string.Format("{0}\n  {1}\n by\n  {2}",
                          FormatFailure("Expecting do NOT emitting signal:"),
                          FormatExpected($"{signal}({args.Formated()})"),
