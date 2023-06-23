@@ -92,7 +92,7 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                if (!testSuite.Name.Equals("SignalAssertTest"))
+                if (!testSuite.Name.Equals("StringAssertTest"))
                     continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)

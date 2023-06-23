@@ -29,7 +29,7 @@ namespace GdUnit4.Asserts
         public IStringAssert HasLength(int expectedLenght, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
         {
             if (Current == null)
-                ThrowTestFailureReport(AssertFailures.HasLength(Current, "unknown", expectedLenght, comparator), Current, expectedLenght);
+                ThrowTestFailureReport(AssertFailures.HasLength(Current, -1, expectedLenght, comparator), Current, expectedLenght);
 
             int currentLenght = (Current as string)?.Length ?? -1;
             var failed = false;

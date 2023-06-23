@@ -421,7 +421,7 @@ namespace GdUnit4.Asserts
                 FormatCurrent(current, false),
                 FormatExpected(expected, false));
 
-        public static string HasLength(string? current, object currentLength, int expectedLength, IStringAssert.Compare comparator)
+        public static string HasLength(string? current, int currentLength, int expectedLength, IStringAssert.Compare comparator)
         {
             var errorMessage = "";
             switch (comparator)
@@ -448,7 +448,7 @@ namespace GdUnit4.Asserts
             return string.Format("{0}\n  {1} but is {2}",
                         FormatFailure(errorMessage),
                         FormatExpected(expectedLength),
-                        FormatCurrent(currentLength),
+                        currentLength == -1 ? "unknown" : FormatCurrent(currentLength),
                         FormatCurrent(current));
         }
 

@@ -47,12 +47,13 @@ namespace GdUnit4.Asserts
 
         public IAssert OverrideFailureMessage(string message)
         {
-            CustomFailureMessage = message;
+            CustomFailureMessage = message.Replace("\r", "");
             return this;
         }
 
         public IExceptionAssert StartsWithMessage(string message)
         {
+            message = message.Replace("\r", "");
             var current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
             if (!current.StartsWith(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
