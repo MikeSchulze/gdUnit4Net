@@ -114,7 +114,7 @@ namespace GdUnit4.Core
             CurrentScene = ((PackedScene)Godot.ResourceLoader.Load(resourcePath)).Instantiate();
             SceneTree.Root.AddChild(CurrentScene);
             CurrentMousePos = default;
-            SavedIterationsPerSecond = (int)ProjectSettings.GetSetting("physics/common/physics_fps");
+            SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
             SetTimeFactor(1.0);
         }
 

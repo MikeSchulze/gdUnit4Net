@@ -5,6 +5,7 @@ signal spell_explode
 
 const SPELL_LIVE_TIME = 1000
 
+@warning_ignore("unused_private_class_variable")
 var _spell_fired :bool = false
 var _spell_live_time :float = 0
 var _spell_pos :Vector3 = Vector3.ZERO
@@ -19,9 +20,9 @@ func _ready():
 #func _notification(what):
 #	prints("Spell", GdObjects.notification_as_string(what))
 
-func _process(delta :float):	
+func _process(delta :float):
 	# added pseudo yield to check `simulate_frames` works wih custom yielding
-	yield(get_tree(), "idle_frame")
+	await get_tree().process_frame
 	_spell_live_time += delta * 1000
 	if _spell_live_time < SPELL_LIVE_TIME:
 		move(delta)
@@ -29,7 +30,7 @@ func _process(delta :float):
 		explode()
 
 func move(delta :float) -> void:
-	#yield(get_tree().create_timer(0.1), "timeout")
+	#await get_tree().create_timer(0.1).timeout
 	_spell_pos.x += delta 
 
 func explode() -> void:
