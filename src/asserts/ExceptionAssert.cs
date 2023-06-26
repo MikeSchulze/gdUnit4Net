@@ -30,8 +30,8 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasMessage(string message)
         {
-            message = message.Replace("\r", "");
-            string current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
+            message = message.UnixFormat();
+            string current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.Equals(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
@@ -47,14 +47,14 @@ namespace GdUnit4.Asserts
 
         public IAssert OverrideFailureMessage(string message)
         {
-            CustomFailureMessage = message.Replace("\r", "");
+            CustomFailureMessage = message.UnixFormat();
             return this;
         }
 
         public IExceptionAssert StartsWithMessage(string message)
         {
-            message = message.Replace("\r", "");
-            var current = Core.CoreUtils.NormalizedFailureMessage(Current?.Message ?? "");
+            message = message.UnixFormat();
+            var current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.StartsWith(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;

@@ -52,7 +52,7 @@ namespace GdUnit4
             return false;
         }
 
-        public static bool VariantEquals([NotNullWhen(true)] this IEnumerable left, IEnumerable right, MODE compareMode)
+        public static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, MODE compareMode)
         {
             // Handle cases where both collections are null
             if (left is null && right is null)
@@ -73,6 +73,8 @@ namespace GdUnit4
             }
             return !(itLeft.MoveNext() || itRight.MoveNext());
         }
+
+        private static bool IsSystemAssembly(object value) => value.GetType().Assembly == typeof(IEnumerable).Assembly;
 
         public class CustomerComparer<TKey> : IComparer<TKey>
         {
@@ -207,13 +209,9 @@ namespace GdUnit4
         public static object? UnboxVariant<T>(this T? value)
         {
             if (value is Variant v)
-            {
-                if (v.VariantType == Variant.Type.Dictionary)
-                {
-                    return v.AsGodotDictionary().UnboxVariant();
-                }
-                return v.Obj;
-            }
+                return v.UnboxVariant();
+            if (value is StringName sn)
+                return sn.ToString();
             if (value is Godot.Collections.Dictionary gd)
                 return gd.UnboxVariant();
             return value;
@@ -226,5 +224,48 @@ namespace GdUnit4
                 unboxed.Add(kvp.Key.UnboxVariant()!, kvp.Value.UnboxVariant());
             return unboxed;
         }
+
+        private static object? UnboxVariant(this Variant v) => v.VariantType switch
+        {
+            Variant.Type.Nil => null,
+            Variant.Type.Bool => v.AsBool(),
+            Variant.Type.Int => v.AsInt64(),
+            Variant.Type.Float => v.AsDouble(),
+            Variant.Type.String => v.AsString(),
+            Variant.Type.Vector2 => v.AsVector2(),
+            Variant.Type.Vector2I => v.AsVector2I(),
+            Variant.Type.Rect2 => v.AsRect2(),
+            Variant.Type.Rect2I => v.AsRect2I(),
+            Variant.Type.Vector3 => v.AsVector3(),
+            Variant.Type.Vector3I => v.AsVector3I(),
+            Variant.Type.Transform2D => v.AsTransform2D(),
+            Variant.Type.Vector4 => v.AsVector4(),
+            Variant.Type.Vector4I => v.AsVector4I(),
+            Variant.Type.Plane => v.AsPlane(),
+            Variant.Type.Quaternion => v.AsQuaternion(),
+            Variant.Type.Aabb => v.AsAabb(),
+            Variant.Type.Basis => v.AsBasis(),
+            Variant.Type.Transform3D => v.AsTransform3D(),
+            Variant.Type.Projection => v.AsProjection(),
+            Variant.Type.Color => v.AsColor(),
+            Variant.Type.StringName => v.AsStringName(),
+            Variant.Type.NodePath => v.AsNodePath(),
+            Variant.Type.Rid => v.AsRid(),
+            Variant.Type.Object => v.AsGodotObject(),
+            Variant.Type.Callable => v.AsCallable(),
+            Variant.Type.Signal => v.AsSignal(),
+            Variant.Type.Dictionary => v.AsGodotDictionary(),
+            Variant.Type.Array => v.AsGodotArray(),
+            Variant.Type.PackedByteArray => v.AsByteArray(),
+            Variant.Type.PackedInt32Array => v.AsInt32Array(),
+            Variant.Type.PackedInt64Array => v.AsInt64Array(),
+            Variant.Type.PackedFloat32Array => v.AsFloat32Array(),
+            Variant.Type.PackedFloat64Array => v.AsFloat64Array(),
+            Variant.Type.PackedStringArray => v.AsStringArray(),
+            Variant.Type.PackedVector2Array => v.AsVector2Array(),
+            Variant.Type.PackedVector3Array => v.AsVector3Array(),
+            Variant.Type.PackedColorArray => v.AsColorArray(),
+            _ => throw new ArgumentOutOfRangeException(nameof(v))
+        };
     }
 }

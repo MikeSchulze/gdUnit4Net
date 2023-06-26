@@ -11,8 +11,8 @@ namespace GdUnit4
         public int LineNumber
         { get; private set; } = -1;
 
-        public Godot.Collections.Array<string> ParameterizedTests
-        { get; private set; } = new Godot.Collections.Array<string>();
+        public List<string> ParameterizedTests
+        { get; private set; } = new List<string>();
 
         public bool IsCsTestSuite
         { get; private set; } = false;
@@ -27,7 +27,7 @@ namespace GdUnit4
         public CsNode(string name, string resourcePath, int lineNumber, List<string> testCases) : this(name, resourcePath)
         {
             LineNumber = lineNumber;
-            ParameterizedTests = testCases.ToGodotArray<string>();
+            ParameterizedTests = testCases;
         }
 
         public override string ToString()

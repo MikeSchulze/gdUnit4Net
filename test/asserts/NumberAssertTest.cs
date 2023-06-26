@@ -16,7 +16,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasMessage("""
                     Expecting be <Null>:
                      but is
-                      '23'
+                        '23'
                     """);
         }
 
@@ -40,7 +40,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 38)
                 .HasMessage("""
                     Expecting be equal:
-                      '42' but is '38'
+                        '42' but is '38'
                     """);
         }
 
@@ -55,7 +55,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 53)
                 .HasMessage("""
                     Expecting be NOT equal:
-                      '23' but is '23'
+                        '23' but is '23'
                     """);
         }
 
@@ -71,28 +71,28 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 69)
                 .HasMessage("""
                     Expecting to be less than:
-                      '23' but is '23'
+                        '23' but is '23'
                     """);
             AssertThrown(() => AssertInt(23).IsLess(22))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 76)
                 .HasMessage("""
                     Expecting to be less than:
-                      '22' but is '23'
+                        '22' but is '23'
                     """);
             AssertThrown(() => AssertInt(-23).IsLess(-23))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 83)
                 .HasMessage("""
                     Expecting to be less than:
-                      '-23' but is '-23'
+                        '-23' but is '-23'
                     """);
             AssertThrown(() => AssertInt(-23).IsLess(-24))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 90)
                 .HasMessage("""
                     Expecting to be less than:
-                      '-24' but is '-23'
+                        '-24' but is '-23'
                     """);
         }
 
@@ -110,14 +110,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 108)
                 .HasMessage("""
                     Expecting to be less than or equal:
-                      '22' but is '23'
+                        '22' but is '23'
                     """);
             AssertThrown(() => AssertInt(-23).IsLessEqual(-24))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 115)
                 .HasMessage("""
                     Expecting to be less than or equal:
-                      '-24' but is '-23'
+                        '-24' but is '-23'
                     """);
         }
 
@@ -134,28 +134,28 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 132)
                 .HasMessage("""
                     Expecting to be greater than:
-                      '23' but is '23'
+                        '23' but is '23'
                     """);
             AssertThrown(() => AssertInt(23).IsGreater(24))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 139)
                 .HasMessage("""
                     Expecting to be greater than:
-                      '24' but is '23'
+                        '24' but is '23'
                     """);
             AssertThrown(() => AssertInt(-23).IsGreater(-23))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 146)
                 .HasMessage("""
                     Expecting to be greater than:
-                      '-23' but is '-23'
+                        '-23' but is '-23'
                     """);
             AssertThrown(() => AssertInt(-23).IsGreater(-22))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 153)
                 .HasMessage("""
                     Expecting to be greater than:
-                      '-22' but is '-23'
+                        '-22' but is '-23'
                     """);
         }
 
@@ -173,14 +173,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 171)
                 .HasMessage("""
                     Expecting to be greater than or equal:
-                      '24' but is '23'
+                        '24' but is '23'
                     """);
             AssertThrown(() => AssertInt(-23).IsGreaterEqual(-22))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 178)
                 .HasMessage("""
                     Expecting to be greater than or equal:
-                      '-22' but is '-23'
+                        '-22' but is '-23'
                     """);
         }
 
@@ -326,18 +326,18 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 324)
                 .HasMessage("""
                     Expecting:
-                      '7'
+                        '7'
                      is in
-                      [3, 4, 5, 6]
+                        [3, 4, 5, 6]
                     """);
             AssertThrown(() => AssertInt(7).IsIn(new int[] { }))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 333)
                 .HasMessage("""
                     Expecting:
-                      '7'
+                        '7'
                      is in
-                      <Empty>
+                        <Empty>
                     """);
         }
 
@@ -354,9 +354,9 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 352)
                 .HasMessage("""
                     Expecting:
-                      '5'
+                        '5'
                      is not in
-                      [3, 4, 5, 6]
+                        [3, 4, 5, 6]
                     """);
         }
 
@@ -374,27 +374,27 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 372)
                 .HasMessage("""
                     Expecting:
-                      '-10'
+                        '-10'
                      in range between
-                      '-9' <> '0'
+                        '-9' <> '0'
                     """);
             AssertThrown(() => AssertInt(0).IsBetween(1, 10))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 381)
                 .HasMessage("""
                     Expecting:
-                      '0'
+                        '0'
                      in range between
-                      '1' <> '10'
+                        '1' <> '10'
                     """);
             AssertThrown(() => AssertInt(10).IsBetween(11, 21))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 390)
                 .HasMessage("""
                     Expecting:
-                      '10'
+                        '10'
                      in range between
-                      '11' <> '21'
+                        '11' <> '21'
                     """);
         }
 

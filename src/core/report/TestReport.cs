@@ -1,10 +1,10 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GdUnit4
 {
-    public sealed class TestReport
+    public sealed class TestReport : IEquatable<object?>
     {
         [Flags]
         public enum TYPE
@@ -22,17 +22,14 @@ namespace GdUnit4
         {
             Type = type;
             LineNumber = line_number;
-            Message = message;
+            Message = message.UnixFormat();
         }
 
-        public TYPE Type
-        { get; private set; }
+        public TYPE Type { get; private set; }
 
-        public int LineNumber
-        { get; private set; }
+        public int LineNumber { get; private set; }
 
-        public string Message
-        { get; private set; }
+        public string Message { get; private set; }
 
         private static IEnumerable<TYPE> ErrorTypes => new[] { TYPE.TERMINATED, TYPE.INTERUPTED, TYPE.ABORT };
 
@@ -44,9 +41,9 @@ namespace GdUnit4
 
         public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
 
-        public IDictionary<string, Godot.Variant> Serialize()
+        public IDictionary<string, object> Serialize()
         {
-            return new Dictionary<string, Godot.Variant>(){
+            return new Dictionary<string, object>(){
              {"type"        ,((int)Type)},
              {"line_number" ,LineNumber},
              {"message"     ,Message}
@@ -59,6 +56,17 @@ namespace GdUnit4
             int lineNumber = (int)serialized["line_number"];
             string message = (string)serialized["message"];
             return new TestReport(type, lineNumber, message);
+        }
+
+        public override bool Equals(object? other)
+        {
+            return other is TestReport report &&
+                   Type == report.Type &&
+                   LineNumber == report.LineNumber &&
+                   Message == report.Message &&
+                   IsError == report.IsError &&
+                   IsFailure == report.IsFailure &&
+                   IsWarning == report.IsWarning;
         }
     }
 }

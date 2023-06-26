@@ -26,7 +26,7 @@ namespace GdUnit4.Asserts
             {
                 try
                 {
-                    value = Extract(value, methodName);
+                    value = Extract(value, methodName).UnboxVariant();
                     if (value == null || value.Equals("n.a."))
                         return value;
                 }

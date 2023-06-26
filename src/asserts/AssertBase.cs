@@ -44,31 +44,15 @@ namespace GdUnit4.Asserts
             return this;
         }
 
-        public IAssert HasFailureMessage(string message)
-        {
-            var current = Core.CoreUtils.NormalizedFailureMessage(CurrentFailureMessage);
-            if (!current.Equals(message))
-                ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
-            return this;
-        }
-
         public IAssert OverrideFailureMessage(string message)
         {
             CustomFailureMessage = message;
             return this;
         }
 
-        public IAssert StartsWithFailureMessage(string message)
-        {
-            var current = Core.CoreUtils.NormalizedFailureMessage(CurrentFailureMessage);
-            if (!current.StartsWith(message))
-                ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
-            return this;
-        }
-
         protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)
         {
-            var failureMessage = CustomFailureMessage ?? message;
+            var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
             CurrentFailureMessage = failureMessage;
             throw new TestFailedException(failureMessage, stackFrameOffset, lineNumber);
         }

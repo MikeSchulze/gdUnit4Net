@@ -19,7 +19,6 @@ namespace GdUnit4.Asserts
 
         public override int GetHashCode() => HashCode.Combine(Values);
 
-        public override string ToString() =>
-            string.Format("tuple({0})", string.Join(", ", Values.Select(v => v == null ? "Null" : v)));
+        public override string ToString() => $"tuple({Values.Formated()})";
     }
 }

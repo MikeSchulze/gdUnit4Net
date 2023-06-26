@@ -153,10 +153,8 @@ namespace GdUnit4.Asserts
         {
             Current = Current?.Select(v =>
             {
-                object?[] valus = extractors.Select(e => e.ExtractValue(v)).ToArray<object?>();
-                return valus.Count() == 1
-                    ? valus.First()
-                    : Tuple(valus);
+                object?[] values = extractors.Select(e => e.ExtractValue(v)).ToArray<object?>();
+                return values.Count() == 1 ? values.First() : Tuple(values);
             }).ToList();
             return this;
         }

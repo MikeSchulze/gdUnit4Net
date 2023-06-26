@@ -19,7 +19,7 @@ namespace GdUnit4.Tests.Asserts
                 .StartsWithMessage("""
                     Expecting be <Null>:
                      but is
-                      "abc"
+                        "abc"
                     """);
         }
 
@@ -43,18 +43,18 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 41)
                 .HasMessage("""
                     Expecting be equal:
-                      "This is a test Message"
+                        "This is a test Message"
                      but is
-                      "This is a test message"
+                        "This is a test message"
                     """);
             AssertThrown(() => AssertString(null).IsEqual("This is a test Message"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 50)
                 .HasMessage("""
                     Expecting be equal:
-                      "This is a test Message"
+                        "This is a test Message"
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -67,18 +67,18 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 65)
                 .HasMessage("""
                     Expecting be equal (ignoring case):
-                      "This is a Message"
+                        "This is a Message"
                      but is
-                      "This is a test message"
+                        "This is a test message"
                     """);
             AssertThrown(() => AssertString(null).IsEqualIgnoringCase("This is a Message"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 74)
                 .HasMessage("""
                     Expecting be equal (ignoring case):
-                      "This is a Message"
+                        "This is a Message"
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -92,9 +92,9 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 90)
                 .HasMessage("""
                     Expecting be NOT equal:
-                      "This is a test message"
+                        "This is a test message"
                      but is
-                      "This is a test message"
+                        "This is a test message"
                     """);
         }
 
@@ -108,9 +108,9 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 106)
                 .HasMessage("""
                     Expecting be NOT equal (ignoring case):
-                      "This is a test Message"
+                        "This is a test Message"
                      but is
-                      "This is a test message"
+                        "This is a test message"
                     """);
         }
 
@@ -125,7 +125,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasMessage("""
                     Expecting be empty:
                      but is
-                      " "
+                        " "
                     """);
             AssertThrown(() => AssertString("abc").IsEmpty())
                 .IsInstanceOf<TestFailedException>()
@@ -133,7 +133,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasMessage("""
                     Expecting be empty:
                      but is
-                      "abc"
+                        "abc"
                     """);
             AssertThrown(() => AssertString(null).IsEmpty())
                 .IsInstanceOf<TestFailedException>()
@@ -141,7 +141,7 @@ namespace GdUnit4.Tests.Asserts
                 .HasMessage("""
                     Expecting be empty:
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -172,18 +172,18 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 170)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      do contains
-                      "a Test"
+                        "a Test"
                     """);
             AssertThrown(() => AssertString(null).Contains("a Test"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 179)
                 .HasMessage("""
                     Expecting:
-                      <Null>
+                        <Null>
                      do contains
-                      "a Test"
+                        "a Test"
                     """);
         }
 
@@ -197,9 +197,9 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 195)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      do not contain
-                      "a test"
+                        "a test"
                     """);
         }
 
@@ -212,18 +212,18 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 210)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      do contains (ignoring case)
-                      "a Tesd"
+                        "a Tesd"
                     """);
             AssertThrown(() => AssertString(null).ContainsIgnoringCase("a Tesd"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 219)
                 .HasMessage("""
                     Expecting:
-                      <Null>
+                        <Null>
                      do contains (ignoring case)
-                      "a Tesd"
+                        "a Tesd"
                     """);
         }
 
@@ -237,9 +237,9 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 235)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      do not contain (ignoring case)
-                      "a Test"
+                        "a Test"
                     """);
         }
 
@@ -252,36 +252,36 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 250)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      to start with
-                      "This iss"
+                        "This iss"
                     """);
             AssertThrown(() => AssertString("This is a test message").StartsWith("this is"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 259)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      to start with
-                      "this is"
+                        "this is"
                     """);
             AssertThrown(() => AssertString("This is a test message").StartsWith("test"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 268)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      to start with
-                      "test"
+                        "test"
                     """);
             AssertThrown(() => AssertString(null).StartsWith("test"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 277)
                 .HasMessage("""
                     Expecting:
-                      <Null>
+                        <Null>
                      to start with
-                      "test"
+                        "test"
                     """);
         }
 
@@ -294,27 +294,27 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 292)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      to end with
-                      "tes message"
+                        "tes message"
                     """);
             AssertThrown(() => AssertString("This is a test message").EndsWith("a test"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 301)
                 .HasMessage("""
                     Expecting:
-                      "This is a test message"
+                        "This is a test message"
                      to end with
-                      "a test"
+                        "a test"
                     """);
             AssertThrown(() => AssertString(null).EndsWith("a test"))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 310)
                 .HasMessage("""
                     Expecting:
-                      <Null>
+                        <Null>
                      to end with
-                      "a test"
+                        "a test"
                     """);
         }
 
@@ -328,14 +328,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 326)
                 .HasMessage("""
                     Expecting length:
-                      '23' but is '22'
+                        '23' but is '22'
                     """);
             AssertThrown(() => AssertString(null).HasLength(23))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 333)
                 .HasMessage("""
                     Expecting length:
-                      '23' but is unknown
+                        '23' but is unknown
                     """);
         }
 
@@ -349,14 +349,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 347)
                 .HasMessage("""
                     Expecting length to be less than:
-                      '22' but is '22'
+                        '22' but is '22'
                     """);
             AssertThrown(() => AssertString(null).HasLength(22, LESS_THAN))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 354)
                 .HasMessage("""
                     Expecting length to be less than:
-                      '22' but is unknown
+                        '22' but is unknown
                     """);
         }
 
@@ -370,14 +370,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 368)
                 .HasMessage("""
                     Expecting length to be less than or equal:
-                      '21' but is '22'
+                        '21' but is '22'
                     """);
             AssertThrown(() => AssertString(null).HasLength(21, LESS_EQUAL))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 375)
                 .HasMessage("""
                     Expecting length to be less than or equal:
-                      '21' but is unknown
+                        '21' but is unknown
                     """);
         }
 
@@ -390,14 +390,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 388)
                 .HasMessage("""
                     Expecting length to be greater than:
-                      '22' but is '22'
+                        '22' but is '22'
                     """);
             AssertThrown(() => AssertString(null).HasLength(22, GREATER_THAN))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 395)
                 .HasMessage("""
                     Expecting length to be greater than:
-                      '22' but is unknown
+                        '22' but is unknown
                     """);
         }
 
@@ -411,14 +411,14 @@ namespace GdUnit4.Tests.Asserts
                 .HasPropertyValue("LineNumber", 409)
                 .HasMessage("""
                     Expecting length to be greater than or equal:
-                      '23' but is '22'
+                        '23' but is '22'
                     """);
             AssertThrown(() => AssertString(null).HasLength(23, GREATER_EQUAL))
                 .IsInstanceOf<TestFailedException>()
                 .HasPropertyValue("LineNumber", 416)
                 .HasMessage("""
                     Expecting length to be greater than or equal:
-                      '23' but is unknown
+                        '23' but is unknown
                     """);
         }
 

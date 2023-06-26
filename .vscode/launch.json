@@ -15,6 +15,7 @@
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
             "stopAtEntry": false,
             "justMyCode": false
         },

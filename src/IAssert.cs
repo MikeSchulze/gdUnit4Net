@@ -21,11 +21,5 @@ namespace GdUnit4.Asserts
 
         /// <summary> Verifies that the current value is not equal to expected one.</summary>
         IAssertBase<V> IsNotEqual(V expected);
-
-        /// <summary> Verifies that the failure starts with the given value.</summary>
-        IAssert StartsWithFailureMessage(string value);
-
-        /// <summary> Verifies the failure message is equal to expected one.</summary>
-        IAssert HasFailureMessage(string expected);
     }
 }

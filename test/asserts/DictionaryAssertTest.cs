@@ -59,17 +59,17 @@ namespace GdUnit4.Asserts
                 .HasPropertyValue("LineNumber", 57)
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      {"a1", "100"}; {"a2", "200"}; {"a3", 300}
+                        {"a1", "100"}; {"a2", "200"}; {"a3", 300}
                     """);
             AssertThrown(() => AssertThat((Hashtable?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -92,17 +92,17 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", 100}; {"a2", 200}
+                        {"a1", 100}; {"a2", 200}
                      but is
-                      {"a1", 100}; {"a2", 200}; {"a3", 300}
+                        {"a1", 100}; {"a2", 200}; {"a3", 300}
                     """);
             AssertThrown(() => AssertThat((Dictionary<string, long>?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", 100}; {"a2", 200}
+                        {"a1", 100}; {"a2", 200}
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -125,17 +125,17 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      {"a1", "100"}; {"a2", "200"}; {"a3", 300}
+                        {"a1", "100"}; {"a2", "200"}; {"a3", 300}
                     """);
             AssertThrown(() => AssertThat((Godot.Collections.Dictionary?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      <Null>
+                        <Null>
                     """);
         }
 
@@ -157,9 +157,9 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be NOT equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                     """);
         }
 
@@ -181,9 +181,9 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be NOT equal:
-                      {"a1", 100}; {"a2", 200}
+                        {"a1", 100}; {"a2", 200}
                      but is
-                      {"a1", 100}; {"a2", 200}
+                        {"a1", 100}; {"a2", 200}
                     """);
         }
 
@@ -205,9 +205,9 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting be NOT equal:
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                      but is
-                      {"a1", "100"}; {"a2", "200"}
+                        {"a1", "100"}; {"a2", "200"}
                     """);
         }
 
@@ -223,7 +223,7 @@ namespace GdUnit4.Asserts
                 .HasMessage("""
                     Expecting be <Null>:
                      but is
-                      <Empty>
+                        <Empty>
                     """);
         }
 
@@ -298,7 +298,7 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting size:
-                      '10' but is {"a1", 100}; {"a2", 200}
+                        '10' but is {"a1", 100}; {"a2", 200}
                     """);
             AssertThrown(() => AssertThat((IDictionary?)null).HasSize(10))
                  .IsInstanceOf<TestFailedException>()
@@ -319,21 +319,21 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting contains elements:
-                      ["a1", "a2"]
+                        ["a1", "a2"]
                      do contains (in any order)
-                      ["a4", "a2", "a3", "a1"]
+                        ["a4", "a2", "a3", "a1"]
                      but could not find elements:
-                      ["a4", "a3"]
+                        ["a4", "a3"]
                     """);
             AssertThrown(() => AssertThat(current).ContainsKeys(new List<string>() { "a4", "a2", "a3", "a1" }))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting contains elements:
-                      ["a1", "a2"]
+                        ["a1", "a2"]
                      do contains (in any order)
-                      ["a4", "a2", "a3", "a1"]
+                        ["a4", "a2", "a3", "a1"]
                      but could not find elements:
-                      ["a4", "a3"]
+                        ["a4", "a3"]
                     """);
             AssertThrown(() => AssertThat((IDictionary?)null).ContainsKeys("a1"))
                  .IsInstanceOf<TestFailedException>()
@@ -354,21 +354,21 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting:
-                      ["a1", "a2"]
+                        ["a1", "a2"]
                      do NOT contains (in any order)
-                      ["a4", "a2", "a3"]
+                        ["a4", "a2", "a3"]
                      but found elements:
-                      ["a2"]
+                        ["a2"]
                     """);
             AssertThrown(() => AssertThat(current).NotContainsKeys(new List<string>() { "a4", "a2", "a3" }))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting:
-                      ["a1", "a2"]
+                        ["a1", "a2"]
                      do NOT contains (in any order)
-                      ["a4", "a2", "a3"]
+                        ["a4", "a2", "a3"]
                      but found elements:
-                      ["a2"]
+                        ["a2"]
                     """);
             AssertThrown(() => AssertThat((IDictionary?)null).NotContainsKeys("a1"))
                  .IsInstanceOf<TestFailedException>()
@@ -388,15 +388,15 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting do contain entry:
-                      {"a1", 200}
+                        {"a1", 200}
                      found key but value is
-                      '100'
+                        '100'
                     """);
             AssertThrown(() => AssertThat(current).ContainsKeyValue("a3", 300L))
                 .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting do contain entry:
-                      {"a3", 300}
+                        {"a3", 300}
                     """);
             AssertThrown(() => AssertThat((IDictionary?)null).ContainsKeyValue("a1", 200L))
                  .IsInstanceOf<TestFailedException>()

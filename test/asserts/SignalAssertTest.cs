@@ -57,9 +57,9 @@ namespace GdUnit4.Asserts
                     .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                     .HasMessage("""
                         Expecting do emitting signal:
-                          "SignalC(abc, 101)"
+                            "SignalC(abc, 101)"
                          by
-                          <GdUnit4.Asserts.SignalAssertTest+TestEmitter>
+                            <GdUnit4.Asserts.SignalAssertTest+TestEmitter>
                         """));
         }
 
@@ -77,9 +77,9 @@ namespace GdUnit4.Asserts
                     .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                     .HasMessage("""
                         Expecting do NOT emitting signal:
-                          "visibility_changed()"
+                            "visibility_changed()"
                          by
-                          <Godot.Node2D>
+                            <Godot.Node2D>
                         """));
         }
 
@@ -100,9 +100,9 @@ namespace GdUnit4.Asserts
                    .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                    .HasMessage("""
                         Expecting do emitting signal:
-                          "visibility_changed()"
+                            "visibility_changed()"
                          by
-                          <Godot.Node2D>
+                            <Godot.Node2D>
                         """));
 
             node.Show();
@@ -125,9 +125,9 @@ namespace GdUnit4.Asserts
                 .IsInstanceOf<GdUnit4.Exceptions.TestFailedException>()
                 .HasMessage("""
                     Expecting signal exists:
-                      "not_existing_signal()"
+                        "not_existing_signal()"
                      on
-                      <Godot.Node2D>
+                        <Godot.Node2D>
                     """);
         }
     }
