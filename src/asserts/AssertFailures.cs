@@ -425,7 +425,7 @@ namespace GdUnit4.Asserts
                 FormatCurrent(current).Indentation(1),
                 FormatExpected(expected).Indentation(1));
 
-        public static string Contains(IEnumerable<object?>? current, IEnumerable<object?> expected, List<object?> notFound) =>
+        public static string Contains<T>(IEnumerable<T>? current, IEnumerable<T> expected, List<T> notFound) =>
             string.Format("""
                 {0}
                 {1}
@@ -549,7 +549,7 @@ namespace GdUnit4.Asserts
                 FormatCurrent(current, false).Indentation(1),
                 FormatExpected(expected, false).Indentation(1));
 
-        public static string NotContains(IEnumerable<object?>? current, IEnumerable<object?> expected, List<object?> found) =>
+        public static string NotContains<T>(IEnumerable<T>? current, IEnumerable<T> expected, List<T> found) =>
             string.Format("""
                 {0}
                 {1}
