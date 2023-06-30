@@ -11,7 +11,7 @@ namespace GdUnit4
 {
 
     /// <summary>
-    /// A extension to convert c# types to Godot types
+    /// A extension to compare C# Objects and Godot Objects by unboxing Variants.
     /// </summary>
     public static class GodotObjectExtensions
     {
@@ -46,12 +46,6 @@ namespace GdUnit4
             return DeepEquals(left, right, compareMode);
         }
 
-
-        public static bool VariantEquals([NotNullWhen(true)] this KeyValuePair<object?, object?> left, KeyValuePair<object?, object?> right)
-        {
-            return false;
-        }
-
         public static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, MODE compareMode)
         {
             // Handle cases where both collections are null
@@ -72,37 +66,6 @@ namespace GdUnit4
                     return false;
             }
             return !(itLeft.MoveNext() || itRight.MoveNext());
-        }
-
-        private static bool IsSystemAssembly(object value) => value.GetType().Assembly == typeof(IEnumerable).Assembly;
-
-        public class CustomerComparer<TKey> : IComparer<TKey>
-        {
-            public int Compare(TKey? l, TKey? r)
-            {
-                return Comparer<TKey>.Default.Compare(l, r);
-            }
-        }
-
-        public static bool VariantEquals<TKey, TValue>([NotNullWhen(true)] this IDictionary<TKey, TValue>? left, IDictionary<TKey, TValue>? right, MODE compareMode)
-        {
-            if (left!.Count != right?.Count)
-                return false;
-
-            // do sort by key first
-            IComparer<TKey> comparer = new CustomerComparer<TKey>();
-
-            IEnumerator<KeyValuePair<TKey, TValue>> itLeft = left!.OrderBy(kvs => kvs.Key, comparer).GetEnumerator();
-            IEnumerator<KeyValuePair<TKey, TValue>> itRight = right?.OrderBy(kvp => kvp.Key, comparer).GetEnumerator() ?? Enumerable.Empty<KeyValuePair<TKey, TValue>>().GetEnumerator();
-
-            while (itLeft.MoveNext() && itRight.MoveNext())
-            {
-                var keyEquals = itLeft.Current.Key.VariantEquals(itRight.Current.Key, compareMode);
-                var valueEquals = itLeft.Current.Value.VariantEquals(itRight.Current.Value, compareMode);
-                if (!keyEquals || !valueEquals)
-                    return false;
-            }
-            return true;
         }
 
         public static bool VariantEquals([NotNullWhen(true)] this IDictionary left, IDictionary right, MODE compareMode)

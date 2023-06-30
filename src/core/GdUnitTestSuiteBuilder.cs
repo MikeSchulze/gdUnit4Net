@@ -310,7 +310,6 @@ namespace GdUnit4.Core
             var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
                 .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName));
             if (method != null && method.Body != null)
-
                 return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
             // Test case not found or location not available
             return -1;

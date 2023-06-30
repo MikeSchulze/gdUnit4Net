@@ -38,8 +38,8 @@ namespace GdUnit4
             .Where(mi => mi.IsDefined(typeof(TestCaseAttribute)))
             .Select(mi =>
             {
-                TestCaseAttribute? testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>();
-                return new GdUnit4.Executions.TestCase(mi, testCaseAttribute!.Line);
+                TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>()!;
+                return new GdUnit4.Executions.TestCase(mi, testCaseAttribute.Line);
             });
     }
 }
