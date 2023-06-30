@@ -180,7 +180,7 @@ namespace GdUnit4
         /// <summary>
         /// Shows the running scene and moves the window to the foreground. 
         /// </summary>
-        void MoveWindowToForeground();
+        void MaximizeView();
 
         /// <summary>
         /// Invokes the method by given name and arguments.
@@ -189,7 +189,7 @@ namespace GdUnit4
         /// <param name="args">The function arguments</param>
         /// <returns>The return value of invoked method</returns>
         /// <exception cref="MissingMethodException"/>
-        public object Invoke(string name, params object[] args);
+        public Variant Invoke(string name, params Variant[] args);
 
         /// <summary>
         /// Returns the property by given name.
@@ -206,6 +206,6 @@ namespace GdUnit4
         /// <param name="name">The name of node to find</param>
         /// <param name="recursive">Allow recursive search</param>
         /// <returns>The node if found or Null</returns>
-        public Node FindNode(string name, bool recursive = true);
+        public Node FindChild(string name, bool recursive = true, bool owned = false);
     }
 }

@@ -80,7 +80,7 @@ namespace GdUnit4
         /// </summary>
         /// <param name="node">The object where is emitting the signal</param>
         /// <returns></returns>
-        public static ISignalAssert AssertSignal(Godot.Object node) => new SignalAssert(node);
+        public static ISignalAssert AssertSignal(Godot.GodotObject node) => new SignalAssert(node);
 
         public static IStringAssert AssertThat(string current) => new StringAssert(current);
         public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
@@ -102,13 +102,60 @@ namespace GdUnit4
         public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
         public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
+        public static IDictionaryAssert<K, V> AssertThat<K, V>(IDictionary<K, V>? current) where K : notnull
+            => new DictionaryAssert<K, V>(current?.ToDictionary(e => e.Key, e => e.Value));
 
-        public static IObjectAssert AssertThat(object? current) => new ObjectAssert(current);
-        public static IEnumerableAssert AssertThat(IEnumerable? current) => new EnumerableAssert(current);
-        public static IDictionaryAssert AssertThat(IDictionary? current) => new DictionaryAssert(current);
-        public static IDictionaryAssert AssertThat<K, V>(Godot.Collections.Dictionary<K, V>? current) => new DictionaryAssert(current?.ToDictionary(e => e.Key, e => e.Value));
+        public static IDictionaryAssert<Godot.Variant, Godot.Variant> AssertThat(Godot.Collections.Dictionary? current)
+           => new DictionaryAssert<Godot.Variant, Godot.Variant>(current);
+
+        public static IDictionaryAssert<TKey, TValue> AssertThat<[Godot.MustBeVariant] TKey, [Godot.MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current) where TKey : notnull
+           => new DictionaryAssert<TKey, TValue>(current);
+
         public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
         public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
+
+
+        /// <summary>
+        /// A dynamic assertion for <see cref="Godot.Variant"/> based on the input type.
+        /// </summary>
+        /// <param name="current">The input value to be asserted.</param>
+        /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
+        public static dynamic AssertThat(Godot.Variant current) => AssertThat(current.UnboxVariant());
+
+
+        /// <summary>
+        /// A dynamic assertion based on the input type.
+        /// </summary>
+        /// <typeparam name="T">The type of the input.</typeparam>
+        /// <param name="current">The input value to be asserted.</param>
+        /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
+        public static dynamic AssertThat<T>(T? current)
+        {
+            var type = typeof(T);
+            if (type == typeof(IDictionary) && current == null)
+            {
+                var assertType = typeof(DictionaryAssert<,>).MakeGenericType(typeof(object), typeof(object));
+                return Activator.CreateInstance(assertType, current)!;
+            }
+            if (current is IDictionary dv)
+            {
+                if (type.IsGenericType)
+                {
+                    var dictionaryTypeArgs = type.GetGenericArguments();
+                    var keyType = dictionaryTypeArgs[0];
+                    var valueType = dictionaryTypeArgs[1];
+                    var assertType = typeof(DictionaryAssert<,>).MakeGenericType(keyType, valueType);
+                    return Activator.CreateInstance(assertType, dv)!;
+                }
+                return new DictionaryAssert<object, object?>(dv
+                    .Cast<DictionaryEntry>()
+                    .ToDictionary(entry => (object)entry.Key, entry => (object?)entry.Value));
+            }
+
+            if (current is IEnumerable ev)
+                return new EnumerableAssert(ev);
+            return new ObjectAssert(current);
+        }
 
         /// <summary>
         /// An Assertion to verify for expecting exceptions
@@ -172,7 +219,7 @@ namespace GdUnit4
         ///<summary>
         /// A litle helper to auto freeing your created objects after test execution
         /// </summary>
-        public static T AutoFree<T>(T? obj) where T : Godot.Object => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
+        public static T? AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 
         /// <summary>
         /// Buils a tuple by given values
@@ -183,18 +230,5 @@ namespace GdUnit4
         ///  Builds an extractor by given method name and optional arguments
         /// </summary>
         public static IValueExtractor Extr(string methodName, params object[] args) => new ValueExtractor(methodName, args);
-
-        /// <summary>
-        ///  A helper to return given enumerable as string representation
-        /// </summary>
-        public static string AaString(IEnumerable values)
-        {
-            var items = new List<string>();
-            foreach (var value in values)
-            {
-                items.Add(value != null ? value.ToString() : "Null");
-            }
-            return string.Join(", ", items);
-        }
     }
 }

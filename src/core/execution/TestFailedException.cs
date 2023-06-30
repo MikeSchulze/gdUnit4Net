@@ -30,7 +30,7 @@ namespace GdUnit4.Exceptions
             }
             frame = new StackFrame(3 + frameOffset, true);
             // fix stack offset if the assert is delegated
-            if (frame.GetFileName() != null && frame.GetFileName().Replace('\\', '/').Contains("src/asserts/"))
+            if (frame.GetFileName() != null && frame.GetFileName()!.Replace('\\', '/').Contains("src/asserts/"))
                 frame = new StackFrame(4 + frameOffset, true);
             return frame.GetFileLineNumber();
         }

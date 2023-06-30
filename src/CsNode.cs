@@ -6,15 +6,12 @@ namespace GdUnit4
     {
         private readonly string _resourcePath;
 
-        public string ResourcePath() => _resourcePath;
-
-        // called from GdUnit4 GdScript to build test case nodes
-        public Godot.Collections.Array<string> test_case_names() => TestCases.ToGodotArray<string>();
+        public string ResourcePath => _resourcePath;
 
         public int LineNumber
         { get; private set; } = -1;
 
-        public List<string> TestCases
+        public List<string> ParameterizedTests
         { get; private set; } = new List<string>();
 
         public bool IsCsTestSuite
@@ -30,13 +27,13 @@ namespace GdUnit4
         public CsNode(string name, string resourcePath, int lineNumber, List<string> testCases) : this(name, resourcePath)
         {
             LineNumber = lineNumber;
-            TestCases = testCases;
+            ParameterizedTests = testCases;
         }
 
         public override string ToString()
         {
-            if (TestCases.Count != 0)
-                return $"{Name}:{LineNumber} {TestCases.Formated()}";
+            if (ParameterizedTests.Count != 0)
+                return $"{Name}:{LineNumber} {ParameterizedTests.Formated()}";
             return $"{Name}:{LineNumber}";
         }
     }

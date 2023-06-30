@@ -1,3 +1,5 @@
+using Godot;
+
 namespace GdUnit4.Tests
 {
     using static Assertions;
@@ -11,8 +13,19 @@ namespace GdUnit4.Tests
         public void DoAssertNotYetImplemented()
         {
             AssertThrown(() => AssertNotYetImplemented())
-                .HasPropertyValue("LineNumber", 13)
+                .HasPropertyValue("LineNumber", 15)
                 .HasMessage("Test not yet implemented!");
+        }
+
+        [TestCase]
+        public void AssertThat_Variants()
+        {
+            // Godot number Variants
+            AssertObject(AssertThat(Variant.From((sbyte)-1))).IsInstanceOf<INumberAssert<long>>();
+            AssertObject(AssertThat(Variant.From(11))).IsInstanceOf<INumberAssert<long>>();
+            AssertObject(AssertThat(Variant.From(12L))).IsInstanceOf<INumberAssert<long>>();
+            AssertObject(AssertThat(Variant.From(1.4f))).IsInstanceOf<INumberAssert<double>>();
+            AssertObject(AssertThat(Variant.From(1.5d))).IsInstanceOf<INumberAssert<double>>();
         }
 
         [TestCase]
@@ -72,17 +85,17 @@ namespace GdUnit4.Tests
         [TestCase]
         public void AssertThat_Dictionary()
         {
-            AssertObject(AssertThat(new System.Collections.Hashtable())).IsInstanceOf<IDictionaryAssert>();
-            AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
-            AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
-            AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert>();
-            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert<Variant, Variant>>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, Godot.Variant>())).IsInstanceOf<IDictionaryAssert<string, Variant>>();
+            AssertObject(AssertThat(new Godot.Collections.Dictionary<string, string>())).IsInstanceOf<IDictionaryAssert<string, string>>();
+            AssertObject(AssertThat(new System.Collections.Hashtable())).IsInstanceOf<IDictionaryAssert<object, object>>();
+            AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert<string, object>>();
         }
 
         [TestCase]
         public void AutoFree_OnNull()
         {
-            Godot.Node obj = AutoFree((Godot.Node)null!);
+            Godot.Node? obj = AutoFree((Godot.Node)null!);
             AssertThat(obj).IsNull();
         }
     }

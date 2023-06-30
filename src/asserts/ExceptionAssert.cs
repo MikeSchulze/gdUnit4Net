@@ -30,7 +30,8 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasMessage(string message)
         {
-            string current = NormalizedFailureMessage(Current?.Message ?? "");
+            message = message.UnixFormat();
+            string current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.Equals(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
@@ -38,7 +39,7 @@ namespace GdUnit4.Asserts
 
         public IExceptionAssert HasPropertyValue(string propertyName, object expected)
         {
-            var value = Current?.GetType().GetProperty(propertyName).GetValue(Current);
+            var value = Current?.GetType().GetProperty(propertyName)?.GetValue(Current);
             if (!Comparable.IsEqual(value, expected).Valid)
                 ThrowTestFailureReport(AssertFailures.HasValue(propertyName, value, expected), value, expected);
             return this;
@@ -46,29 +47,17 @@ namespace GdUnit4.Asserts
 
         public IAssert OverrideFailureMessage(string message)
         {
-            CustomFailureMessage = message;
+            CustomFailureMessage = message.UnixFormat();
             return this;
         }
 
         public IExceptionAssert StartsWithMessage(string message)
         {
-            var current = NormalizedFailureMessage(Current?.Message ?? "");
+            message = message.UnixFormat();
+            var current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.StartsWith(message))
                 ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
             return this;
-        }
-
-        private static string NormalizedFailureMessage(string input)
-        {
-            using (var rtl = new Godot.RichTextLabel())
-            {
-                rtl.BbcodeEnabled = true;
-                rtl.ParseBbcode(input);
-                var text = rtl.Text;
-                // need to be manually free here, https://github.com/godotengine/godot/issues/56097
-                rtl.Free();
-                return text;
-            }
         }
 
         private void ThrowTestFailureReport(string message, object? current, object? expected)

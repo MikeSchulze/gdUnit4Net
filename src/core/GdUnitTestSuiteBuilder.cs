@@ -12,6 +12,27 @@ namespace GdUnit4.Core
     public class GdUnitTestSuiteBuilder
     {
 
+        const string DEFAULT_TEMP_TS_CS = """
+            // GdUnit generated TestSuite
+            
+            using Godot;
+            using GdUnit4;
+            
+            namespace ${name_space}
+            {
+                using static Assertions;
+                using static Utils;
+            
+                [TestSuite]
+                public class ${suite_class_name}
+                {
+                    // TestSuite generated from
+                    private const string sourceClazzPath = "${source_resource_path}";
+                    
+                }
+            }
+        """;
+
         private static Dictionary<String, Type> clazzCache = new Dictionary<string, Type>();
 
         public static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
@@ -34,9 +55,9 @@ namespace GdUnit4.Core
                 }
 
                 // create directory if not exists
-                var fi = new FileInfo(testSuitePath);
-                if (!fi.Exists)
-                    System.IO.Directory.CreateDirectory(fi.Directory.FullName);
+                var dir = Path.GetDirectoryName(testSuitePath);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir!);
 
                 if (!File.Exists(testSuitePath))
                 {
@@ -77,7 +98,7 @@ namespace GdUnit4.Core
             }
         }
 
-        internal class ClassDefinition
+        internal class ClassDefinition : IEquatable<object?>
         {
             public ClassDefinition(string? nameSpace, string name)
             {
@@ -85,9 +106,20 @@ namespace GdUnit4.Core
                 Name = name;
             }
 
+
+
             public string? Namespace { get; }
             public string Name { get; }
             public string ClassName { get => Namespace == null ? Name : $"{Namespace}.{Name}"; }
+
+            public override bool Equals(object? obj)
+            {
+                return obj is ClassDefinition definition &&
+                       Namespace == definition.Namespace &&
+                       Name == definition.Name;
+            }
+
+            public override int GetHashCode() => HashCode.Combine(Namespace, Name, ClassName);
         }
 
         internal static ClassDefinition? ParseFullqualifiedClassName(String classPath)
@@ -116,7 +148,7 @@ namespace GdUnit4.Core
 
         private static ClassDefinition ParseClassDefinition(CompilationUnitSyntax root)
         {
-            NamespaceDeclarationSyntax namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             if (namespaceSyntax != null)
             {
                 ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
@@ -124,6 +156,7 @@ namespace GdUnit4.Core
             }
             return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
         }
+
 
         public static Type? ParseType(String classPath)
         {
@@ -136,7 +169,7 @@ namespace GdUnit4.Core
             try
             {
                 var root = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).GetCompilationUnitRoot();
-                NamespaceDeclarationSyntax namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+                NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
                 if (namespaceSyntax != null)
                 {
                     ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
@@ -156,7 +189,7 @@ namespace GdUnit4.Core
             }
         }
 
-        public static Godot.Node? Load(string classPath)
+        public static CsNode? Load(string classPath)
         {
             if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
@@ -242,10 +275,9 @@ namespace GdUnit4.Core
 
         private static string LoadTestSuiteTemplate()
         {
-            if (Godot.ProjectSettings.HasSetting("gdunit3/templates/testsuite/CSharpScript"))
-                return (string)Godot.ProjectSettings.GetSetting("gdunit3/templates/testsuite/CSharpScript");
-            var script = Godot.ResourceLoader.Load("res://addons/gdUnit4/src/core/templates/test_suite/GdUnitTestSuiteDefaultTemplate.gd");
-            return (string)script.Get("DEFAULT_TEMP_TS_CS");
+            if (Godot.ProjectSettings.HasSetting("gdunit4/templates/testsuite/CSharpScript"))
+                return (string)Godot.ProjectSettings.GetSetting("gdunit4/templates/testsuite/CSharpScript");
+            return DEFAULT_TEMP_TS_CS;
         }
 
         private const string TAG_TEST_SUITE_NAMESPACE = "${name_space}";
@@ -265,7 +297,7 @@ namespace GdUnit4.Core
 
         internal static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
         {
-            NamespaceDeclarationSyntax namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             return namespaceSyntax == null
                 ? root.Members.OfType<ClassDeclarationSyntax>().First()
                 : namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
@@ -273,10 +305,14 @@ namespace GdUnit4.Core
 
         internal static int TestCaseLineNumber(CompilationUnitSyntax root, string testCaseName)
         {
+            var classDeclaration = ClassDeclaration(root);
             // lookup on test cases
-            return ClassDeclaration(root).Members.OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(method => method.Identifier.Text.Equals(testCaseName))
-                .Body?.GetLocation().GetLineSpan().StartLinePosition.Line ?? -1;
+            var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
+                .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName));
+            if (method != null && method.Body != null)
+                return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
+            // Test case not found or location not available
+            return -1;
         }
 
         internal static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>

@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -153,56 +152,60 @@ namespace GdUnit4.Core.Tests
         }
 
         private static string UpdatedTestSuite(string sourceClass) =>
-@"// GdUnit generated TestSuite
-using Godot;
-using GdUnit4;
-
-namespace GdUnit4.Example.Test.Resources
-{
-	using static Assertions;
-	using static Utils;
-
-	[TestSuite]
-	public class TestPersonTest
-	{
-		// TestSuite generated from
-		private const string sourceClazzPath = ${sourceClazzPath};
-		[TestCase]
-		public void FullName3()
-		{
-			AssertNotYetImplemented();
-		}
-
-		[TestCase]
-		public void LastName()
-		{
-			AssertNotYetImplemented();
-		}
-	}
-}".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r\n", "\n");
+            """
+			// GdUnit generated TestSuite
+			using Godot;
+			using GdUnit4;
+			
+			namespace GdUnit4.Example.Test.Resources
+			{
+				using static Assertions;
+				using static Utils;
+			
+				[TestSuite]
+				public class TestPersonTest
+				{
+					// TestSuite generated from
+					private const string sourceClazzPath = ${sourceClazzPath};
+					[TestCase]
+					public void FullName3()
+					{
+						AssertNotYetImplemented();
+					}
+			
+					[TestCase]
+					public void LastName()
+					{
+						AssertNotYetImplemented();
+					}
+				}
+			}
+			""".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r", string.Empty);
 
         private static string NewCreatedTestSuite(string sourceClass) =>
-@"// GdUnit generated TestSuite
-using Godot;
-using GdUnit4;
-
-namespace GdUnit4.Example.Test.Resources
-{
-	using static Assertions;
-	using static Utils;
-
-	[TestSuite]
-	public class TestPersonTest
-	{
-		// TestSuite generated from
-		private const string sourceClazzPath = ${sourceClazzPath};
-		[TestCase]
-		public void FullName3()
-		{
-			AssertNotYetImplemented();
-		}
-	}
-}".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r\n", "\n");
+            """
+			// GdUnit generated TestSuite
+			using Godot;
+			using GdUnit4;
+			
+			namespace GdUnit4.Example.Test.Resources
+			{
+				using static Assertions;
+				using static Utils;
+			
+				[TestSuite]
+				public class TestPersonTest
+				{
+					// TestSuite generated from
+					private const string sourceClazzPath = ${sourceClazzPath};
+					[TestCase]
+					public void FullName3()
+					{
+						AssertNotYetImplemented();
+					}
+				}
+			}
+			""".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r", string.Empty);
 
 
         [TestCase]
@@ -212,7 +215,7 @@ namespace GdUnit4.Example.Test.Resources
             AssertThat(testSuite).IsNotNull();
             AssertThat(testSuite!.Name).IsEqual("ExampleTestSuite");
             AssertThat(testSuite!.GetChildren())
-                .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("TestCases"))
+                .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("ParameterizedTests"))
                 .ContainsExactly(
                     Tuple("TestFoo", 38, new List<string>()),
                     Tuple("TestBar", 44, new List<string>()),

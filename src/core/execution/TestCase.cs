@@ -21,7 +21,7 @@ namespace GdUnit4.Executions
 
         public IEnumerable<TestCaseAttribute> TestCaseAttributes => MethodInfo.GetCustomAttributes<TestCaseAttribute>();
 
-        public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>();
+        public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
 
         public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 

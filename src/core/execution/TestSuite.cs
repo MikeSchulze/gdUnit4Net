@@ -21,7 +21,8 @@ namespace GdUnit4.Executions
         public string ResourcePath { get; set; }
 
         public string Name { get; set; }
-        public string FullName => GetType().FullName;
+
+        public string? FullName => GetType().FullName;
 
         public object Instance { get; set; }
 

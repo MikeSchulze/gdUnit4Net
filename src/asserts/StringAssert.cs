@@ -29,7 +29,7 @@ namespace GdUnit4.Asserts
         public IStringAssert HasLength(int expectedLenght, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
         {
             if (Current == null)
-                ThrowTestFailureReport(AssertFailures.HasLength(Current, "unknown", expectedLenght, comparator), Current, expectedLenght);
+                ThrowTestFailureReport(AssertFailures.HasLength(Current, -1, expectedLenght, comparator), Current, expectedLenght);
 
             int currentLenght = (Current as string)?.Length ?? -1;
             var failed = false;
@@ -70,7 +70,7 @@ namespace GdUnit4.Asserts
 
         public IStringAssert IsEqualIgnoringCase(string expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (!result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
             return this;
@@ -85,7 +85,7 @@ namespace GdUnit4.Asserts
 
         public IStringAssert IsNotEqualIgnoringCase(string expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
             return this;

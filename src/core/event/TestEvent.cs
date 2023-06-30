@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace GdUnit4
             if (reports != null)
             {
                 var serializedReports = reports.Select(report => report.Serialize()).ToArray();
-                _data.Add("reports", new Godot.Collections.Array(serializedReports));
+                _data.Add("reports", serializedReports);
             }
         }
 
@@ -111,6 +112,7 @@ namespace GdUnit4
         public bool IsError => Statistics.Contains(ERRORS) ? (bool)Statistics[ERRORS] : false;
         public bool IsSkipped => Statistics.Contains(SKIPPED) ? (bool)Statistics[SKIPPED] : false;
         public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
+        public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(Statistics.Contains(ELAPSED_TIME) ? (long)Statistics[ELAPSED_TIME] : 0);
 
         public override string ToString()
         {

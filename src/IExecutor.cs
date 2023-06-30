@@ -10,7 +10,7 @@ namespace GdUnit4
         public void Execute(CsNode node);
 
 
-        public IExecutor AddGdTestEventListener(Godot.Object listener);
+        public IExecutor AddGdTestEventListener(Godot.GodotObject listener);
 
     }
 }

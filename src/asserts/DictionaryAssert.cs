@@ -4,19 +4,19 @@ using System.Linq;
 
 namespace GdUnit4.Asserts
 {
-    internal sealed class DictionaryAssert : AssertBase<IDictionary>, IDictionaryAssert
+    internal sealed class DictionaryAssert<K, V> : AssertBase<IDictionary<K, V>>, IDictionaryAssert<K, V> where K : notnull
     {
-        public DictionaryAssert(IDictionary? current) : base(current)
+        public DictionaryAssert(IDictionary<K, V>? current) : base(current)
         { }
 
-        public IDictionaryAssert IsEmpty()
+        public IDictionaryAssert<K, V> IsEmpty()
         {
             if (Current == null || Current.Count != 0)
                 ThrowTestFailureReport(AssertFailures.IsEmpty(Current?.Count ?? 0, Current == null), Current, null);
             return this;
         }
 
-        public IDictionaryAssert IsNotEmpty()
+        public IDictionaryAssert<K, V> IsNotEmpty()
         {
             IsNotNull();
             if (Current?.Count == 0)
@@ -24,7 +24,7 @@ namespace GdUnit4.Asserts
             return this;
         }
 
-        public IDictionaryAssert HasSize(int expected)
+        public IDictionaryAssert<K, V> HasSize(int expected)
         {
             IsNotNull();
             if (Current?.Count != expected)
@@ -32,46 +32,46 @@ namespace GdUnit4.Asserts
             return this;
         }
 
-        public IDictionaryAssert ContainsKeys(params object[] expected)
+        public IDictionaryAssert<K, V> ContainsKeys(params K[] expected)
         {
             IsNotNull();
-            IEnumerable<object> keys = Current?.Keys.Cast<object>().ToList() ?? new List<object>();
-            List<object?> notFound = expected.Where(key => !keys.Contains(key)).ToList<object?>();
+            IEnumerable<K> keys = Current?.Keys.Cast<K>().ToList() ?? new List<K>();
+            List<K> notFound = expected.Where(key => !keys.Contains(key)).ToList<K>();
 
             if (notFound.Count() > 0)
-                ThrowTestFailureReport(AssertFailures.Contains(keys, expected!, notFound), Current, expected);
+                ThrowTestFailureReport(AssertFailures.Contains<K>(keys, expected!, notFound), Current, expected);
             return this;
         }
-        public IDictionaryAssert ContainsKeys(IEnumerable expected) => ContainsKeys(expected.Cast<object>().ToArray());
+        public IDictionaryAssert<K, V> ContainsKeys(IEnumerable expected) => ContainsKeys(expected.Cast<K>().ToArray());
 
-        public IDictionaryAssert NotContainsKeys(params object[] expected)
+        public IDictionaryAssert<K, V> NotContainsKeys(params K[] expected)
         {
             IsNotNull();
-            IEnumerable<object> keys = Current?.Keys.Cast<object>().ToList() ?? new List<object>();
-            List<object?> found = expected.Where(key => keys.Contains(key)).ToList<object?>();
+            IEnumerable<K> keys = Current?.Keys.Cast<K>().ToList() ?? new List<K>();
+            List<K> found = expected.Where(key => keys.Contains(key)).ToList<K>();
             if (found.Count() > 0)
-                ThrowTestFailureReport(AssertFailures.NotContains(keys, expected, found), Current, expected);
+                ThrowTestFailureReport(AssertFailures.NotContains<K>(keys, expected, found), Current, expected);
             return this;
         }
 
-        public IDictionaryAssert NotContainsKeys(IEnumerable expected) => NotContainsKeys(expected.Cast<object>().ToArray());
+        public IDictionaryAssert<K, V> NotContainsKeys(IEnumerable expected) => NotContainsKeys(expected.Cast<K>().ToArray());
 
-        public IDictionaryAssert ContainsKeyValue(object key, object value)
+        public IDictionaryAssert<K, V> ContainsKeyValue(K key, V value)
         {
             IsNotNull();
-            bool hasKey = Current?.Contains(key) ?? false;
-            Dictionary<object, object> expectedKeyValue = new Dictionary<object, object>() { { key, value } };
+            bool hasKey = Current!.ContainsKey(key);
+            Dictionary<K, V> expectedKeyValue = new Dictionary<K, V>() { { key, value } };
             if (!hasKey)
                 ThrowTestFailureReport(AssertFailures.ContainsKeyValue(expectedKeyValue), Current, expectedKeyValue);
 
-            var currentValue = Current?[key];
+            var currentValue = Current[key];
             var result = Comparable.IsEqual(currentValue, value);
             if (!result.Valid)
                 ThrowTestFailureReport(AssertFailures.ContainsKeyValue(expectedKeyValue, currentValue), Current, expectedKeyValue);
             return this;
         }
 
-        public new IDictionaryAssert OverrideFailureMessage(string message)
+        public new IDictionaryAssert<K, V> OverrideFailureMessage(string message)
         {
             base.OverrideFailureMessage(message);
             return this;

@@ -1,12 +1,12 @@
 // GdUnit generated TestSuite
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace GdUnit4.Asserts
 {
     using Exceptions;
     using static Assertions;
-    using static Utils;
 
     [TestSuite]
     public class DictionaryAssertTest
@@ -14,6 +14,16 @@ namespace GdUnit4.Asserts
         // TestSuite generated from
         private const string sourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/DictionaryAssert.cs";
 
+        [TestCase]
+        public void VerifyDictionaryTypes()
+        {
+            AssertThat(new Hashtable()).IsEmpty();
+            AssertThat(new Dictionary<string, long>()).IsEmpty();
+            AssertThat(new SortedDictionary<string, object>()).IsEmpty();
+            AssertThat(ImmutableDictionary.Create<string, long>()).IsEmpty();
+            AssertThat(new Godot.Collections.Dictionary()).IsEmpty();
+            AssertThat(new Godot.Collections.Dictionary<string, Godot.Variant>()).IsEmpty();
+        }
 
         [TestCase]
         public void OverrideFailureMessage()
@@ -22,32 +32,45 @@ namespace GdUnit4.Asserts
                     .OverrideFailureMessage("Custom failure message")
                     .IsNotNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 21)
+                .HasPropertyValue("LineNumber", 31)
                 .HasMessage("Custom failure message");
         }
 
         [TestCase]
         public void IsEqual_Hashtable()
         {
-            var current = new Hashtable();
-            var expected = new Hashtable();
+            var current = new SortedDictionary<string, object>();
+            var expected = new SortedDictionary<string, object>();
             AssertThat(current).IsEqual(expected);
 
-            current = new Hashtable() {
-                {"a1", "100"},
-                {"a2", "200"},
+            current = new SortedDictionary<string, object>() {
+                { "a1", "100"},
+                { "a2", "200"},
             };
-            expected = new Hashtable(current);
+            expected = new SortedDictionary<string, object>() {
+                { "a1", "100"},
+                { "a2", "200"},
+            };
             AssertThat(current).IsEqual(expected);
 
             current.Add("a3", 300);
             AssertThrown(() => AssertThat(current).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasPropertyValue("LineNumber", 44)
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a2, 200}; {a3, 300}; {a1, 100}");
+                .HasPropertyValue("LineNumber", 57)
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        {"a1", "100"}; {"a2", "200"}; {"a3", 300}
+                    """);
             AssertThrown(() => AssertThat((Hashtable?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  <Null>");
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        <Null>
+                    """);
         }
 
         [TestCase]
@@ -67,10 +90,20 @@ namespace GdUnit4.Asserts
             current.Add("a3", 300);
             AssertThrown(() => AssertThat(current).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}; {a3, 300}");
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", 100}; {"a2", 200}
+                     but is
+                        {"a1", 100}; {"a2", 200}; {"a3", 300}
+                    """);
             AssertThrown(() => AssertThat((Dictionary<string, long>?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  <Null>");
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", 100}; {"a2", 200}
+                     but is
+                        <Null>
+                    """);
         }
 
         [TestCase]
@@ -84,35 +117,50 @@ namespace GdUnit4.Asserts
                 {"a1", "100"},
                 {"a2", "200"},
             };
-            expected = new Godot.Collections.Dictionary(current);
+            expected = current.Duplicate();
             AssertThat(current).IsEqual(expected);
 
             current.Add("a3", 300);
             AssertThrown(() => AssertThat(current).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}; {a3, 300}");
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        {"a1", "100"}; {"a2", "200"}; {"a3", 300}
+                    """);
             AssertThrown(() => AssertThat((Godot.Collections.Dictionary?)null).IsEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be equal:\n  {a1, 100}; {a2, 200}\n but is\n  <Null>");
+                .HasMessage("""
+                    Expecting be equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        <Null>
+                    """);
         }
 
         [TestCase]
         public void IsNotEqual_Hashtable()
         {
-            var current = new Hashtable() {
+            var current = new SortedDictionary<string, object>() {
                 {"a1", "100"},
                 {"a2", "200"},
             };
-            var expected = new Hashtable(){
+            var expected = new SortedDictionary<string, object>(){
                 {"a1", "101"},
                 {"a2", "200"},
             };
             AssertThat(current).IsNotEqual(expected);
 
-            expected = new Hashtable(current);
+            expected = new SortedDictionary<string, object>(current);
             AssertThrown(() => AssertThat(current).IsNotEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be NOT equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}");
+                .HasMessage("""
+                    Expecting be NOT equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        {"a1", "100"}; {"a2", "200"}
+                    """);
         }
 
         [TestCase]
@@ -131,7 +179,12 @@ namespace GdUnit4.Asserts
             expected = new Dictionary<string, long>(current);
             AssertThrown(() => AssertThat(current).IsNotEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be NOT equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}");
+                .HasMessage("""
+                    Expecting be NOT equal:
+                        {"a1", 100}; {"a2", 200}
+                     but is
+                        {"a1", 100}; {"a2", 200}
+                    """);
         }
 
         [TestCase]
@@ -147,10 +200,15 @@ namespace GdUnit4.Asserts
             };
             AssertThat(current).IsNotEqual(expected);
 
-            expected = new Godot.Collections.Dictionary(current);
+            expected = current.Duplicate();
             AssertThrown(() => AssertThat(current).IsNotEqual(expected))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be NOT equal:\n  {a1, 100}; {a2, 200}\n but is\n  {a1, 100}; {a2, 200}");
+                .HasMessage("""
+                    Expecting be NOT equal:
+                        {"a1", "100"}; {"a2", "200"}
+                     but is
+                        {"a1", "100"}; {"a2", "200"}
+                    """);
         }
 
         [TestCase]
@@ -162,7 +220,11 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(new Hashtable()).IsNull())
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be <Null>:\n but is\n  <Empty>");
+                .HasMessage("""
+                    Expecting be <Null>:
+                     but is
+                        <Empty>
+                    """);
         }
 
         [TestCase]
@@ -190,10 +252,16 @@ namespace GdUnit4.Asserts
             };
             AssertThrown(() => AssertThat(expected).IsEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be empty:\n but has size '2'");
+                .HasMessage("""
+                    Expecting be empty:
+                     but has size '2'
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).IsEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting be empty:\n but is <Null>");
+                .HasMessage("""
+                    Expecting be empty:
+                     but is <Null>
+                    """);
         }
 
         [TestCase]
@@ -207,11 +275,15 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(new Hashtable()).IsNotEmpty())
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting being NOT empty:\n but is empty");
+                .HasMessage("""
+                    Expecting being NOT empty:
+                     but is empty
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).IsNotEmpty())
                  .IsInstanceOf<TestFailedException>()
                  .HasMessage("Expecting be NOT <Null>:");
         }
+
         [TestCase]
         public void HasSize()
         {
@@ -224,7 +296,10 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(current).HasSize(10))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting size:\n  '10' but is {a1, 100}; {a2, 200}");
+                .HasMessage("""
+                    Expecting size:
+                        '10' but is {"a1", 100}; {"a2", 200}
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).HasSize(10))
                  .IsInstanceOf<TestFailedException>()
                  .HasMessage("Expecting be NOT <Null>:");
@@ -242,20 +317,24 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(current).ContainsKeys("a4", "a2", "a3", "a1"))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting contains elements:\n"
-                            + "  [a1, a2]\n"
-                            + " do contains (in any order)\n"
-                            + "  [a4, a2, a3, a1]\n"
-                            + " but could not find elements:\n"
-                            + "  [a4, a3]");
+                .HasMessage("""
+                    Expecting contains elements:
+                        ["a1", "a2"]
+                     do contains (in any order)
+                        ["a4", "a2", "a3", "a1"]
+                     but could not find elements:
+                        ["a4", "a3"]
+                    """);
             AssertThrown(() => AssertThat(current).ContainsKeys(new List<string>() { "a4", "a2", "a3", "a1" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting contains elements:\n"
-                            + "  [a1, a2]\n"
-                            + " do contains (in any order)\n"
-                            + "  [a4, a2, a3, a1]\n"
-                            + " but could not find elements:\n"
-                            + "  [a4, a3]");
+                .HasMessage("""
+                    Expecting contains elements:
+                        ["a1", "a2"]
+                     do contains (in any order)
+                        ["a4", "a2", "a3", "a1"]
+                     but could not find elements:
+                        ["a4", "a3"]
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).ContainsKeys("a1"))
                  .IsInstanceOf<TestFailedException>()
                  .HasMessage("Expecting be NOT <Null>:");
@@ -273,20 +352,24 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(current).NotContainsKeys("a4", "a2", "a3"))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting:\n"
-                            + "  [a1, a2]\n"
-                            + " do NOT contains (in any order)\n"
-                            + "  [a4, a2, a3]\n"
-                            + " but found elements:\n"
-                            + "  [a2]");
+                .HasMessage("""
+                    Expecting:
+                        ["a1", "a2"]
+                     do NOT contains (in any order)
+                        ["a4", "a2", "a3"]
+                     but found elements:
+                        ["a2"]
+                    """);
             AssertThrown(() => AssertThat(current).NotContainsKeys(new List<string>() { "a4", "a2", "a3" }))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting:\n"
-                            + "  [a1, a2]\n"
-                            + " do NOT contains (in any order)\n"
-                            + "  [a4, a2, a3]\n"
-                            + " but found elements:\n"
-                            + "  [a2]");
+                .HasMessage("""
+                    Expecting:
+                        ["a1", "a2"]
+                     do NOT contains (in any order)
+                        ["a4", "a2", "a3"]
+                     but found elements:
+                        ["a2"]
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).NotContainsKeys("a1"))
                  .IsInstanceOf<TestFailedException>()
                  .HasMessage("Expecting be NOT <Null>:");
@@ -303,10 +386,18 @@ namespace GdUnit4.Asserts
 
             AssertThrown(() => AssertThat(current).ContainsKeyValue("a1", 200L))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting do contain entry:\n  {a1, 200}\n found key but value is\n  '100'");
+                .HasMessage("""
+                    Expecting do contain entry:
+                        {"a1", 200}
+                     found key but value is
+                        '100'
+                    """);
             AssertThrown(() => AssertThat(current).ContainsKeyValue("a3", 300L))
                 .IsInstanceOf<TestFailedException>()
-                .HasMessage("Expecting do contain entry:\n  {a3, 300}");
+                .HasMessage("""
+                    Expecting do contain entry:
+                        {"a3", 300}
+                    """);
             AssertThrown(() => AssertThat((IDictionary?)null).ContainsKeyValue("a1", 200L))
                  .IsInstanceOf<TestFailedException>()
                  .HasMessage("Expecting be NOT <Null>:");

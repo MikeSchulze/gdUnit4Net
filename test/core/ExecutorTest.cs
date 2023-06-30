@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -40,12 +41,12 @@ namespace GdUnit4.Tests
         {
             if (_verbose)
             {
-                Godot.GD.PrintS("-------------------------------");
-                Godot.GD.PrintS(e.Type, e.SuiteName, e.TestName, new Godot.Collections.Dictionary(e.Statistics));
-                Godot.GD.PrintS("ErrorCount:", e.ErrorCount, "FailedCount:", e.FailedCount, "OrphanCount:", e.OrphanCount);
-                var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, NormalizedFailureMessage(r.Message)));
+                Console.WriteLine("-------------------------------");
+                Console.WriteLine($"Event Type: {e.Type}, SuiteName: {e.SuiteName}, TestName: {e.TestName}, Statistics: {e.Statistics}");
+                Console.WriteLine($"ErrorCount: {e.ErrorCount}, FailedCount: {e.FailedCount}, OrphanCount: {e.OrphanCount}");
+                var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
                 if (_verbose)
-                    reports.ForEach(r => Godot.GD.PrintS("Reports ->", r));
+                    reports.ForEach(r => Console.WriteLine($"Reports -> {r}"));
             }
             _events.Add(e);
         }
@@ -57,10 +58,10 @@ namespace GdUnit4.Tests
 
             _executor.ReportOrphanNodesEnabled = enableOrphanDetection;
             if (_verbose)
-                Godot.GD.PrintS($"Execute {testSuiteName}.");
+                Console.WriteLine($"Execute {testSuiteName}.");
             await _executor.ExecuteInternally(testSuite);
             if (_verbose)
-                Godot.GD.PrintS($"Execution {testSuiteName} done.");
+                Console.WriteLine($"Execution {testSuiteName} done.");
             return _events;
         }
 
@@ -92,23 +93,12 @@ namespace GdUnit4.Tests
         {
             var extractedEvents = events.ConvertAll(e =>
             {
-                var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, NormalizedFailureMessage(r.Message)));
+                var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
                 return new { e.TestName, EventType = e.Type, Reports = reports };
             });
             return AssertArray(extractedEvents).ExtractV(Extr("EventType"), Extr("TestName"), Extr("Reports"));
         }
 
-        private static string NormalizedFailureMessage(string input)
-        {
-            using (var rtl = new Godot.RichTextLabel())
-            {
-                rtl.BbcodeEnabled = true;
-                rtl.ParseBbcode(input);
-                var text = rtl.Text;
-                rtl.Free();
-                return text.Replace("\n", "").Replace("\r", "");
-            }
-        }
 
         private static List<ITuple> ExpectedTestCase(string suiteName, string testName, List<object[]> testCaseParams)
         {
@@ -359,7 +349,12 @@ namespace GdUnit4.Tests
             AssertReports(events).ContainsExactly(
                 Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>() { new TestReport(FAILURE, 36, "Expecting be equal:  'TestCase1' but is  'invalid'") }),
+                Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>() { new TestReport(FAILURE, 36, """
+                    Expecting be equal:
+                        "TestCase1"
+                     but is
+                        "invalid"
+                    """) }),
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>()),
                 Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
@@ -403,7 +398,11 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>() {
                 new TestReport(FAILURE, 25, "failed on BeforeTest()"),
-                new TestReport(FAILURE, 37, "Expecting be empty: but is  'TestCase1'")}),
+                new TestReport(FAILURE, 37, """
+                    Expecting be empty:
+                     but is
+                        "TestCase1"
+                    """)}),
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() { new TestReport(FAILURE, 25, "failed on BeforeTest()") }),
                 Tuple(TESTSUITE_AFTER, "After", new List<TestReport>() { new TestReport(FAILURE, 19, "failed on After()") }));
@@ -451,16 +450,45 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
                 // ends with warnings
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>() {
-                new TestReport(WARN, 0, "WARNING: Detected <2> orphan nodes during test setup stage! Check SetupTest:28 and TearDownTest:36 for unfreed instances!"),
-                new TestReport(WARN, 43, "WARNING: Detected <3> orphan nodes during test execution!")}),
+                    new TestReport(WARN, 0, """
+                        WARNING:
+                         Detected <2> orphan nodes during test setup stage!
+                         Check SetupTest:28 and TearDownTest:36 for unfreed instances!
+                        """),
+                    new TestReport(WARN, 43, """
+                        WARNING:
+                         Detected <3> orphan nodes during test execution!
+                        """)
+                    }
+                ),
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
                 // ends with failure and warnings 
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() {
-                new TestReport(WARN, 0, "WARNING: Detected <2> orphan nodes during test setup stage! Check SetupTest:28 and TearDownTest:36 for unfreed instances!"),
-                new TestReport(WARN, 52, "WARNING: Detected <4> orphan nodes during test execution!"),
-                new TestReport(FAILURE, 58, "Expecting be empty: but is  'TestCase2'") }),
+                    new TestReport(WARN, 0, """
+                        WARNING:
+                         Detected <2> orphan nodes during test setup stage!
+                         Check SetupTest:28 and TearDownTest:36 for unfreed instances!
+                        """),
+                    new TestReport(WARN, 52, """
+                        WARNING:
+                         Detected <4> orphan nodes during test execution!
+                        """),
+                    new TestReport(FAILURE, 58, """
+                        Expecting be empty:
+                         but is
+                            "TestCase2"
+                        """)
+                    }
+                ),
                 // and one orphan detected at stage 'After'
-                Tuple(TESTSUITE_AFTER, "After", new List<TestReport>() { new TestReport(WARN, 0, "WARNING: Detected <1> orphan nodes during test suite setup stage! Check SetupSuite:15 and TearDownSuite:22 for unfreed instances!") }));
+                Tuple(TESTSUITE_AFTER, "After", new List<TestReport>() {
+                    new TestReport(WARN, 0, """
+                        WARNING:
+                         Detected <1> orphan nodes during test suite setup stage!
+                         Check SetupSuite:15 and TearDownSuite:22 for unfreed instances!
+                        """)
+                    })
+                );
         }
 
         [TestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
@@ -501,7 +529,11 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
                 // ends with failure
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() {
-                new TestReport(FAILURE, 58, "Expecting be empty: but is  'TestCase2'") }),
+                    new TestReport(FAILURE, 58, """
+                        Expecting be empty:
+                         but is
+                            "TestCase2"
+                        """) }),
                 Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
         }
 
@@ -575,12 +607,17 @@ namespace GdUnit4.Tests
                 // reports a test interruption due to a timeout
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>(){
-                new TestReport(INTERUPTED, 33, "The execution has timed out after 1000ms.") }),
+                    new TestReport(INTERUPTED, 33, "The execution has timed out after 1s.") }
+                ),
 
                 // reports a test failure
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>(){
-                new TestReport(FAILURE, 45, "Expecting be equal:  'False' but is 'True'") }),
+                    new TestReport(FAILURE, 45, """
+                        Expecting be equal:
+                            'False' but is 'True'
+                        """) }
+                ),
 
                 // succedes with no reports
                 Tuple(TESTCASE_BEFORE, "TestCase3", new List<TestReport>()),
@@ -589,7 +626,11 @@ namespace GdUnit4.Tests
                 // reports a method signature failure
                 Tuple(TESTCASE_BEFORE, "TestCase4", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase4", new List<TestReport>(){
-                new TestReport(FAILURE, 58, "Invalid method signature found at: TestCase4. You must return a <Task> for an asynchronously specified method.") }),
+                    new TestReport(FAILURE, 58, """
+                        Invalid method signature found at: TestCase4.
+                         You must return a <Task> for an asynchronously specified method.
+                        """) }
+                ),
 
                 // succedes with no reports
                 Tuple(TESTCASE_BEFORE, "TestCase5", new List<TestReport>()),
@@ -651,10 +692,16 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 6, 7, 8, 21 }), new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 1, 2, 3, 6 }), new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }), new List<TestReport>(){
-                    new TestReport(FAILURE, 30, "Expecting be equal:  '11' but is '12'")
+                    new TestReport(FAILURE, 30, """
+                        Expecting be equal:
+                            '11' but is '12'
+                        """)
                 }),
                 Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }), new List<TestReport>(){
-                    new TestReport(FAILURE, 30, "Expecting be equal:  '22' but is '21'")
+                    new TestReport(FAILURE, 30, """
+                        Expecting be equal:
+                            '22' but is '21'
+                        """)
                 }),
                 Tuple(TESTSUITE_AFTER, "After", new List<TestReport>())
             );

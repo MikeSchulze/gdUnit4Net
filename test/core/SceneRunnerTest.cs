@@ -13,13 +13,13 @@ namespace GdUnit4.Tests
         public void Setup()
         {
             // use a dedicated FPS because we calculate frames by time
-            Engine.TargetFps = 60;
+            Engine.PhysicsTicksPerSecond = 60;
         }
 
         [After]
         public void TearDown()
         {
-            Engine.TargetFps = 0;
+            Engine.PhysicsTicksPerSecond = 0;
         }
 
         [TestCase]
@@ -99,7 +99,7 @@ namespace GdUnit4.Tests
         public async Task RunScene_ColorCycle()
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
-            runner.MoveWindowToForeground();
+            runner.MaximizeView();
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
             // verify inital color
@@ -129,18 +129,18 @@ namespace GdUnit4.Tests
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             // inital no spell is fired
-            AssertObject(runner.FindNode("Spell")).IsNull();
+            AssertObject(runner.FindChild("Spell")).IsNull();
 
             // fire spell be pressing enter key
-            runner.SimulateKeyPressed(KeyList.Enter);
+            runner.SimulateKeyPressed(Key.Enter);
             // wait until next frame
             await runner.AwaitIdleFrame();
 
             // verify a spell is created
-            AssertObject(runner.FindNode("Spell")).IsNotNull();
+            AssertObject(runner.FindChild("Spell")).IsNotNull();
 
             // wait until spell is explode after around 1s
-            var spell = runner.FindNode("Spell");
+            var spell = runner.FindChild("Spell");
             // test to wait on signal with invlaid argument and must be timed out after 300ms
             await AssertThrown(spell.AwaitSignal("spell_explode", null).WithTimeout(300))
                 .ContinueWith(result => result.Result?.IsInstanceOf<GdUnit4.Executions.ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 300ms."));
@@ -148,14 +148,14 @@ namespace GdUnit4.Tests
             await spell.AwaitSignal("spell_explode", spell).WithTimeout(1100);
 
             // verify spell is removed when is explode
-            AssertObject(runner.FindNode("Spell")).IsNull();
+            AssertObject(runner.FindChild("Spell")).IsNull();
         }
 
         [TestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 2000)]
         public async Task RunScene_SimulateMouseEvents()
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
-            runner.MoveWindowToForeground();
+            runner.MaximizeView();
 
             var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
             var box2 = runner.GetProperty<Godot.ColorRect>("_box2");
@@ -168,7 +168,7 @@ namespace GdUnit4.Tests
 
             // set mouse position to button one and simulate is pressed
             runner.SetMousePos(new Vector2(60, 20))
-                .SimulateMouseButtonPressed(ButtonList.Left);
+                .SimulateMouseButtonPressed(MouseButton.Left);
 
             // wait until next frame
             await runner.AwaitIdleFrame();
@@ -179,7 +179,7 @@ namespace GdUnit4.Tests
 
             // set mouse position to button two and simulate is pressed
             runner.SetMousePos(new Vector2(160, 20))
-                .SimulateMouseButtonPressed(ButtonList.Left);
+                .SimulateMouseButtonPressed(MouseButton.Left);
             // verify box two is changed to Aqua
             AssertObject(box1.Color).IsEqual(Colors.Aqua);
             AssertObject(box2.Color).IsEqual(Colors.Aqua);
@@ -187,7 +187,7 @@ namespace GdUnit4.Tests
 
             // set mouse position to button three and simulate is pressed
             runner.SetMousePos(new Vector2(260, 20))
-                .SimulateMouseButtonPressed(ButtonList.Left);
+                .SimulateMouseButtonPressed(MouseButton.Left);
             // verify box three is changed to red and after around 1s to Aqua
             AssertObject(box3.Color).IsEqual(Colors.Red);
             await runner.AwaitSignal("panel_color_change", box3, Colors.Aqua).WithTimeout(1100);

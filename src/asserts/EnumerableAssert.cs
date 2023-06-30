@@ -17,7 +17,7 @@ namespace GdUnit4.Asserts
 
         public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (!result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
             return this;
@@ -25,7 +25,7 @@ namespace GdUnit4.Asserts
 
         public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
         {
-            var result = Comparable.IsEqual(Current, expected, Comparable.MODE.CASE_INSENSITIVE);
+            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
             if (result.Valid)
                 ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
             return this;
@@ -51,7 +51,7 @@ namespace GdUnit4.Asserts
         {
             var count = Current?.Count();
             if (count != expected)
-                ThrowTestFailureReport(AssertFailures.HasSize(count == null ? "unknown" : count, expected), Current, null);
+                ThrowTestFailureReport(AssertFailures.HasSize(count, expected), Current, null);
             return this;
         }
 
@@ -153,10 +153,8 @@ namespace GdUnit4.Asserts
         {
             Current = Current?.Select(v =>
             {
-                object?[] valus = extractors.Select(e => e.ExtractValue(v)).ToArray<object?>();
-                return valus.Count() == 1
-                    ? valus.First()
-                    : Tuple(valus);
+                object?[] values = extractors.Select(e => e.ExtractValue(v)).ToArray<object?>();
+                return values.Count() == 1 ? values.First() : Tuple(values);
             }).ToList();
             return this;
         }
@@ -167,22 +165,20 @@ namespace GdUnit4.Asserts
             return this;
         }
 
-        private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?> right)
+        private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?>? right)
         {
             var notFound = right?.ToList() ?? new List<object?>();
 
             if (left != null)
-                foreach (var c in left.ToList())
+            {
+                var leftList = left.ToList();
+                foreach (var c in leftList)
                 {
-                    foreach (var e in right.ToList())
-                    {
-                        if (Comparable.IsEqual(c, e).Valid)
-                        {
-                            notFound.Remove(e);
-                            break;
-                        }
-                    }
+                    var found = right?.FirstOrDefault(e => Comparable.IsEqual(c, e).Valid);
+                    if (found != null)
+                        notFound.Remove(found);
                 }
+            }
             return notFound;
         }
 

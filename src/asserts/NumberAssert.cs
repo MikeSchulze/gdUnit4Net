@@ -2,7 +2,7 @@ using System;
 
 namespace GdUnit4.Asserts
 {
-    internal class NumberAssert<V> : AssertBase<V>, INumberAssert<V> where V : IComparable, IComparable<V>
+    internal class NumberAssert<V> : AssertBase<V>, INumberAssert<V> where V : notnull, IComparable, IComparable<V>
     {
         public NumberAssert(V current) : base(current)
         { }

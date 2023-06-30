@@ -26,25 +26,27 @@ namespace GdUnit4.Asserts
             {
                 try
                 {
-                    value = Extract(value, methodName);
+                    value = Extract(value, methodName).UnboxVariant();
                     if (value == null || value.Equals("n.a."))
                         return value;
                 }
                 catch (Exception e)
                 {
-                    Godot.GD.PrintErr(e.Message, value, methodName);
+                    Console.WriteLine($"Can't ExtractValue {methodName}:{value}\n {e.StackTrace}");
                     return "n.a.";
                 }
             }
             return value;
         }
 
-        private object Extract(object instance, string name)
+        private object? Extract(object instance, string name)
         {
             var type = instance.GetType();
             var method = type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (method != null)
             {
+                if (_args.Count() > 0 && instance is Godot.GodotObject go)
+                    return go.Callv(method.Name.ToSnakeCase(), _args.ToGodotArray()).UnboxVariant();
                 return method.Invoke(instance, _args.ToArray());
             }
             var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

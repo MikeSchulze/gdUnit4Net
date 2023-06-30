@@ -8,15 +8,16 @@ using System.Reflection;
 
 namespace GdUnit4
 {
-    public partial class GdUnit3MonoAPI : RefCounted
+    public partial class GdUnit4MonoAPI : RefCounted
     {
         public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
         {
+
             var result = GdUnitTestSuiteBuilder.Build(NormalisizePath(sourcePath), lineNumber, NormalisizePath(testSuitePath));
             // we need to return the original resource name of the test suite on Godot site e.g. `res://foo/..` or `user://foo/..`
             if (result.ContainsKey("path"))
                 result["path"] = testSuitePath;
-            return new Godot.Collections.Dictionary(result);
+            return result.ToGodotDictionary();
         }
 
         public static bool IsTestSuite(string classPath)
@@ -25,8 +26,7 @@ namespace GdUnit4
             return type != null ? Attribute.IsDefined(type, typeof(TestSuiteAttribute)) : false;
         }
 
-
-        public static Godot.Node? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
+        public static CsNode? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
 
         public static GdUnit4.IExecutor Executor(Godot.Node listener) =>
             new GdUnit4.Executions.Executor().AddGdTestEventListener(listener);
@@ -35,10 +35,10 @@ namespace GdUnit4
              (path.StartsWith("res://") || path.StartsWith("user://")) ? Godot.ProjectSettings.GlobalizePath(path) : path;
 
         private static IEnumerable<GdUnit4.Executions.TestCase> LoadTestCases(Type type) => type.GetMethods()
-            .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+            .Where(mi => mi.IsDefined(typeof(TestCaseAttribute)))
             .Select(mi =>
             {
-                TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>();
+                TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>()!;
                 return new GdUnit4.Executions.TestCase(mi, testCaseAttribute.Line);
             });
     }

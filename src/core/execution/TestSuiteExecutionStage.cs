@@ -38,6 +38,13 @@ namespace GdUnit4.Executions
                         await RunParameterizedTest(testCaseContext, testCase);
                     else
                         await RunTestCase(testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
+
+
+                    if (testCaseContext.IsFailed || testCaseContext.IsError)
+                    {
+                       // break;
+                    }
+
                 }
             }
             await AfterStage.Execute(testSuiteContext);

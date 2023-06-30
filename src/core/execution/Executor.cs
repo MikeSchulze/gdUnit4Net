@@ -8,22 +8,22 @@ namespace GdUnit4.Executions
     public sealed partial class Executor : Godot.RefCounted, IExecutor
     {
         [Godot.Signal]
-        public delegate void ExecutionCompleted();
+        public delegate void ExecutionCompletedEventHandler();
 
         private List<ITestEventListener> _eventListeners = new List<ITestEventListener>();
 
         private class GdTestEventListenerDelegator : ITestEventListener
         {
-            private readonly Godot.Object _listener;
+            private readonly Godot.GodotObject _listener;
 
-            public GdTestEventListenerDelegator(Godot.Object listener)
+            public GdTestEventListenerDelegator(Godot.GodotObject listener)
             {
                 _listener = listener;
             }
             public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
         }
 
-        public IExecutor AddGdTestEventListener(Godot.Object listener)
+        public IExecutor AddGdTestEventListener(Godot.GodotObject listener)
         {
             // I want to using anonymus implementation to remove the extra delegator class
             _eventListeners.Add(new GdTestEventListenerDelegator(listener));
@@ -48,9 +48,9 @@ namespace GdUnit4.Executions
                 var includedTests = testSuite.GetChildren()
                     .Cast<CsNode>()
                     .ToList()
-                    .Select(node => node.Name)
+                    .Select(node => node.Name.ToString())
                     .ToList();
-                await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                await ExecuteInternally(new TestSuite(testSuite.ResourcePath, includedTests));
             }
             catch (Exception e)
             {
@@ -72,7 +72,7 @@ namespace GdUnit4.Executions
                 using (ExecutionContext context = new ExecutionContext(testSuite, _eventListeners, ReportOrphanNodesEnabled))
                 {
                     var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                    task.GetAwaiter().OnCompleted(() => EmitSignal(nameof(ExecutionCompleted)));
+                    task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
                     await task;
                 }
             }
