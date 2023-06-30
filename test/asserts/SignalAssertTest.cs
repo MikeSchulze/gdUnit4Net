@@ -47,7 +47,7 @@ namespace GdUnit4.Asserts
         [TestCase]
         public async Task IsEmitted()
         {
-            var node = AutoFree(new TestEmitter());
+            var node = AutoFree(new TestEmitter())!;
             await AssertSignal(node).IsEmitted("SignalA").WithTimeout(200);
             await AssertSignal(node).IsEmitted("SignalB", "abc").WithTimeout(200);
             await AssertSignal(node).IsEmitted("SignalC", "abc", 100).WithTimeout(200);
@@ -112,7 +112,7 @@ namespace GdUnit4.Asserts
         [TestCase]
         public void IsSignalExists()
         {
-            var node = AutoFree(new Godot.Node2D());
+            var node = AutoFree(new Godot.Node2D())!;
 
             AssertSignal(node).IsSignalExists("visibility_changed")
                 .IsSignalExists("draw")

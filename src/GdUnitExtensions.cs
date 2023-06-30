@@ -73,7 +73,7 @@ namespace GdUnit4
 
 
         public static string Formated(this object? value) => Format(value);
-        public static string Formated(this String? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
+        public static string Formated(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
         public static string Formated(this Godot.Variant value) => value.ToString();
         public static string Formated(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formated())).Indentation(indentation);
         public static string Formated(this Godot.Collections.Array args, int indentation = 0) => args.Cast<IEnumerable>().Formated(indentation);

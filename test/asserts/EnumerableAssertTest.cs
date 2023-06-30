@@ -727,17 +727,17 @@ namespace GdUnit4.Tests.Asserts
             AssertArray(new object?[] { 1, false, 3.14, null, Colors.AliceBlue }).Extract("GetClass")
                 .ContainsExactly("n.a.", "n.a.", "n.a.", null, "n.a.");
             // extracting by a func without arguments
-            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("GetClass")
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("GetClass")
                 .ContainsExactly("RefCounted", "n.a.", "AStarGrid2D", "Node");
             // extracting by a func with arguments
-            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("HasSignal", new object[] { "tree_entered" })
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("HasSignal", new object[] { "tree_entered" })
                 .ContainsExactly(false, "n.a.", false, true);
 
             // try extract on object via a func that not exists
-            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("InvalidMethod")
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("InvalidMethod")
                 .ContainsExactly("n.a.", "n.a.", "n.a.", "n.a.");
             // try extract on object via a func that has no return value
-            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node()) }).Extract("RemoveMeta", new object[] { "" })
+            AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("RemoveMeta", new object[] { "" })
                 .ContainsExactly(null, "n.a.", null, null);
             // must fail we can't extract from a null instance
             AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))

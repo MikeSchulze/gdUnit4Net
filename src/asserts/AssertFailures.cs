@@ -56,8 +56,8 @@ namespace GdUnit4.Asserts
             var keyValues = new ArrayList();
             foreach (KeyValuePair<Godot.Variant, Godot.Variant> entry in dict)
             {
-                var key = entry.Key.UnboxVariant();
-                var value = entry.Value.UnboxVariant();
+                object? key = entry.Key.UnboxVariant();
+                object? value = entry.Value.UnboxVariant();
                 keyValues.Add($"{{{key.Formated()}, {value.Formated()}}}");
             }
             string pairs = string.Join("; ", keyValues.ToArray());

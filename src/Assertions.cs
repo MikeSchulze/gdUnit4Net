@@ -114,15 +114,23 @@ namespace GdUnit4
         public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
         public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
 
+
+        /// <summary>
+        /// A dynamic assertion for <see cref="Godot.Variant"/> based on the input type.
+        /// </summary>
+        /// <param name="current">The input value to be asserted.</param>
+        /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
+        public static dynamic AssertThat(Godot.Variant current) => AssertThat(current.UnboxVariant());
+
+
+        /// <summary>
+        /// A dynamic assertion based on the input type.
+        /// </summary>
+        /// <typeparam name="T">The type of the input.</typeparam>
+        /// <param name="current">The input value to be asserted.</param>
+        /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
         public static dynamic AssertThat<T>(T? current)
         {
-            if (current is Godot.Variant)
-                return AssertThat(current.UnboxVariant());
-
-            var number = IsNumericType<T>(current);
-            if (number != null)
-                return AssertThat(number);
-
             var type = typeof(T);
             if (type == typeof(IDictionary) && current == null)
             {
@@ -148,22 +156,6 @@ namespace GdUnit4
                 return new EnumerableAssert(ev);
             return new ObjectAssert(current);
         }
-
-        private static dynamic? IsNumericType<T>(T? value) => value switch
-        {
-            int intValue => intValue,
-            long longValue => longValue,
-            float floatValue => floatValue,
-            double doubleValue => doubleValue,
-            decimal decimalValue => decimalValue,
-            byte byteValue => byteValue,
-            sbyte sbyteValue => sbyteValue,
-            short shortValue => shortValue,
-            ushort ushortValue => ushortValue,
-            uint uintValue => uintValue,
-            ulong ulongValue => ulongValue,
-            _ => null
-        };
 
         /// <summary>
         /// An Assertion to verify for expecting exceptions
@@ -227,7 +219,7 @@ namespace GdUnit4
         ///<summary>
         /// A litle helper to auto freeing your created objects after test execution
         /// </summary>
-        public static T AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
+        public static T? AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 
         /// <summary>
         /// Buils a tuple by given values

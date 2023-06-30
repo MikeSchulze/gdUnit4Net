@@ -165,22 +165,20 @@ namespace GdUnit4.Asserts
             return this;
         }
 
-        private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?> right)
+        private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?>? right)
         {
             var notFound = right?.ToList() ?? new List<object?>();
 
             if (left != null)
-                foreach (var c in left.ToList())
+            {
+                var leftList = left.ToList();
+                foreach (var c in leftList)
                 {
-                    foreach (var e in right.ToList())
-                    {
-                        if (Comparable.IsEqual(c, e).Valid)
-                        {
-                            notFound.Remove(e);
-                            break;
-                        }
-                    }
+                    var found = right?.FirstOrDefault(e => Comparable.IsEqual(c, e).Valid);
+                    if (found != null)
+                        notFound.Remove(found);
                 }
+            }
             return notFound;
         }
 

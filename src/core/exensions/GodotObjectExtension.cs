@@ -206,7 +206,7 @@ namespace GdUnit4
             return r;
         }
 
-        public static object? UnboxVariant<T>(this T? value)
+        public static dynamic? UnboxVariant<T>(this T? value)
         {
             if (value is Variant v)
                 return v.UnboxVariant();
@@ -225,7 +225,7 @@ namespace GdUnit4
             return unboxed;
         }
 
-        private static object? UnboxVariant(this Variant v) => v.VariantType switch
+        private static dynamic? UnboxVariant(this Variant v) => v.VariantType switch
         {
             Variant.Type.Nil => null,
             Variant.Type.Bool => v.AsBool(),

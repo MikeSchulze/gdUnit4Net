@@ -158,9 +158,9 @@ namespace GdUnit4.Tests.Asserts
         [TestCase]
         public void IsSame()
         {
-            var obj1 = AutoFree(new Godot.Node());
+            var obj1 = AutoFree(new Godot.Node())!;
             var obj2 = obj1;
-            var obj3 = AutoFree(obj1.Duplicate());
+            var obj3 = AutoFree(obj1.Duplicate())!;
             AssertObject(obj1).IsSame(obj1);
             AssertObject(obj1).IsSame(obj2);
             AssertObject(obj2).IsSame(obj1);
@@ -203,9 +203,9 @@ namespace GdUnit4.Tests.Asserts
         [TestCase]
         public void IsNotSame()
         {
-            var obj1 = AutoFree(new Godot.Node());
+            var obj1 = AutoFree(new Godot.Node())!;
             var obj2 = obj1;
-            var obj3 = AutoFree(obj1.Duplicate());
+            var obj3 = AutoFree(obj1.Duplicate())!;
             AssertObject(null).IsNotSame(obj1);
             AssertObject(obj1).IsNotSame(obj3);
             AssertObject(obj3).IsNotSame(obj1);

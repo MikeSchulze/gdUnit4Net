@@ -58,19 +58,16 @@ namespace GdUnit4
             return new TestReport(type, lineNumber, message);
         }
 
-        public override bool Equals(object? other)
-        {
-            return other is TestReport report &&
-                   Type == report.Type &&
-                   LineNumber == report.LineNumber &&
-                   Message == report.Message &&
-                   IsError == report.IsError &&
-                   IsFailure == report.IsFailure &&
-                   IsWarning == report.IsWarning;
-        }
+        public override bool Equals(object? other) => other is TestReport report
+            && Type == report.Type
+            && LineNumber == report.LineNumber
+            && Message == report.Message
+            && IsError == report.IsError
+            && IsFailure == report.IsFailure
+            && IsWarning == report.IsWarning;
+
+
+        public override int GetHashCode() =>
+            HashCode.Combine(Type, LineNumber, Message, IsError, IsFailure, IsWarning);
     }
 }
-
-
-
-
