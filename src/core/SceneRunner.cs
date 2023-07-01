@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace GdUnit4
             return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4)!.GetFileLineNumber() : -1;
         }
 
-        public sealed class GodotMethodAwaiter<V>
+        public sealed class GodotMethodAwaiter<[Godot.MustBeVariant] V>
         {
             private string MethodName { get; }
             private Node Instance { get; }
@@ -54,36 +55,42 @@ namespace GdUnit4
                 Instance = instance;
                 MethodName = methodName;
                 Args = args;
-                if (!Instance.HasMethod(methodName))
-                    throw new MissingMethodException($"The method '{methodName}' not exist on loaded scene.");
+                if (!Instance.HasMethod(MethodName))
+                    throw new MissingMethodException($"The method '{MethodName}' not exist on loaded scene.");
             }
 
             public async Task IsEqual(V expected) =>
-                await Task.Run(async () => await IsReturnValue((current) => Comparable.IsEqual(current, expected).Valid));
+                await CallAndWaitIsFinished((current) => AssertThat(current).IsEqual(expected));
 
             public async Task IsNull() =>
-                await Task.Run(async () => await IsReturnValue((current) => current == null));
+                await CallAndWaitIsFinished((current) => AssertThat(current).IsNull());
 
             public async Task IsNotNull() =>
-                await Task.Run(async () => await IsReturnValue((current) => current != null));
+                await CallAndWaitIsFinished((current) => AssertThat(current).IsNotNull());
 
-            private delegate bool Comperator(object current);
-            private async Task IsReturnValue(Comperator comperator)
+            private delegate void Predicate(Godot.Variant current);
+
+            private async Task CallAndWaitIsFinished(Predicate comperator) => await Task.Run(async () =>
             {
+                // sync to main thread
+                await ISceneRunner.SyncProcessFrame;
                 var current = Instance.Call(MethodName, Args);
-                // https://github.com/godotengine/godot/issues/77624
-                Variant[] result = await Instance.ToSignal(Instance, "completed");
-                if (comperator(result[0]))
+                if (current.VariantType != Variant.Type.Nil && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
+                {
+                    Variant[] result = await Instance.ToSignal(current.As<GodotObject>(), "completed");
+                    comperator(result[0]);
                     return;
-            }
+                }
+                comperator(current);
+            });
         }
 
-        public static async Task AwaitSignal(this Godot.Node node, string signal, params object[]? expectedArgs)
+        public static async Task AwaitSignal(this Godot.Node node, string signal, params Godot.Variant[] expectedArgs)
         {
             while (true)
             {
                 Variant[] signalArgs = await Engine.GetMainLoop().ToSignal(node, signal);
-                if (expectedArgs?.Length == 0 || signalArgs.Equals(expectedArgs))
+                if (expectedArgs?.Length == 0 || signalArgs.VariantEquals(expectedArgs))
                     return;
             }
         }
@@ -246,13 +253,17 @@ namespace GdUnit4.Core
 
         private void ActivateTimeFactor()
         {
-            Engine.TimeScale = (float)TimeFactor;
+            if (Verbose)
+                Console.WriteLine($"ActivateTimeFactor: Engine.TimeScale={TimeFactor}, Engine.PhysicsTicksPerSecond={(int)(SavedIterationsPerSecond * TimeFactor)}");
+            Engine.TimeScale = TimeFactor;
             Engine.PhysicsTicksPerSecond = (int)(SavedIterationsPerSecond * TimeFactor);
 
         }
 
         private void DeactivateTimeFactor()
         {
+            if (Verbose)
+                Console.WriteLine($"ActivateTimeFactor: Engine.TimeScale={1}, Engine.PhysicsTicksPerSecond={SavedIterationsPerSecond}");
             Engine.TimeScale = 1;
             Engine.PhysicsTicksPerSecond = SavedIterationsPerSecond;
         }
@@ -289,10 +300,13 @@ namespace GdUnit4.Core
 
         public Node Scene() => CurrentScene;
 
-        public GdUnitAwaiter.GodotMethodAwaiter<V> AwaitMethod<V>(string methodName) =>
+        public GdUnitAwaiter.GodotMethodAwaiter<V> AwaitMethod<[Godot.MustBeVariant] V>(string methodName) =>
             new GdUnitAwaiter.GodotMethodAwaiter<V>(CurrentScene, methodName);
 
-        public async Task AwaitIdleFrame() => await Task.Run(() => SceneTree.ToSignal(SceneTree, SceneTree.SignalName.ProcessFrame));
+
+        public async Task AwaitIdleFrame() => await Task.Run(() =>
+            SceneTree.ToSignal(SceneTree, SceneTree.SignalName.ProcessFrame));
+
 
         public async Task AwaitMillis(uint timeMillis)
         {
@@ -302,7 +316,7 @@ namespace GdUnit4.Core
             }
         }
 
-        public async Task AwaitSignal(string signal, params object[] args) =>
+        public async Task AwaitSignal(string signal, params Godot.Variant[] args) =>
             await GdUnitAwaiter.AwaitSignal(CurrentScene, signal, args);
 
         public Variant Invoke(string name, params Variant[] args)
@@ -312,15 +326,28 @@ namespace GdUnit4.Core
             return CurrentScene.Call(name, args);
         }
 
-        public T GetProperty<T>(string name)
+        public dynamic? GetProperty(string name)
         {
-            var property = CurrentScene.Get(name);
-            if (property.Obj != null)
-                return (T)property.Obj;
-            throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
+            if (!PropertyExists(name))
+                throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
+            return CurrentScene.Get(name)!.UnboxVariant();
         }
 
-        public Node FindChild(string name, bool recursive = true, bool owned = false) => CurrentScene.FindChild(name, recursive, owned);
+        public T? GetProperty<T>(string name) => GetProperty(name);
+
+
+        public void SetProperty(string name, Variant value)
+        {
+            if (!PropertyExists(name))
+                throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
+            CurrentScene.Set(name, value);
+        }
+
+        private bool PropertyExists(string name) =>
+            CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+
+        public Node FindChild(string name, bool recursive = true, bool owned = false) =>
+            CurrentScene.FindChild(name, recursive, owned);
 
         public void MaximizeView()
         {
@@ -334,7 +361,7 @@ namespace GdUnit4.Core
             DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
             SceneTree.Root.RemoveChild(CurrentScene);
             if (SceneAutoFree)
-                CurrentScene.Free();
+                CurrentScene.QueueFree();
         }
     }
 }

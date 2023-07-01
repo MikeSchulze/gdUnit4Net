@@ -10,6 +10,18 @@ namespace GdUnit4
     /// </summary>
     public interface ISceneRunner : IDisposable
     {
+        private static SceneTree? _instance = Engine.GetMainLoop() as SceneTree;
+
+        public static SceneTree Instance
+        {
+            get => _instance ?? throw new Exception("SceneTree not set");
+        }
+
+        public static SignalAwaiter SyncProcessFrame =>
+            Instance.ToSignal(Instance, SceneTree.SignalName.ProcessFrame);
+
+        public static SignalAwaiter SyncPhysicsFrame =>
+            Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
 
         /// <summary>
         /// Loads a scene into the SceneRunner to be simmulated.
@@ -143,7 +155,7 @@ namespace GdUnit4
         /// <typeparam name="V">The expected result type</typeparam>
         /// <param name="methodName">The name of the method to wait</param>
         /// <returns>GodotMethodAwaiter</returns>
-        GdUnitAwaiter.GodotMethodAwaiter<V> AwaitMethod<V>(string methodName);
+        GdUnitAwaiter.GodotMethodAwaiter<V> AwaitMethod<[Godot.MustBeVariant] V>(string methodName);
 
         /// <summary>
         /// Waits for given signal is emited.
@@ -156,7 +168,7 @@ namespace GdUnit4
         /// </summary>
         /// <param name="signal">The name of the signal to wait</param>
         /// <returns>Task to wait</returns>
-        Task AwaitSignal(string signal, params object[] args);
+        Task AwaitSignal(string signal, params Godot.Variant[] args);
 
         /// <summary>
         /// Waits for a specific amount of milliseconds.
@@ -192,13 +204,28 @@ namespace GdUnit4
         public Variant Invoke(string name, params Variant[] args);
 
         /// <summary>
-        /// Returns the property by given name.
+        /// Returns the value of the property with the specified name.
         /// </summary>
-        /// <typeparam name="T">The type of the property</typeparam>
-        /// <param name="name">The parameter name</param>
-        /// <returns>The value of the property or throws a MissingFieldException</returns>
-        /// <exception cref="MissingFieldException"/>
-        public T GetProperty<T>(string name);
+        /// <param name="name">The name of the property.</param>
+        /// <returns>The value of the property.</returns>
+        /// <exception cref="MissingFieldException">Thrown when the property is not found.</exception>
+        public dynamic? GetProperty(string name);
+
+        /// <summary>
+        /// Returns the value of the property with the specified name.
+        /// </summary>
+        /// <typeparam name="T">The type of the property value.</typeparam>
+        /// <param name="name">The name of the property.</param>
+        /// <returns>The value of the property.</returns>
+        /// <exception cref="MissingFieldException">Thrown when the property is not found.</exception>
+        public T? GetProperty<T>(string name);
+
+        /// <summary>
+        /// Sets the value of the property with the specified name.
+        /// </summary>
+        /// <param name="name">The name of the property.</param>
+        /// <param name="value">The value to set for the property.</param>
+        public void SetProperty(string name, Godot.Variant value);
 
         /// <summary>
         /// Finds the node by given name.

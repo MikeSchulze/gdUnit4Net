@@ -10,9 +10,9 @@ namespace GdUnit4.Asserts
 
         private string? CustomFailureMessage { get; set; }
 
-        public ExceptionAssert(Func<T> supplier)
+        public ExceptionAssert(Action action)
         {
-            try { supplier.Invoke(); }
+            try { action.Invoke(); }
             catch (Exception e) { Current = e; }
         }
 

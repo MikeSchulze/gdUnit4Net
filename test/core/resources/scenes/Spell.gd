@@ -10,8 +10,6 @@ var _spell_fired :bool = false
 var _spell_live_time :float = 0
 var _spell_pos :Vector3 = Vector3.ZERO
 
-# helper counter for testing simulate_frames
-var _debug_process_counted := 0
 
 func _ready():
 	set_name("Spell")

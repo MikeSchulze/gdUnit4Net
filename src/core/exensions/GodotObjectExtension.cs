@@ -177,6 +177,8 @@ namespace GdUnit4
                 return sn.ToString();
             if (value is Godot.Collections.Dictionary gd)
                 return gd.UnboxVariant();
+            if (value is Godot.Collections.Array ga)
+                return ga.UnboxVariant();
             return value;
         }
 
@@ -185,6 +187,14 @@ namespace GdUnit4
             var unboxed = new Dictionary<object, object?>();
             foreach (KeyValuePair<Variant, Variant> kvp in dict)
                 unboxed.Add(kvp.Key.UnboxVariant()!, kvp.Value.UnboxVariant());
+            return unboxed;
+        }
+
+        private static ICollection<object?> UnboxVariant(this Godot.Collections.Array values)
+        {
+            var unboxed = new List<object?>();
+            foreach (Variant value in values)
+                unboxed.Add(value.UnboxVariant());
             return unboxed;
         }
 

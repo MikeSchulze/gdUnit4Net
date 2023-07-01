@@ -163,7 +163,11 @@ namespace GdUnit4.Executions
 
         public void Dispose()
         {
-            Disposables.ForEach(disposable => disposable.Dispose());
+            Disposables.ForEach(disposable =>
+            {
+                try { disposable.Dispose(); }
+                catch (ObjectDisposedException e) { _ = e; }
+            });
             Stopwatch.Stop();
         }
 

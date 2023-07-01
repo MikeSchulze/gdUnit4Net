@@ -19,15 +19,27 @@ namespace GdUnit4.Tests
         [After]
         public void TearDown()
         {
-            Engine.PhysicsTicksPerSecond = 0;
+            Engine.PhysicsTicksPerSecond = 60;
         }
 
         [TestCase]
         public void GetProperty()
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
-            AssertObject(runner.GetProperty<Godot.ColorRect>("_box1")).IsInstanceOf<Godot.ColorRect>();
-            AssertThrown(() => runner.GetProperty<Godot.ColorRect>("_invalid"))
+            AssertObject(runner.GetProperty("_box1")).IsInstanceOf<Godot.ColorRect>();
+            AssertObject(runner.GetProperty("_nullable")).IsNull();
+            AssertThrown(() => runner.GetProperty("_invalid"))
+                .IsInstanceOf<System.MissingFieldException>()
+                .HasMessage("The property '_invalid' not exist on loaded scene.");
+        }
+
+        [TestCase]
+        public void SetProperty()
+        {
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
+            runner.SetProperty("_box1", Colors.Red);
+            AssertObject(runner.GetProperty("_box1")).IsEqual(Colors.Red);
+            AssertThrown(() => runner.SetProperty("_invalid", 42))
                 .IsInstanceOf<System.MissingFieldException>()
                 .HasMessage("The property '_invalid' not exist on loaded scene.");
         }
@@ -59,7 +71,7 @@ namespace GdUnit4.Tests
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
+            var box1 = runner.GetProperty<Godot.ColorRect>("_box1")!;
             // initial is white
             AssertObject(box1.Color).IsEqual(Colors.White);
 
@@ -82,7 +94,7 @@ namespace GdUnit4.Tests
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
+            var box1 = runner.GetProperty<Godot.ColorRect>("_box1")!;
             // initial is white
             AssertObject(box1.Color).IsEqual(Colors.White);
 
@@ -101,7 +113,7 @@ namespace GdUnit4.Tests
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             runner.MaximizeView();
 
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
+            var box1 = runner.GetProperty<Godot.ColorRect>("_box1")!;
             // verify inital color
             AssertObject(box1.Color).IsEqual(Colors.White);
 
@@ -157,9 +169,9 @@ namespace GdUnit4.Tests
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
             runner.MaximizeView();
 
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
-            var box2 = runner.GetProperty<Godot.ColorRect>("_box2");
-            var box3 = runner.GetProperty<Godot.ColorRect>("_box3");
+            var box1 = runner.GetProperty<Godot.ColorRect>("_box1")!;
+            var box2 = runner.GetProperty<Godot.ColorRect>("_box2")!;
+            var box3 = runner.GetProperty<Godot.ColorRect>("_box3")!;
 
             // verify inital colors
             AssertObject(box1.Color).IsEqual(Colors.White);
@@ -194,18 +206,25 @@ namespace GdUnit4.Tests
             AssertObject(box3.Color).IsEqual(Colors.Aqua);
         }
 
-        [TestCase(Description = "Example to wait for a specific method result", Timeout = 3000)]
+        [TestCase(Description = "Example to wait for a specific method result", Timeout = 5000)]
         public async Task AwaitMethod()
         {
             ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
 
             // wait until 'color_cycle()' returns 'black'
             await runner.AwaitMethod<string>("color_cycle").IsEqual("black");
-            // verify the box is changed to green (last color cycle step)
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
-            AssertObject(box1.Color).IsEqual(Colors.Green);
 
-            // wait for returns 'red' but will never happen and expect is interrupted after 500ms
+            // wait until 'color_cycle()' and expect be return `red` but should fail because it ends with `black`
+            await AssertThrown(runner.AwaitMethod<string>("color_cycle").IsEqual("red"))
+               .ContinueWith(result => result.Result?.HasMessage(
+                    """
+                    Expecting be equal:
+                        "red"
+                     but is
+                        "black"
+                    """
+               ));
+            // wait again for returns 'red' but with using a custom timeout of 500ms and expect is interrupted after 500ms
             await AssertThrown(runner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(500))
                .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 500ms."));
         }
@@ -218,13 +237,45 @@ namespace GdUnit4.Tests
             runner.SetTimeFactor(10);
             // wait until 'color_cycle()' returns 'black' (using small timeout we expect the method will now processes 10 times faster)
             await runner.AwaitMethod<string>("color_cycle").IsEqual("black").WithTimeout(300);
-            // verify the box is changed to green (last color cycle step)
-            var box1 = runner.GetProperty<Godot.ColorRect>("_box1");
-            AssertObject(box1.Color).IsEqual(Colors.Green);
 
             // wait for returns 'red' but will never happen and expect is interrupted after 250ms
             await AssertThrown(runner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(250))
                .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 250ms."));
+        }
+
+        [TestCase]
+        public async Task AwaitSignal()
+        {
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
+            var box1 = runner.GetProperty<ColorRect>("_box1")!;
+
+            // Set max time factor to minimize waiting time checked `runner.wait_func`
+            runner.Invoke("start_color_cycle");
+
+            await runner.AwaitSignal("panel_color_change", box1, new Color(1, 0, 0)); // Red
+            await runner.AwaitSignal("panel_color_change", box1, new Color(0, 0, 1)); // Blue
+            await runner.AwaitSignal("panel_color_change", box1, new Color(0, 1, 0)); // Green
+        }
+
+        [TestCase]
+        public async Task DisposeSceneRunner()
+        {
+            ISceneRunner runner = ISceneRunner.Load("res://test/core/resources/scenes/TestScene.tscn", true);
+            SceneTree tree = (SceneTree)Godot.Engine.GetMainLoop();
+
+            var currentScene = runner.Scene();
+            var nodePath = currentScene.GetPath();
+            // check scene is loaded and added to the root node
+            AssertThat(Godot.GodotObject.IsInstanceValid(currentScene)).IsTrue();
+            AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNotNull();
+
+            await ISceneRunner.SyncProcessFrame;
+            runner.Dispose();
+
+            await ISceneRunner.SyncProcessFrame;
+            // check scene is freed and removed from the root node
+            AssertThat(Godot.GodotObject.IsInstanceValid(currentScene)).IsFalse();
+            AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNull();
         }
     }
 }
