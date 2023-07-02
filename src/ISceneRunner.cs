@@ -17,9 +17,16 @@ namespace GdUnit4
             get => _instance ?? throw new Exception("SceneTree not set");
         }
 
+        /// <summary>
+        /// A utility to synchronize the current thread with the Godot physics thread.
+        /// This can be used to await the completion of a single physics frame in Godot.
+        /// </summary>
         public static SignalAwaiter SyncProcessFrame =>
             Instance.ToSignal(Instance, SceneTree.SignalName.ProcessFrame);
 
+        /// <summary>
+        /// A util to syncronize the current thread with the Godot physics thread
+        /// </summary>
         public static SignalAwaiter SyncPhysicsFrame =>
             Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
 
