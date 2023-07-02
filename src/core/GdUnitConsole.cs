@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace GdUnit4.Core
@@ -14,6 +15,8 @@ namespace GdUnit4.Core
         private const String __CSI_UNDERLINE = "\u001b[4m";
 
         static object lockObj = new object();
+
+        internal Dictionary<string, (int Left, int Top)> SavedCursors = new Dictionary<string, (int, int)>();
 
         public GdUnitConsole NewLine()
         {
@@ -109,6 +112,18 @@ namespace GdUnit4.Core
         {
             Console.WriteLine(message);
             return this;
+        }
+
+        internal void SaveCursor(string name) =>
+            SavedCursors[name] = Console.GetCursorPosition();
+
+        internal void RestoreCursor(string name)
+        {
+            if (SavedCursors.TryGetValue(name, out var position))
+            {
+                Console.SetCursorPosition(position.Left, position.Top);
+                SavedCursors.Remove(name);
+            }
         }
     }
 }

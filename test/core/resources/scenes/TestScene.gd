@@ -1,5 +1,6 @@
 extends Control
 
+
 signal panel_color_change(box, color)
 
 const COLOR_CYCLE := [Color.ROYAL_BLUE, Color.CHARTREUSE, Color.YELLOW_GREEN]
@@ -11,6 +12,7 @@ const COLOR_CYCLE := [Color.ROYAL_BLUE, Color.CHARTREUSE, Color.YELLOW_GREEN]
 @warning_ignore("unused_private_class_variable")
 @export var _initial_color := Color.RED
 
+@warning_ignore("unused_private_class_variable")
 var _nullable :Object
 
 func _ready():
@@ -60,16 +62,16 @@ func _on_timeout(timer :Timer):
 
 
 func color_cycle() -> String:
-	prints("color_cycle")
+	prints("color_cycle initial")
 	await create_timer(0.500).timeout
 	emit_signal("panel_color_change", _box1, Color.RED)
-	prints("timer1")
+	prints("changed to RED")
 	await create_timer(0.500).timeout
 	emit_signal("panel_color_change", _box1, Color.BLUE)
-	prints("timer2")
+	prints("changed to BLUE")
 	await create_timer(0.500).timeout
 	emit_signal("panel_color_change", _box1, Color.GREEN)
-	prints("cycle end")
+	prints("chaned to GREEN")
 	return "black"
 
 

@@ -158,11 +158,13 @@ namespace GdUnit4
         }
 
         /// <summary>
-        /// An Assertion to verify for expecting exceptions
+        /// Asserts that an exception of type <see cref="Exception"/> is thrown when executing the supplied action.
         /// </summary>
-        /// <param name="supplier">A function callback where throw possible exceptions</param>
-        /// <returns>IExceptionAssert</returns>
-        public static IExceptionAssert AssertThrown<T>(Func<T> supplier) => new ExceptionAssert<T>(supplier);
+        /// <param name="action">An action that may throw an exception.</param>
+        /// <returns>An instance of <see cref="IExceptionAssert"/> for further assertions on the thrown exception.</returns>
+        public static IExceptionAssert AssertThrown(Action action) =>
+            new ExceptionAssert<Exception>(action);
+
 
         /// <summary>
         /// An Assertion to verify for expecting exceptions when performing a task.

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using GdUnit4.Executions;
 using GdUnit4.Core;
@@ -29,6 +28,8 @@ namespace GdUnit4
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     Console.Print($"    {testEvent.SuiteName}", ConsoleColor.Cyan);
                     Console.Print($":{testEvent.TestName.PadRight(80 - testEvent.SuiteName.Length)} ", ConsoleColor.DarkCyan, GdUnitConsole.BOLD);
+                    Console.SaveCursor("TestCaseState");
+                    Console.NewLine();
                     break;
                 case TestEvent.TYPE.TESTCASE_AFTER:
                     WriteStatus(testEvent);
@@ -45,6 +46,9 @@ namespace GdUnit4
 
             void WriteStatus(TestEvent testEvent)
             {
+                Console.SaveCursor("LastLine");
+                Console.RestoreCursor("TestCaseState");
+
                 if (testEvent.IsSkipped)
                     Console.Print("SKIPPED", ConsoleColor.DarkYellow, GdUnitConsole.BOLD | GdUnitConsole.ITALIC);
                 else if (testEvent.IsFailed || testEvent.IsError)
@@ -58,7 +62,7 @@ namespace GdUnit4
                     Console.Print("PASSED", ConsoleColor.Green, GdUnitConsole.BOLD);
 
                 Console.Println($" {testEvent.ElapsedInMs.Humanize()}", ConsoleColor.Cyan);
-
+                Console.RestoreCursor("LastLine");
                 if (testEvent.IsFailed || testEvent.IsError)
                     WriteFailureReport(testEvent);
             }
@@ -68,18 +72,21 @@ namespace GdUnit4
         {
             foreach (TestReport report in testEvent.Reports)
             {
-                Console.Println(report.ToString().RichTextNormalize(), ConsoleColor.DarkCyan);
+                Console.Println(report.ToString().RichTextNormalize().Indentation(2), ConsoleColor.DarkCyan);
             }
         }
     }
 
     partial class TestRunner : Godot.Node
     {
-        private bool FailFast { get; set; } = true;
+        private bool FailFast { get; set; } = false;
 
         public override async void _Ready()
         {
             var cmdArgs = Godot.OS.GetCmdlineArgs();
+            Console.ForegroundColor = ConsoleColor.White;
+            // TODO check this line, it results into a crash when resizing the terminal
+            Console.BufferHeight = 100;
             Console.Clear();
             Console.Title = "GdUnit4TestRunner";
             Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
@@ -92,8 +99,8 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                if (testSuite.Name.Equals("SceneRunnerTest"))
-                    continue;
+                //if (!testSuite.Name.Equals("SceneRunnerTest"))
+                //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)
                     break;
