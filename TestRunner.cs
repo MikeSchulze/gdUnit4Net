@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using GdUnit4.Executions;
 using GdUnit4.Core;
@@ -86,6 +85,7 @@ namespace GdUnit4
         {
             var cmdArgs = Godot.OS.GetCmdlineArgs();
             Console.ForegroundColor = ConsoleColor.White;
+            // TODO check this line, it results into a crash when resizing the terminal
             Console.BufferHeight = 100;
             Console.Clear();
             Console.Title = "GdUnit4TestRunner";

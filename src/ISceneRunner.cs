@@ -12,7 +12,7 @@ namespace GdUnit4
     {
         private static SceneTree? _instance = Engine.GetMainLoop() as SceneTree;
 
-        public static SceneTree Instance
+        internal static SceneTree Instance
         {
             get => _instance ?? throw new Exception("SceneTree not set");
         }
