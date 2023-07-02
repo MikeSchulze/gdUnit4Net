@@ -80,7 +80,7 @@ namespace GdUnit4
 
     partial class TestRunner : Godot.Node
     {
-        private bool FailFast { get; set; } = true;
+        private bool FailFast { get; set; } = false;
 
         public override async void _Ready()
         {
@@ -91,7 +91,7 @@ namespace GdUnit4
             Console.Title = "GdUnit4TestRunner";
             Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
 
-            var currentDir = Directory.GetCurrentDirectory() + "/test/core";
+            var currentDir = Directory.GetCurrentDirectory() + "/test";
             List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
             using Executor executor = new Executor();
             TestReporter listener = new TestReporter();
@@ -99,8 +99,8 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                if (!testSuite.Name.Equals("SceneRunnerTest"))
-                    continue;
+                //if (!testSuite.Name.Equals("SceneRunnerTest"))
+                //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)
                     break;
