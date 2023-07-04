@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq;
 
 using Godot;
+using System.Threading.Tasks;
 
 namespace GdUnit4
 {
@@ -179,6 +180,8 @@ namespace GdUnit4
                 return gd.UnboxVariant();
             if (value is Godot.Collections.Array ga)
                 return ga.UnboxVariant();
+            if (value is Variant[] parameters)
+                return parameters.UnboxVariant();
             return value;
         }
 
@@ -191,6 +194,14 @@ namespace GdUnit4
         }
 
         private static ICollection<object?> UnboxVariant(this Godot.Collections.Array values)
+        {
+            var unboxed = new List<object?>();
+            foreach (Variant value in values)
+                unboxed.Add(value.UnboxVariant());
+            return unboxed;
+        }
+
+        private static ICollection<object?> UnboxVariant(this Variant[] values)
         {
             var unboxed = new List<object?>();
             foreach (Variant value in values)
@@ -240,5 +251,34 @@ namespace GdUnit4
             Variant.Type.PackedColorArray => v.AsColorArray(),
             _ => throw new ArgumentOutOfRangeException(nameof(v))
         };
+
+        internal static async Task<object?> Invoke(object Instance, string MethodName, params Variant[] Args)
+        {
+            if (Instance is Godot.GodotObject goi && goi.HasMethod(MethodName))
+            {
+                Variant current = goi.Call(MethodName, Args);
+                if (current.VariantType != Variant.Type.Nil && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
+                {
+                    Variant[] results = await goi.ToSignal(current.As<GodotObject>(), "completed");
+                    return results[0].UnboxVariant();
+                }
+                return current;
+            }
+
+            object?[] parameters = Args.UnboxVariant().ToArray();
+            MethodInfo? methodInfo = Instance.GetType().GetMethod(MethodName);
+
+            object? result = methodInfo!.Invoke(Instance, parameters);
+            if (result is Task task)
+            {
+                await task.ConfigureAwait(false);
+                Type resultType = task.GetType().GetTypeInfo().GetGenericArguments()[0];
+                PropertyInfo? resultProperty = task.GetType().GetProperty("Result");
+                if (resultProperty is null)
+                    throw new InvalidOperationException("Task does not have a 'Result' property.");
+                return resultProperty.GetValue(task);
+            }
+            return result;
+        }
     }
 }

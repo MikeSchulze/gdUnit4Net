@@ -101,8 +101,27 @@ namespace GdUnit4.Executions
                 Godot.GD.PushError(e.StackTrace);
             }
             StackTrace stack = new StackTrace(e, true);
-            var lineNumber = stack.FrameCount > 1 ? stack.GetFrame(1)!.GetFileLineNumber() : -1;
+            var lineNumber = ScanFailureLineNumber(stack);
             context.ReportCollector.Consume(new TestReport(TestReport.TYPE.ABORT, lineNumber, e.Message));
+        }
+
+        private static int ScanFailureLineNumber(StackTrace stack)
+        {
+            bool isFound = false;
+            foreach (var frame in stack.GetFrames().Reverse())
+            {
+                var fileName = frame.GetFileName();
+                if (fileName == null)
+                    continue;
+                if (fileName.Replace('\\', '/').EndsWith("src/core/execution/ExecutionStage.cs"))
+                {
+                    isFound = true;
+                    continue;
+                }
+                if (isFound)
+                    return frame.GetFileLineNumber();
+            }
+            return stack.FrameCount > 1 ? stack.GetFrame(1)!.GetFileLineNumber() : -1;
         }
 
         private async Task ExecuteStage(ExecutionContext context)

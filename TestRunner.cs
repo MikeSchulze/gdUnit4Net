@@ -38,6 +38,8 @@ namespace GdUnit4
                     Console.Print($"{testEvent.SuiteName}", ConsoleColor.Blue);
                     if (testEvent.IsSuccess)
                         Console.Print(" PASSED", ConsoleColor.Green, GdUnitConsole.BOLD);
+                    else if (testEvent.IsWarning)
+                        Console.Print(" WARNING", ConsoleColor.Yellow, GdUnitConsole.BOLD);
                     else
                         Console.Print(" FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
                     Console.Println($" {testEvent.ElapsedInMs.Humanize()}").NewLine();
@@ -56,6 +58,8 @@ namespace GdUnit4
                     Failed = true;
                     Console.Print("FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
                 }
+                else if (testEvent.IsWarning)
+                    Console.Print(" WARNING", ConsoleColor.Yellow, GdUnitConsole.BOLD);
                 else if (testEvent.OrphanCount > 0)
                     Console.Print("PASSED", ConsoleColor.Yellow, GdUnitConsole.BOLD | GdUnitConsole.UNDERLINE);
                 else
@@ -63,7 +67,7 @@ namespace GdUnit4
 
                 Console.Println($" {testEvent.ElapsedInMs.Humanize()}", ConsoleColor.Cyan);
                 Console.RestoreCursor("LastLine");
-                if (testEvent.IsFailed || testEvent.IsError)
+                if (!testEvent.IsSuccess)
                     WriteFailureReport(testEvent);
             }
         }
@@ -79,19 +83,19 @@ namespace GdUnit4
 
     partial class TestRunner : Godot.Node
     {
-        private bool FailFast { get; set; } = false;
+        private bool FailFast { get; set; } = true;
 
         public override async void _Ready()
         {
             var cmdArgs = Godot.OS.GetCmdlineArgs();
             Console.ForegroundColor = ConsoleColor.White;
             // TODO check this line, it results into a crash when resizing the terminal
-            Console.BufferHeight = 100;
+            //Console.BufferHeight = 100;
             Console.Clear();
             Console.Title = "GdUnit4TestRunner";
             Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
 
-            var currentDir = Directory.GetCurrentDirectory() + "/test";
+            var currentDir = Directory.GetCurrentDirectory() + "/test/";
             List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
             using Executor executor = new Executor();
             TestReporter listener = new TestReporter();
@@ -99,7 +103,7 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                //if (!testSuite.Name.Equals("SceneRunnerTest"))
+              //  if (!testSuite.Name.Equals("SceneRunnerGDScriptSceneTest"))
                 //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)

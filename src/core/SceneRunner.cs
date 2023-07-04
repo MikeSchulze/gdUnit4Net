@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using System.Linq;
 
 namespace GdUnit4
 {
+    using System.Reflection;
     using Executions;
     using Godot;
     using static Assertions;
@@ -53,7 +55,7 @@ namespace GdUnit4
                 Instance = instance;
                 MethodName = methodName;
                 Args = args;
-                if (!Instance.HasMethod(MethodName))
+                if (!Instance.HasMethod(MethodName) && Instance.GetType().GetMethod(methodName) == null)
                     throw new MissingMethodException($"The method '{MethodName}' not exist on loaded scene.");
             }
 
@@ -66,20 +68,14 @@ namespace GdUnit4
             public async Task IsNotNull() =>
                 await CallAndWaitIsFinished((current) => AssertThat(current).IsNotNull());
 
-            private delegate void Predicate(Godot.Variant current);
+            private delegate void Predicate(object? current);
 
             private async Task CallAndWaitIsFinished(Predicate comperator) => await Task.Run(async () =>
             {
                 // sync to main thread
                 await ISceneRunner.SyncProcessFrame;
-                var current = Instance.Call(MethodName, Args);
-                if (current.VariantType != Variant.Type.Nil && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
-                {
-                    Variant[] result = await Instance.ToSignal(current.As<GodotObject>(), "completed");
-                    comperator(result[0]);
-                    return;
-                }
-                comperator(current);
+                var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args);
+                comperator(value);
             });
         }
 
@@ -99,7 +95,10 @@ namespace GdUnit4.Core
 {
     using Godot;
     using Executions;
-    internal sealed class SceneRunner : GdUnit4.ISceneRunner
+    using System.IO;
+    using System.Reflection;
+
+    internal sealed class SceneRunner : ISceneRunner
     {
         private SceneTree SceneTree { get; set; }
         private Node CurrentScene { get; set; }
@@ -109,9 +108,16 @@ namespace GdUnit4.Core
         private double TimeFactor { get; set; }
         private int SavedIterationsPerSecond { get; set; }
         private InputEvent? LastInputEvent { get; set; }
+        private ICollection<Key> KeyOnPress = new HashSet<Key>();
+        private ICollection<MouseButton> MouseButtonOnPress = new HashSet<MouseButton>();
+
+        private Guid Uuid { get; set; } = Guid.NewGuid();
+
 
         public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false)
         {
+            if (!Godot.FileAccess.FileExists(resourcePath))
+                throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource not exists.");
             Verbose = verbose;
             SceneAutoFree = autoFree;
             ExecutionContext.RegisterDisposable(this);
@@ -123,13 +129,29 @@ namespace GdUnit4.Core
             SetTimeFactor(1.0);
         }
 
-        public GdUnit4.ISceneRunner SetMousePos(Vector2 position)
+        private void ResetInputToDefault()
         {
-            CurrentScene.GetViewport().WarpMouse(position);
-            CurrentMousePos = position;
-            return this;
+            // reset all mouse button to inital state if need
+            foreach (var button in MouseButtonOnPress)
+            {
+                if (Input.IsMouseButtonPressed(button))
+                    SimulateMouseButtonRelease(button);
+            }
+            MouseButtonOnPress.Clear();
+
+            foreach (var key in KeyOnPress)
+            {
+                if (Input.IsKeyPressed(key))
+                    SimulateKeyRelease(key);
+            }
+            KeyOnPress.Clear();
+            Input.FlushBufferedEvents();
         }
 
+        /// <summary>
+        /// copy over current active modifiers
+        /// </summary>
+        /// <param name="inputEvent"></param>
         private void ApplyInputModifiers(InputEventWithModifiers inputEvent)
         {
             if (LastInputEvent is InputEventWithModifiers lastInputEvent)
@@ -141,92 +163,191 @@ namespace GdUnit4.Core
             }
         }
 
-        public GdUnit4.ISceneRunner SimulateKeyPress(Key keyCode, bool shiftPressed = false, bool controlPressed = false)
+        /// <summary>
+        /// copy over current active mouse mask and combine with curren mask
+        /// </summary>
+        /// <param name="inputEvent"></param>
+        private void ApplyInputMouseMask(InputEvent inputEvent)
         {
-            PrintCurrentFocus();
-            var action = new InputEventKey();
-            action.Pressed = true;
-            action.Keycode = keyCode;
-            action.PhysicalKeycode = keyCode;
-            action.AltPressed = keyCode == Key.Alt;
-            action.ShiftPressed = shiftPressed || keyCode == Key.Shift;
-            action.CtrlPressed = controlPressed || keyCode == Key.Ctrl;
-            ApplyInputModifiers(action);
+            // first apply last mask
+            if (LastInputEvent is InputEventMouse lastInputEvent && inputEvent is InputEventMouse ie)
+                ie.ButtonMask |= lastInputEvent.ButtonMask;
+            if (inputEvent is InputEventMouseButton inputEventMouseButton)
+            {
+                int button_mask = 1 << ((int)inputEventMouseButton.ButtonIndex - 1);
+                MouseButtonMask mask = (MouseButtonMask)Enum.ToObject(typeof(MouseButtonMask), button_mask);
+                if (inputEventMouseButton.IsPressed())
+                    inputEventMouseButton.ButtonMask |= mask;
+                else
+                    inputEventMouseButton.ButtonMask ^= mask;
+            }
+        }
 
-            Print("	process key event {0} ({1}) <- {2}:{3}", CurrentScene, SceneName(), action.AsText(), action.IsPressed() ? "pressing" : "released");
+        /// <summary>
+        /// copy over last mouse position if need
+        /// </summary>
+        /// <param name="inputEvent"></param>
+        private void ApplyInputMousePosition(InputEvent inputEvent)
+        {
+            if (LastInputEvent is InputEventMouse lastInputEvent && inputEvent is InputEventMouseButton ie)
+                ie.Position = lastInputEvent.Position;
+        }
 
+        /// <summary>
+        /// for handling read https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html?highlight=inputevent#how-does-it-work
+        /// </summary>
+        /// <param name="inputEvent"></param>
+        /// <returns></returns>
+        private ISceneRunner HandleInputEvent(InputEvent inputEvent)
+        {
+            if (inputEvent is InputEventMouse ie)
+                Input.WarpMouse(ie.Position);
+            Input.ParseInputEvent(inputEvent);
+            Input.FlushBufferedEvents();
+
+            if (Godot.GodotObject.IsInstanceValid(CurrentScene))
+            {
+                Print($"	process event {CurrentScene} ({SceneName()}) <- {inputEvent.AsText()}");
+                if (CurrentScene.HasMethod("_gui_input"))
+                    CurrentScene.Call("_gui_input", inputEvent);
+                if (CurrentScene.HasMethod("_unhandled_input"))
+                    CurrentScene.Call("_unhandled_input", inputEvent);
+                CurrentScene.GetViewport().SetInputAsHandled();
+            }
+            // save last input event needs to be merged with next InputEventMouseButton
+            LastInputEvent = inputEvent;
             return this;
         }
 
-        public GdUnit4.ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false)
+        public ISceneRunner SimulateKeyPress(Key keyCode, bool shiftPressed = false, bool controlPressed = false)
+        {
+            PrintCurrentFocus();
+            var inputEvent = new InputEventKey();
+            inputEvent.Pressed = true;
+            inputEvent.Keycode = keyCode;
+            inputEvent.PhysicalKeycode = keyCode;
+            inputEvent.AltPressed = keyCode == Key.Alt;
+            inputEvent.ShiftPressed = shiftPressed || keyCode == Key.Shift;
+            inputEvent.CtrlPressed = controlPressed || keyCode == Key.Ctrl;
+            ApplyInputModifiers(inputEvent);
+            KeyOnPress.Add(keyCode);
+            return HandleInputEvent(inputEvent);
+        }
+
+        public ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false)
         {
             SimulateKeyPress(keyCode, shift, control);
             SimulateKeyRelease(keyCode, shift, control);
             return this;
         }
 
-        public GdUnit4.ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false)
+        public ISceneRunner SimulateKeyRelease(Key keyCode, bool shiftPressed = false, bool controlPressed = false)
         {
             PrintCurrentFocus();
-            var action = new InputEventKey();
-            action.Pressed = false;
-            action.Keycode = keyCode;
-            action.ShiftPressed = shift;
-            action.CtrlPressed = control;
-
-            Print("	process key event {0} ({1}) <- {2}:{3}", CurrentScene, SceneName(), action.AsText(), action.IsPressed() ? "pressing" : "released");
-
-            return this;
+            var inputEvent = new InputEventKey();
+            inputEvent.Pressed = false;
+            inputEvent.Keycode = keyCode;
+            inputEvent.PhysicalKeycode = keyCode;
+            inputEvent.AltPressed = keyCode == Key.Alt;
+            inputEvent.ShiftPressed = shiftPressed || keyCode == Key.Shift;
+            inputEvent.CtrlPressed = controlPressed || keyCode == Key.Ctrl;
+            ApplyInputModifiers(inputEvent);
+            KeyOnPress.Remove(keyCode);
+            return HandleInputEvent(inputEvent);
         }
 
-        public GdUnit4.ISceneRunner SimulateMouseMove(Vector2 relative, Vector2 speed = default)
+        public ISceneRunner SetMousePos(Vector2 position)
         {
-            var action = new InputEventMouseMotion();
-            action.Relative = relative;
-            action.Velocity = speed == default ? Vector2.One : speed;
-
-            Print("	process mouse motion event {0} ({1}) <- {2}", CurrentScene, SceneName(), action.AsText());
-
-            return this;
+            var inputEvent = new InputEventMouseMotion();
+            inputEvent.Position = position;
+            inputEvent.GlobalPosition = GetGlobalMousePosition();
+            ApplyInputModifiers(inputEvent);
+            return HandleInputEvent(inputEvent);
         }
 
-        public GdUnit4.ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex)
+        public Vector2 GetMousePosition()
         {
-            SimulateMouseButtonPress(buttonIndex);
+            if (LastInputEvent is InputEventMouse me)
+                return me.Position;
+            return CurrentScene.GetViewport().GetMousePosition();
+        }
+
+        public Vector2 GetGlobalMousePosition() =>
+            SceneTree.Root.GetMousePosition();
+
+        public ISceneRunner SimulateMouseMove(Vector2 position)
+        {
+            var inputEvent = new InputEventMouseMotion();
+            inputEvent.Position = position;
+            inputEvent.Relative = position - GetMousePosition();
+            ApplyInputMouseMask(inputEvent);
+            ApplyInputModifiers(inputEvent);
+            return HandleInputEvent(inputEvent);
+        }
+
+        /*
+                async Task  SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default)
+                {
+
+                    if (LastInputEvent is InputEventMouse lastInputEvent)
+                    {
+                        var current_pos = lastInputEvent.Position;
+                        var final_pos = current_pos + relative;
+                        var delta_milli = speed.X * 0.1;
+                        var t = 0.0;
+
+                        while (!current_pos.IsEqualApprox(final_pos))
+                        {
+                            t += delta_milli * speed.X;
+                            SimulateMouseMove(current_pos);
+                            await SceneTree.CreateTimer(delta_milli).Timeout;
+                            current_pos = current_pos.Lerp(final_pos, (float)t);
+                        }
+                        SimulateMouseMove(final_pos);
+
+
+                        await SceneTree.ProcessFrame;
+                    }
+                    return;
+                }
+                */
+
+        public ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex, bool doubleClick = false)
+        {
+            SimulateMouseButtonPress(buttonIndex, doubleClick);
             SimulateMouseButtonRelease(buttonIndex);
             return this;
         }
 
-        public GdUnit4.ISceneRunner SimulateMouseButtonPress(MouseButton buttonIndex)
+        public ISceneRunner SimulateMouseButtonPress(MouseButton buttonIndex, bool doubleClick = false)
         {
             PrintCurrentFocus();
-            var action = new InputEventMouseButton();
-            action.ButtonIndex = buttonIndex;
-            action.ButtonMask = MouseButtonMask.Left;
-            action.Pressed = true;
-            action.Position = CurrentMousePos;
-            action.GlobalPosition = CurrentMousePos;
+            var inputEvent = new InputEventMouseButton();
+            inputEvent.ButtonIndex = buttonIndex;
+            inputEvent.Pressed = true;
+            inputEvent.DoubleClick = doubleClick;
 
-            Print("	process mouse button event {0} ({1}) <- {2}", CurrentScene, SceneName(), action.AsText());
-
-            return this;
+            MouseButtonOnPress.Add(buttonIndex);
+            ApplyInputMousePosition(inputEvent);
+            ApplyInputMouseMask(inputEvent);
+            ApplyInputModifiers(inputEvent);
+            return HandleInputEvent(inputEvent);
         }
 
-        public GdUnit4.ISceneRunner SimulateMouseButtonRelease(MouseButton buttonIndex)
+        public ISceneRunner SimulateMouseButtonRelease(MouseButton buttonIndex)
         {
-            var action = new InputEventMouseButton();
-            action.ButtonIndex = buttonIndex;
-            action.ButtonMask = 0;
-            action.Pressed = false;
-            action.Position = CurrentMousePos;
-            action.GlobalPosition = CurrentMousePos;
+            var inputEvent = new InputEventMouseButton();
+            inputEvent.ButtonIndex = buttonIndex;
+            inputEvent.Pressed = false;
 
-            Print("	process mouse button event {0} ({1}) <- {2}", CurrentScene, SceneName(), action.AsText());
-
-            return this;
+            MouseButtonOnPress.Remove(buttonIndex);
+            ApplyInputMousePosition(inputEvent);
+            ApplyInputMouseMask(inputEvent);
+            ApplyInputModifiers(inputEvent);
+            return HandleInputEvent(inputEvent);
         }
 
-        public GdUnit4.ISceneRunner SetTimeFactor(double timeFactor = 1.0)
+        public ISceneRunner SetTimeFactor(double timeFactor = 1.0)
         {
             TimeFactor = Math.Min(9.0, timeFactor);
             ActivateTimeFactor();
@@ -246,7 +367,7 @@ namespace GdUnit4.Core
         {
             var timeShiftFrames = Math.Max(1, frames / TimeFactor);
             for (int frame = 0; frame < timeShiftFrames; frame++)
-                await AwaitIdleFrame();
+                await ISceneRunner.SyncProcessFrame;
         }
 
         private void ActivateTimeFactor()
@@ -286,25 +407,16 @@ namespace GdUnit4.Core
 
         private string SceneName()
         {
-            Script? sceneScript = (Script?)CurrentScene.GetScript();
-
-            if (!(sceneScript is Script))
-                return CurrentScene.Name;
-            if (!CurrentScene.Name.IsEmpty)
-                return CurrentScene.Name;
-
-            return sceneScript.ResourceName;
+            GDScript? sceneScript = CurrentScene.GetScript().Obj as GDScript;
+            if (sceneScript == null)
+                return CurrentScene.Name.ToString();
+            return sceneScript.ResourceName.GetBaseName();
         }
 
         public Node Scene() => CurrentScene;
 
         public GdUnitAwaiter.GodotMethodAwaiter<V> AwaitMethod<[Godot.MustBeVariant] V>(string methodName) =>
             new GdUnitAwaiter.GodotMethodAwaiter<V>(CurrentScene, methodName);
-
-
-        public async Task AwaitIdleFrame() => await Task.Run(() =>
-            SceneTree.ToSignal(SceneTree, SceneTree.SignalName.ProcessFrame));
-
 
         public async Task AwaitMillis(uint timeMillis)
         {
@@ -316,6 +428,10 @@ namespace GdUnit4.Core
 
         public async Task AwaitSignal(string signal, params Godot.Variant[] args) =>
             await GdUnitAwaiter.AwaitSignal(CurrentScene, signal, args);
+
+
+        public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
+
 
         public Variant Invoke(string name, params Variant[] args)
         {
@@ -342,7 +458,8 @@ namespace GdUnit4.Core
         }
 
         private bool PropertyExists(string name) =>
-            CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+            CurrentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Any((field) => field.Name.Equals(name)) || CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
 
         public Node FindChild(string name, bool recursive = true, bool owned = false) =>
             CurrentScene.FindChild(name, recursive, owned);
@@ -353,13 +470,21 @@ namespace GdUnit4.Core
             DisplayServer.WindowMoveToForeground();
         }
 
+        internal bool disposed = false;
         public void Dispose()
         {
+            if (disposed)
+                return;
             DeactivateTimeFactor();
+            ResetInputToDefault();
             DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
-            SceneTree.Root.RemoveChild(CurrentScene);
-            if (SceneAutoFree)
-                CurrentScene.QueueFree();
+            if (CurrentScene != null)
+            {
+                SceneTree.Root.RemoveChild(CurrentScene);
+                if (SceneAutoFree)
+                    CurrentScene.Free();
+            }
+            disposed = true;
         }
     }
 }

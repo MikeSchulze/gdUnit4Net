@@ -68,7 +68,7 @@ namespace GdUnit4.Executions
                 Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             try
             {
-
+                await ISceneRunner.SyncProcessFrame;
                 using (ExecutionContext context = new ExecutionContext(testSuite, _eventListeners, ReportOrphanNodesEnabled))
                 {
                     var task = new TestSuiteExecutionStage(testSuite).Execute(context);
