@@ -79,7 +79,7 @@ namespace GdUnit4
         /// <param name="relative">The relative position, e.g. the mouse position offset</param>
         /// <param name="speed">The mouse speed in pixels per second.</param>
         /// <returns>SceneRunner</returns>
-        //ISceneRunner SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default);
+        Task SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default);
 
         /// <summary>
         /// Simulates a mouse button pressed.

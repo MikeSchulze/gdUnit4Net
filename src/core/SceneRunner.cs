@@ -174,13 +174,18 @@ namespace GdUnit4.Core
                 ie.ButtonMask |= lastInputEvent.ButtonMask;
             if (inputEvent is InputEventMouseButton inputEventMouseButton)
             {
-                int button_mask = 1 << ((int)inputEventMouseButton.ButtonIndex - 1);
-                MouseButtonMask mask = (MouseButtonMask)Enum.ToObject(typeof(MouseButtonMask), button_mask);
+                MouseButtonMask mask = toMouseButtonMask(inputEventMouseButton.ButtonIndex);
                 if (inputEventMouseButton.IsPressed())
                     inputEventMouseButton.ButtonMask |= mask;
                 else
                     inputEventMouseButton.ButtonMask ^= mask;
             }
+        }
+
+        internal static MouseButtonMask toMouseButtonMask(MouseButton button)
+        {
+            int button_mask = 1 << ((int)button - 1);
+            return (MouseButtonMask)Enum.ToObject(typeof(MouseButtonMask), button_mask);
         }
 
         /// <summary>
@@ -285,32 +290,28 @@ namespace GdUnit4.Core
             return HandleInputEvent(inputEvent);
         }
 
-        /*
-                async Task  SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default)
+
+        public async Task SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default)
+        {
+            if (LastInputEvent is InputEventMouse lastInputEvent)
+            {
+                var current_pos = lastInputEvent.Position;
+                var final_pos = current_pos + relative;
+                double delta_milli = speed.X * 0.1;
+                var t = 0.0;
+
+                while (!current_pos.IsEqualApprox(final_pos))
                 {
-
-                    if (LastInputEvent is InputEventMouse lastInputEvent)
-                    {
-                        var current_pos = lastInputEvent.Position;
-                        var final_pos = current_pos + relative;
-                        var delta_milli = speed.X * 0.1;
-                        var t = 0.0;
-
-                        while (!current_pos.IsEqualApprox(final_pos))
-                        {
-                            t += delta_milli * speed.X;
-                            SimulateMouseMove(current_pos);
-                            await SceneTree.CreateTimer(delta_milli).Timeout;
-                            current_pos = current_pos.Lerp(final_pos, (float)t);
-                        }
-                        SimulateMouseMove(final_pos);
-
-
-                        await SceneTree.ProcessFrame;
-                    }
-                    return;
+                    t += delta_milli * speed.X;
+                    SimulateMouseMove(current_pos);
+                    await AwaitMillis((uint)(delta_milli * 1000));
+                    current_pos = current_pos.Lerp(final_pos, (float)t);
                 }
-                */
+                SimulateMouseMove(final_pos);
+                await ISceneRunner.SyncProcessFrame;
+            }
+        }
+
 
         public ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex, bool doubleClick = false)
         {
