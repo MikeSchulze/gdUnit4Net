@@ -16,6 +16,7 @@ namespace GdUnit4.Executions
             context.MemoryPool.SetActive(StageName);
             context.OrphanMonitor.Start(true);
             await base.Execute(context);
+            await ISceneRunner.SyncProcessFrame;
             context.MemoryPool.ReleaseRegisteredObjects();
             context.OrphanMonitor.Stop();
 

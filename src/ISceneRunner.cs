@@ -40,13 +40,6 @@ namespace GdUnit4
         public static ISceneRunner Load(string resourcePath, bool autofree = false, bool verbose = false) => new Core.SceneRunner(resourcePath, autofree, verbose);
 
         /// <summary>
-        /// Sets the actual mouse position relative to the viewport.
-        /// </summary>
-        /// <param name="position">The position in x/y coordinates</param>
-        /// <returns></returns>
-        ISceneRunner SetMousePos(Vector2 position);
-
-        /// <summary>
         /// Simulates that a key has been pressed.
         /// </summary>
         /// <param name="keyCode">the key code e.g. 'Key.Enter'</param>
@@ -74,26 +67,35 @@ namespace GdUnit4
         ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false);
 
         /// <summary>
-        /// Simulates a mouse moved to relative position by given speed.
+        /// Simulates a mouse moved to final position.
         /// </summary>
-        /// <param name="relative">The mouse position relative to the previous position (position at the last frame).</param>
+        /// <param name="position">The position in x/y coordinates</param>
+        /// <returns>SceneRunner</returns>
+        ISceneRunner SimulateMouseMove(Vector2 position);
+
+        /// <summary>
+        /// Simulates a mouse move to the relative coordinates (offset).
+        /// </summary>
+        /// <param name="relative">The relative position, e.g. the mouse position offset</param>
         /// <param name="speed">The mouse speed in pixels per second.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseMove(Vector2 relative, Vector2 speeds = default);
+        Task SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default);
 
         /// <summary>
         /// Simulates a mouse button pressed.
         /// </summary>
         /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
+        /// <param name="doubleClick">Indicates the button was double clicked.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseButtonPressed(MouseButton button);
+        ISceneRunner SimulateMouseButtonPressed(MouseButton button, bool doubleClick = false);
 
         /// <summary>
         /// Simulates a mouse button press. (holding)
         /// </summary>
         /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
+        /// <param name="doubleClick">Indicates the button was double clicked.</param>
         /// <returns>SceneRunner</returns>
-        ISceneRunner SimulateMouseButtonPress(MouseButton button);
+        ISceneRunner SimulateMouseButtonPress(MouseButton button, bool doubleClick = false);
 
         /// <summary>
         /// Simulates a mouse button released.
@@ -101,6 +103,25 @@ namespace GdUnit4
         /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
         /// <returns>SceneRunner</returns>
         ISceneRunner SimulateMouseButtonRelease(MouseButton button);
+
+        /// <summary>
+        /// Sets the mouse cursor to given position relative to the viewport.
+        /// </summary>
+        /// <param name="position">The absolute mouse position.</param>
+        /// <returns>SceneRunner</returns>
+        ISceneRunner SetMousePos(Vector2 position);
+
+        /// <summary>
+        /// Gets the current mouse position of the current viewport
+        /// </summary>
+        /// <returns>Vector2</returns>
+        Vector2 GetMousePosition();
+
+        /// <summary>
+        /// Gets the current global mouse position of the current window
+        /// </summary>
+        /// <returns>Vector2</returns>
+        Vector2 GetGlobalMousePosition();
 
         /// <summary>
         /// Sets how fast or slow the scene simulation is processed (clock ticks versus the real).

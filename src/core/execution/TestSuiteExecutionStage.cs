@@ -42,7 +42,7 @@ namespace GdUnit4.Executions
 
                     if (testCaseContext.IsFailed || testCaseContext.IsError)
                     {
-                       // break;
+                        break;
                     }
 
                 }

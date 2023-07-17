@@ -38,6 +38,8 @@ namespace GdUnit4
                     Console.Print($"{testEvent.SuiteName}", ConsoleColor.Blue);
                     if (testEvent.IsSuccess)
                         Console.Print(" PASSED", ConsoleColor.Green, GdUnitConsole.BOLD);
+                    else if (testEvent.IsWarning)
+                        Console.Print(" WARNING", ConsoleColor.Yellow, GdUnitConsole.BOLD);
                     else
                         Console.Print(" FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
                     Console.Println($" {testEvent.ElapsedInMs.Humanize()}").NewLine();
@@ -56,6 +58,8 @@ namespace GdUnit4
                     Failed = true;
                     Console.Print("FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
                 }
+                else if (testEvent.IsWarning)
+                    Console.Print(" WARNING", ConsoleColor.Yellow, GdUnitConsole.BOLD);
                 else if (testEvent.OrphanCount > 0)
                     Console.Print("PASSED", ConsoleColor.Yellow, GdUnitConsole.BOLD | GdUnitConsole.UNDERLINE);
                 else
@@ -63,7 +67,7 @@ namespace GdUnit4
 
                 Console.Println($" {testEvent.ElapsedInMs.Humanize()}", ConsoleColor.Cyan);
                 Console.RestoreCursor("LastLine");
-                if (testEvent.IsFailed || testEvent.IsError)
+                if (!testEvent.IsSuccess)
                     WriteFailureReport(testEvent);
             }
         }
@@ -86,7 +90,7 @@ namespace GdUnit4
             var cmdArgs = Godot.OS.GetCmdlineArgs();
             Console.ForegroundColor = ConsoleColor.White;
             // TODO check this line, it results into a crash when resizing the terminal
-            Console.BufferHeight = 100;
+            //Console.BufferHeight = 100;
             Console.Clear();
             Console.Title = "GdUnit4TestRunner";
             Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
@@ -99,7 +103,7 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                //if (!testSuite.Name.Equals("SceneRunnerTest"))
+                //if (!testSuite.Name.Equals("SceneRunnerInputEventIntegrationTest"))
                 //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)
