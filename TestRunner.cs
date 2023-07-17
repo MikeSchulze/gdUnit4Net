@@ -83,7 +83,7 @@ namespace GdUnit4
 
     partial class TestRunner : Godot.Node
     {
-        private bool FailFast { get; set; } = true;
+        private bool FailFast { get; set; } = false;
 
         public override async void _Ready()
         {
@@ -103,8 +103,8 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                if (!testSuite.Name.Equals("SceneRunnerInputEventIntegrationTest"))
-                    continue;
+                //if (!testSuite.Name.Equals("SceneRunnerInputEventIntegrationTest"))
+                //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)
                     break;

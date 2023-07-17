@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace GdUnit4
 {
-    using System.Reflection;
     using Executions;
     using Godot;
     using static Assertions;
@@ -95,8 +96,7 @@ namespace GdUnit4.Core
 {
     using Godot;
     using Executions;
-    using System.IO;
-    using System.Reflection;
+
 
     internal sealed class SceneRunner : ISceneRunner
     {
