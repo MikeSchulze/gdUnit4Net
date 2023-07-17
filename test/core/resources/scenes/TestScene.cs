@@ -34,7 +34,7 @@ public partial class TestScene : Control
 
     public async void _OnTestPressed(long buttonId)
     {
-        Console.WriteLine($"pressed {buttonId}");
+        // Console.WriteLine($"pressed {buttonId}");
         ColorRect box;
         switch (buttonId)
         {

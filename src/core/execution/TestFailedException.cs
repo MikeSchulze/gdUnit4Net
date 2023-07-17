@@ -27,14 +27,10 @@ namespace GdUnit4.Exceptions
                 if (isFound)
                     return frame.GetFileLineNumber();
             }
-            frame = new StackFrame(3 + frameOffset, true);
-            // fix stack offset if the assert is delegated
-            if (frame.GetFileName() != null && frame.GetFileName()!.Replace('\\', '/').Contains("src/asserts/"))
-                frame = new StackFrame(4 + frameOffset, true);
-            return frame.GetFileLineNumber();
+            return ReverseScanFailureLineNumber(frameOffset, stackOffset);
         }
 
-        private static int ScanFailureLineNumber_save(int frameOffset, int stackOffset)
+        private static int ReverseScanFailureLineNumber(int frameOffset, int stackOffset)
         {
             bool isFound = false;
             StackFrame frame;

@@ -10,8 +10,9 @@ namespace GdUnit4.Tests
     [TestSuite]
     class SceneRunnerGDScriptSceneTest
     {
-
+#nullable disable
         private ISceneRunner SceneRunner;
+#nullable enable
 
         [Before]
         public void Setup()

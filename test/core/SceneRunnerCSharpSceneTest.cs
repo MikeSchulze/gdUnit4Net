@@ -1,19 +1,17 @@
 using System.IO;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace GdUnit4.Tests
 {
-    using System;
-    using System.Reflection;
     using Godot;
     using static Assertions;
 
     [TestSuite]
     class SceneRunnerCSharpSceneTest
     {
-
+#nullable disable
         private ISceneRunner SceneRunner;
+#nullable enable
 
         [Before]
         public void Setup()

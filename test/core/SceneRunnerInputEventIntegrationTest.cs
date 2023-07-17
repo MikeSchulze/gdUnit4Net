@@ -1,21 +1,19 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 
 namespace GdUnit4.Tests
 {
+    using System.Linq;
     using Godot;
     using static Assertions;
-
 
     [TestSuite]
     class SceneRunnerInputEventIntegrationTest
     {
-
-        //pragma warning disable CS8618
+#nullable disable
         private ISceneRunner SceneRunner;
-        //pragma warning restore CS8618
+#nullable enable
 
         [Before]
         public void Setup()
@@ -75,6 +73,20 @@ namespace GdUnit4.Tests
             SceneMock.Verify(m => m.ColorCycle(), Times.Once);
             scene.Free();
 
+        }
+
+        [TestCase]
+        public void ToMouseButtonMask()
+        {
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Left)).IsEqual(MouseButtonMask.Left);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Middle)).IsEqual(MouseButtonMask.Middle);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Right)).IsEqual(MouseButtonMask.Right);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelUp)).IsEqual((MouseButtonMask)8L);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelDown)).IsEqual((MouseButtonMask)16L);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelLeft)).IsEqual((MouseButtonMask)32L);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelRight)).IsEqual((MouseButtonMask)64L);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Xbutton1)).IsEqual(MouseButtonMask.MbXbutton1);
+            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Xbutton2)).IsEqual(MouseButtonMask.MbXbutton2);
         }
 
         [TestCase]
@@ -337,10 +349,10 @@ namespace GdUnit4.Tests
             mouseEvent.Pressed = true;
             mouseEvent.DoubleClick = false;
             mouseEvent.ButtonIndex = MouseButton.Left;
-            mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Left);
-            //verify(_scene_spy, 1)._input(event)
-            AssertThat(Input.IsMouseButtonPressed(mouseEvent.ButtonIndex)).IsTrue();
-            AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+            mouseEvent.ButtonMask = MouseButtonMask.Left;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left);
         }
 
         [TestCase]
@@ -357,10 +369,10 @@ namespace GdUnit4.Tests
             mouseEvent.Pressed = true;
             mouseEvent.DoubleClick = true;
             mouseEvent.ButtonIndex = MouseButton.Left;
-            mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Left);
-            //verify(_scene_spy, 1)._input(event)
-            AssertThat(Input.IsMouseButtonPressed(mouseEvent.ButtonIndex)).IsTrue();
-            AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+            mouseEvent.ButtonMask = MouseButtonMask.Left;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left);
         }
 
         [TestCase]
@@ -377,10 +389,10 @@ namespace GdUnit4.Tests
             mouseEvent.Pressed = true;
             mouseEvent.DoubleClick = false;
             mouseEvent.ButtonIndex = MouseButton.Right;
-            mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Right);
-            //verify(_scene_spy, 1)._input(event)
-            AssertThat(Input.IsMouseButtonPressed(mouseEvent.ButtonIndex)).IsTrue();
-            AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+            mouseEvent.ButtonMask = MouseButtonMask.Right;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Right);
         }
 
         [TestCase]
@@ -397,11 +409,257 @@ namespace GdUnit4.Tests
             mouseEvent.Pressed = true;
             mouseEvent.DoubleClick = true;
             mouseEvent.ButtonIndex = MouseButton.Right;
-            mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Right);
-            //verify(_scene_spy, 1)._input(event)
-            AssertThat(Input.IsMouseButtonPressed(mouseEvent.ButtonIndex)).IsTrue();
-            AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+            mouseEvent.ButtonMask = MouseButtonMask.Right;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Right);
         }
 
+        [TestCase]
+        public async Task SimulateMouseButtonPressLeftAndRight()
+        {
+            // simulate mouse button press left+right
+            var gmp = SceneRunner.GetGlobalMousePosition();
+            SceneRunner.SimulateMouseButtonPress(MouseButton.Left);
+            SceneRunner.SimulateMouseButtonPress(MouseButton.Right);
+            await ISceneRunner.SyncProcessFrame;
+
+
+            // results in two events, first is left mouse button
+            var mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = true;
+            mouseEvent.ButtonIndex = MouseButton.Left;
+            mouseEvent.ButtonMask = MouseButtonMask.Left;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+
+            // second is left+right and combined mask
+            mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = true;
+            mouseEvent.ButtonIndex = MouseButton.Right;
+            mouseEvent.ButtonMask = MouseButtonMask.Left | MouseButtonMask.Right;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left | MouseButtonMask.Right);
+        }
+
+        [TestCase]
+        public async Task SimulateMouseButtonPressLeftAndRightAndRelease()
+        {
+            // simulate mouse button press left+right
+            var gmp = SceneRunner.GetGlobalMousePosition();
+            SceneRunner.SimulateMouseButtonPress(MouseButton.Left);
+            SceneRunner.SimulateMouseButtonPress(MouseButton.Right);
+            await ISceneRunner.SyncProcessFrame;
+
+            // will results into two events
+            // first for left mouse button
+            var mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = true;
+            mouseEvent.ButtonIndex = MouseButton.Left;
+            mouseEvent.ButtonMask = MouseButtonMask.Left;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+
+            // second is left+right and combined mask
+            mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = true;
+            mouseEvent.ButtonIndex = MouseButton.Right;
+            mouseEvent.ButtonMask = MouseButtonMask.Left | MouseButtonMask.Right;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsTrue();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left | MouseButtonMask.Right);
+
+            // now release the right button
+            gmp = SceneRunner.GetGlobalMousePosition();
+            SceneRunner.SimulateMouseButtonPressed(MouseButton.Right);
+            await ISceneRunner.SyncProcessFrame;
+            // will result in right button press false but stay with mask for left pressed
+            mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = false;
+            mouseEvent.ButtonIndex = MouseButton.Right;
+            mouseEvent.ButtonMask = MouseButtonMask.Left;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsFalse();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left);
+
+            // finally relase left button
+            gmp = SceneRunner.GetGlobalMousePosition();
+            SceneRunner.SimulateMouseButtonPressed(MouseButton.Left);
+            await ISceneRunner.SyncProcessFrame;
+            // will result in right button press false but stay with mask for left pressed
+            mouseEvent = new InputEventMouseButton();
+            mouseEvent.Position = Vector2.Zero;
+            mouseEvent.GlobalPosition = gmp;
+            mouseEvent.Pressed = false;
+            mouseEvent.ButtonIndex = MouseButton.Left;
+            mouseEvent.ButtonMask = 0;
+            //verify(_scene_spy, 1)._input(mouseEvent)
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsFalse();
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Right)).IsFalse();
+            AssertThat(Input.GetMouseButtonMask()).IsEqual((MouseButtonMask)0L);
+        }
+
+        [TestCase]
+        public async Task SimulateMouseButtonPressed()
+        {
+            MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+            foreach (var mouse_button in buttons)
+            {
+                // simulate mouse button press and release
+                var gmp = SceneRunner.GetGlobalMousePosition();
+                SceneRunner.SimulateMouseButtonPressed(mouse_button);
+                await ISceneRunner.SyncProcessFrame;
+
+                // it genrates two events, first for press and second as released
+                var mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = true;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                //verify(_scene_spy, 1)._input(mouseEvent)
+
+
+                mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = false;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = (MouseButtonMask)0L;
+                //verify(_scene_spy, 1)._input(mouseEvent)
+                AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsFalse();
+                AssertThat(Input.GetMouseButtonMask()).IsEqual((MouseButtonMask)0L);
+                //verify(_scene_spy, 2)._input(any_class(InputEventMouseButton))
+                //reset(_scene_spy)
+            }
+        }
+
+        [TestCase]
+        public async Task SimulateMouseButtonPressedDoubleclick()
+        {
+            MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+            foreach (var mouse_button in buttons)
+            {
+                // simulate mouse button press and release by double_click
+                var gmp = SceneRunner.GetGlobalMousePosition();
+                SceneRunner.SimulateMouseButtonPressed(mouse_button, true);
+                await ISceneRunner.SyncProcessFrame;
+
+                // it genrates two events, first for press and second as released
+                var mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = true;
+                mouseEvent.DoubleClick = true;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                //verify(_scene_spy, 1)._input(mouseEvent)
+
+                mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = false;
+                mouseEvent.DoubleClick = false;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = (MouseButtonMask)0L;
+                //verify(_scene_spy, 1)._input(mouseEvent)
+
+                AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsFalse();
+                AssertThat(Input.GetMouseButtonMask()).IsEqual((MouseButtonMask)0L);
+                //verify(_scene_spy, 2)._input(any_class(InputEventMouseButton))
+                //reset(_scene_spy)
+            }
+        }
+
+        [TestCase]
+        public async Task SimulateMouseButtonPressAndRelease()
+        {
+            MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+            foreach (var mouse_button in buttons)
+            {
+                var gmp = SceneRunner.GetGlobalMousePosition();
+                // simulate mouse button press and release
+                SceneRunner.SimulateMouseButtonPress(mouse_button);
+                await ISceneRunner.SyncProcessFrame;
+
+                var mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = true;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                //verify(_scene_spy, 1)._input(mouseEvent)
+                AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsTrue();
+                AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+
+                // now simulate mouse button release
+                gmp = SceneRunner.GetGlobalMousePosition();
+                SceneRunner.SimulateMouseButtonRelease(mouse_button);
+                await ISceneRunner.SyncProcessFrame;
+
+                mouseEvent = new InputEventMouseButton();
+                mouseEvent.Position = Vector2.Zero;
+                mouseEvent.GlobalPosition = gmp;
+                mouseEvent.Pressed = false;
+                mouseEvent.ButtonIndex = mouse_button;
+                mouseEvent.ButtonMask = (MouseButtonMask)0L;
+                //verify(_scene_spy, 1)._input(mouseEvent)
+                AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsFalse();
+                AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);
+            }
+        }
+
+        [TestCase]
+        public async Task MouseDragAndDrop()
+        {
+            var DragAndDropSceneRunner = ISceneRunner.Load("res://test/core/resources/scenes/DragAndDrop/DragAndDropTestScene.tscn", true);
+            //var spy_scene = spy("res://addons/gdUnit4/test/core/resources/scenes/drag_and_drop/DragAndDropTestScene.tscn")
+            //var runner := scene_runner(spy_scene)
+
+            var scene = DragAndDropSceneRunner.Scene();
+            TextureRect slot_left = scene.GetNode<TextureRect>(new NodePath($"/root/DragAndDropScene/left/TextureRect"));
+            TextureRect slot_right = scene.GetNode<TextureRect>(new NodePath($"/root/DragAndDropScene/right/TextureRect"));
+
+            var save_mouse_pos = DragAndDropSceneRunner.GetMousePosition();
+            // set inital mouse pos over the left slot
+            var mouse_pos = slot_left.GlobalPosition + new Vector2(10, 10);
+
+            DragAndDropSceneRunner.SetMousePos(mouse_pos);
+            await DragAndDropSceneRunner.AwaitMillis(1000);
+            await ISceneRunner.SyncProcessFrame;
+
+            var mouseEvent = new InputEventMouseMotion();
+            mouseEvent.Position = mouse_pos;
+            mouseEvent.GlobalPosition = save_mouse_pos;
+            //verify(spy_scene, 1)._gui_input(mouseEvent)
+
+            DragAndDropSceneRunner.SimulateMouseButtonPress(MouseButton.Left);
+            await ISceneRunner.SyncProcessFrame;
+
+            AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
+
+            //# start drag&drop to left pannel
+            foreach (var i in Enumerable.Range(0, 20))
+            {
+                DragAndDropSceneRunner.SimulateMouseMove(mouse_pos + new Vector2(i * .5f * i, 0));
+                await DragAndDropSceneRunner.AwaitMillis(40);
+            }
+            DragAndDropSceneRunner.SimulateMouseButtonRelease(MouseButton.Left);
+            await ISceneRunner.SyncProcessFrame;
+
+            AssertThat(slot_right.Texture).IsEqual(slot_left.Texture);
+        }
     }
 }
