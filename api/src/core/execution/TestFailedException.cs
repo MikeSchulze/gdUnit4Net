@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace GdUnit4.Exceptions
 {
-    internal sealed class TestFailedException : System.Exception
+    public sealed class TestFailedException : System.Exception
     {
         public TestFailedException(string message, int frameOffset = 0, int lineNumber = -1) : base(message)
         {

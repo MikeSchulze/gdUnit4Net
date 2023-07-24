@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using GdUnit4.Core;
 using System.IO;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("GdUnit4MonoTest")]
 
 namespace GdUnit4.Executions
 {
