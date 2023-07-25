@@ -30,7 +30,7 @@ namespace GdUnit4.Tests
         [BeforeTest]
         public void BeforeTest()
         {
-            SceneRunner = ISceneRunner.Load("res://test/core/resources/scenes/TestSceneGDScript.tscn", true);
+            SceneRunner = ISceneRunner.Load("res://core/resources/scenes/TestSceneGDScript.tscn", true);
             AssertThat(SceneRunner).IsNotNull();
             SceneRunner.SetMousePos(new Vector2(600, 600));
         }
@@ -38,9 +38,9 @@ namespace GdUnit4.Tests
         [TestCase]
         public void LoadSceneInvalidResource()
         {
-            AssertThrown(() => ISceneRunner.Load("res://test/core/resources/scenes/NotExistingScene.tscn", true))
+            AssertThrown(() => ISceneRunner.Load("res://core/resources/scenes/NotExistingScene.tscn", true))
                 .IsInstanceOf<FileNotFoundException>()
-                .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://test/core/resources/scenes/NotExistingScene.tscn'. The resource not exists.");
+                .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://core/resources/scenes/NotExistingScene.tscn'. The resource not exists.");
         }
 
         [TestCase]
@@ -266,7 +266,7 @@ namespace GdUnit4.Tests
         [TestCase]
         public async Task DisposeSceneRunner()
         {
-            ISceneRunner SceneRunner_ = ISceneRunner.Load("res://test/core/resources/scenes/TestSceneGDScript.tscn", true);
+            ISceneRunner SceneRunner_ = ISceneRunner.Load("res://core/resources/scenes/TestSceneGDScript.tscn", true);
             SceneTree tree = (SceneTree)Godot.Engine.GetMainLoop();
 
             var currentScene = SceneRunner_.Scene();

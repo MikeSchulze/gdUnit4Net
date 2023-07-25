@@ -95,7 +95,7 @@ namespace GdUnit4
 			Console.Title = "GdUnit4TestRunner";
 			Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
 
-			var currentDir = Directory.GetCurrentDirectory() + "/test";
+			var currentDir = Directory.GetCurrentDirectory();
 			List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
 			using Executor executor = new Executor();
 			TestReporter listener = new TestReporter();
