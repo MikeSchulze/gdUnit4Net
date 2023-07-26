@@ -191,9 +191,8 @@ namespace GdUnit4.Core.Tests
 			namespace GdUnit4.Example.Test.Resources
 			{
 				using static Assertions;
-				using static Utils;
-			
-				[TestSuite]
+
+                [TestSuite]
 				public class TestPersonTest
 				{
 					// TestSuite generated from

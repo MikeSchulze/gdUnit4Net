@@ -1,5 +1,3 @@
-using Godot;
-
 public class TestPerson2
 {
 

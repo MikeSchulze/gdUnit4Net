@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 namespace GdUnit4.Tests
 {
     using System.IO;
-    using GdUnit4.Executions;
     using Godot;
     using static Assertions;
 

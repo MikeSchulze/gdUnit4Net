@@ -1,11 +1,9 @@
 // GdUnit generated TestSuite
 using Godot;
-using GdUnit4;
 
 namespace GdUnit4.Asserts
 {
     using static Assertions;
-    using static Utils;
 
     [TestSuite]
     public class Vector2AssertTest

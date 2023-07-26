@@ -1,5 +1,3 @@
-using Godot;
-
 namespace GdUnit4.Example.Test.Resources
 {
     public class TestPerson
