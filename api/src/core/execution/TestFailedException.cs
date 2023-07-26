@@ -12,10 +12,9 @@ namespace GdUnit4.Exceptions
         private static int ScanFailureLineNumber(int frameOffset, int stackOffset)
         {
             bool isFound = false;
-            StackFrame frame;
             for (var i = 0; i <= 15; i++)
             {
-                frame = new StackFrame(i, true);
+                StackFrame frame = new StackFrame(i, true);
                 var fileName = frame.GetFileName();
                 if (fileName == null)
                     continue;

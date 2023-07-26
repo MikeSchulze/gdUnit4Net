@@ -23,7 +23,7 @@ namespace GdUnit4.Asserts
             var lineNumber = new StackFrame(3, true).GetFileLineNumber();
             var isEmitted = await IsEmittedTask(signal, args);
             if (!isEmitted)
-                ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), Current, signal, lineNumber);
+                ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), lineNumber);
             return this;
         }
 
@@ -35,7 +35,7 @@ namespace GdUnit4.Asserts
             var lineNumber = new StackFrame(3, true).GetFileLineNumber();
             var isEmitted = await IsEmittedTask(signal, args);
             if (isEmitted)
-                ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), Current, signal, lineNumber);
+                ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), lineNumber);
             return this;
         }
 
@@ -64,7 +64,7 @@ namespace GdUnit4.Asserts
             return await Task.Run<bool>(() => GodotSignalCollector.Instance.IsEmitted(SignalCancellationToken, Current!, signal, args), SignalCancellationToken.Token);
         }
 
-        private void ThrowTestFailureReport(string message, object? current, object? expected, int lineNumber)
+        private void ThrowTestFailureReport(string message, int lineNumber)
         {
             CurrentFailureMessage = CustomFailureMessage ?? message;
             throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);

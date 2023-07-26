@@ -110,7 +110,7 @@ namespace GdUnit4.Core
 
             public string? Namespace { get; }
             public string Name { get; }
-            public string ClassName { get => Namespace == null ? Name : $"{Namespace}.{Name}"; }
+            public string ClassName => Namespace == null ? Name : $"{Namespace}.{Name}";
 
             public override bool Equals(object? obj)
             {

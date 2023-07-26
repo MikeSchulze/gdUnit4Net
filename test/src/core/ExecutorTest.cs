@@ -65,7 +65,7 @@ namespace GdUnit4.Tests
             return _events;
         }
 
-        private List<ITuple> ExpectedEvents(List<TestEvent> events, string suiteName, params string[] testCaseNames)
+        private List<ITuple> ExpectedEvents(string suiteName, params string[] testCaseNames)
         {
             var expectedEvents = new List<ITuple>();
 
@@ -125,7 +125,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteAllStagesSuccess", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteAllStagesSuccess", "TestCase1", "TestCase2"));
 
             AssertEventCounters(events).ContainsExactly(
                 Tuple(TESTSUITE_BEFORE, "Before", 0, 0, 0),
@@ -163,7 +163,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnStageBefore", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageBefore", "TestCase1", "TestCase2"));
 
             // we expect the testsuite is failing on stage 'Before()' and commits one failure
             // where is reported finally at TESTSUITE_AFTER event
@@ -204,7 +204,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnStageAfter", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageAfter", "TestCase1", "TestCase2"));
 
             // we expect the testsuite is failing on stage 'After()' and commits one failure
             // where is reported finally at TESTSUITE_AFTER event
@@ -245,7 +245,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnStageBeforeTest", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageBeforeTest", "TestCase1", "TestCase2"));
 
             // we expect the testsuite is failing on stage 'BeforeTest()' and commits one failure on each test case
             // because is in scope of test execution
@@ -285,7 +285,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnStageAfterTest", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageAfterTest", "TestCase1", "TestCase2"));
 
             // we expect the testsuite is failing on stage 'AfterTest()' and commits one failure on each test case
             // because is in scope of test execution
@@ -325,7 +325,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnTestCase1", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnTestCase1", "TestCase1", "TestCase2"));
 
             // we expect the test case 'TestCase1' is failing  and commits one failure
             AssertEventCounters(events).ContainsExactly(
@@ -369,7 +369,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailOnMultiStages", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailOnMultiStages", "TestCase1", "TestCase2"));
 
             // we expect failing on multiple stages
             AssertEventCounters(events).ContainsExactly(
@@ -417,7 +417,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailAndOrpahnsDetected", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrpahnsDetected", "TestCase1", "TestCase2"));
 
             // we expect orphans detected on multiple stages
             AssertEventCounters(events).ContainsExactly(
@@ -501,7 +501,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite, false);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteFailAndOrpahnsDetected", "TestCase1", "TestCase2"));
+                .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrpahnsDetected", "TestCase1", "TestCase2"));
 
             AssertEventCounters(events).ContainsExactly(
                 Tuple(TESTSUITE_BEFORE, "Before", 0, 0, 0),
@@ -546,7 +546,7 @@ namespace GdUnit4.Tests
             var events = await ExecuteTestSuite(testSuite);
 
             AssertTestCaseNames(events)
-                .ContainsExactly(ExpectedEvents(events, "TestSuiteAbortOnTestTimeout", "TestCase1", "TestCase2", "TestCase3", "TestCase4", "TestCase5"));
+                .ContainsExactly(ExpectedEvents("TestSuiteAbortOnTestTimeout", "TestCase1", "TestCase2", "TestCase3", "TestCase4", "TestCase5"));
 
 
             // "ErrorCount", "FailedCount", "OrphanCount"

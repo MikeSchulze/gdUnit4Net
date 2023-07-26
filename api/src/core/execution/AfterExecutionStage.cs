@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -43,17 +42,12 @@ namespace GdUnit4.Executions
             var afterAttributes = AfterAttribute(context);
 
             if (beforeAttribute != null && afterAttributes != null)
-                return String.Format("{0}\n Detected <{1}> orphan nodes during test suite setup stage!\n Check [b]{2}[/b] and [b]{3}[/b] for unfreed instances!",
-                    AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false),
-                    context.OrphanMonitor.OrphanCount,
-                    beforeAttribute.Name + ":" + beforeAttribute.Line,
-                    afterAttributes.Name + ":" + afterAttributes.Line);
-            return String.Format("{0}\n Detected <{1}> orphan nodes during test suite setup stage!\n Check [b]{2}[/b] for unfreed instances!",
-                AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false),
-                context.OrphanMonitor.OrphanCount,
-                beforeAttribute != null
+                return
+                    $"{AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}\n Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test suite setup stage!\n Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!";
+            return
+                $"{AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}\n Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test suite setup stage!\n Check [b]{(beforeAttribute != null
                     ? (beforeAttribute.Name + ":" + beforeAttribute.Line)
-                    : (afterAttributes?.Name + ":" + afterAttributes?.Line));
+                    : (afterAttributes?.Name + ":" + afterAttributes?.Line))}[/b] for unfreed instances!";
         }
     }
 }

@@ -12,10 +12,7 @@ namespace GdUnit4
     {
         private static SceneTree? _instance = Engine.GetMainLoop() as SceneTree;
 
-        internal static SceneTree Instance
-        {
-            get => _instance ?? throw new Exception("SceneTree not set");
-        }
+        internal static SceneTree Instance => _instance ?? throw new Exception("SceneTree not set");
 
         /// <summary>
         /// A utility to synchronize the current thread with the Godot physics thread.

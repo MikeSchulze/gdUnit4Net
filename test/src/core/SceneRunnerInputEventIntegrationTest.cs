@@ -201,7 +201,7 @@ namespace GdUnit4.Tests
             AssertThat(Input.IsKeyPressed(Key.W)).IsFalse();
             AssertThat(Input.IsPhysicalKeyPressed(Key.W)).IsFalse();
             AssertThat(Input.IsKeyPressed(Key.Z)).IsTrue();
-            AssertThat(Input.IsPhysicalKeyPressed(Key.Z)).IsTrue(); ;
+            AssertThat(Input.IsPhysicalKeyPressed(Key.Z)).IsTrue();
         }
 
         [TestCase]
@@ -629,8 +629,8 @@ namespace GdUnit4.Tests
             //var runner := scene_runner(spy_scene)
 
             var scene = DragAndDropSceneRunner.Scene();
-            TextureRect slot_left = scene.GetNode<TextureRect>(new NodePath($"/root/DragAndDropScene/left/TextureRect"));
-            TextureRect slot_right = scene.GetNode<TextureRect>(new NodePath($"/root/DragAndDropScene/right/TextureRect"));
+            TextureRect slot_left = scene.GetNode<TextureRect>(new NodePath("/root/DragAndDropScene/left/TextureRect"));
+            TextureRect slot_right = scene.GetNode<TextureRect>(new NodePath("/root/DragAndDropScene/right/TextureRect"));
 
             var save_mouse_pos = DragAndDropSceneRunner.GetMousePosition();
             // set inital mouse pos over the left slot

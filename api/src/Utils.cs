@@ -63,7 +63,7 @@ namespace GdUnit4
         };
 
 
-        public async static Task<long> DoWait(long timeout)
+        public static async Task<long> DoWait(long timeout)
         {
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();

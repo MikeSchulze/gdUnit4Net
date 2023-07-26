@@ -16,8 +16,7 @@ namespace GdUnit4
         public void Clear() => _reports.Clear();
 
 
-        public IEnumerable<TestReport> Reports
-        { get => _reports; }
+        public IEnumerable<TestReport> Reports => _reports;
 
         public IEnumerable<TestReport> Failures => _reports.Where(r => r.IsFailure);
 

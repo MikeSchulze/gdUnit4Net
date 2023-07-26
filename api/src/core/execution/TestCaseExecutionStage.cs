@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using GdUnit4.Asserts;
 
@@ -23,8 +22,6 @@ namespace GdUnit4.Executions
         }
 
         private static string ReportOrphans(ExecutionContext context) =>
-            String.Format("{0}\n Detected <{1}> orphan nodes during test execution!",
-                AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false),
-                context.OrphanMonitor.OrphanCount);
+            $"{AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}\n Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!";
     }
 }

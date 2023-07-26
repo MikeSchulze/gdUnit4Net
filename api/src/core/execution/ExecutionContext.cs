@@ -106,18 +106,18 @@ namespace GdUnit4.Executions
         public TestReportCollector ReportCollector
         { get; private set; }
 
-        public bool IsFailed => ReportCollector.Failures.Any() || SubExecutionContexts.Where(context => context.IsFailed).Any();
+        public bool IsFailed => ReportCollector.Failures.Any() || SubExecutionContexts.Any(context => context.IsFailed);
 
-        public bool IsError => ReportCollector.Errors.Any() || SubExecutionContexts.Where(context => context.IsError).Any();
+        public bool IsError => ReportCollector.Errors.Any() || SubExecutionContexts.Any(context => context.IsError);
 
-        public bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Where(context => context.IsWarning).Any();
+        public bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Any(context => context.IsWarning);
 
         public bool IsSkipped
         { get; private set; }
 
         public IEnumerable<TestReport> CollectReports => ReportCollector.Reports;
 
-        private int SkippedCount => SubExecutionContexts.Where(context => context.IsSkipped).Count();
+        private int SkippedCount => SubExecutionContexts.Count(context => context.IsSkipped);
 
         private int FailureCount => ReportCollector.Failures.Count();
 

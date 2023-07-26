@@ -8,7 +8,7 @@ namespace GdUnit4.Asserts
         {
             Type? type = current?.GetType();
             if (type != null && type.IsPrimitive)
-                ThrowTestFailureReport(String.Format("ObjectAssert inital error: current is primitive <{0}>", type), Current, null, 1);
+                ThrowTestFailureReport($"ObjectAssert inital error: current is primitive <{type}>", Current, null, 1);
         }
 
         public IObjectAssert IsNotInstanceOf<ExpectedType>()

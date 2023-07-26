@@ -177,7 +177,7 @@ namespace GdUnit4
         /// </summary>
         /// <param name="task">A task where throw possible exceptions</param>
         /// <returns>a task of <c>IExceptionAssert</c> to await</returns>
-        public async static Task<IExceptionAssert?> AssertThrown<T>(Task<T> task)
+        public static async Task<IExceptionAssert?> AssertThrown<T>(Task<T> task)
         {
             try
             {
@@ -190,7 +190,7 @@ namespace GdUnit4
             }
         }
 
-        public async static Task<IExceptionAssert?> AssertThrown(Task task)
+        public static async Task<IExceptionAssert?> AssertThrown(Task task)
         {
             try
             {

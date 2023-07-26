@@ -116,7 +116,7 @@ namespace GdUnit4
 
         public override string ToString()
         {
-            return string.Format("Event: {0} {1}:{2}, {3} ", Type, SuiteName, TestName, "");
+            return $"Event: {Type} {SuiteName}:{TestName}, {""} ";
         }
     }
 }

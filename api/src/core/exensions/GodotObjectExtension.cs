@@ -96,7 +96,7 @@ namespace GdUnit4
                 return ld.VariantEquals(rd, compareMode);
             if (left is IEnumerable le && right is IEnumerable re)
                 return le.VariantEquals(re, compareMode);
-            if (left is System.ValueType lvt && right is System.ValueType rvt)
+            if (left is System.ValueType && right is System.ValueType)
                 return left!.Equals(right);
             return left!.Equals(right);
         }

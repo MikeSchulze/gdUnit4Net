@@ -24,7 +24,7 @@ namespace GdUnit4.Asserts
         public IExceptionAssert IsInstanceOf<ExpectedType>()
         {
             if (!(Current is ExpectedType))
-                ThrowTestFailureReport(AssertFailures.IsInstanceOf(Current?.GetType(), typeof(ExpectedType)), Current, typeof(ExpectedType));
+                ThrowTestFailureReport(AssertFailures.IsInstanceOf(Current?.GetType(), typeof(ExpectedType)));
             return this;
         }
 
@@ -33,7 +33,7 @@ namespace GdUnit4.Asserts
             message = message.UnixFormat();
             string current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.Equals(message))
-                ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
+                ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
             return this;
         }
 
@@ -41,7 +41,7 @@ namespace GdUnit4.Asserts
         {
             var value = Current?.GetType().GetProperty(propertyName)?.GetValue(Current);
             if (!Comparable.IsEqual(value, expected).Valid)
-                ThrowTestFailureReport(AssertFailures.HasValue(propertyName, value, expected), value, expected);
+                ThrowTestFailureReport(AssertFailures.HasValue(propertyName, value, expected));
             return this;
         }
 
@@ -56,11 +56,11 @@ namespace GdUnit4.Asserts
             message = message.UnixFormat();
             var current = Current?.Message.RichTextNormalize() ?? "";
             if (!current.StartsWith(message))
-                ThrowTestFailureReport(AssertFailures.IsEqual(current, message), current, message);
+                ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
             return this;
         }
 
-        private void ThrowTestFailureReport(string message, object? current, object? expected)
+        private void ThrowTestFailureReport(string message)
         {
             var failureMessage = CustomFailureMessage ?? message;
             throw new TestFailedException(failureMessage);

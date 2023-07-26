@@ -428,7 +428,7 @@ namespace GdUnit4.Core
         }
 
         public async Task AwaitSignal(string signal, params Godot.Variant[] args) =>
-            await GdUnitAwaiter.AwaitSignal(CurrentScene, signal, args);
+            await CurrentScene.AwaitSignal(signal, args);
 
 
         public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
