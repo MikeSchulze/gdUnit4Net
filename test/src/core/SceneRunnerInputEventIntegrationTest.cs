@@ -23,7 +23,7 @@ namespace GdUnit4.Tests
         [BeforeTest]
         public void BeforeTest()
         {
-            SceneRunner = ISceneRunner.Load("res://core/resources/scenes/TestSceneCSharp.tscn", true);
+            SceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);
             AssertInitalMouseState();
             AssertInitalKeyState();
             // we need to maximize the view, a minimized view cannot handle mouse events see (https://github.com/godotengine/godot/issues/73461)
@@ -59,7 +59,7 @@ namespace GdUnit4.Tests
         // [TestCase]
         public void testSpy()
         {
-            var scene = Godot.ResourceLoader.Load<PackedScene>("res://core/resources/scenes/TestSceneCSharp.tscn").Instantiate();
+            var scene = Godot.ResourceLoader.Load<PackedScene>("res://src/core/resources/scenes/TestSceneCSharp.tscn").Instantiate();
 
 
             var SceneMock = new Mock<TestScene>() { CallBase = true };
@@ -624,7 +624,7 @@ namespace GdUnit4.Tests
         [TestCase]
         public async Task MouseDragAndDrop()
         {
-            var DragAndDropSceneRunner = ISceneRunner.Load("res://core/resources/scenes/DragAndDrop/DragAndDropTestScene.tscn", true);
+            var DragAndDropSceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/DragAndDrop/DragAndDropTestScene.tscn", true);
             //var spy_scene = spy("res://addons/gdUnit4/test/core/resources/scenes/drag_and_drop/DragAndDropTestScene.tscn")
             //var runner := scene_runner(spy_scene)
 

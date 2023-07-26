@@ -119,7 +119,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
         public async Task Execute_Success()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteAllStagesSuccess.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteAllStagesSuccess.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -157,7 +157,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies report a failure on stage 'Before'.")]
         public async Task Execute_FailureOnStage_Before()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnStageBefore.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageBefore.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -198,7 +198,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies report a failure on stage 'After'.")]
         public async Task Execute_FailureOnStage_After()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnStageAfter.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageAfter.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -239,7 +239,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
         public async Task Execute_FailureOnStage_BeforeTest()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnStageBeforeTest.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageBeforeTest.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -279,7 +279,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies report a failure on stage 'AfterTest'.")]
         public async Task Execute_FailureOnStage_AfterTest()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnStageAfterTest.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageAfterTest.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -319,7 +319,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies a failure is reportes for a single test case.")]
         public async Task Execute_FailureOn_TestCase1()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnTestCase1.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnTestCase1.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -363,7 +363,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Verifies multiple failures are reportes for different stages.")]
         public async Task Execute_FailureOn_MultiStages()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailOnMultiStages.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnMultiStages.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -411,7 +411,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
         public async Task Execute_Failure_OrphanNodesDetected()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailAndOrpahnsDetected.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailAndOrpahnsDetected.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -494,7 +494,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
         public async Task Execute_Failure_OrphanNodesDetection_Disabled()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteFailAndOrpahnsDetected.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailAndOrpahnsDetected.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             // simulate test suite execution with disabled orphan detection
@@ -540,7 +540,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "GD-66: The execution must be aborted by a test timeout.")]
         public async Task Execute_Abort_OnTimeOut()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteAbortOnTestTimeout.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteAbortOnTestTimeout.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2", "TestCase3", "TestCase4", "TestCase5" });
 
             var events = await ExecuteTestSuite(testSuite);
@@ -642,7 +642,7 @@ namespace GdUnit4.Tests
         [TestCase(Description = "Tests is all parameterized tests case executed.")]
         public async Task Execute_ParameterizedTest()
         {
-            TestSuite testSuite = LoadTestSuite("core/resources/testsuites/mono/TestSuiteParameterizedTests.cs");
+            TestSuite testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteParameterizedTests.cs");
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] {
                 "ParameterizedBoolValue",
                 "ParameterizedIntValues",

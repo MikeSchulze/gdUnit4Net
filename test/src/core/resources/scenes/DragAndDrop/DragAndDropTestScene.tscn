@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://skueh3d5qn46"]
 
-[ext_resource type="Script" path="res://core/resources/scenes/DragAndDrop/DragAndDropTestScene.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://ca2rr3dan4vvw" path="res://core/resources/scenes/DragAndDrop/DragAndDropControl.tscn" id="2_u5ccv"]
+[ext_resource type="Script" path="res://src/core/resources/scenes/DragAndDrop/DragAndDropTestScene.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://ca2rr3dan4vvw" path="res://src/core/resources/scenes/DragAndDrop/DragAndDropControl.tscn" id="2_u5ccv"]
 
 [node name="DragAndDropScene" type="Control"]
 layout_mode = 3

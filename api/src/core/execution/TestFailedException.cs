@@ -41,7 +41,7 @@ namespace GdUnit4.Exceptions
                 if (fileName == null)
                     continue;
                 //Godot.GD.PrintS("StackFrame", i, fileName, frame.GetFileLineNumber());
-                if (fileName.Replace('\\', '/').EndsWith("core/execution/ExecutionStage.cs"))
+                if (fileName.Replace('\\', '/').EndsWith("src/core/execution/ExecutionStage.cs"))
                 {
                     isFound = true;
                     continue;

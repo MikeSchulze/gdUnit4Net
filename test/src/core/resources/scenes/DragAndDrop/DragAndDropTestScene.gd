@@ -1,6 +1,6 @@
 extends Control
 
-@onready var texture = preload("res://core/resources/scenes/DragAndDrop/icon.png")
+@onready var texture = preload("res://src/core/resources/scenes/DragAndDrop/icon.png")
 
 func _ready():
 	# set initial drag texture

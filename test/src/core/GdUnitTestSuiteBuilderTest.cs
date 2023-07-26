@@ -20,24 +20,24 @@ namespace GdUnit4.Core.Tests
         [TestCase]
         public void ParseFullqualifiedClassName()
         {
-            AssertThat(GdUnitTestSuiteBuilder.ParseFullqualifiedClassName("core/resources/sources/TestPerson.cs"))
+            AssertThat(GdUnitTestSuiteBuilder.ParseFullqualifiedClassName("src/core/resources/sources/TestPerson.cs"))
                 .IsEqual(new GdUnitTestSuiteBuilder.ClassDefinition("GdUnit4.Example.Test.Resources", "TestPerson"));
         }
 
         [TestCase]
         public void ParseType()
         {
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("core/resources/testsuites/mono/noSpace/TestSuiteWithoutNamespace.cs")).IsEqual(typeof(TestSuiteWithoutNamespace));
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceA.TestSuite));
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceB.TestSuite));
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/noSpace/TestSuiteWithoutNamespace.cs")).IsEqual(typeof(TestSuiteWithoutNamespace));
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceA.TestSuite));
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceB.TestSuite));
             // source file not exists
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("core/resources/testsuites/mono/spaceC/TestSuite.cs")).IsNull();
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceC/TestSuite.cs")).IsNull();
         }
 
         [TestCase]
         public void FindMethod_LineOutOfRange()
         {
-            var classPath = Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs");
+            var classPath = Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
             AssertThrown(() => GdUnitTestSuiteBuilder.FindMethod(classPath, 0)).StartsWithMessage("Specified argument was out of the range of valid values.");
             AssertThrown(() => GdUnitTestSuiteBuilder.FindMethod(classPath, 10000)).StartsWithMessage("Specified argument was out of the range of valid values.");
         }
@@ -45,7 +45,7 @@ namespace GdUnit4.Core.Tests
         [TestCase]
         public void FindMethod_NoMethodFound()
         {
-            var classPath = Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs");
+            var classPath = Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 5)).IsNull();
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 11)).IsNull();
         }
@@ -53,7 +53,7 @@ namespace GdUnit4.Core.Tests
         [TestCase]
         public void FindMethod_Found()
         {
-            var classPath = Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs");
+            var classPath = Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 14)).IsEqual("FirstName");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 16)).IsEqual("LastName");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 18)).IsEqual("FullName");
@@ -69,7 +69,7 @@ namespace GdUnit4.Core.Tests
         {
             var tmp = CreateTempDir("build-test-suite-test");
             string sourceClass = Path.Combine(tmp, "TestPerson.cs");
-            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs")), sourceClass);
+            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs")), sourceClass);
 
             // first time generates the test suite and adds the test case
             string testSuite = Path.Combine(tmp, "TestPersonTest.cs");
@@ -90,7 +90,7 @@ namespace GdUnit4.Core.Tests
         {
             var tmp = CreateTempDir("build-test-suite-test");
             string sourceClass = Path.Combine(tmp, "TestPerson.cs");
-            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs")), sourceClass);
+            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs")), sourceClass);
 
             // use of a line number for which no method is defined in the source class
             Dictionary<string, object> dictionary = GdUnitTestSuiteBuilder.Build(sourceClass, 4, Path.Combine(tmp, "TestPersonTest.cs"));
@@ -104,7 +104,7 @@ namespace GdUnit4.Core.Tests
         {
             var tmp = CreateTempDir("build-test-suite-test");
             string sourceClass = Path.Combine(tmp, "TestPerson2.cs");
-            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson2.cs")), sourceClass);
+            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson2.cs")), sourceClass);
 
             // use of a line number for which no method is defined in the source class
             string testSuite = Path.Combine(tmp, "TestPerson2Test.cs");
@@ -118,7 +118,7 @@ namespace GdUnit4.Core.Tests
         {
             var tmp = CreateTempDir("build-test-suite-test");
             string sourceClass = Path.Combine(tmp, "TestPerson.cs");
-            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs")), sourceClass);
+            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs")), sourceClass);
 
             // use of a line number for which no method is defined in the source class
             string testSuite = Path.Combine(tmp, "TestPersonTest.cs");
@@ -132,7 +132,7 @@ namespace GdUnit4.Core.Tests
         {
             var tmp = CreateTempDir("build-test-suite-test");
             string sourceClass = Path.Combine(tmp, "TestPerson.cs");
-            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://core/resources/sources/TestPerson.cs")), sourceClass);
+            File.Copy(Path.GetFullPath(Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs")), sourceClass);
 
             string expected = NewCreatedTestSuite(sourceClass);
 
@@ -192,7 +192,7 @@ namespace GdUnit4.Core.Tests
 			{
 				using static Assertions;
 
-                [TestSuite]
+				[TestSuite]
 				public class TestPersonTest
 				{
 					// TestSuite generated from
@@ -210,7 +210,7 @@ namespace GdUnit4.Core.Tests
         [TestCase]
         public void LoadTestSuite()
         {
-            var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("core/ExampleTestSuite.cs"));
+            var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("src/core/ExampleTestSuite.cs"));
             AssertThat(testSuite).IsNotNull();
             AssertThat(testSuite!.Name).IsEqual("ExampleTestSuite");
             AssertThat(testSuite!.GetChildren())
