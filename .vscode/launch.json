@@ -11,7 +11,7 @@
                 "--path",
                 "${workspaceFolder}/test",
                 "-d",
-                "TestRunner.tscn"
+                "src/api/TestRunner.tscn"
             ],
             "cwd": "${workspaceFolder}/test",
             "console": "integratedTerminal",

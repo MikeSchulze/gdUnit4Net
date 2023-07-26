@@ -47,21 +47,21 @@ namespace GdUnit4.Core.Tests
         {
             var classPath = Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 5)).IsNull();
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 11)).IsNull();
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 9)).IsNull();
         }
 
         [TestCase]
         public void FindMethod_Found()
         {
             var classPath = Godot.ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 14)).IsEqual("FirstName");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 16)).IsEqual("LastName");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 18)).IsEqual("FullName");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 20)).IsEqual("FullName2");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 12)).IsEqual("FirstName");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 14)).IsEqual("LastName");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 16)).IsEqual("FullName");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 18)).IsEqual("FullName2");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 20)).IsEqual("FullName3");
+            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 21)).IsEqual("FullName3");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 22)).IsEqual("FullName3");
             AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 23)).IsEqual("FullName3");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 24)).IsEqual("FullName3");
-            AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 25)).IsEqual("FullName3");
         }
 
         [TestCase]
@@ -79,7 +79,7 @@ namespace GdUnit4.Core.Tests
             AssertThat(File.ReadAllText(testSuite, Encoding.UTF8)).IsEqual(NewCreatedTestSuite(sourceClass));
 
             // second call updated the existing test suite and adds a new test case
-            dictionary = GdUnitTestSuiteBuilder.Build(sourceClass, 16, testSuite);
+            dictionary = GdUnitTestSuiteBuilder.Build(sourceClass, 14, testSuite);
             AssertThat(dictionary["path"]).IsEqual(testSuite);
             AssertThat((int)dictionary["line"]).IsEqual(22);
             AssertThat(File.ReadAllText(testSuite, Encoding.UTF8)).IsEqual(UpdatedTestSuite(sourceClass));
@@ -191,7 +191,8 @@ namespace GdUnit4.Core.Tests
 			namespace GdUnit4.Example.Test.Resources
 			{
 				using static Assertions;
-
+				using static Utils;
+			
 				[TestSuite]
 				public class TestPersonTest
 				{
@@ -216,12 +217,12 @@ namespace GdUnit4.Core.Tests
             AssertThat(testSuite!.GetChildren())
                 .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("ParameterizedTests"))
                 .ContainsExactly(
-                    Tuple("TestFoo", 38, new List<string>()),
-                    Tuple("TestBar", 44, new List<string>()),
-                    Tuple("Waiting", 50, new List<string>()),
-                    Tuple("TestFooBar", 56, new List<string>()),
-                    Tuple("TestCaseArguments", 64, new List<string> { "TestCaseArguments [1, 2, 3, 6]", "TestCaseArguments [3, 4, 5, 12]", "TestCaseArguments [6, 7, 8, 21]" }),
-                    Tuple("TestCasesWithCustomTestName", 72, new List<string> { "TestCaseA", "TestCaseB", "TestCaseC" }));
+                    Tuple("TestFoo", 36, new List<string>()),
+                    Tuple("TestBar", 42, new List<string>()),
+                    Tuple("Waiting", 48, new List<string>()),
+                    Tuple("TestFooBar", 54, new List<string>()),
+                    Tuple("TestCaseArguments", 62, new List<string> { "TestCaseArguments [1, 2, 3, 6]", "TestCaseArguments [3, 4, 5, 12]", "TestCaseArguments [6, 7, 8, 21]" }),
+                    Tuple("TestCasesWithCustomTestName", 70, new List<string> { "TestCaseA", "TestCaseB", "TestCaseC" }));
         }
     }
 }

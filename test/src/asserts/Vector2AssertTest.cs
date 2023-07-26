@@ -23,7 +23,7 @@ namespace GdUnit4.Asserts
             AssertVec2(Vector2.One).IsBetween(Vector2.Zero, Vector2.One);
             // false test
             AssertThrown(() => AssertVec2(new Vector2(0, -.1f)).IsBetween(Vector2.Zero, Vector2.One))
-                .HasPropertyValue("LineNumber", 27)
+                .HasPropertyValue("LineNumber", 25)
                 .HasMessage("""
                     Expecting:
                         '(0, -0.1)'
@@ -47,7 +47,7 @@ namespace GdUnit4.Asserts
             AssertVec2(new Vector2(1.2f, 1.000001f)).IsEqual(new Vector2(1.2f, 1.000001f));
             // false test
             AssertThrown(() => AssertVec2(Vector2.One).IsEqual(new Vector2(1.2f, 1.000001f)))
-                .HasPropertyValue("LineNumber", 51)
+                .HasPropertyValue("LineNumber", 49)
                 .HasMessage("""
                     Expecting be equal:
                         '(1.2, 1.000001)' but is '(1, 1)'
@@ -62,7 +62,7 @@ namespace GdUnit4.Asserts
             AssertVec2(new Vector2(1.2f, 1.000001f)).IsNotEqual(new Vector2(1.2f, 1.000002f));
             // false test
             AssertThrown(() => AssertVec2(new Vector2(1.2f, 1.000001f)).IsNotEqual(new Vector2(1.2f, 1.000001f)))
-                .HasPropertyValue("LineNumber", 66)
+                .HasPropertyValue("LineNumber", 64)
                 .HasMessage("""
                     Expecting be NOT equal:
                         '(1.2, 1.000001)' but is '(1.2, 1.000001)'
@@ -78,7 +78,7 @@ namespace GdUnit4.Asserts
 
             // false test
             AssertThrown(() => AssertVec2(new Vector2(1.005f, 1f)).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f)))
-                .HasPropertyValue("LineNumber", 82)
+                .HasPropertyValue("LineNumber", 80)
                 .HasMessage("""
                     Expecting:
                         '(1.005, 1)'
@@ -86,7 +86,7 @@ namespace GdUnit4.Asserts
                         '(0.996, 0.996)' <> '(1.004, 1.004)'
                     """);
             AssertThrown(() => AssertVec2(new Vector2(1f, 0.995f)).IsEqualApprox(Vector2.One, new Vector2(0f, 0.004f)))
-                .HasPropertyValue("LineNumber", 90)
+                .HasPropertyValue("LineNumber", 88)
                 .HasMessage("""
                     Expecting:
                         '(1, 0.995)'
@@ -103,13 +103,13 @@ namespace GdUnit4.Asserts
 
             // false test
             AssertThrown(() => AssertVec2(Vector2.Zero).IsGreater(Vector2.One))
-                .HasPropertyValue("LineNumber", 107)
+                .HasPropertyValue("LineNumber", 105)
                 .HasMessage("""
                     Expecting to be greater than:
                         '(1, 1)' but is '(0, 0)'
                     """);
             AssertThrown(() => AssertVec2(new Vector2(1.2f, 1.000001f)).IsGreater(new Vector2(1.2f, 1.000001f)))
-                .HasPropertyValue("LineNumber", 113)
+                .HasPropertyValue("LineNumber", 111)
                 .HasMessage("""
                     Expecting to be greater than:
                         '(1.2, 1.000001)' but is '(1.2, 1.000001)'
@@ -126,13 +126,13 @@ namespace GdUnit4.Asserts
 
             // false test
             AssertThrown(() => AssertVec2(Vector2.Zero).IsGreaterEqual(Vector2.One))
-                .HasPropertyValue("LineNumber", 130)
+                .HasPropertyValue("LineNumber", 128)
                 .HasMessage("""
                     Expecting to be greater than or equal:
                         '(1, 1)' but is '(0, 0)'
                     """);
             AssertThrown(() => AssertVec2(new Vector2(1.2f, 1.000002f)).IsGreaterEqual(new Vector2(1.2f, 1.000003f)))
-                .HasPropertyValue("LineNumber", 136)
+                .HasPropertyValue("LineNumber", 134)
                 .HasMessage("""
                     Expecting to be greater than or equal:
                         '(1.2, 1.000003)' but is '(1.2, 1.000002)'
@@ -147,13 +147,13 @@ namespace GdUnit4.Asserts
 
             // false test
             AssertThrown(() => AssertVec2(Vector2.One).IsLess(Vector2.One))
-                .HasPropertyValue("LineNumber", 151)
+                .HasPropertyValue("LineNumber", 149)
                 .HasMessage("""
                     Expecting to be less than:
                         '(1, 1)' but is '(1, 1)'
                     """);
             AssertThrown(() => AssertVec2(new Vector2(1.2f, 1.000001f)).IsLess(new Vector2(1.2f, 1.000001f)))
-                .HasPropertyValue("LineNumber", 157)
+                .HasPropertyValue("LineNumber", 155)
                 .HasMessage("""
                     Expecting to be less than:
                         '(1.2, 1.000001)' but is '(1.2, 1.000001)'
@@ -169,13 +169,13 @@ namespace GdUnit4.Asserts
 
             // false test
             AssertThrown(() => AssertVec2(Vector2.One).IsLessEqual(Vector2.Zero))
-                .HasPropertyValue("LineNumber", 173)
+                .HasPropertyValue("LineNumber", 171)
                 .HasMessage("""
                     Expecting to be less than or equal:
                         '(0, 0)' but is '(1, 1)'
                     """);
             AssertThrown(() => AssertVec2(new Vector2(1.2f, 1.000002f)).IsLessEqual(new Vector2(1.2f, 1.000001f)))
-                .HasPropertyValue("LineNumber", 179)
+                .HasPropertyValue("LineNumber", 177)
                 .HasMessage("""
                     Expecting to be less than or equal:
                         '(1.2, 1.000001)' but is '(1.2, 1.000002)'
@@ -188,7 +188,7 @@ namespace GdUnit4.Asserts
             AssertVec2(new Vector2(1f, 1.0002f)).IsNotBetween(Vector2.Zero, Vector2.One);
             // false test
             AssertThrown(() => AssertVec2(Vector2.One).IsNotBetween(Vector2.Zero, Vector2.One))
-                .HasPropertyValue("LineNumber", 192)
+                .HasPropertyValue("LineNumber", 190)
                 .HasMessage("""
                     Expecting:
                         '(1, 1)'

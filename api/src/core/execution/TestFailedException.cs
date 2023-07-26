@@ -4,58 +4,25 @@ namespace GdUnit4.Exceptions
 {
     public sealed class TestFailedException : System.Exception
     {
+        public int LineNumber
+        { get; private set; }
+
         public TestFailedException(string message, int frameOffset = 0, int lineNumber = -1) : base(message)
         {
-            LineNumber = lineNumber == -1 ? ScanFailureLineNumber(frameOffset, 15) : lineNumber;
+            LineNumber = lineNumber == -1 ? GetRootCauseLineNumber() : lineNumber;
         }
 
-        private static int ScanFailureLineNumber(int frameOffset, int stackOffset)
+        private static int GetRootCauseLineNumber()
         {
-            bool isFound = false;
+            // Navigate the stack frames to find the root cause
             for (var i = 0; i <= 15; i++)
             {
                 StackFrame frame = new StackFrame(i, true);
-                var fileName = frame.GetFileName();
-                if (fileName == null)
-                    continue;
-                if (fileName.Replace('\\', '/').EndsWith("src/Assertions.cs"))
-                {
-                    isFound = true;
-                    continue;
-                }
-                if (isFound)
+                // Check if the frame a external assembly
+                if (frame.GetFileName() != null && frame.GetMethod()?.Module.Assembly != typeof(TestFailedException).Assembly)
                     return frame.GetFileLineNumber();
             }
-            return ReverseScanFailureLineNumber(frameOffset, stackOffset);
+            return -1;
         }
-
-        private static int ReverseScanFailureLineNumber(int frameOffset, int stackOffset)
-        {
-            bool isFound = false;
-            StackFrame frame;
-            for (var i = stackOffset; i >= 0; i--)
-            {
-                frame = new StackFrame(i, true);
-                var fileName = frame.GetFileName();
-                if (fileName == null)
-                    continue;
-                //Godot.GD.PrintS("StackFrame", i, fileName, frame.GetFileLineNumber());
-                if (fileName.Replace('\\', '/').EndsWith("src/core/execution/ExecutionStage.cs"))
-                {
-                    isFound = true;
-                    continue;
-                }
-                if (isFound)
-                    return frame.GetFileLineNumber();
-            }
-            frame = new StackFrame(3 + frameOffset, true);
-            // fix stack offset if the assert is delegated
-            if (frame.GetFileName() != null && frame.GetFileName()!.Replace('\\', '/').Contains("src/asserts/"))
-                frame = new StackFrame(4 + frameOffset, true);
-            return frame.GetFileLineNumber();
-        }
-
-        public int LineNumber
-        { get; private set; }
     }
 }

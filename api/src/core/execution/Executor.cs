@@ -50,7 +50,7 @@ namespace GdUnit4.Executions
                     .ToList()
                     .Select(node => node.Name.ToString())
                     .ToList();
-                await ExecuteInternally(new TestSuite(testSuite.ResourcePath, includedTests));
+                await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
             }
             catch (Exception e)
             {

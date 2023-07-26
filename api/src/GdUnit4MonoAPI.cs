@@ -28,8 +28,8 @@ namespace GdUnit4
 
         public static CsNode? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
 
-        public static GdUnit4.IExecutor Executor(Godot.Node listener) =>
-            new GdUnit4.Executions.Executor().AddGdTestEventListener(listener);
+        public static Godot.RefCounted Executor(Godot.Node listener) =>
+            (Godot.RefCounted)new GdUnit4.Executions.Executor().AddGdTestEventListener(listener);
 
         private static string NormalisizePath(string path) =>
              (path.StartsWith("res://") || path.StartsWith("user://")) ? Godot.ProjectSettings.GlobalizePath(path) : path;

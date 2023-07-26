@@ -6,7 +6,7 @@ namespace GdUnit4
     {
         private readonly string _resourcePath;
 
-        public string ResourcePath => _resourcePath;
+        public string ResourcePath() => _resourcePath;
 
         public int LineNumber
         { get; private set; } = -1;
