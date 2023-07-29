@@ -452,12 +452,12 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>() {
                     new TestReport(WARN, 0, """
                         WARNING:
-                         Detected <2> orphan nodes during test setup stage!
-                         Check SetupTest:28 and TearDownTest:36 for unfreed instances!
+                            Detected <2> orphan nodes during test setup stage!
+                            Check SetupTest:28 and TearDownTest:36 for unfreed instances!
                         """),
                     new TestReport(WARN, 43, """
                         WARNING:
-                         Detected <3> orphan nodes during test execution!
+                            Detected <3> orphan nodes during test execution!
                         """)
                     }
                 ),
@@ -466,12 +466,12 @@ namespace GdUnit4.Tests
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() {
                     new TestReport(WARN, 0, """
                         WARNING:
-                         Detected <2> orphan nodes during test setup stage!
-                         Check SetupTest:28 and TearDownTest:36 for unfreed instances!
+                            Detected <2> orphan nodes during test setup stage!
+                            Check SetupTest:28 and TearDownTest:36 for unfreed instances!
                         """),
                     new TestReport(WARN, 52, """
                         WARNING:
-                         Detected <4> orphan nodes during test execution!
+                            Detected <4> orphan nodes during test execution!
                         """),
                     new TestReport(FAILURE, 58, """
                         Expecting be empty:
@@ -484,8 +484,8 @@ namespace GdUnit4.Tests
                 Tuple(TESTSUITE_AFTER, "After", new List<TestReport>() {
                     new TestReport(WARN, 0, """
                         WARNING:
-                         Detected <1> orphan nodes during test suite setup stage!
-                         Check SetupSuite:15 and TearDownSuite:22 for unfreed instances!
+                            Detected <1> orphan nodes during test suite setup stage!
+                            Check SetupSuite:15 and TearDownSuite:22 for unfreed instances!
                         """)
                     })
                 );

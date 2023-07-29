@@ -21,7 +21,9 @@ namespace GdUnit4.Executions
                 context.ReportCollector.PushFront(new TestReport(TestReport.TYPE.WARN, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
         }
 
-        private static string ReportOrphans(ExecutionContext context) =>
-            $"{AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}\n Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!";
+        private static string ReportOrphans(ExecutionContext context) => $"""
+            {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
+                Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!
+            """;
     }
 }
