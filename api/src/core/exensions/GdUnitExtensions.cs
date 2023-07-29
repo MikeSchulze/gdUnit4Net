@@ -8,48 +8,10 @@ namespace GdUnit4
 {
 
     /// <summary>
-    /// A extension to convert c# types to Godot types
+    /// A util extension to format Godot object into a string representation
     /// </summary>
     public static class GdUnitExtensions
     {
-        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this IEnumerable elements) => new Godot.Collections.Array<T>(elements.ToGodotArray());
-
-        public static Godot.Collections.Array<T> ToGodotArray<[Godot.MustBeVariant] T>(this T[] args) => new Godot.Collections.Array<T>(ToGodotArray((IEnumerable)args));
-
-        public static Godot.Collections.Array ToGodotArray(this object[] args) => ToGodotArray((IEnumerable)args);
-
-        public static Godot.Collections.Array ToGodotArray(this IEnumerable<object> elements) => ToGodotArray((IEnumerable)elements);
-
-        public static Godot.Collections.Array ToGodotArray(this IEnumerable elements)
-        {
-            var converted = new Godot.Collections.Array();
-            foreach (var item in elements)
-            {
-                try
-                {
-                    if (item is String s)
-                        converted.Add(Godot.Variant.CreateFrom(s));
-                    else
-                        converted.Add(Godot.Variant.From(item));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
-                    converted.Add(Godot.Variant.CreateFrom("n.a"));
-                }
-            }
-            return converted;
-        }
-
-        public static Godot.Collections.Dictionary ToGodotDictionary(this Dictionary<string, object> dict)
-        {
-            var converted = new Godot.Collections.Dictionary();
-            foreach (var item in dict)
-            {
-                converted.Add(item.Key, (Godot.Variant)item.Value);
-            }
-            return converted;
-        }
 
         public static string ToSnakeCase(this string? input)
         {
@@ -80,9 +42,7 @@ namespace GdUnit4
         public static string Formated(this object[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formated)).Indentation(indentation);
         public static string Formated(this IEnumerable args, int indentation = 0) => string.Join(", ", args.Cast<object>().Select(Formated)).Indentation(indentation);
 
-
         public static string UnixFormat(this string value) => value.Replace("\r", string.Empty);
-
 
         public static string Indentation(this string value, int indentation)
         {

@@ -1,18 +1,17 @@
-using Godot;
 using System;
-using GdUnit4.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
+using Godot;
 
 namespace GdUnit4
 {
+    using Core;
+
     public partial class GdUnit4MonoAPI : RefCounted
     {
         public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
         {
-
             var result = GdUnitTestSuiteBuilder.Build(NormalisizePath(sourcePath), lineNumber, NormalisizePath(testSuitePath));
             // we need to return the original resource name of the test suite on Godot site e.g. `res://foo/..` or `user://foo/..`
             if (result.ContainsKey("path"))

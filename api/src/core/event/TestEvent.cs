@@ -93,7 +93,7 @@ namespace GdUnit4
         }
 
         // used as bridge  to serialize GdUnitRunner:PublishEvent
-        public IDictionary<string, object> AsDictionary() => _data;
+        public Godot.Collections.Dictionary AsDictionary() => _data.ToGodotDictionary();
 
         public TestEvent.TYPE Type { get; private set; }
         public string SuiteName => _data["suite_name"] as string;
