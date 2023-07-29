@@ -1,50 +1,19 @@
 <Project Sdk="Godot.NET.Sdk/4.1.0">
   <PropertyGroup>
-    <Title>GdUnit4Mono</Title>
-    <Version>4.2.0.0</Version>
-    <Description>The Godot C# extension for GdUnit4.</Description>
-    <Copyright>© 2023 Mike Schulze</Copyright>
-    <Authors>Mike Schulze</Authors>
-  </PropertyGroup>
-  <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
+    <AssemblyName>GdUnit4Mono</AssemblyName>
     <RootNamespace>GdUnit4</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
-  <PropertyGroup>
-    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
-    <PackageId>GdUnit4Mono</PackageId>
-    <PackageVersion>4.2.0-release.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>GdUnit4Mono release.</PackageReleaseNotes>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
-    <!-- Exclude tests -->
-    <!-- DefaultItemExcludes>$(DefaultItemExcludes);test/**/*</DefaultItemExcludes -->
-  </PropertyGroup>
-  <!-- Test dependencies -->
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
-    <!-- Do onyl include this line for local builds, need to be exclude on release -->
-    <PackageReference Include="GodotSharp" Version="4.1.0" />
-    <PackageReference Include="Moq" Version="4.18.4" />
-    <!-- Content Include=".gitignore" -->
-    <Content Include="LICENSE" />
-    <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="LICENSE" Pack="true" PackagePath="" />
-    <None Include="icon.png" Pack="true" PackagePath="" />
+    <ProjectReference Include="api\gdUnit4MonoApi.csproj" />
+    <ProjectReference Include="test\gdUnit4MonoTest.csproj" />
   </ItemGroup>
 </Project>

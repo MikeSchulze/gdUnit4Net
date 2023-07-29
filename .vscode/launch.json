@@ -9,11 +9,11 @@
             "program": "${env:GODOT_BIN}",
             "args": [
                 "--path",
-                ".",
+                "${workspaceFolder}/test",
                 "-d",
-                "TestRunner.tscn"
+                "src/api/TestRunner.tscn"
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/test",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "stopAtEntry": false,
