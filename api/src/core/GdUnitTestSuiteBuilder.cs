@@ -106,8 +106,6 @@ namespace GdUnit4.Core
                 Name = name;
             }
 
-
-
             public string? Namespace { get; }
             public string Name { get; }
             public string ClassName => Namespace == null ? Name : $"{Namespace}.{Name}";
@@ -215,14 +213,13 @@ namespace GdUnit4.Core
                                 if (attr.Arguments == null || attr.Arguments.Length == 0)
                                     return null;
 
-                                // needs to investigate to use Roslyn analyzer to verify the Attribute matches with the method signature
-                                if (attr.Arguments.Length != mi.GetParameters().Count())
-                                {
-                                }
-                                var testCaseName = mi.Name;
+                                // TODO: needs to investigate to use Roslyn analyzer to verify the Attribute matches with the method signature
+                                //if (attr.Arguments.Length != mi.GetParameters().Count())
+                                //{
+                                //}
                                 if (attr.TestName != null)
                                     return attr.TestName;
-                                return $"{testCaseName} [{attr.Arguments.Formated()}]";
+                                return $"{attr.TestName ?? mi.Name}:{Index} [{attr.Arguments.Formated()}]";
                             })
                             .Where(attr => attr != null)
                             .Aggregate(new List<string>(), (acc, attributes) =>

@@ -95,7 +95,7 @@ namespace GdUnit4.Tests
         [TestCase]
         public void AutoFree_OnNull()
         {
-            Godot.Node? obj = AutoFree((Godot.Node)null!);
+            Godot.Node? obj = AutoFree((Node)null!);
             AssertThat(obj).IsNull();
         }
     }

@@ -28,7 +28,7 @@ namespace GdUnit4.Executions
             Disposables = new List<IDisposable>();
         }
 
-        public ExecutionContext(ExecutionContext context, params object[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+        public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
         {
             ReportCollector = context.ReportCollector;
             context.SubExecutionContexts.Add(this);
@@ -48,12 +48,12 @@ namespace GdUnit4.Executions
             IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         }
 
-        public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+        public ExecutionContext(ExecutionContext context, TestCase testCase, int testIndex, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
         {
             context.SubExecutionContexts.Add(this);
-            TestCaseName = BuildTestCaseName(testCase.Name, testCaseAttribute);
             CurrentTestCase = testCase;
-            CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
+            CurrentIteration = 0;
+            TestCaseName = BuildTestCaseName(testCase.Name, testIndex, testCaseAttribute);
             IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         }
 
@@ -92,7 +92,7 @@ namespace GdUnit4.Executions
         public string TestCaseName
         { get; set; } = "";
 
-        public object[] MethodArguments { get; private set; } = { };
+        public object?[] MethodArguments { get; private set; } = Array.Empty<object?>();
 
         private long Duration => Stopwatch.ElapsedMilliseconds;
 
@@ -171,10 +171,10 @@ namespace GdUnit4.Executions
             Stopwatch.Stop();
         }
 
-        private static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
+        private static string BuildTestCaseName(string testName, int index, TestCaseAttribute attribute)
         {
-            if (attribute.Arguments.Count() > 1)
-                return attribute.TestName != null ? attribute.TestName : $"{testName} [{attribute.Arguments.Formated()}]";
+            if (attribute.Arguments.Length > 1)
+                return $"{attribute.TestName ?? testName}:{index} [{attribute.Arguments.Formated()}]";
             return testName;
         }
 

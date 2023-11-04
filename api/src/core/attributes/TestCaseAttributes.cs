@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GdUnit4
 {
@@ -18,14 +19,14 @@ namespace GdUnit4
         /// <summary>
         /// Holds the test case argument when is specified
         /// </summary>
-        internal object[] Arguments { get; set; } = { };
+        internal object?[] Arguments { get; set; } = Array.Empty<object?>();
 
         /// <summary>
         /// Optional test case name to override the original test case name
         /// </summary>
         public string? TestName { get; set; } = null;
 
-        public TestCaseAttribute(params object[] args) : base("", -1)
+        public TestCaseAttribute(params object?[] args) : base("", -1)
         {
             Arguments = args;
         }

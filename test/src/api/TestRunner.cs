@@ -103,7 +103,7 @@ namespace GdUnit4
 
             foreach (var testSuite in testSuites)
             {
-                //if (!testSuite.Name.Equals("TestEventTest"))
+                //if (!testSuite.Name.Equals("DictionaryAssertTest"))
                 //    continue;
                 await executor.ExecuteInternally(testSuite);
                 if (listener.Failed && FailFast)

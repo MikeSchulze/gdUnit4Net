@@ -30,19 +30,16 @@ namespace GdUnit4.Executions
             await BeforeStage.Execute(testSuiteContext);
             foreach (TestCase testCase in testSuiteContext.TestSuite.TestCases)
             {
-                using (ExecutionContext testCaseContext = new ExecutionContext(testSuiteContext, testCase))
+                using ExecutionContext testCaseContext = new ExecutionContext(testSuiteContext, testCase);
+                if (testCase.TestCaseAttributes.Count() > 1)
+                    await RunParameterizedTest(testCaseContext, testCase);
+                else
+                    await RunTestCase(testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
+
+
+                if (testCaseContext.IsFailed || testCaseContext.IsError)
                 {
-                    if (testCase.TestCaseAttributes.Count() > 1)
-                        await RunParameterizedTest(testCaseContext, testCase);
-                    else
-                        await RunTestCase(testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
-
-
-                    if (testCaseContext.IsFailed || testCaseContext.IsError)
-                    {
-                        //break;
-                    }
-
+                    //break;
                 }
             }
             await AfterStage.Execute(testSuiteContext);
@@ -51,20 +48,19 @@ namespace GdUnit4.Executions
         private async Task RunParameterizedTest(ExecutionContext executionContext, TestCase testCase)
         {
             executionContext.FireBeforeTestEvent();
-            foreach (var testAttribute in testCase.TestCaseAttributes)
+            for (int testIndex = 0; testIndex < testCase.TestCaseAttributes.Count(); testIndex++)
             {
-                using (ExecutionContext testCaseContext = new ExecutionContext(executionContext, testCase, testAttribute))
-                {
-                    await RunTestCase(testCaseContext, testCase, testAttribute, testAttribute.Arguments);
-                }
+                var testAttribute = testCase.TestCaseAttributes.ElementAt(testIndex);
+                using ExecutionContext testCaseContext = new(executionContext, testCase, testIndex, testAttribute);
+                await RunTestCase(testCaseContext, testCase, testAttribute, testAttribute.Arguments);
             }
             executionContext.FireAfterTestEvent();
         }
 
-        private async Task RunTestCase(ExecutionContext executionContext, TestCase testCase, TestCaseAttribute stageAttribute, params object[] methodArguments)
+        private async Task RunTestCase(ExecutionContext executionContext, TestCase testCase, TestCaseAttribute stageAttribute, params object?[] methodArguments)
         {
             await BeforeTestStage.Execute(executionContext);
-            using (ExecutionContext context = new ExecutionContext(executionContext, methodArguments))
+            using (ExecutionContext context = new(executionContext, methodArguments))
             {
                 await new TestCaseExecutionStage(context.TestCaseName, testCase, stageAttribute).Execute(context);
             }

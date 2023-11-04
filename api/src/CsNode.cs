@@ -8,6 +8,9 @@ namespace GdUnit4
 
         public string ResourcePath() => _resourcePath;
 
+        // wraper method to GdScript
+        public Godot.Collections.Array<string> TestCaseNames() => ParameterizedTests.ToGodotArray<string>();
+
         public int LineNumber
         { get; private set; } = -1;
 

@@ -37,6 +37,9 @@ namespace GdUnit4.Executions
 
         public bool ReportOrphanNodesEnabled { get; set; } = true;
 
+        public bool IsExecutable(Godot.Node node) => node is CsNode;
+
+
         /// <summary>
         /// Execute a testsuite, is called externally from Godot test suite runner
         /// </summary>
@@ -69,12 +72,10 @@ namespace GdUnit4.Executions
             try
             {
                 await ISceneRunner.SyncProcessFrame;
-                using (ExecutionContext context = new ExecutionContext(testSuite, _eventListeners, ReportOrphanNodesEnabled))
-                {
-                    var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                    task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
-                    await task;
-                }
+                using ExecutionContext context = new(testSuite, _eventListeners, ReportOrphanNodesEnabled);
+                var task = new TestSuiteExecutionStage(testSuite).Execute(context);
+                task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
+                await task;
             }
             catch (Exception e)
             {

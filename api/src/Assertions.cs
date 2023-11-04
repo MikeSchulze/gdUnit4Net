@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace GdUnit4
 {
+    using System.Diagnostics.CodeAnalysis;
     using Asserts;
 
     /// <summary>
