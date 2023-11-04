@@ -1,6 +1,6 @@
-<Project Sdk="Godot.NET.Sdk/4.1.0">
+<Project Sdk="Godot.NET.Sdk/4.1.2">
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>

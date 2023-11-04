@@ -5,6 +5,8 @@ namespace GdUnit4.Tests.Asserts
     using Executions;
     using Exceptions;
     using static Assertions;
+    using System.Collections;
+
 
     [TestSuite]
     public partial class EnumerableAssertTest
@@ -756,8 +758,8 @@ namespace GdUnit4.Tests.Asserts
         partial class TestObj : Godot.RefCounted
         {
             string _name;
-            object? _value;
-            object? _x;
+            readonly object? _value;
+            readonly object? _x;
 
             public TestObj(string name, object? value, object? x = null)
             {
@@ -779,8 +781,6 @@ namespace GdUnit4.Tests.Asserts
             public string GetX8() => "x8";
             public string GetX9() => "x9";
         }
-
-
 
         [TestCase]
         public void ExtractV()

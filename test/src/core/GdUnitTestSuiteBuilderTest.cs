@@ -221,7 +221,7 @@ namespace GdUnit4.Core.Tests
                     Tuple("TestBar", 42, new List<string>()),
                     Tuple("Waiting", 48, new List<string>()),
                     Tuple("TestFooBar", 54, new List<string>()),
-                    Tuple("TestCaseArguments", 62, new List<string> { "TestCaseArguments [1, 2, 3, 6]", "TestCaseArguments [3, 4, 5, 12]", "TestCaseArguments [6, 7, 8, 21]" }),
+                    Tuple("TestCaseArguments", 62, new List<string> { "TestCaseArguments:0 [1, 2, 3, 6]", "TestCaseArguments:1 [3, 4, 5, 12]", "TestCaseArguments:2 [6, 7, 8, 21]" }),
                     Tuple("TestCasesWithCustomTestName", 70, new List<string> { "TestCaseA", "TestCaseB", "TestCaseC" }));
         }
     }

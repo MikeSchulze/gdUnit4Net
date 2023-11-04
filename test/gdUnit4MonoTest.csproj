@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.1.0">
+<Project Sdk="Godot.NET.Sdk/4.1.2">
     <PropertyGroup>
         <Version>4.2.0</Version>
         <Copyright>© 2023 Mike Schulze</Copyright>
@@ -6,6 +6,8 @@
 
         <TargetFramework>net7.0</TargetFramework>
         <LangVersion>11.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <NullableReferenceTypes>true</NullableReferenceTypes>
 
         <RootNamespace>GdUnit4</RootNamespace>
         <AssemblyName>GdUnit4MonoTest</AssemblyName>

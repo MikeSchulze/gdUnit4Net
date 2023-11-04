@@ -40,5 +40,7 @@ namespace GdUnit4
                 TestCaseAttribute testCaseAttribute = mi.GetCustomAttribute<TestCaseAttribute>()!;
                 return new GdUnit4.Executions.TestCase(mi, testCaseAttribute.Line);
             });
+
+        public static string Version() => Assembly.GetAssembly(typeof(GdUnit4MonoAPI))!.GetName()!.Version!.ToString();
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.1.0">
+<Project Sdk="Godot.NET.Sdk/4.1.2">
   <PropertyGroup>
     <Title>GdUnit4Mono</Title>
     <Version>4.2.0.0</Version>
@@ -12,6 +12,7 @@
     <LangVersion>11.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
+    <NullableReferenceTypes>true</NullableReferenceTypes>
     <AssemblyName>GdUnit4MonoApi</AssemblyName>
     <RootNamespace>GdUnit4</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -24,12 +25,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>GdUnit4MonoApi</PackageId>
-    <PackageVersion>4.2.0-release.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
+    <PackageVersion>4.2.0-rc.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>GdUnit4Mono release.</PackageReleaseNotes>
+    <PackageReleaseNotes>GdUnit4Mono release candidate.</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
+    <Description>
+      GdUnit4MonoApi is the C# extention to enable GdUnit4 to run/write unit tests in C#.
+    </Description>
   </PropertyGroup>
 
   <ItemGroup>
