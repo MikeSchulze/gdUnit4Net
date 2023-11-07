@@ -1,4 +1,5 @@
-<Project Sdk="Godot.NET.Sdk/4.1.2">
+<Project Sdk="Godot.NET.Sdk">
+    <Import Project="../PackageVersions.props" />
     <PropertyGroup>
         <Version>4.2.0</Version>
         <Copyright>© 2023 Mike Schulze</Copyright>
@@ -10,7 +11,6 @@
         <NullableReferenceTypes>true</NullableReferenceTypes>
 
         <RootNamespace>GdUnit4</RootNamespace>
-        <AssemblyName>GdUnit4MonoTest</AssemblyName>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 

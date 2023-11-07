@@ -1,18 +1,15 @@
 # Project-specific ignores
 .history
-.godot  
+.godot
+bin/
+obj/
+.generated/
 *.*.import
 
 # Mono-specific ignores
 .mono/
 data_*/
 mono_crash.*.json
-
-# GdUnit4 Plugin
-addons/
-logs/
-GdUnitRunner.cfg
-reports/
 
 # System/tool-specific ignores
 .directory

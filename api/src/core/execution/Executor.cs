@@ -44,7 +44,7 @@ namespace GdUnit4.Executions
         /// Execute a testsuite, is called externally from Godot test suite runner
         /// </summary>
         /// <param name="testSuite"></param>
-        public async void Execute(CsNode testSuite)
+        public void Execute(CsNode testSuite)
         {
             try
             {
@@ -53,7 +53,8 @@ namespace GdUnit4.Executions
                     .ToList()
                     .Select(node => node.Name.ToString())
                     .ToList();
-                await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
             }
             catch (Exception e)
             {
@@ -67,15 +68,13 @@ namespace GdUnit4.Executions
 
         internal async Task ExecuteInternally(TestSuite testSuite)
         {
-            if (!ReportOrphanNodesEnabled)
-                Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             try
             {
+                if (!ReportOrphanNodesEnabled)
+                    Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
                 await ISceneRunner.SyncProcessFrame;
                 using ExecutionContext context = new(testSuite, _eventListeners, ReportOrphanNodesEnabled);
-                var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
-                await task;
+                await new TestSuiteExecutionStage(testSuite).Execute(context);
             }
             catch (Exception e)
             {

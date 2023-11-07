@@ -10,8 +10,7 @@
             "args": [
                 "--path",
                 "${workspaceFolder}/test",
-                "-d",
-                "src/api/TestRunner.tscn"
+                "-d"
             ],
             "cwd": "${workspaceFolder}/test",
             "console": "integratedTerminal",

@@ -12,10 +12,7 @@ namespace GdUnit4
         // we used explicit 'async void' to avoid  'Attempted to convert an unmarshallable managed type to Variant Task'
         public void Execute(CsNode node);
 
-
         public IExecutor AddGdTestEventListener(Godot.GodotObject listener);
-
-
 
     }
 }
