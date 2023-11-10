@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../PackageVersions.props" />
+
+  <PropertyGroup>
+    <Title>GdUnit4TestAdapter</Title>
+    <Version>1.0.0</Version>
+    <Description>The Test Adapter for GdUnit4Mono.</Description>
+    <Copyright>© 2023 Mike Schulze</Copyright>
+    <Authors>Mike Schulze</Authors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <LangVersion>11.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <NullableReferenceTypes>true</NullableReferenceTypes>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+
+    <AssemblyName>GdUnit4.TestAdapter</AssemblyName>
+    <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
+    <PackageId>GdUnit4.TestAdapter</PackageId>
+    <PackageVersion>1.0.0-beta.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
+    <Description>
+      GdUnit4TestAdapter is the test adapter to run GdUnit4 tests in C#.
+    </Description>
+  </PropertyGroup>  
+
+  <ItemGroup>
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.5.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.5.0" />
+    <PackageReference Include="coverlet.collector" Version="3.2.0" />
+
+  </ItemGroup>
+
+</Project>

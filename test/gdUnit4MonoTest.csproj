@@ -17,9 +17,11 @@
     <PropertyGroup>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\api\gdUnit4MonoApi.csproj" />
+        <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
     </ItemGroup>
 </Project>

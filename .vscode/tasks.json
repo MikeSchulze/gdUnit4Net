@@ -38,6 +38,19 @@
                 "${workspaceFolder}/gdUnit4Mono.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "ListTests",
+            "command": "dotnet",
+            "dependsOn": "build",
+            "type": "process",
+            "args": [
+                "vstest",
+                "/TestAdapterPath:testadapter/bin/Debug/net7.0/",
+                "/ListTests",
+                "test/src/AssertionsTest.cs"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
