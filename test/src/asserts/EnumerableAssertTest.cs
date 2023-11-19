@@ -799,7 +799,7 @@ public partial class EnumerableAssertTest
                 .ExtractV(Extr("GetName"), Extr("GetValue"), Extr("GetX"))
                 .ContainsExactly(Tuple("A", 10, null)))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 800)
+            .HasPropertyValue("LineNumber", 798)
             .HasMessage("""
                     Expecting contains exactly elements:
                         <Null>
@@ -890,7 +890,7 @@ public partial class EnumerableAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 891)
+            .HasPropertyValue("LineNumber", 889)
             .HasMessage("Custom failure message");
     }
 

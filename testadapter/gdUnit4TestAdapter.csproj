@@ -2,7 +2,7 @@
   <Import Project="../PackageVersions.props" />
 
   <PropertyGroup>
-    <Title>GdUnit4TestAdapter</Title>
+    <Title>gdUnit4.TestAdapter</Title>
     <Version>1.0.0</Version>
     <Description>The Test Adapter for GdUnit4Mono.</Description>
     <Copyright>© 2023 Mike Schulze</Copyright>
@@ -15,35 +15,54 @@
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <IncludeSymbols>true</IncludeSymbols>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
-    <AssemblyName>GdUnit4.TestAdapter</AssemblyName>
+    <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
     <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
-    <PackageId>GdUnit4.TestAdapter</PackageId>
-    <PackageVersion>1.0.0-beta.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
+    <PackageId>gdUnit4.testAdapter</PackageId>
+    <PackageVersion>1.0.0-rc.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <Description>
-      GdUnit4TestAdapter is the test adapter to run GdUnit4 tests in C#.
+      GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
   </PropertyGroup>  
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+      <Optimize>false</Optimize>
+      <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
-    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.5.0" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.5.0" />
-    <PackageReference Include="coverlet.collector" Version="3.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="LICENSE" Pack="true" PackagePath="/" />
+    <None Include="icon.png" Pack="true" PackagePath="/" />
+
+    <ProjectReference Include="..\api\gdUnit4Api.csproj" />
 
   </ItemGroup>
 

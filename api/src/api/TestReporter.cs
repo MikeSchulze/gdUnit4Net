@@ -6,9 +6,9 @@ namespace GdUnit4.Api;
 
 class TestReporter : ITestEventListener
 {
-    public bool Failed { get; private set; } = false;
+    public bool IsFailed { get; set; } = false;
 
-    private static GdUnitConsole Console = new GdUnitConsole();
+    private static readonly GdUnitConsole Console = new();
 
     public TestReporter()
     { }
@@ -52,7 +52,7 @@ class TestReporter : ITestEventListener
                 Console.Print("SKIPPED", ConsoleColor.DarkYellow, GdUnitConsole.BOLD | GdUnitConsole.ITALIC);
             else if (testEvent.IsFailed || testEvent.IsError)
             {
-                Failed = true;
+                IsFailed = true;
                 Console.Print("FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
             }
             else if (testEvent.IsWarning)

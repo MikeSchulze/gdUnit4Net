@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -131,7 +130,7 @@ namespace GdUnit4.Executions
             return orphanCount;
         }
 
-        public IDictionary BuildStatistics(int orphanCount)
+        public IDictionary<TestEvent.STATISTIC_KEY, object> BuildStatistics(int orphanCount)
         {
             return TestEvent.BuildStatistics(
                 orphanCount,

@@ -9,7 +9,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/gdUnit4Mono.csproj",
+                "${workspaceFolder}/gdUnit4.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -21,7 +21,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/gdUnit4Mono.csproj",
+                "${workspaceFolder}/gdUnit4.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -35,7 +35,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/gdUnit4Mono.csproj"
+                "${workspaceFolder}/gdUnit4.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -48,7 +48,33 @@
                 "vstest",
                 "/TestAdapterPath:testadapter/bin/Debug/net7.0/",
                 "/ListTests",
-                "test/src/AssertionsTest.cs"
+                "test/.godot/mono/temp/bin/Debug/gdUnit4Test.dll"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "RunAllTests",
+            "command": "dotnet",
+            "dependsOn": "build",
+            "type": "process",
+            "args": [
+                "vstest",
+                "/TestAdapterPath:testadapter/bin/Debug/net7.0/",
+                "test/.godot/mono/temp/bin/Debug/gdUnit4Test.dll"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "RunTest",
+            "command": "dotnet",
+            "dependsOn": "build",
+            "type": "process",
+            "args": [
+                "vstest",
+                "/TestAdapterPath:testadapter/bin/Debug/net7.0/",
+                "/Settings:.runsettings", //" -- RunSettings.TestRunParameters.GODOT_BIN=${env:GODOT_BIN}",
+                "/Tests:GdUnit4.Tests.Asserts.StringAssertTest",
+                "test/.godot/mono/temp/bin/Debug/gdUnit4Test.dll"
             ],
             "problemMatcher": "$msCompile"
         }

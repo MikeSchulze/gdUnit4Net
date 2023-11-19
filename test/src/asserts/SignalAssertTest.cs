@@ -1,7 +1,7 @@
 // GdUnit generated TestSuite
 using System.Threading.Tasks;
 
-namespace GdUnit4.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using static Assertions;
 

@@ -9,19 +9,20 @@
         <LangVersion>11.0</LangVersion>
         <Nullable>enable</Nullable>
         <NullableReferenceTypes>true</NullableReferenceTypes>
-
-        <RootNamespace>GdUnit4</RootNamespace>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>GdUnit4.Tests</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup>
+        <AssemblyName>gdUnit4Test</AssemblyName>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\api\gdUnit4MonoApi.csproj" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+        <ProjectReference Include="..\api\gdUnit4Api.csproj" />
         <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
     </ItemGroup>
 </Project>

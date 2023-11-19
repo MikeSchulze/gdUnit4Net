@@ -21,6 +21,8 @@ namespace GdUnit4.Tests
         // enable to verbose debug event 
         private bool _verbose = false;
 
+        public bool IsFailed { get; set; }
+
         [Before]
         public void Before()
         {

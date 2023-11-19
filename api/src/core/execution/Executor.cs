@@ -10,17 +10,38 @@ namespace GdUnit4.Executions
         [Godot.Signal]
         public delegate void ExecutionCompletedEventHandler();
 
-        private List<ITestEventListener> _eventListeners = new List<ITestEventListener>();
+        private List<ITestEventListener> _eventListeners = new();
 
         private class GdTestEventListenerDelegator : ITestEventListener
         {
             private readonly Godot.GodotObject _listener;
 
+            public bool IsFailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public GdTestEventListenerDelegator(Godot.GodotObject listener)
             {
                 _listener = listener;
             }
-            public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
+
+            public void PublishEvent(TestEvent testEvent)
+            {
+                Godot.Collections.Dictionary<string, Godot.Variant> data = new()
+                {
+                    { "type", testEvent.Type.ToVariant() },
+                    { "resource_path", testEvent.ResourcePath.ToVariant()  },
+                    { "suite_name", testEvent.SuiteName.ToVariant()  },
+                    { "test_name", testEvent.TestName.ToVariant()  },
+                    { "total_count", testEvent.TotalCount.ToVariant()  },
+                    { "statistics", testEvent.Statistics.ToGodotTypedDictionary() }
+                };
+
+                if (testEvent.Reports.Count() != 0)
+                {
+                    var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
+                    data.Add("reports", serializedReports);
+                }
+                _listener.Call("PublishEvent", data);
+            }
         }
 
         public IExecutor AddGdTestEventListener(Godot.GodotObject listener)

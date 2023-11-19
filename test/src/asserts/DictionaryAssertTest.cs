@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace GdUnit4.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using Exceptions;
     using static Assertions;

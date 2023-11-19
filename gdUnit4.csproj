@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="api\gdUnit4MonoApi.csproj" />
-    <ProjectReference Include="test\gdUnit4MonoTest.csproj" />
+    <ProjectReference Include="api\gdUnit4Api.csproj" />
+    <ProjectReference Include="test\gdUnit4Test.csproj" />
   </ItemGroup>
 </Project>

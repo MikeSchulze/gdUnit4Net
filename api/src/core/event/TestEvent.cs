@@ -1,122 +1,146 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
-namespace GdUnit4
+
+namespace GdUnit4;
+
+public class TestEvent : IEquatable<TestEvent>
 {
-
-    public partial class TestEvent : Godot.RefCounted
+    public enum TYPE
     {
+        INIT,
+        STOP,
+        TESTSUITE_BEFORE,
+        TESTSUITE_AFTER,
+        TESTCASE_BEFORE,
+        TESTCASE_AFTER,
+    }
 
-        public enum TYPE
-        {
-            INIT,
-            STOP,
-            TESTSUITE_BEFORE,
-            TESTSUITE_AFTER,
-            TESTCASE_BEFORE,
-            TESTCASE_AFTER,
-        }
-        const string WARNINGS = "warnings";
-        const string FAILED = "failed";
-        const string ERRORS = "errors";
-        const string SKIPPED = "skipped";
-        const string ELAPSED_TIME = "elapsed_time";
-        const string ORPHAN_NODES = "orphan_nodes";
-        const string ERROR_COUNT = "error_count";
-        const string FAILED_COUNT = "failed_count";
-        const string TOTAL_COUNT = "total_count";
-        const string SKIPPED_COUNT = "skipped_count";
-
-        private IDictionary<string, object> _data = new Dictionary<string, object>();
+    public enum STATISTIC_KEY
+    {
+        WARNINGS,
+        FAILED,
+        ERRORS,
+        SKIPPED,
+        ELAPSED_TIME,
+        ORPHAN_NODES,
+        TOTAL_COUNT,
+        ERROR_COUNT,
+        FAILED_COUNT,
+        SKIPPED_COUNT
+    }
 
 #nullable enable
-        private List<TestReport>? _reports;
 
-        private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary? statistics = null, IEnumerable<TestReport>? reports = null)
-        {
-            Type = type;
-            _data.Add("type", type);
-            _data.Add("resource_path", resourcePath);
-            _data.Add("suite_name", suiteName);
-            _data.Add("test_name", testName);
-            _data.Add(TOTAL_COUNT, totalCount);
-            _data.Add("statistics", statistics ?? new Dictionary<string, object>());
+    // constructor needs to serialize/deserialize by JsonConvert
+    TestEvent() { }
 
-            _reports = reports?.ToList();
-            if (reports != null)
-            {
-                var serializedReports = reports.Select(report => report.Serialize()).ToArray();
-                _data.Add("reports", serializedReports);
-            }
-        }
+    private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null, IEnumerable<TestReport>? reports = null)
+    {
+        Type = type;
+        ResourcePath = resourcePath;
+        SuiteName = suiteName;
+        TestName = testName;
+        Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>();
+        Statistics[STATISTIC_KEY.TOTAL_COUNT] = totalCount;
+        Reports = reports?.ToList() ?? new List<TestReport>();
+    }
 
-        public static TestEvent Before(string resourcePath, string suiteName, int totalCount)
-        {
-            return new TestEvent(TYPE.TESTSUITE_BEFORE, resourcePath, suiteName, "Before", totalCount);
-        }
+    public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
+        new(TYPE.TESTSUITE_BEFORE, resourcePath, suiteName, "Before", totalCount);
 
-        public static TestEvent After(string resourcePath, string suiteName, IDictionary statistics, IEnumerable<TestReport> reports)
-        {
-            return new TestEvent(TYPE.TESTSUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
-        }
+    public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<TestReport> reports) =>
+        new(TYPE.TESTSUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
 
-        public static TestEvent BeforeTest(string resourcePath, string suiteName, string testName)
-        {
-            return new TestEvent(TYPE.TESTCASE_BEFORE, resourcePath, suiteName, testName);
-        }
+    public static TestEvent BeforeTest(string resourcePath, string suiteName, string testName) =>
+        new(TYPE.TESTCASE_BEFORE, resourcePath, suiteName, testName);
 
-        public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary? statistics = null, IEnumerable<TestReport>? reports = null)
-        {
-            return new TestEvent(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
-        }
+    public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null, IEnumerable<TestReport>? reports = null) =>
+        new(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
+
 #nullable disable
 
-        public static IDictionary BuildStatistics(int orphan_count,
-            bool isError, int error_count,
-            bool isFailure, int failure_count,
-            bool is_warning,
-            bool is_skipped, int skippedCount,
-            long elapsed_since_ms)
-        {
-            return new Dictionary<string, object>() {
-                    { ORPHAN_NODES, orphan_count},
-                    { ELAPSED_TIME, elapsed_since_ms},
-                    { WARNINGS, is_warning},
-                    { ERRORS, isError},
-                    { ERROR_COUNT, error_count},
-                    { FAILED, isFailure},
-                    { FAILED_COUNT, failure_count},
-                    { SKIPPED, is_skipped},
-                    { SKIPPED_COUNT, skippedCount}};
-        }
-
-        // used as bridge  to serialize GdUnitRunner:PublishEvent
-        public Godot.Collections.Dictionary AsDictionary() => _data.ToGodotDictionary();
-
-        public TestEvent.TYPE Type { get; private set; }
-        public string SuiteName => _data["suite_name"] as string;
-        public string TestName => _data["test_name"] as string;
-        public string ResourcePath => _data["resource_path"] as string;
-
-        public IDictionary Statistics => _data["statistics"] as IDictionary;
-
-        public IEnumerable<TestReport> Reports => _reports ?? new List<TestReport>();
-        public int TotalCount => _data.ContainsKey(TOTAL_COUNT) ? (int)_data[TOTAL_COUNT] : 0;
-        public int ErrorCount => Statistics.Contains(ERROR_COUNT) ? (int)Statistics[ERROR_COUNT] : 0;
-        public int FailedCount => Statistics.Contains(FAILED_COUNT) ? (int)Statistics[FAILED_COUNT] : 0;
-        public int OrphanCount => Statistics.Contains(ORPHAN_NODES) ? (int)Statistics[ORPHAN_NODES] : 0;
-        public bool IsWarning => Statistics.Contains(WARNINGS) ? (bool)Statistics[WARNINGS] : false;
-        public bool IsFailed => Statistics.Contains(FAILED) ? (bool)Statistics[FAILED] : false;
-        public bool IsError => Statistics.Contains(ERRORS) ? (bool)Statistics[ERRORS] : false;
-        public bool IsSkipped => Statistics.Contains(SKIPPED) ? (bool)Statistics[SKIPPED] : false;
-        public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
-        public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(Statistics.Contains(ELAPSED_TIME) ? (long)Statistics[ELAPSED_TIME] : 0);
-
-        public override string ToString()
-        {
-            return $"Event: {Type} {SuiteName}:{TestName}, {""} ";
-        }
+    public static IDictionary<STATISTIC_KEY, object> BuildStatistics(int orphan_count,
+        bool isError, int error_count,
+        bool isFailure, int failure_count,
+        bool is_warning,
+        bool is_skipped, int skippedCount,
+        long elapsed_since_ms)
+    {
+        return new Dictionary<STATISTIC_KEY, object>() {
+            { STATISTIC_KEY.ORPHAN_NODES, orphan_count},
+            { STATISTIC_KEY.ELAPSED_TIME, elapsed_since_ms},
+            { STATISTIC_KEY.WARNINGS, is_warning},
+            { STATISTIC_KEY.ERRORS, isError},
+            { STATISTIC_KEY.ERROR_COUNT, error_count},
+            { STATISTIC_KEY.FAILED, isFailure},
+            { STATISTIC_KEY.FAILED_COUNT, failure_count},
+            { STATISTIC_KEY.SKIPPED, is_skipped},
+            { STATISTIC_KEY.SKIPPED_COUNT, skippedCount}};
     }
+
+    public TYPE Type { get; set; }
+    public string SuiteName { get; set; }
+    public string TestName { get; set; }
+    public string ResourcePath { get; set; }
+    public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
+    public IEnumerable<TestReport> Reports { get; set; } = new List<TestReport>();
+
+    public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
+    public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
+    public int FailedCount => GetByKeyOrDefault(STATISTIC_KEY.FAILED_COUNT, 0);
+    public int OrphanCount => GetByKeyOrDefault(STATISTIC_KEY.ORPHAN_NODES, 0);
+    public int SkippedCount => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED_COUNT, 0);
+    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
+    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
+    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
+    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
+    public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
+    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
+
+    private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T default_value) =>
+        Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : default_value;
+    public override string ToString()
+    {
+        return $"Event: {Type} {SuiteName}:{TestName}, {""} ";
+    }
+
+#nullable enable
+    public override bool Equals(object? obj) => obj is TestEvent other && this.Equals(other);
+#nullable disable
+
+    public static bool operator ==(TestEvent lhs, TestEvent rhs) => lhs.Equals(rhs);
+
+    public static bool operator !=(TestEvent lhs, TestEvent rhs) => !(lhs == rhs);
+
+    public bool Equals(TestEvent other) =>
+        (Type,
+        ResourcePath,
+        SuiteName,
+        TestName,
+        TotalCount,
+        ErrorCount,
+        FailedCount,
+        OrphanCount)
+        .Equals((
+            other.Type,
+            other.ResourcePath,
+            other.SuiteName,
+            other.TestName,
+            other.TotalCount,
+            other.ErrorCount,
+            other.FailedCount,
+            other.OrphanCount));
+
+    public override int GetHashCode() =>
+        HashCode.Combine(Type,
+            ResourcePath,
+            SuiteName,
+            TestName,
+            TotalCount,
+            ErrorCount,
+            FailedCount,
+            OrphanCount);
 }

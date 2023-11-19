@@ -1,6 +1,7 @@
+
 namespace GdUnit4.Tests;
 
-partial class TestRunner : GdUnit4.Api.TestRunner
+partial class TestRunner : Api.TestRunner
 {
 	public override void _Ready()
 		=> _ = RunTests();
