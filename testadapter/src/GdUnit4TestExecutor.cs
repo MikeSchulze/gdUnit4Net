@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using Newtonsoft.Json;
 using Godot;
+using System.IO;
 
 namespace GdUnit4.TestAdapter;
 
@@ -31,7 +32,11 @@ public class GdUnit4TestExecutor : ITestExecutor
     /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        if (tests == null || frameworkHandle == null || runContext == null) return;
+        _ = tests ?? throw new Exception("Argument 'tests' is null, abort!");
+        _ = runContext ?? throw new Exception("Argument 'runContext' is null abort!");
+        _ = frameworkHandle ?? throw new Exception("Argument 'frameworkHandle' is null, abort!");
+        var godotBin = System.Environment.GetEnvironmentVariable("GODOT_BIN")
+            ?? throw new Exception("Godot runtime is not set! Set evn 'GODOT_BIN' is missing!");
         //CheckIfDebug();
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
@@ -42,14 +47,16 @@ public class GdUnit4TestExecutor : ITestExecutor
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{key} = '{settings[key]}'");
         }
 
-        var classPath = tests.First().CodeFilePath;
-        Console.WriteLine($"classPath: {classPath}");
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Processing: {classPath}");
+        TestCase testCase = tests.First();
+        var classPath = testCase.CodeFilePath!;
+        var workingDirectory = LookupGodotProjectPath(classPath);
+
         using (pProcess = new())
         {
-            pProcess.StartInfo.WorkingDirectory = @"D:\develop\workspace\gdUnit4Mono\test";
-            pProcess.StartInfo.FileName = @"d:\develop\Godot_v4.1.2-stable_mono_win64\Godot_v4.1.2-stable_mono_win64.exe";
-            pProcess.StartInfo.Arguments = $@"-d --path D:\develop\workspace\gdUnit4Mono\test --testadapter --testsuites='{classPath} --verbose'";
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Execute test's on: {classPath}");
+            pProcess.StartInfo.WorkingDirectory = @$"{workingDirectory}";
+            pProcess.StartInfo.FileName = @$"{godotBin}";
+            pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --testsuites='{classPath} --verbose'";
             pProcess.StartInfo.CreateNoWindow = true; //not diplay a windows
             pProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             pProcess.StartInfo.UseShellExecute = false;
@@ -157,6 +164,18 @@ public class GdUnit4TestExecutor : ITestExecutor
         }
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"stdout: {json}");
     });
+
+    private static string? LookupGodotProjectPath(string classPath)
+    {
+        DirectoryInfo? currentDir = new DirectoryInfo(classPath).Parent;
+        while (currentDir != null)
+        {
+            if (currentDir.EnumerateFiles("project.godot").Any())
+                return currentDir.FullName;
+            currentDir = currentDir.Parent;
+        }
+        return null;
+    }
 
     private void CheckIfDebug()
     {

@@ -17,7 +17,6 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IncludeSymbols>true</IncludeSymbols>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
     <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
     <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
@@ -44,7 +43,7 @@
       <DebugSymbols>true</DebugSymbols>
       <DebugType>full</DebugType>
       <Optimize>false</Optimize>
-      <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
+      <!--DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants-->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DebugType>pdbonly</DebugType>
@@ -54,16 +53,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="gdUnit4.api" Version="4.2.0-rc*" />
 
     <None Include="README.md" Pack="true" PackagePath="/" />
     <None Include="LICENSE" Pack="true" PackagePath="/" />
     <None Include="icon.png" Pack="true" PackagePath="/" />
-
-    <ProjectReference Include="..\api\gdUnit4Api.csproj" />
-
   </ItemGroup>
 
 </Project>

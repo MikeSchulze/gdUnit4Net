@@ -31,14 +31,14 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        logger.SendMessage(TestMessageLevel.Informational, "--- Loading GdUnit4TestDiscoverer ----");
-
         logger.SendMessage(TestMessageLevel.Informational, $"{discoveryContext.RunSettings}");
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
         logger.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
 
-        foreach (string assemblyPath in assemblyPaths)
+        var filteredAssemblys = FilterWithoutTestAdapter(assemblyPaths);
+        foreach (string assemblyPath in filteredAssemblys)
         {
+            logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
             Assembly? assembly = LoadAssembly(assemblyPath, logger);
             if (assembly == null) continue;
 
@@ -72,14 +72,14 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
     }
 
+    private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>
+        assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));
 
     private static Assembly? LoadAssembly(string assemblyPath, IMessageLogger logger)
     {
         try
         {
-            var assembly = Assembly.LoadFrom(assemblyPath);
-            //AppDomain.CurrentDomain.Load(assembly.GetName());
-            return assembly;
+            return Assembly.LoadFrom(assemblyPath);
         }
         catch (Exception e)
         {
