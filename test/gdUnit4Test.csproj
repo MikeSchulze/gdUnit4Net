@@ -20,8 +20,13 @@
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <!-- Configure TestAdapter Settings -->
+        <RunSettingsFilePath>$(ProjectDir).runsettings</RunSettingsFilePath>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
         <ProjectReference Include="..\api\gdUnit4Api.csproj" />
         <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
     </ItemGroup>

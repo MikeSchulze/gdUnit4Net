@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +30,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        logger.SendMessage(TestMessageLevel.Informational, $"{discoveryContext.RunSettings}");
+        ISettingsProvider t;
+        logger.SendMessage(TestMessageLevel.Informational, $"RunSettings: {discoveryContext.RunSettings}:{discoveryContext.RunSettings?.SettingsXml}");
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
         logger.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
 
