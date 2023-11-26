@@ -40,39 +40,53 @@ public class GdUnit4TestExecutor : ITestExecutor
         //CheckIfDebug();
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
+        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
         var settings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         foreach (var key in settings.Keys)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{key} = '{settings[key]}'");
         }
 
-        TestCase testCase = tests.First();
-        var classPath = testCase.CodeFilePath!;
-        var workingDirectory = LookupGodotProjectPath(classPath);
+        Dictionary<string, List<TestCase>> groupedTests = tests
+            .GroupBy(t => t.CodeFilePath!)
+            .ToDictionary(group => group.Key, group => group.ToList());
 
-        using (pProcess = new())
+        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunTests {groupedTests.Keys.Formated()}");
+
+        foreach (var key in groupedTests.Keys)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Execute test's on: {classPath}");
-            pProcess.StartInfo.WorkingDirectory = @$"{workingDirectory}";
-            pProcess.StartInfo.FileName = @$"{godotBin}";
-            pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --testsuites='{classPath} --verbose'";
-            pProcess.StartInfo.CreateNoWindow = true; //not diplay a windows
-            pProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            pProcess.StartInfo.UseShellExecute = false;
-            pProcess.StartInfo.RedirectStandardOutput = true;
-            pProcess.StartInfo.RedirectStandardError = true;
-            pProcess.StartInfo.RedirectStandardInput = true;
-            pProcess.EnableRaisingEvents = true;
-            pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, tests);
-            pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-            pProcess.Exited += ExitHandler(frameworkHandle);
-            pProcess.Start();
-            pProcess.BeginErrorReadLine();
-            pProcess.BeginOutputReadLine();
-            //pProcess.WaitForExit((int)runConfiguration.TestSessionTimeout);
-            pProcess.WaitForExit();
-        };
+            var classPath = key;
+            List<TestCase> testCases = groupedTests[key];
+
+            var workingDirectory = LookupGodotProjectPath(classPath);
+
+            using (pProcess = new())
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Execute test's on: {classPath}");
+                pProcess.StartInfo.WorkingDirectory = @$"{workingDirectory}";
+                pProcess.StartInfo.FileName = @$"{godotBin}";
+                pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --testsuites='{classPath} --verbose'";
+                pProcess.StartInfo.CreateNoWindow = true; //not diplay a windows
+                pProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                pProcess.StartInfo.UseShellExecute = false;
+                pProcess.StartInfo.RedirectStandardOutput = true;
+                pProcess.StartInfo.RedirectStandardError = true;
+                pProcess.StartInfo.RedirectStandardInput = true;
+                pProcess.EnableRaisingEvents = true;
+                pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
+                pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                pProcess.Exited += ExitHandler(frameworkHandle);
+                pProcess.Start();
+                pProcess.BeginErrorReadLine();
+                pProcess.BeginOutputReadLine();
+                //pProcess.WaitForExit((int)runConfiguration.TestSessionTimeout);
+                pProcess.WaitForExit();
+            };
+
+        }
+
+
+
     }
 
     /// <summary>
@@ -132,13 +146,23 @@ public class GdUnit4TestExecutor : ITestExecutor
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     {
-                        var testCase = tests.First(t => t.DisplayName == e.TestName);
+                        var testCase = tests.FirstOrDefault(t => t.DisplayName == e.TestName);
+                        if (testCase == null)
+                        {
+                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.TestName}");
+                            return;
+                        }
                         frameworkHandle.RecordStart(testCase);
                     }
                     break;
                 case TestEvent.TYPE.TESTCASE_AFTER:
                     {
-                        var testCase = tests.First(t => t.DisplayName == e.TestName);
+                        var testCase = tests.FirstOrDefault(t => t.DisplayName == e.TestName);
+                        if (testCase == null)
+                        {
+                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.TestName}");
+                            return;
+                        }
                         var testResult = new TestResult(testCase)
                         {
                             DisplayName = testCase.DisplayName,
@@ -148,7 +172,8 @@ public class GdUnit4TestExecutor : ITestExecutor
                         };
                         foreach (var report in e.Reports)
                         {
-                            testResult.Messages.Add(new TestResultMessage(TestResultMessage.AdditionalInfoCategory, report.Message.RichTextNormalize().Indentation(2)));
+                            testResult.ErrorMessage = report.Message.RichTextNormalize();
+                            testResult.ErrorStackTrace = $"StackTrace    at {testCase.FullyQualifiedName}() in {testCase.CodeFilePath}:line {report.LineNumber}";
                         }
                         frameworkHandle.RecordResult(testResult);
                         frameworkHandle.RecordEnd(testCase, testResult.Outcome);

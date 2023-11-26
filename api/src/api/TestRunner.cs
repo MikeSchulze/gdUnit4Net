@@ -62,7 +62,7 @@ partial class TestRunner : Godot.Node
 
         foreach (var testSuite in testSuites)
         {
-            //if (!testSuite.Name.Equals("GodotObjectExtensionsTest"))
+            //if (!testSuite.Name.Equals("UtilsTest"))
             //    continue;
             await executor.ExecuteInternally(testSuite);
             if (listener.IsFailed && FailFast)

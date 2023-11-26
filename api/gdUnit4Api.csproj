@@ -13,7 +13,6 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
-    <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
     <AssemblyName>gdUnit4Api</AssemblyName>
@@ -25,6 +24,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>gdUnit4.api</PackageId>

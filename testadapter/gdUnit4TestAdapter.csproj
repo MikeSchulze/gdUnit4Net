@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="../PackageVersions.props" />
 
   <PropertyGroup>
-    <Title>gdUnit4.TestAdapter</Title>
+    <Title>gdUnit4TestAdapter</Title>
     <Version>1.0.0</Version>
     <Description>The Test Adapter for GdUnit4Mono.</Description>
     <Copyright>© 2023 Mike Schulze</Copyright>
@@ -14,20 +15,19 @@
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <IncludeSymbols>true</IncludeSymbols>
-
     <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
     <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
-    <PackageId>gdUnit4.testAdapter</PackageId>
+    <PackageId>gdUnit4.test.adapter</PackageId>
     <PackageVersion>1.0.0-rc.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -38,17 +38,6 @@
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
   </PropertyGroup>  
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DebugSymbols>true</DebugSymbols>
-      <DebugType>full</DebugType>
-      <Optimize>false</Optimize>
-      <!--DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants-->
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DebugType>pdbonly</DebugType>
-      <Optimize>true</Optimize>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
