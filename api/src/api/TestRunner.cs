@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using GdUnit4.Executions;
@@ -21,8 +20,11 @@ partial class TestRunner : Godot.Node
         [Option(Required = false, HelpText = "Runs the Runner in test adapter mode.")]
         public bool TestAdapter { get; set; }
 
-        [Option(Required = false, HelpText = "Runs the Runner in test adapter mode.")]
-        public IEnumerable<string>? TestSuites { get; set; }
+        [Option(Required = false, HelpText = "The list of test-suites to execute.")]
+        public IEnumerable<string> TestSuites { get; set; } = new List<string>();
+
+        [Option(Required = false, HelpText = "Adds the given test suite or directory to the execution pipeline.")]
+        public string Add { get; set; } = "";
     }
 
     private bool FailFast { get; set; } = true;
@@ -30,6 +32,7 @@ partial class TestRunner : Godot.Node
     public async Task RunTests()
     {
         var cmdArgs = Godot.OS.GetCmdlineArgs();
+
         await new Parser(with =>
         {
             with.EnableDashDash = true;
@@ -39,59 +42,26 @@ partial class TestRunner : Godot.Node
            .WithParsedAsync(async o =>
            {
                FailFast = o.FailFast;
-               var exitCode = await (o.TestAdapter ? RunTestByAdapter(o.TestSuites!) : RunAllTests());
+               var exitCode = await (o.TestAdapter
+                ? RunTests(LoadTestSuites(o.TestSuites), new TestAdapterReporter())
+                : RunTests(LoadTestSuites(new DirectoryInfo(o.Add)), new TestReporter()));
                Console.WriteLine($"Testrun ends with exit code: {exitCode}, FailFast:{FailFast}");
                GetTree().Quit(exitCode);
            });
     }
 
-    private async Task<int> RunAllTests()
+    private async Task<int> RunTests(IEnumerable<TestSuite> testSuites, ITestEventListener listener)
     {
-        Console.ForegroundColor = ConsoleColor.White;
-        // TODO check this line, it results into a crash when resizing the terminal
-        //Console.BufferHeight = 100;
-        Console.Clear();
-        Console.Title = "GdUnit4TestRunner";
-        Console.WriteLine($"This is From Console App {Assembly.GetExecutingAssembly()}");
-
-        var currentDir = $"{Directory.GetCurrentDirectory()}/src";
-        List<TestSuite> testSuites = ScanTestSuites(new DirectoryInfo(currentDir), new List<TestSuite>());
-        using Executor executor = new Executor();
-        ITestEventListener listener = new TestReporter();
-        executor.AddTestEventListener(listener);
-
-        foreach (var testSuite in testSuites)
-        {
-            //if (!testSuite.Name.Equals("UtilsTest"))
-            //    continue;
-            await executor.ExecuteInternally(testSuite);
-            if (listener.IsFailed && FailFast)
-                break;
-        }
-        return listener.IsFailed ? 100 : 0;
-    }
-
-    private async Task<int> RunTestByAdapter(IEnumerable<string> testSuites)
-    {
-        Console.Title = "GdUnit4TestRunner";
-        if (testSuites == null || testSuites.Count() == 0)
+        if (!testSuites.Any())
         {
             Console.Error.WriteLine("No testsuite's specified!, Abort!");
             return -1;
         }
         using Executor executor = new();
-        TestAdapterReporter listener = new();
         executor.AddTestEventListener(listener);
 
-        foreach (var path in testSuites)
+        foreach (var testSuite in testSuites)
         {
-            var testSuitePath = path.TrimStart('\'').TrimEnd('\'');
-            var testSuite = LoadTestSuite(testSuitePath!);
-            if (testSuite == null)
-            {
-                Console.Error.WriteLine($"Can't load testsuite {testSuitePath}!, Abort!");
-                return -1;
-            }
             await executor.ExecuteInternally(testSuite!);
             if (listener.IsFailed && FailFast)
                 break;
@@ -99,26 +69,43 @@ partial class TestRunner : Godot.Node
         return listener.IsFailed ? 100 : 0;
     }
 
-    private static List<TestSuite> ScanTestSuites(DirectoryInfo currentDir, List<TestSuite> acc)
+    private static List<TestSuite> LoadTestSuites(IEnumerable<string> testSuites)
     {
-        Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
-        foreach (var file in currentDir.GetFiles("*.cs"))
+        List<TestSuite> acc = new();
+        foreach (var path in testSuites)
         {
-            Type? type = GdUnitTestSuiteBuilder.ParseType(file.FullName);
+            var testSuitePath = path.TrimStart('\'').TrimEnd('\'');
+            Type? type = GdUnitTestSuiteBuilder.ParseType(testSuitePath);
             if (type != null && IsTestSuite(type))
-                acc.Add(new TestSuite(file.FullName));
+                acc.Add(new TestSuite(testSuitePath));
+            else
+                Console.Error.WriteLine($"Can't load testsuite {testSuitePath}!, Skipp it!");
         }
-        foreach (var directory in currentDir.GetDirectories())
-            ScanTestSuites(directory, acc);
         return acc;
     }
 
-    private static TestSuite? LoadTestSuite(string path)
+    private static List<TestSuite> LoadTestSuites(DirectoryInfo rootDir)
     {
-        Type? type = GdUnitTestSuiteBuilder.ParseType(path);
-        if (type != null && IsTestSuite(type))
-            return new TestSuite(path);
-        return null;
+        List<TestSuite> acc = new();
+        Stack<DirectoryInfo> stack = new();
+        stack.Push(rootDir);
+
+        while (stack.Count > 0)
+        {
+            DirectoryInfo currentDir = stack.Pop();
+            Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
+
+            foreach (var file in currentDir.GetFiles("*.cs"))
+            {
+                Type? type = GdUnitTestSuiteBuilder.ParseType(file.FullName);
+                if (type != null && IsTestSuite(type))
+                    acc.Add(new TestSuite(file.FullName));
+            }
+
+            foreach (var directory in currentDir.GetDirectories())
+                stack.Push(directory);
+        }
+        return acc;
     }
 
     private static bool IsTestSuite(Type type) =>

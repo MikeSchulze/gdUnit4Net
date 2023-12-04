@@ -32,7 +32,7 @@ namespace GdUnit4.Executions
                     { "suite_name", testEvent.SuiteName.ToVariant()  },
                     { "test_name", testEvent.TestName.ToVariant()  },
                     { "total_count", testEvent.TotalCount.ToVariant()  },
-                    { "statistics", testEvent.Statistics.ToGodotTypedDictionary() }
+                    { "statistics", toGdUnitEventStatisitics(testEvent.Statistics) }
                 };
 
                 if (testEvent.Reports.Count() != 0)
@@ -41,6 +41,14 @@ namespace GdUnit4.Executions
                     data.Add("reports", serializedReports);
                 }
                 _listener.Call("PublishEvent", data);
+            }
+
+            private Godot.Collections.Dictionary<Godot.Variant, Godot.Variant> toGdUnitEventStatisitics(IDictionary<TestEvent.STATISTIC_KEY, object> statistics)
+            {
+                var converted = new Godot.Collections.Dictionary<Godot.Variant, Godot.Variant>();
+                foreach (var (key, value) in statistics)
+                    converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
+                return converted;
             }
         }
 

@@ -10,7 +10,9 @@
             "args": [
                 "--path",
                 "${workspaceFolder}/test",
-                "-d"
+                "-d",
+                "--add",
+                "${workspaceFolder}/test/src"
             ],
             "cwd": "${workspaceFolder}/test",
             "console": "integratedTerminal",
