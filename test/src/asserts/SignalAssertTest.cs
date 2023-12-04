@@ -59,7 +59,7 @@ namespace GdUnit4.Tests.Asserts
                         Expecting do emitting signal:
                             "SignalC(abc, 101)"
                          by
-                            <GdUnit4.Asserts.SignalAssertTest+TestEmitter>
+                            <GdUnit4.Tests.Asserts.SignalAssertTest+TestEmitter>
                         """));
         }
 

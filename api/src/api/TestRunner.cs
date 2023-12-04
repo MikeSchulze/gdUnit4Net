@@ -62,6 +62,8 @@ partial class TestRunner : Godot.Node
 
         foreach (var testSuite in testSuites)
         {
+            //if (!testSuite.Name.Equals("SignalAssertTest"))
+            //    continue;
             await executor.ExecuteInternally(testSuite!);
             if (listener.IsFailed && FailFast)
                 break;
