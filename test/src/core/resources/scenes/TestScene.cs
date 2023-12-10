@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Threading.Tasks;
 
 public partial class TestScene : Control
@@ -11,6 +12,8 @@ public partial class TestScene : Control
     private Color _initial_color = Colors.Red;
 
     private RefCounted? _nullable;
+
+    bool _player_jump_action = false;
 
 #pragma warning disable CS8618
     public ColorRect _box1;
@@ -120,6 +123,8 @@ public partial class TestScene : Control
 
     public override void _Input(InputEvent inputEvent)
     {
+        _player_jump_action = Input.IsActionJustReleased("player_jump", true);
+        GD.PrintS($"->>>> _Input {inputEvent.AsText()}, {_player_jump_action}");
         if (inputEvent.IsActionReleased("ui_accept"))
         {
             AddChild(CreateSpell());

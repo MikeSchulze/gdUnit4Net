@@ -37,11 +37,10 @@ public class GdUnit4TestExecutor : ITestExecutor
         _ = frameworkHandle ?? throw new Exception("Argument 'frameworkHandle' is null, abort!");
         var godotBin = System.Environment.GetEnvironmentVariable("GODOT_BIN")
             ?? throw new Exception("Godot runtime is not set! Set evn 'GODOT_BIN' is missing!");
-        //CheckIfDebug();
-
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
         //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
         var settings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+
         foreach (var key in settings.Keys)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{key} = '{settings[key]}'");
@@ -77,6 +76,8 @@ public class GdUnit4TestExecutor : ITestExecutor
                 pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
                 pProcess.Exited += ExitHandler(frameworkHandle);
                 pProcess.Start();
+                AttachDebugerIfNeed(runContext, frameworkHandle, pProcess);
+
                 pProcess.BeginErrorReadLine();
                 pProcess.BeginOutputReadLine();
                 //pProcess.WaitForExit((int)runConfiguration.TestSessionTimeout);
@@ -84,9 +85,12 @@ public class GdUnit4TestExecutor : ITestExecutor
             };
 
         }
+    }
 
-
-
+    private void AttachDebugerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
+    {
+        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2)
+            fh2.AttachDebuggerToProcess(pid: process.Id);
     }
 
     /// <summary>
@@ -200,11 +204,5 @@ public class GdUnit4TestExecutor : ITestExecutor
             currentDir = currentDir.Parent;
         }
         return null;
-    }
-
-    private void CheckIfDebug()
-    {
-        if (!Debugger.IsAttached)
-            Debugger.Launch();
     }
 }

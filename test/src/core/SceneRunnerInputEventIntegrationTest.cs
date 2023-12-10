@@ -124,6 +124,21 @@ namespace GdUnit4.Tests
         }
 
         [TestCase]
+        public void SimulateKeyPressAsAction()
+        {
+            var @event = new InputEventKey();
+            @event.Keycode = Key.Space;
+            InputMap.AddAction("player_jump");
+            InputMap.ActionAddEvent("player_jump", @event);
+
+            AssertThat(SceneRunner.GetProperty("_player_jump_action")).IsFalse();
+
+            SceneRunner.SimulateKeyPressed(Key.Space);
+            AssertThat(Input.IsActionJustPressed("player_jump")).IsTrue();
+            AssertThat(SceneRunner.GetProperty("_player_jump_action")).IsTrue();
+        }
+
+        [TestCase]
         public async Task SimulateKeyPress()
         {
             Key[] keys = { Key.A, Key.D, Key.X, Key.Key0 };
