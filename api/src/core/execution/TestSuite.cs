@@ -27,14 +27,12 @@ namespace GdUnit4.Executions
 
         public bool FilterDisabled { get; set; } = false;
 
-        public TestSuite(string classPath, List<string>? includedTests = null)
+        public TestSuite(string classPath, IEnumerable<string>? includedTests = null)
         {
-            Type? type = GdUnitTestSuiteBuilder.ParseType(classPath);
-            if (type == null)
-                throw new ArgumentException($"Can't parse testsuite {classPath}");
-
-            Instance = Activator.CreateInstance(type) ??
-                throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
+            Type? type = GdUnitTestSuiteBuilder.ParseType(classPath)
+                ?? throw new ArgumentException($"Can't parse testsuite {classPath}");
+            Instance = Activator.CreateInstance(type)
+                ?? throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
 
             Name = type.Name;
             ResourcePath = classPath;
@@ -55,7 +53,7 @@ namespace GdUnit4.Executions
             _testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, null));
         }
 
-        private IEnumerable<Executions.TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, List<string>? includedTests = null)
+        private IEnumerable<Executions.TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null)
         {
             return type.GetMethods()
                 .Where(m => m.IsDefined(typeof(TestCaseAttribute)))

@@ -123,8 +123,8 @@ public partial class TestScene : Control
 
     public override void _Input(InputEvent inputEvent)
     {
-        _player_jump_action = Input.IsActionJustReleased("player_jump", true);
-        GD.PrintS($"->>>> _Input {inputEvent.AsText()}, {_player_jump_action}");
+        if (InputMap.HasAction("player_jump"))
+            _player_jump_action = Input.IsActionJustReleased("player_jump", true);
         if (inputEvent.IsActionReleased("ui_accept"))
         {
             AddChild(CreateSpell());

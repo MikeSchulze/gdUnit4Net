@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using CommandLine;
 using GdUnit4.Executions;
 using GdUnit4.Core;
+using Newtonsoft.Json;
+
 
 partial class TestRunner : Godot.Node
 {
@@ -20,8 +22,8 @@ partial class TestRunner : Godot.Node
         [Option(Required = false, HelpText = "Runs the Runner in test adapter mode.")]
         public bool TestAdapter { get; set; }
 
-        [Option(Required = false, HelpText = "The list of test-suites to execute.")]
-        public IEnumerable<string> TestSuites { get; set; } = new List<string>();
+        [Option(Required = false, HelpText = "The test runner config.")]
+        public string ConfigFile { get; set; } = "";
 
         [Option(Required = false, HelpText = "Adds the given test suite or directory to the execution pipeline.")]
         public string Add { get; set; } = "";
@@ -43,7 +45,7 @@ partial class TestRunner : Godot.Node
            {
                FailFast = o.FailFast;
                var exitCode = await (o.TestAdapter
-                ? RunTests(LoadTestSuites(o.TestSuites), new TestAdapterReporter())
+                ? RunTests(LoadTestSuites(o.ConfigFile), new TestAdapterReporter())
                 : RunTests(LoadTestSuites(new DirectoryInfo(o.Add)), new TestReporter()));
                Console.WriteLine($"Testrun ends with exit code: {exitCode}, FailFast:{FailFast}");
                GetTree().Quit(exitCode);
@@ -62,8 +64,6 @@ partial class TestRunner : Godot.Node
 
         foreach (var testSuite in testSuites)
         {
-            //if (!testSuite.Name.Equals("SignalAssertTest"))
-            //    continue;
             await executor.ExecuteInternally(testSuite!);
             if (listener.IsFailed && FailFast)
                 break;
@@ -71,24 +71,34 @@ partial class TestRunner : Godot.Node
         return listener.IsFailed ? 100 : 0;
     }
 
-    private static List<TestSuite> LoadTestSuites(IEnumerable<string> testSuites)
+    private static TestSuite? TryCreateTestSuite(KeyValuePair<string, IEnumerable<TestCaseConfig>> entry)
     {
-        List<TestSuite> acc = new();
-        foreach (var path in testSuites)
-        {
-            var testSuitePath = path.TrimStart('\'').TrimEnd('\'');
-            Type? type = GdUnitTestSuiteBuilder.ParseType(testSuitePath);
-            if (type != null && IsTestSuite(type))
-                acc.Add(new TestSuite(testSuitePath));
-            else
-                Console.Error.WriteLine($"Can't load testsuite {testSuitePath}!, Skipp it!");
-        }
-        return acc;
+        var testSuitePath = entry.Key;
+        var testCases = entry.Value.Select(t => t.Name);
+
+        if (GdUnitTestSuiteBuilder.ParseType(testSuitePath) is Type type && IsTestSuite(type))
+            return new TestSuite(testSuitePath, testCases);
+        Console.Error.WriteLine($"Can't load testsuite {testSuitePath}! Skip it!");
+        return null;
     }
 
-    private static List<TestSuite> LoadTestSuites(DirectoryInfo rootDir)
+    private static List<TestSuite> LoadTestSuites(string runnerConfigFile)
     {
-        List<TestSuite> acc = new();
+        var runnerConfig = LoadTestRunnerConfig(runnerConfigFile);
+        return runnerConfig?.Included
+            .Select(TryCreateTestSuite)
+            .OfType<TestSuite>() // Filter out invalid test suites
+            .ToList() ?? new List<TestSuite>();
+    }
+
+    private static TestRunnerConfig? LoadTestRunnerConfig(string configFile)
+    {
+        var json = File.ReadAllText(configFile.Trim('\''));
+        return JsonConvert.DeserializeObject<TestRunnerConfig>(json);
+    }
+
+    private static IEnumerable<TestSuite> LoadTestSuites(DirectoryInfo rootDir, string searchPattern = "*.cs")
+    {
         Stack<DirectoryInfo> stack = new();
         stack.Push(rootDir);
 
@@ -97,17 +107,16 @@ partial class TestRunner : Godot.Node
             DirectoryInfo currentDir = stack.Pop();
             Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
 
-            foreach (var file in currentDir.GetFiles("*.cs"))
+            foreach (var filePath in Directory.EnumerateFiles(currentDir.FullName, searchPattern))
             {
-                Type? type = GdUnitTestSuiteBuilder.ParseType(file.FullName);
+                Type? type = GdUnitTestSuiteBuilder.ParseType(filePath);
                 if (type != null && IsTestSuite(type))
-                    acc.Add(new TestSuite(file.FullName));
+                    yield return new TestSuite(filePath);
             }
 
             foreach (var directory in currentDir.GetDirectories())
                 stack.Push(directory);
         }
-        return acc;
     }
 
     private static bool IsTestSuite(Type type) =>

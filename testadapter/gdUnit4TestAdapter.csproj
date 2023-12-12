@@ -44,6 +44,7 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="All" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!--ProjectReference Include="..\api\gdUnit4Api.csproj" /-->
     <PackageReference Include="gdUnit4.api" Version="4.2.0-rc*" />
 
     <None Include="README.md" Pack="true" PackagePath="/" />

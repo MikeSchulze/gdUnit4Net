@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using Godot;
 using System.IO;
 
+using GdUnit4.Api;
+
 namespace GdUnit4.TestAdapter;
 
 [ExtensionUri(ExecutorUri)]
@@ -22,6 +24,14 @@ public class GdUnit4TestExecutor : ITestExecutor
     /// The Uri used to identify the NUnitExecutor
     ///</summary>
     public const string ExecutorUri = "executor://GdUnit4.TestAdapter/v1";
+
+
+    // Test properties supported for filtering
+    private Dictionary<string, TestProperty> SupportedProperties = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
+        ["Name"] = TestCaseProperties.DisplayName,
+    };
 
 
     /// <summary>
@@ -50,6 +60,13 @@ public class GdUnit4TestExecutor : ITestExecutor
             .GroupBy(t => t.CodeFilePath!)
             .ToDictionary(group => group.Key, group => group.ToList());
 
+        var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, (propertyName) =>
+        {
+            SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
+            return testProperty;
+        });
+
+
         //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunTests {groupedTests.Keys.Formated()}");
 
         foreach (var key in groupedTests.Keys)
@@ -57,6 +74,15 @@ public class GdUnit4TestExecutor : ITestExecutor
             var classPath = key;
             List<TestCase> testCases = groupedTests[key];
 
+            //var filteredTestCases = filterExpression != null
+            //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
+            //    {
+            //        SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
+            //        return t.GetPropertyValue(testProperty);
+            //    }) == false)
+            //    : testCases;
+
+            var configName = WriteTestRunnerConfig(classPath, testCases);
             var workingDirectory = LookupGodotProjectPath(classPath);
 
             using (pProcess = new())
@@ -64,7 +90,7 @@ public class GdUnit4TestExecutor : ITestExecutor
                 frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Execute test's on: {classPath}");
                 pProcess.StartInfo.WorkingDirectory = @$"{workingDirectory}";
                 pProcess.StartInfo.FileName = @$"{godotBin}";
-                pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --testsuites='{classPath} --verbose'";
+                pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --configfile='{configName}'";
                 pProcess.StartInfo.CreateNoWindow = true; //not diplay a windows
                 pProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 pProcess.StartInfo.UseShellExecute = false;
@@ -76,21 +102,16 @@ public class GdUnit4TestExecutor : ITestExecutor
                 pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
                 pProcess.Exited += ExitHandler(frameworkHandle);
                 pProcess.Start();
-                AttachDebugerIfNeed(runContext, frameworkHandle, pProcess);
+                AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
 
                 pProcess.BeginErrorReadLine();
                 pProcess.BeginOutputReadLine();
                 //pProcess.WaitForExit((int)runConfiguration.TestSessionTimeout);
                 pProcess.WaitForExit();
+                File.Delete(configName);
             };
 
         }
-    }
-
-    private void AttachDebugerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
-    {
-        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2)
-            fh2.AttachDebuggerToProcess(pid: process.Id);
     }
 
     /// <summary>
@@ -118,7 +139,6 @@ public class GdUnit4TestExecutor : ITestExecutor
         }
     }
 
-
     private static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e)
         => frameworkHandle.SendMessage(TestMessageLevel.Informational, "Exited: " + e.GetType()));
 
@@ -129,6 +149,24 @@ public class GdUnit4TestExecutor : ITestExecutor
             return;
         frameworkHandle.SendMessage(TestMessageLevel.Error, $"stderr: {message}");
     });
+
+    private static string WriteTestRunnerConfig(string testSuitePath, List<TestCase> testCases)
+    {
+        var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+
+        var testConfig = new TestRunnerConfig();
+        testConfig.Included.Add(testSuitePath, testCases.Select(t => new TestCaseConfig() { Name = t.DisplayName }));
+        var jsonContent = JsonConvert.SerializeObject(testConfig, Formatting.Indented);
+        File.WriteAllText(filePath, jsonContent);
+        return filePath;
+    }
+
+    private static void AttachDebuggerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
+    {
+        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2)
+            fh2.AttachDebuggerToProcess(pid: process.Id);
+    }
 
     private static DataReceivedEventHandler TestEventProcessor(IFrameworkHandle frameworkHandle, IEnumerable<TestCase> tests) => new((sender, args) =>
     {
