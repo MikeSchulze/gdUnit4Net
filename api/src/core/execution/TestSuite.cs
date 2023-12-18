@@ -27,9 +27,9 @@ namespace GdUnit4.Executions
 
         public bool FilterDisabled { get; set; } = false;
 
-        public TestSuite(string classPath, IEnumerable<string>? includedTests = null)
+        public TestSuite(string classPath, IEnumerable<string>? includedTests = null, bool checkIfTestSuite = true)
         {
-            Type? type = GdUnitTestSuiteBuilder.ParseType(classPath)
+            Type? type = GdUnitTestSuiteBuilder.ParseType(classPath, checkIfTestSuite)
                 ?? throw new ArgumentException($"Can't parse testsuite {classPath}");
             Instance = Activator.CreateInstance(type)
                 ?? throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
@@ -39,18 +39,6 @@ namespace GdUnit4.Executions
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).WithFilePath(classPath).GetCompilationUnitRoot();
             // we do lazy loading to only load test case one times
             _testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, syntaxTree, includedTests));
-        }
-
-        public TestSuite(Type type)
-        {
-            Instance = Activator.CreateInstance(type) ??
-                throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
-
-            Name = type.Name;
-            ResourcePath = type.Assembly.Location;
-
-            // we do lazy loading to only load test case one times
-            _testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, null));
         }
 
         private IEnumerable<Executions.TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null)

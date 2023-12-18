@@ -244,9 +244,9 @@ namespace GdUnit4.Tests
             // wait until 'color_cycle()' returns 'black' (using small timeout we expect the method will now processes 10 times faster)
             await SceneRunner.AwaitMethod<string>("color_cycle").IsEqual("black").WithTimeout(300);
 
-            // wait for returns 'red' but will never happen and expect is interrupted after 250ms
-            await AssertThrown(SceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(250))
-               .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 250ms."));
+            // wait for returns 'red' but will never happen and expect is interrupted after 150ms
+            await AssertThrown(SceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(150))
+               .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
         }
 
         [TestCase]

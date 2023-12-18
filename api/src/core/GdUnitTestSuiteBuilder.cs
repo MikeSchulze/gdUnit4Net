@@ -153,39 +153,40 @@ namespace GdUnit4.Core
             return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
         }
 
+        static Type? FindClassWithTestSuiteAttribute(string classPath, bool isTestSuite)
+        {
+            var code = File.ReadAllText(classPath);
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var root = syntaxTree.GetCompilationUnitRoot();
+            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                    .FirstOrDefault(classDeclaration =>
+                    {
+                        var hasTestSuiteAttribute = classDeclaration.AttributeLists
+                            .SelectMany(attrList => attrList.Attributes)
+                            .Any(attribute => attribute.Name.ToString() == "TestSuite");
+                        return isTestSuite ? hasTestSuiteAttribute : !hasTestSuiteAttribute;
+                    });
 
-        public static Type? ParseType(String classPath)
+            if (classDeclaration != null)
+            {
+                // Construct full class name with namespace
+                var namespaceSyntax = classDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()
+                    ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
+                var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
+                return FindTypeOnAssembly(className);
+            }
+            Console.Error.WriteLine($"No class found in the provided code ({classPath}).");
+            return null;
+        }
+
+        public static Type? ParseType(string classPath, bool isTestSuite = false)
         {
             if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
                 Console.Error.WriteLine($"Class `{classPath}` does not exist.");
                 return null;
             }
-            try
-            {
-                var code = File.ReadAllText(classPath);
-                var syntaxTree = CSharpSyntaxTree.ParseText(code);
-                var root = syntaxTree.GetCompilationUnitRoot();
-                BaseNamespaceDeclarationSyntax? namespaceSyntax = ParseNameSpaceSyntax(root);
-                var classSyntax = namespaceSyntax?.Members.OfType<ClassDeclarationSyntax>().FirstOrDefault() ??
-                                  root.Members.OfType<ClassDeclarationSyntax>().FirstOrDefault();
-
-                if (classSyntax != null)
-                {
-                    string fullClassName = namespaceSyntax != null
-                        ? $"{namespaceSyntax.Name}.{classSyntax.Identifier.ValueText}"
-                        : classSyntax.Identifier.ValueText;
-
-                    return FindTypeOnAssembly(fullClassName);
-                }
-                Console.Error.WriteLine($"No class found in the provided code ({classPath}).");
-                return null;
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
-                return null;
-            }
+            return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
         }
 
         private static BaseNamespaceDeclarationSyntax? ParseNameSpaceSyntax(CompilationUnitSyntax root) =>

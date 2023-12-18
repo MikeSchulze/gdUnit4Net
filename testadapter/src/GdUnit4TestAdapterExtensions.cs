@@ -6,7 +6,7 @@ static class GdUnit4TestAdapterExtensions
 {
     public static TestOutcome AsTestOutcome(this TestEvent e)
     {
-        if (e.IsFailed)
+        if (e.IsFailed || e.IsError)
             return TestOutcome.Failed;
         if (e.IsSkipped)
             return TestOutcome.Skipped;

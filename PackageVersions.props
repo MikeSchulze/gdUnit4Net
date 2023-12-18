@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <GodotVersion>4.2.0-beta.5</GodotVersion>
+    <GodotVersion>4.2.0</GodotVersion>
     <GodotNetSdkVersion>$(GodotVersion)</GodotNetSdkVersion>
     <MicrosoftSdkVersion>17.8.0</MicrosoftSdkVersion>
     <MicrosoftCodeAnalysisCSharpVersion>4.7.0</MicrosoftCodeAnalysisCSharpVersion>

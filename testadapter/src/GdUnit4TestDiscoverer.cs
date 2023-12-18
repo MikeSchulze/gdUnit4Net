@@ -39,11 +39,10 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         foreach (string assemblyPath in filteredAssemblys)
         {
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
-            Assembly? assembly = LoadAssembly(assemblyPath, logger);
 
-            var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath);
-
-            if (assembly == null) continue;
+            using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath, logger);
+            if (codeNavigationProvider.GetAssembly() == null) continue;
+            Assembly assembly = codeNavigationProvider.GetAssembly()!;
 
             // discover GdUnit4 testsuites
             foreach (var type in assembly.GetTypes().Where(IsTestSuite))
@@ -79,19 +78,6 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 
     private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>
         assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));
-
-    private static Assembly? LoadAssembly(string assemblyPath, IMessageLogger logger)
-    {
-        try
-        {
-            return Assembly.LoadFrom(assemblyPath);
-        }
-        catch (Exception e)
-        {
-            logger.SendMessage(TestMessageLevel.Error, e.Message);
-            return null;
-        }
-    }
 
     private static bool IsTestSuite(Type type) =>
         type.IsClass && !type.IsAbstract && Attribute.IsDefined(type, typeof(TestSuiteAttribute));

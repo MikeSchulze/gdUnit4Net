@@ -17,7 +17,7 @@ partial class TestRunner : Godot.Node
     public class Options
     {
         [Option(Required = false, HelpText = "If failfast=true the test run will abort on first test failure.")]
-        public bool FailFast { get; set; } = true;
+        public bool FailFast { get; set; } = false;
 
         [Option(Required = false, HelpText = "Runs the Runner in test adapter mode.")]
         public bool TestAdapter { get; set; }
@@ -75,8 +75,9 @@ partial class TestRunner : Godot.Node
     {
         var testSuitePath = entry.Key;
         var testCases = entry.Value.Select(t => t.Name);
+        Console.WriteLine($"Load testsuite {testSuitePath}");
 
-        if (GdUnitTestSuiteBuilder.ParseType(testSuitePath) is Type type && IsTestSuite(type))
+        if (GdUnitTestSuiteBuilder.ParseType(testSuitePath, true) != null)
             return new TestSuite(testSuitePath, testCases);
         Console.Error.WriteLine($"Can't load testsuite {testSuitePath}! Skip it!");
         return null;
@@ -109,8 +110,7 @@ partial class TestRunner : Godot.Node
 
             foreach (var filePath in Directory.EnumerateFiles(currentDir.FullName, searchPattern))
             {
-                Type? type = GdUnitTestSuiteBuilder.ParseType(filePath);
-                if (type != null && IsTestSuite(type))
+                if (GdUnitTestSuiteBuilder.ParseType(filePath, true) != null)
                     yield return new TestSuite(filePath);
             }
 
@@ -118,8 +118,4 @@ partial class TestRunner : Godot.Node
                 stack.Push(directory);
         }
     }
-
-    private static bool IsTestSuite(Type type) =>
-        type.IsClass && !type.IsAbstract && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
-
 }

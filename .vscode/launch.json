@@ -11,6 +11,7 @@
                 "--path",
                 "${workspaceFolder}/test",
                 "-d",
+                "--failfast",
                 "--add",
                 "${workspaceFolder}/test/src"
             ],

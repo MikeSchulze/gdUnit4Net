@@ -84,6 +84,7 @@ public class TestEvent : IEquatable<TestEvent>
     public TYPE Type { get; set; }
     public string SuiteName { get; set; }
     public string TestName { get; set; }
+    public string FullyQualifiedName => SuiteName + "." + TestName;
     public string ResourcePath { get; set; }
     public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
     public IEnumerable<TestReport> Reports { get; set; } = new List<TestReport>();

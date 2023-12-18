@@ -10,7 +10,7 @@ namespace GdUnit4.Tests
     using static Assertions;
     using static TestEvent.TYPE;
     using static TestReport.TYPE;
-
+    using GdUnit4.Core;
 
     [TestSuite]
     public class ExecutorTest : ITestEventListener
@@ -32,7 +32,7 @@ namespace GdUnit4.Tests
 
         private static TestSuite LoadTestSuite(string clazzPath)
         {
-            TestSuite testSuite = new TestSuite(clazzPath);
+            TestSuite testSuite = new TestSuite(clazzPath, null, false);
 
             // we disable default test filtering
             testSuite.FilterDisabled = true;
@@ -419,7 +419,6 @@ namespace GdUnit4.Tests
             AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
             var events = await ExecuteTestSuite(testSuite);
-
             AssertTestCaseNames(events)
                 .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrpahnsDetected", "TestCase1", "TestCase2"));
 

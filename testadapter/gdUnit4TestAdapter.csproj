@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -44,8 +45,7 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="All" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <!--ProjectReference Include="..\api\gdUnit4Api.csproj" /-->
-    <PackageReference Include="gdUnit4.api" Version="4.2.0-rc*" />
+    <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
 
     <None Include="README.md" Pack="true" PackagePath="/" />
     <None Include="LICENSE" Pack="true" PackagePath="/" />

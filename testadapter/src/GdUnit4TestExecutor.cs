@@ -1,30 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
-using Newtonsoft.Json;
-using Godot;
-using System.IO;
 
-using GdUnit4.Api;
+using GdUnit4.TestAdapter.Execution;
+using ITestExecutor = GdUnit4.TestAdapter.Execution.ITestExecutor;
 
 namespace GdUnit4.TestAdapter;
 
 [ExtensionUri(ExecutorUri)]
-public class GdUnit4TestExecutor : ITestExecutor
+public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor
 {
-
-    private Process? pProcess = null;
-
     ///<summary>
     /// The Uri used to identify the NUnitExecutor
     ///</summary>
     public const string ExecutorUri = "executor://GdUnit4.TestAdapter/v1";
 
+    private ITestExecutor? _executor;
 
     // Test properties supported for filtering
     private Dictionary<string, TestProperty> SupportedProperties = new(StringComparer.OrdinalIgnoreCase)
@@ -32,7 +26,6 @@ public class GdUnit4TestExecutor : ITestExecutor
         ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
         ["Name"] = TestCaseProperties.DisplayName,
     };
-
 
     /// <summary>
     /// Runs only the tests specified by parameter 'tests'. 
@@ -42,23 +35,16 @@ public class GdUnit4TestExecutor : ITestExecutor
     /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        _ = tests ?? throw new Exception("Argument 'tests' is null, abort!");
-        _ = runContext ?? throw new Exception("Argument 'runContext' is null abort!");
-        _ = frameworkHandle ?? throw new Exception("Argument 'frameworkHandle' is null, abort!");
-        var godotBin = System.Environment.GetEnvironmentVariable("GODOT_BIN")
-            ?? throw new Exception("Godot runtime is not set! Set evn 'GODOT_BIN' is missing!");
-        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
-        var settings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+        _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'tests' is null, abort!");
+        _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
+        _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
+        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
+        var settings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         foreach (var key in settings.Keys)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{key} = '{settings[key]}'");
         }
-
-        Dictionary<string, List<TestCase>> groupedTests = tests
-            .GroupBy(t => t.CodeFilePath!)
-            .ToDictionary(group => group.Key, group => group.ToList());
 
         var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, (propertyName) =>
         {
@@ -66,52 +52,8 @@ public class GdUnit4TestExecutor : ITestExecutor
             return testProperty;
         });
 
-
-        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"RunTests {groupedTests.Keys.Formated()}");
-
-        foreach (var key in groupedTests.Keys)
-        {
-            var classPath = key;
-            List<TestCase> testCases = groupedTests[key];
-
-            //var filteredTestCases = filterExpression != null
-            //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
-            //    {
-            //        SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
-            //        return t.GetPropertyValue(testProperty);
-            //    }) == false)
-            //    : testCases;
-
-            var configName = WriteTestRunnerConfig(classPath, testCases);
-            var workingDirectory = LookupGodotProjectPath(classPath);
-
-            using (pProcess = new())
-            {
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Execute test's on: {classPath}");
-                pProcess.StartInfo.WorkingDirectory = @$"{workingDirectory}";
-                pProcess.StartInfo.FileName = @$"{godotBin}";
-                pProcess.StartInfo.Arguments = @$"-d --path {workingDirectory} --testadapter --configfile='{configName}'";
-                pProcess.StartInfo.CreateNoWindow = true; //not diplay a windows
-                pProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                pProcess.StartInfo.UseShellExecute = false;
-                pProcess.StartInfo.RedirectStandardOutput = true;
-                pProcess.StartInfo.RedirectStandardError = true;
-                pProcess.StartInfo.RedirectStandardInput = true;
-                pProcess.EnableRaisingEvents = true;
-                pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
-                pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-                pProcess.Exited += ExitHandler(frameworkHandle);
-                pProcess.Start();
-                AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
-
-                pProcess.BeginErrorReadLine();
-                pProcess.BeginOutputReadLine();
-                //pProcess.WaitForExit((int)runConfiguration.TestSessionTimeout);
-                pProcess.WaitForExit();
-                File.Delete(configName);
-            };
-
-        }
+        _executor = new TestExecutor(runConfiguration);
+        _executor.Run(frameworkHandle, runContext, tests);
     }
 
     /// <summary>
@@ -122,7 +64,7 @@ public class GdUnit4TestExecutor : ITestExecutor
     /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<string>? containers, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        frameworkHandle?.SendMessage(TestMessageLevel.Warning, $"RunTests:containers ${containers}");
+        frameworkHandle?.SendMessage(TestMessageLevel.Warning, $"RunTests:containers ${containers} NOT implemented!");
     }
 
     /// <summary>
@@ -130,117 +72,7 @@ public class GdUnit4TestExecutor : ITestExecutor
     /// </summary>
     public void Cancel()
     {
-        if (pProcess != null)
-        {
-            pProcess.Refresh();
-            if (pProcess.HasExited)
-                return;
-            pProcess.Kill(true);
-        }
+        _executor?.Cancel();
     }
 
-    private static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e)
-        => frameworkHandle.SendMessage(TestMessageLevel.Informational, "Exited: " + e.GetType()));
-
-    private static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => new((sender, args) =>
-    {
-        var message = args.Data?.Trim();
-        if (string.IsNullOrEmpty(message))
-            return;
-        frameworkHandle.SendMessage(TestMessageLevel.Error, $"stderr: {message}");
-    });
-
-    private static string WriteTestRunnerConfig(string testSuitePath, List<TestCase> testCases)
-    {
-        var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-
-        var testConfig = new TestRunnerConfig();
-        testConfig.Included.Add(testSuitePath, testCases.Select(t => new TestCaseConfig() { Name = t.DisplayName }));
-        var jsonContent = JsonConvert.SerializeObject(testConfig, Formatting.Indented);
-        File.WriteAllText(filePath, jsonContent);
-        return filePath;
-    }
-
-    private static void AttachDebuggerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
-    {
-        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2)
-            fh2.AttachDebuggerToProcess(pid: process.Id);
-    }
-
-    private static DataReceivedEventHandler TestEventProcessor(IFrameworkHandle frameworkHandle, IEnumerable<TestCase> tests) => new((sender, args) =>
-    {
-        var json = args.Data?.Trim();
-        if (string.IsNullOrEmpty(json))
-            return;
-
-        if (json.StartsWith("GdUnitTestEvent:"))
-        {
-            json = json.TrimPrefix("GdUnitTestEvent:");
-            TestEvent e = JsonConvert.DeserializeObject<TestEvent>(json)!;
-
-            switch (e.Type)
-            {
-                case TestEvent.TYPE.TESTSUITE_BEFORE:
-                    {
-                        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Run Test Suite {e.SuiteName}");
-                    }
-                    break;
-                case TestEvent.TYPE.TESTCASE_BEFORE:
-                    {
-                        var testCase = tests.FirstOrDefault(t => t.DisplayName == e.TestName);
-                        if (testCase == null)
-                        {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.TestName}");
-                            return;
-                        }
-                        frameworkHandle.RecordStart(testCase);
-                    }
-                    break;
-                case TestEvent.TYPE.TESTCASE_AFTER:
-                    {
-                        var testCase = tests.FirstOrDefault(t => t.DisplayName == e.TestName);
-                        if (testCase == null)
-                        {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.TestName}");
-                            return;
-                        }
-                        var testResult = new TestResult(testCase)
-                        {
-                            DisplayName = testCase.DisplayName,
-                            Outcome = e.AsTestOutcome(),
-                            EndTime = DateTimeOffset.Now,
-                            Duration = e.ElapsedInMs
-                        };
-                        foreach (var report in e.Reports)
-                        {
-                            testResult.ErrorMessage = report.Message.RichTextNormalize();
-                            testResult.ErrorStackTrace = $"StackTrace    at {testCase.FullyQualifiedName}() in {testCase.CodeFilePath}:line {report.LineNumber}";
-                        }
-                        frameworkHandle.RecordResult(testResult);
-                        frameworkHandle.RecordEnd(testCase, testResult.Outcome);
-                    }
-                    break;
-                case TestEvent.TYPE.TESTSUITE_AFTER:
-                    {
-                        //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Run Test Suite {e.SuiteName} {e.AsTestOutcome()}");
-                    }
-                    break;
-            }
-            return;
-        }
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"stdout: {json}");
-    });
-
-    private static string? LookupGodotProjectPath(string classPath)
-    {
-        DirectoryInfo? currentDir = new DirectoryInfo(classPath).Parent;
-        while (currentDir != null)
-        {
-            if (currentDir.EnumerateFiles("project.godot").Any())
-                return currentDir.FullName;
-            currentDir = currentDir.Parent;
-        }
-        return null;
-    }
 }

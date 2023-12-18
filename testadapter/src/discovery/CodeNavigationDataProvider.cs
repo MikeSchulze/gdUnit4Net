@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace GdUnit4.TestAdapter.Discovery;
 
@@ -15,14 +16,23 @@ public class CodeNavigationDataProvider : IDisposable
         public readonly bool IsValid => Source != null;
     }
 
-    internal readonly Assembly assembly;
+    internal readonly Assembly? assembly;
     internal readonly DiaSession diaSession;
 
-    public CodeNavigationDataProvider(string assemblyPath)
+    public CodeNavigationDataProvider(string assemblyPath, IMessageLogger logger)
     {
-        assembly = Assembly.LoadFrom(assemblyPath);
+        try
+        {
+            assembly = Assembly.LoadFrom(assemblyPath);
+        }
+        catch (Exception e)
+        {
+            logger.SendMessage(TestMessageLevel.Error, e.Message);
+        }
         diaSession = new(assemblyPath);
     }
+
+    public Assembly? GetAssembly() => assembly;
 
     public CodeNavigation GetNavigationData(string className, string methodName)
     {
@@ -54,7 +64,7 @@ public class CodeNavigationDataProvider : IDisposable
     }
 
     MethodInfo? GetMethod(string className, string methodName) =>
-        assembly.GetType(className)?
+        assembly!.GetType(className)?
            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
            .Where(info => info.Name == methodName)
            .OrderBy(info => info.GetParameters().Length)
@@ -70,5 +80,8 @@ public class CodeNavigationDataProvider : IDisposable
             .GetProperty("StateMachineType")?
             .GetValue(stateMachineAttribute) as Type ?? null;
 
-    public void Dispose() => diaSession?.Dispose();
+    public void Dispose()
+    {
+        diaSession?.Dispose();
+    }
 }

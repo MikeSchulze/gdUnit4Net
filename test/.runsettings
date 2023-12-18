@@ -4,8 +4,7 @@
         <MaxCpuCount>1</MaxCpuCount>
         <ResultsDirectory>./TestResults</ResultsDirectory>
         <TargetFrameworkVersion>net7.0</TargetFrameworkVersion>
-        <!--TestAdaptersPaths>./testadapter/bin/Debug/net7.0/</TestAdaptersPaths-->
-        <TestSessionTimeout>30000</TestSessionTimeout>
+        <TestSessionTimeout>180000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
     </RunConfiguration>
 
