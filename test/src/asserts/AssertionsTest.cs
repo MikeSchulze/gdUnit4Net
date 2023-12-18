@@ -1,6 +1,6 @@
 using Godot;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Asserts
 {
     using static Assertions;
     using GdUnit4.Asserts;

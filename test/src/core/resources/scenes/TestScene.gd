@@ -5,6 +5,8 @@ signal panel_color_change(box, color)
 
 const COLOR_CYCLE := [Color.ROYAL_BLUE, Color.CHARTREUSE, Color.YELLOW_GREEN]
 
+const Spell = preload("res://src/core/resources/scenes/Spell.gd")
+
 @onready var _box1 = $VBoxContainer/PanelContainer/HBoxContainer/Panel1
 @onready var _box2 = $VBoxContainer/PanelContainer/HBoxContainer/Panel2
 @onready var _box3 = $VBoxContainer/PanelContainer/HBoxContainer/Panel3

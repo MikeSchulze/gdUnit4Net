@@ -10,11 +10,11 @@ config_version=5
 
 [application]
 
-config/name="GdUnit4MonoTest"
+config/name="gdUnit4Test"
 run/main_scene="res://src/api/TestRunner.tscn"
 config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [dotnet]
 
-project/assembly_name="GdUnit4MonoTest"
+project/assembly_name="gdUnit4Test"

@@ -83,7 +83,7 @@ namespace GdUnit4
         /// <returns></returns>
         public static ISignalAssert AssertSignal(Godot.GodotObject node) => new SignalAssert(node);
 
-        public static IStringAssert AssertThat(string current) => new StringAssert(current);
+        public static IStringAssert AssertThat(string? current) => new StringAssert(current);
         public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
 
         /// <summary>

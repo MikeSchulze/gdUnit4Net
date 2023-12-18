@@ -1,19 +1,17 @@
-<Project Sdk="Godot.NET.Sdk/4.1.2">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <!--Force nullable warnings, you can disable if you want-->
     <Nullable>enable</Nullable>
-    <AssemblyName>GdUnit4Mono</AssemblyName>
     <RootNamespace>GdUnit4</RootNamespace>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="api\gdUnit4MonoApi.csproj" />
-    <ProjectReference Include="test\gdUnit4MonoTest.csproj" />
+    <ProjectReference Include="api\gdUnit4Api.csproj" />
+    <ProjectReference Include="test\gdUnit4Test.csproj" />
   </ItemGroup>
 </Project>

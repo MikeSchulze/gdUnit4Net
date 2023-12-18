@@ -9,7 +9,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/gdUnit4Mono.csproj",
+                "${workspaceFolder}/gdUnit4.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -21,7 +21,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/gdUnit4Mono.csproj",
+                "${workspaceFolder}/gdUnit4.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -35,7 +35,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/gdUnit4Mono.csproj"
+                "${workspaceFolder}/gdUnit4.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <RunConfiguration>
+        <MaxCpuCount>1</MaxCpuCount>
+        <ResultsDirectory>./TestResults</ResultsDirectory>
+        <TargetFrameworkVersion>net7.0</TargetFrameworkVersion>
+        <TestSessionTimeout>180000</TestSessionTimeout>
+        <TreatNoTestsAsError>true</TreatNoTestsAsError>
+    </RunConfiguration>
+
+    <LoggerRunSettings>
+        <Loggers>
+            <Logger friendlyName="console" enabled="True">
+                <Configuration>
+                    <Verbosity>detailed</Verbosity>
+                </Configuration>
+            </Logger>
+        </Loggers>
+    </LoggerRunSettings>
+
+    <TestRunParameters>
+        <Parameter name="foo" value="http://localhost" />
+        <Parameter name="GODOT_BIN" value="xxxx" />
+    </TestRunParameters>
+
+    <gdUnit4>
+        <DefaultTimeout>0</DefaultTimeout>
+    </gdUnit4>
+</RunSettings>

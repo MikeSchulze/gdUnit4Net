@@ -1,4 +1,5 @@
 {
     "editor.formatOnSave": true,
-    "terminal.integrated.tabs.title": "${task}"
+    "terminal.integrated.tabs.title": "${task}",
+    "dotnet.unitTests.runSettingsPath": "./test/.runsettings"
 }

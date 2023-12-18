@@ -3,6 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Threading.Tasks;
+using GdUnit4.Asserts;
+using System.Threading;
+using System.Diagnostics;
+using GdUnit4.Executions;
 
 namespace GdUnit4
 {
@@ -55,7 +60,7 @@ namespace GdUnit4
 
         public static string Humanize(this TimeSpan t)
         {
-            var parts = new List<String>();
+            var parts = new List<string>();
             if (t.Hours > 1)
                 parts.Add($@"{t:%h}h");
             if (t.Minutes > 0)
@@ -64,9 +69,58 @@ namespace GdUnit4
                 parts.Add($@"{t:%s}s");
             if (t.Milliseconds > 0)
                 parts.Add($@"{t:fff}ms");
-            return String.Join(" ", parts);
+            return string.Join(" ", parts);
         }
 
         public static string RichTextNormalize(this string? input) => Regex.Replace(input?.UnixFormat() ?? "", "\\[/?(b|color).*?\\]", string.Empty);
+
+
+
+        private static int GetWithTimeoutLineNumber()
+        {
+            StackTrace saveStackTrace = new StackTrace(true);
+            return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4)!.GetFileLineNumber() : -1;
+        }
+
+        public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
+        {
+            using var token = new CancellationTokenSource();
+            var wrapperTask = Task.Run(async () => await task.ConfigureAwait(false));
+            var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
+            token.Cancel();
+            if (completedTask == wrapperTask)
+                return await task.ConfigureAwait(false);
+            else
+            {
+                var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
+                if (data is CancellationTokenSource cancelToken)
+                    cancelToken.Cancel();
+                return await task.ConfigureAwait(false);
+            }
+        }
+
+        public static async Task<T> WithTimeout<T>(this Task<T> task, int timeoutMillis)
+        {
+            var lineNumber = GetWithTimeoutLineNumber();
+            var wrapperTask = Task.Run(async () => await task);
+            using var token = new CancellationTokenSource();
+            var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
+            if (completedTask != wrapperTask)
+                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
+            token.Cancel();
+            return await task;
+        }
+
+        public static async Task WithTimeout(this Task task, int timeoutMillis)
+        {
+            var lineNumber = GetWithTimeoutLineNumber();
+            var wrapperTask = Task.Run(async () => await task);
+            using var token = new CancellationTokenSource();
+            var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
+            if (completedTask != wrapperTask)
+                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
+            token.Cancel();
+            await task;
+        }
     }
 }

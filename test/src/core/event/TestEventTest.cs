@@ -1,50 +1,110 @@
-namespace GdUnit4.Tests.Asserts
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
+namespace GdUnit4.Tests.Asserts;
+using static Assertions;
+
+[TestSuite]
+public class TestEventTest
 {
-    using System.Collections.Generic;
-    using static Assertions;
-    using static Utils;
-
-    [TestSuite]
-    public class TestEventTest
+    [TestCase]
+    public void SerializeDeserialize_Before()
     {
+        TestEvent testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100);
+        var json = JsonConvert.SerializeObject(testEvent);
 
-        [TestCase]
-        public void AsDictionary()
-        {
-            var statistics = TestEvent.BuildStatistics(
-                0,
-                false, 0,
-                false, 0,
-                false,
-                false, 0,
-                1000);
-            List<TestReport> reports = new List<TestReport> {
-                new TestReport(TestReport.TYPE.SUCCESS, 12, "success")
-            };
-            AssertObject(TestEvent
-                .Before("res://foo/TestSuite.cs", "TestSuite", 42).AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-            AssertObject(TestEvent
-                .After("res://foo/TestSuite.cs", "TestSuite", new Dictionary<string, object>() { }, new List<TestReport> { }).AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-            AssertObject(TestEvent
-                .After("res://foo/TestSuite.cs", "TestSuite", statistics, reports).AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-            AssertObject(TestEvent
-                .BeforeTest("res://foo/TestSuite.cs", "TestSuite", "TestA").AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-            AssertObject(TestEvent
-                .AfterTest("res://foo/TestSuite.cs", "TestSuite", "TestA").AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-            AssertObject(TestEvent
-                .AfterTest("res://foo/TestSuite.cs", "TestSuite", "TestA", statistics, reports).AsDictionary())
-                .IsInstanceOf<Godot.Collections.Dictionary>()
-                .IsNotNull();
-        }
+        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        AssertThat(current).IsEqual(testEvent);
+        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current!.TestName).IsEqual("Before");
+    }
+
+    [TestCase]
+    public void SerializeDeserialize_BeforeTest()
+    {
+        TestEvent testEvent = TestEvent.BeforeTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
+        var json = JsonConvert.SerializeObject(testEvent);
+
+        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        AssertThat(current).IsEqual(testEvent);
+        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current!.TestName).IsEqual("TestCaseA");
+    }
+
+    [TestCase]
+    public void SerializeDeserialize_After()
+    {
+        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
+            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
+            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2},
+            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3},
+            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4},
+            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0},
+            { TestEvent.STATISTIC_KEY.FAILED, true},
+            { TestEvent.STATISTIC_KEY.ERRORS, false},
+            { TestEvent.STATISTIC_KEY.WARNINGS, false},
+            { TestEvent.STATISTIC_KEY.SKIPPED, true},
+        };
+
+        List<TestReport> reports = new() {
+            new TestReport(TestReport.TYPE.FAILURE, 42, "test failed")
+        };
+
+        TestEvent testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
+        var json = JsonConvert.SerializeObject(testEvent);
+
+        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
+        AssertThat(current!.Reports).Contains(new TestReport(TestReport.TYPE.FAILURE, 42, "test failed"));
+        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current!.TestName).IsEqual("After");
+        AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
+        AssertThat(current!.ErrorCount).IsEqual(2);
+        AssertThat(current!.FailedCount).IsEqual(3);
+        AssertThat(current!.SkippedCount).IsEqual(4);
+        AssertThat(current!.OrphanCount).IsEqual(0);
+        AssertThat(current!.IsFailed).IsEqual(true);
+        AssertThat(current!.IsError).IsEqual(false);
+        AssertThat(current!.IsWarning).IsEqual(false);
+        AssertThat(current!.IsSkipped).IsEqual(true);
+    }
+
+    [TestCase]
+    public void SerializeDeserialize_AfterTest()
+    {
+        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
+            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
+            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2},
+            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3},
+            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4},
+            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0},
+            { TestEvent.STATISTIC_KEY.FAILED, true},
+            { TestEvent.STATISTIC_KEY.ERRORS, false},
+            { TestEvent.STATISTIC_KEY.WARNINGS, false},
+            { TestEvent.STATISTIC_KEY.SKIPPED, true},
+        };
+
+        List<TestReport> reports = new() {
+            new TestReport(TestReport.TYPE.FAILURE, 42, "test failed")
+        };
+
+        TestEvent testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
+        var json = JsonConvert.SerializeObject(testEvent);
+
+        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
+        AssertThat(current!.Reports).Contains(new TestReport(TestReport.TYPE.FAILURE, 42, "test failed"));
+        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current!.TestName).IsEqual("TestCaseA");
+        AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
+        AssertThat(current!.ErrorCount).IsEqual(2);
+        AssertThat(current!.FailedCount).IsEqual(3);
+        AssertThat(current!.SkippedCount).IsEqual(4);
+        AssertThat(current!.OrphanCount).IsEqual(0);
+        AssertThat(current!.IsFailed).IsEqual(true);
+        AssertThat(current!.IsError).IsEqual(false);
+        AssertThat(current!.IsWarning).IsEqual(false);
+        AssertThat(current!.IsSkipped).IsEqual(true);
     }
 }

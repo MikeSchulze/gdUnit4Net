@@ -127,13 +127,22 @@ namespace GdUnit4
             return converted;
         }
 
-        public static Godot.Collections.Dictionary ToGodotDictionary(this IDictionary<string, object> dict)
+        public static Godot.Collections.Dictionary<Godot.Variant, Godot.Variant> ToGodotTypedDictionary<K, V>(this IDictionary<K, V> dict)
         {
-            var converted = new Godot.Collections.Dictionary();
+            var converted = new Godot.Collections.Dictionary<Godot.Variant, Godot.Variant>();
             foreach (var (key, value) in dict)
                 converted[key.ToVariant()] = value.ToVariant();
             return converted;
         }
+
+        public static Godot.Collections.Dictionary ToGodotDictionary(this IDictionary dict)
+        {
+            var converted = new Godot.Collections.Dictionary();
+            foreach (var key in dict.Keys)
+                converted[key.ToVariant()] = dict[key].ToVariant();
+            return converted;
+        }
+
 
         private static Dictionary<String, Dictionary<String, object?>> GodotObject2Dictionary(GodotObject? obj, Dictionary<object, bool> hashedObjects)
         {

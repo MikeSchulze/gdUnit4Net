@@ -37,8 +37,10 @@ namespace GdUnit4.Core
 
         public static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
         {
-            var result = new Dictionary<string, object>();
-            result.Add("path", testSuitePath);
+            var result = new Dictionary<string, object>
+            {
+                { "path", testSuitePath }
+            };
             try
             {
                 ClassDefinition? classDefinition = ParseFullqualifiedClassName(sourcePath);
@@ -48,7 +50,7 @@ namespace GdUnit4.Core
                     return result;
                 }
                 string methodToTest = FindMethod(sourcePath, lineNumber) ?? "";
-                if (String.IsNullOrEmpty(methodToTest))
+                if (string.IsNullOrEmpty(methodToTest))
                 {
                     result.Add("error", $"Can't parse method name from {sourcePath}:{lineNumber}.");
                     return result;
@@ -122,31 +124,27 @@ namespace GdUnit4.Core
 
         internal static ClassDefinition? ParseFullqualifiedClassName(String classPath)
         {
-            if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
-                Console.Error.WriteLine($"Class `{classPath}` not exists .");
-                Godot.GD.PrintS("Build Error", $"Class `{classPath}` not exists .");
+                Console.Error.WriteLine($"Class `{classPath}` does not exist.");
                 return null;
             }
             try
             {
-                var root = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).GetCompilationUnitRoot();
+                var code = File.ReadAllText(classPath);
+                var root = CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot();
                 return ParseClassDefinition(root);
             }
-#pragma warning disable CS0168
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
-                Godot.GD.PrintS("Build Error", $"Can't parse namespace of {classPath}. Error: {e.Message}");
-#pragma warning restore CS0168
-                // ignore exception
                 return null;
             }
         }
 
         private static ClassDefinition ParseClassDefinition(CompilationUnitSyntax root)
         {
-            NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            BaseNamespaceDeclarationSyntax? namespaceSyntax = ParseNameSpaceSyntax(root);
             if (namespaceSyntax != null)
             {
                 ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
@@ -155,49 +153,58 @@ namespace GdUnit4.Core
             return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
         }
 
-
-        public static Type? ParseType(String classPath)
+        static Type? FindClassWithTestSuiteAttribute(string classPath, bool isTestSuite)
         {
-            if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            var code = File.ReadAllText(classPath);
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var root = syntaxTree.GetCompilationUnitRoot();
+            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                    .FirstOrDefault(classDeclaration =>
+                    {
+                        var hasTestSuiteAttribute = classDeclaration.AttributeLists
+                            .SelectMany(attrList => attrList.Attributes)
+                            .Any(attribute => attribute.Name.ToString() == "TestSuite");
+                        return isTestSuite ? hasTestSuiteAttribute : !hasTestSuiteAttribute;
+                    });
+
+            if (classDeclaration != null)
             {
-                Console.Error.WriteLine($"Class `{classPath}` not exists .");
-                Godot.GD.PrintS("Build Error", $"Class `{classPath}` not exists .");
-                return null;
+                // Construct full class name with namespace
+                var namespaceSyntax = classDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()
+                    ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
+                var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
+                return FindTypeOnAssembly(className);
             }
-            try
-            {
-                var root = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).GetCompilationUnitRoot();
-                NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
-                if (namespaceSyntax != null)
-                {
-                    ClassDeclarationSyntax classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
-                    return FindTypeOnAssembly(namespaceSyntax.Name.ToString() + "." + classSyntax.Identifier.ValueText);
-                }
-                ClassDeclarationSyntax programClassSyntax = root.Members.OfType<ClassDeclarationSyntax>().First();
-                return FindTypeOnAssembly(programClassSyntax.Identifier.ValueText);
-            }
-#pragma warning disable CS0168
-            catch (Exception e)
-            {
-                Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
-                Godot.GD.PrintS("Build Error", $"Can't parse namespace of {classPath}. Error: {e.Message}");
-#pragma warning restore CS0168
-                // ignore exception
-                return null;
-            }
+            Console.Error.WriteLine($"No class found in the provided code ({classPath}).");
+            return null;
         }
+
+        public static Type? ParseType(string classPath, bool isTestSuite = false)
+        {
+            if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            {
+                Console.Error.WriteLine($"Class `{classPath}` does not exist.");
+                return null;
+            }
+            return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
+        }
+
+        private static BaseNamespaceDeclarationSyntax? ParseNameSpaceSyntax(CompilationUnitSyntax root) =>
+            root.Members.OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax ??
+            root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+
 
         public static CsNode? Load(string classPath)
         {
-            if (String.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+            if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
-                Console.Error.WriteLine($"Parse Error: Class `{classPath}` not exists .");
-                Godot.GD.PrintS("Parse Error:", $"Class `{classPath}` not exists .");
+                Console.Error.WriteLine($"Parse Error: Class `{classPath}` does not exist.");
                 return null;
             }
             try
             {
-                var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).WithFilePath(classPath).GetCompilationUnitRoot();
+                var code = File.ReadAllText(classPath);
+                var syntaxTree = CSharpSyntaxTree.ParseText(code).WithFilePath(classPath).GetCompilationUnitRoot();
                 ClassDefinition classDefinition = ParseClassDefinition(syntaxTree);
                 var type = FindTypeOnAssembly(classDefinition.ClassName);
                 return type!.GetMethods()
@@ -249,7 +256,6 @@ namespace GdUnit4.Core
         {
             if (clazzCache.ContainsKey(clazz))
             {
-                // Godot.GD.PrintS("Use class cache");
                 return clazzCache[clazz];
             }
             Type? type = Type.GetType(clazz);
@@ -286,7 +292,7 @@ namespace GdUnit4.Core
 
         private static string FillFromTemplate(string template, ClassDefinition classDefinition, string classPath) =>
             template
-                .Replace(TAG_TEST_SUITE_NAMESPACE, String.IsNullOrEmpty(classDefinition.Namespace) ? "GdUnitDefaultTestNamespace" : classDefinition.Namespace)
+                .Replace(TAG_TEST_SUITE_NAMESPACE, string.IsNullOrEmpty(classDefinition.Namespace) ? "GdUnitDefaultTestNamespace" : classDefinition.Namespace)
                 .Replace(TAG_TEST_SUITE_CLASS, classDefinition.Name + "Test")
                 .Replace(TAG_SOURCE_RESOURCE_PATH, classPath)
                 .Replace(TAG_SOURCE_CLASS_NAME, classDefinition.Name)
@@ -294,7 +300,7 @@ namespace GdUnit4.Core
 
         internal static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
         {
-            NamespaceDeclarationSyntax? namespaceSyntax = root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            BaseNamespaceDeclarationSyntax? namespaceSyntax = ParseNameSpaceSyntax(root);
             return namespaceSyntax == null
                 ? root.Members.OfType<ClassDeclarationSyntax>().First()
                 : namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
@@ -328,14 +334,14 @@ namespace GdUnit4.Core
                 SyntaxFactory.List<AttributeListSyntax>().Add(attributes),
                 SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)),
                 SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                default(ExplicitInterfaceSpecifierSyntax),
+                default,
                 SyntaxFactory.Identifier(testCaseName),
-                default(TypeParameterListSyntax),
+                default,
                 SyntaxFactory.ParameterList(),
-                default(SyntaxList<TypeParameterConstraintClauseSyntax>),
+                default,
                 SyntaxFactory.Block(),
-                default(ArrowExpressionClauseSyntax),
-                default(SyntaxToken));
+                default,
+                default);
 
             BlockSyntax newBody = SyntaxFactory.Block(SyntaxFactory.ParseStatement("AssertNotYetImplemented();"));
             method = method.ReplaceNode(method.Body!, newBody);
@@ -367,6 +373,5 @@ namespace GdUnit4.Core
             }
             return null;
         }
-
     }
 }

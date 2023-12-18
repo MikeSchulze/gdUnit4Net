@@ -48,34 +48,34 @@ namespace GdUnit4
             return unboxed;
         }
 
-        internal static Variant ToVariant(this Object? obj) =>
+        internal static Variant ToVariant(this object? obj) =>
             Type.GetTypeCode(obj?.GetType()) switch
             {
                 TypeCode.Empty => new Variant(),
-                TypeCode.String => Variant.CreateFrom((String)obj!),
-                TypeCode.Boolean => Variant.CreateFrom((Boolean)obj!),
-                TypeCode.Char => Variant.CreateFrom(0 + (Char)obj!),
-                TypeCode.SByte => Variant.CreateFrom((SByte)obj!),
-                TypeCode.Byte => Variant.CreateFrom((Byte)obj!),
-                TypeCode.Int16 => Variant.CreateFrom((Int16)obj!),
-                TypeCode.UInt16 => Variant.CreateFrom((UInt16)obj!),
-                TypeCode.Int32 => Variant.CreateFrom((Int32)obj!),
-                TypeCode.UInt32 => Variant.CreateFrom((UInt32)obj!),
-                TypeCode.Int64 => Variant.CreateFrom((Int64)obj!),
-                TypeCode.UInt64 => Variant.CreateFrom((UInt64)obj!),
-                TypeCode.Single => Variant.CreateFrom((Single)obj!),
-                TypeCode.Double => Variant.CreateFrom((Double)obj!),
-                TypeCode.Decimal => Variant.CreateFrom((UInt64)obj!),
+                TypeCode.String => Variant.CreateFrom((string)obj!),
+                TypeCode.Boolean => Variant.CreateFrom((bool)obj!),
+                TypeCode.Char => Variant.CreateFrom(0 + (char)obj!),
+                TypeCode.SByte => Variant.CreateFrom((sbyte)obj!),
+                TypeCode.Byte => Variant.CreateFrom((byte)obj!),
+                TypeCode.Int16 => Variant.CreateFrom((short)obj!),
+                TypeCode.UInt16 => Variant.CreateFrom((ushort)obj!),
+                TypeCode.Int32 => Variant.CreateFrom((int)obj!),
+                TypeCode.UInt32 => Variant.CreateFrom((uint)obj!),
+                TypeCode.Int64 => Variant.CreateFrom((long)obj!),
+                TypeCode.UInt64 => Variant.CreateFrom((ulong)obj!),
+                TypeCode.Single => Variant.CreateFrom((float)obj!),
+                TypeCode.Double => Variant.CreateFrom((double)obj!),
+                TypeCode.Decimal => Variant.CreateFrom((ulong)obj!),
                 _ => ToVariantByType(obj!)
             };
 
-        private static Variant ToVariantByType(Object obj)
+        private static Variant ToVariantByType(object obj)
         {
             if (obj is System.Collections.IList list)
                 return list.ToGodotArray();
 
             if (obj is IDictionary<string, object> dict)
-                return dict.ToGodotDictionary();
+                return dict.ToGodotTypedDictionary();
 
             throw new NotImplementedException($"Cannot convert '{obj?.GetType()}' to Variant!");
         }

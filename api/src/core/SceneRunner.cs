@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,35 +14,6 @@ namespace GdUnit4
 
     public static class GdUnitAwaiter
     {
-        public static async Task WithTimeout(this Task task, int timeoutMillis)
-        {
-            var lineNumber = GetWithTimeoutLineNumber();
-            var wrapperTask = Task.Run(async () => await task);
-            using var token = new CancellationTokenSource();
-            var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
-            if (completedTask != wrapperTask)
-                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
-            token.Cancel();
-            await task;
-        }
-
-        public static async Task<T> WithTimeout<T>(this Task<T> task, int timeoutMillis)
-        {
-            var lineNumber = GetWithTimeoutLineNumber();
-            var wrapperTask = Task.Run(async () => await task);
-            using var token = new CancellationTokenSource();
-            var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
-            if (completedTask != wrapperTask)
-                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
-            token.Cancel();
-            return await task;
-        }
-
-        private static int GetWithTimeoutLineNumber()
-        {
-            StackTrace saveStackTrace = new StackTrace(true);
-            return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4)!.GetFileLineNumber() : -1;
-        }
 
         public sealed class GodotMethodAwaiter<[Godot.MustBeVariant] V>
         {

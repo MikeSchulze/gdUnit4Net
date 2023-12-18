@@ -10,17 +10,46 @@ namespace GdUnit4.Executions
         [Godot.Signal]
         public delegate void ExecutionCompletedEventHandler();
 
-        private List<ITestEventListener> _eventListeners = new List<ITestEventListener>();
+        private List<ITestEventListener> _eventListeners = new();
 
         private class GdTestEventListenerDelegator : ITestEventListener
         {
             private readonly Godot.GodotObject _listener;
 
+            public bool IsFailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public GdTestEventListenerDelegator(Godot.GodotObject listener)
             {
                 _listener = listener;
             }
-            public void PublishEvent(TestEvent testEvent) => _listener.Call("PublishEvent", testEvent);
+
+            public void PublishEvent(TestEvent testEvent)
+            {
+                Godot.Collections.Dictionary<string, Godot.Variant> data = new()
+                {
+                    { "type", testEvent.Type.ToVariant() },
+                    { "resource_path", testEvent.ResourcePath.ToVariant()  },
+                    { "suite_name", testEvent.SuiteName.ToVariant()  },
+                    { "test_name", testEvent.TestName.ToVariant()  },
+                    { "total_count", testEvent.TotalCount.ToVariant()  },
+                    { "statistics", toGdUnitEventStatisitics(testEvent.Statistics) }
+                };
+
+                if (testEvent.Reports.Count() != 0)
+                {
+                    var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
+                    data.Add("reports", serializedReports);
+                }
+                _listener.Call("PublishEvent", data);
+            }
+
+            private Godot.Collections.Dictionary<Godot.Variant, Godot.Variant> toGdUnitEventStatisitics(IDictionary<TestEvent.STATISTIC_KEY, object> statistics)
+            {
+                var converted = new Godot.Collections.Dictionary<Godot.Variant, Godot.Variant>();
+                foreach (var (key, value) in statistics)
+                    converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
+                return converted;
+            }
         }
 
         public IExecutor AddGdTestEventListener(Godot.GodotObject listener)
@@ -44,7 +73,7 @@ namespace GdUnit4.Executions
         /// Execute a testsuite, is called externally from Godot test suite runner
         /// </summary>
         /// <param name="testSuite"></param>
-        public async void Execute(CsNode testSuite)
+        public void Execute(CsNode testSuite)
         {
             try
             {
@@ -53,7 +82,8 @@ namespace GdUnit4.Executions
                     .ToList()
                     .Select(node => node.Name.ToString())
                     .ToList();
-                await ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
             }
             catch (Exception e)
             {
@@ -67,15 +97,13 @@ namespace GdUnit4.Executions
 
         internal async Task ExecuteInternally(TestSuite testSuite)
         {
-            if (!ReportOrphanNodesEnabled)
-                Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             try
             {
+                if (!ReportOrphanNodesEnabled)
+                    Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
                 await ISceneRunner.SyncProcessFrame;
                 using ExecutionContext context = new(testSuite, _eventListeners, ReportOrphanNodesEnabled);
-                var task = new TestSuiteExecutionStage(testSuite).Execute(context);
-                task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
-                await task;
+                await new TestSuiteExecutionStage(testSuite).Execute(context);
             }
             catch (Exception e)
             {

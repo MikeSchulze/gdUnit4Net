@@ -25,13 +25,26 @@ namespace GdUnit4.Core.Tests
         }
 
         [TestCase]
-        public void ParseType()
+        public void ParseType_WithNamespace()
         {
-            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/noSpace/TestSuiteWithoutNamespace.cs")).IsEqual(typeof(TestSuiteWithoutNamespace));
             AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceA.TestSuite));
             AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(GdUnit4.Tests.SpaceB.TestSuite));
             // source file not exists
             AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceC/TestSuite.cs")).IsNull();
+        }
+
+        [TestCase]
+        public void ParseType_WithoutNamespace()
+        {
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/noSpace/TestSuiteWithoutNamespace.cs"))
+                .IsEqual(typeof(TestSuiteWithoutNamespace));
+        }
+
+        [TestCase]
+        public void ParseType_WithFileScopedNamespace()
+        {
+            AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/TestSuiteWithFileScopedNamespace.cs"))
+                .IsEqual(typeof(GdUnit4.Tests.Resources.TestSuiteWithFileScopedNamespace));
         }
 
         [TestCase]

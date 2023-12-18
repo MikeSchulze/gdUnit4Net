@@ -70,27 +70,4 @@ namespace GdUnit4.Asserts
             throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);
         }
     }
-
-
-    internal static class SignalAssertTaskExtension
-    {
-        public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
-        {
-            using (var token = new CancellationTokenSource())
-            {
-                var wrapperTask = Task.Run(async () => await task.ConfigureAwait(false));
-                var completedTask = await Task.WhenAny(wrapperTask, Task.Delay(timeoutMillis, token.Token));
-                token.Cancel();
-                if (completedTask == wrapperTask)
-                    return await task.ConfigureAwait(false);
-                else
-                {
-                    var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-                    if (data is CancellationTokenSource cancelToken)
-                        cancelToken.Cancel();
-                    return await task.ConfigureAwait(false);
-                }
-            }
-        }
-    }
 }

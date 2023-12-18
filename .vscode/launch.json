@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug gdUnit4Mono",
+            "name": "Debug gdUnit4",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -11,7 +11,9 @@
                 "--path",
                 "${workspaceFolder}/test",
                 "-d",
-                "src/api/TestRunner.tscn"
+                "--failfast",
+                "--add",
+                "${workspaceFolder}/test/src"
             ],
             "cwd": "${workspaceFolder}/test",
             "console": "integratedTerminal",
@@ -20,7 +22,7 @@
             "justMyCode": false
         },
         {
-            "name": "Attach gdUnit4Mono",
+            "name": "Attach gdUnit4",
             "type": "coreclr",
             "request": "attach"
         }

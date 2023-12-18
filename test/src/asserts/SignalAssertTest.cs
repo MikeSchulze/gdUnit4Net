@@ -1,7 +1,7 @@
 // GdUnit generated TestSuite
 using System.Threading.Tasks;
 
-namespace GdUnit4.Asserts
+namespace GdUnit4.Tests.Asserts
 {
     using static Assertions;
 
@@ -59,7 +59,7 @@ namespace GdUnit4.Asserts
                         Expecting do emitting signal:
                             "SignalC(abc, 101)"
                          by
-                            <GdUnit4.Asserts.SignalAssertTest+TestEmitter>
+                            <GdUnit4.Tests.Asserts.SignalAssertTest+TestEmitter>
                         """));
         }
 
