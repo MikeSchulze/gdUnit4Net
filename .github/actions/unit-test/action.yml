@@ -18,8 +18,5 @@ runs:
         GODOT_BIN: "/home/runner/godot-linux/godot"
       shell: bash
       run: |
-        $GODOT_BIN --path ./test -e --quit
-        $GODOT_BIN --path ./test -d ./src/api/TestRunner.tscn --failfast --add src
-
-      #xvfb-run --auto-servernum ./addons/gdUnit4/runtest.sh --add ${{ inputs.test-includes }} --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --continue --verbose
-
+        $GODOT_BIN --path ./test -e --quit --headless
+        xvfb-run --auto-servernum $GODOT_BIN --path ./test -d ./src/api/TestRunner.tscn --failfast --add src --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --continue
