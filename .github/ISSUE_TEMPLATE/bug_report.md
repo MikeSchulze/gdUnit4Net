@@ -8,8 +8,11 @@ assignees: MikeSchulze
 ---
 
 <!-- Please search existing issues for potential duplicates before filing yours:
-https://github.com/MikeSchulze/gdUnit4/issues?q=is%3Aissue
+https://github.com/MikeSchulze/gdUnit4Mono/issues?q=is%3Aissue
 -->
+
+**The used GdUnit4 version:**
+<!-- Specify the GdUnit4 version you have used. -->
 
 **The used Godot version:**
 <!-- Specify commit hash if using non-official build. -->

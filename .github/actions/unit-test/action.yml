@@ -1,18 +1,25 @@
 name: unit-test
-description: "Run unit tests for GdUnit4 API"
+description: "Runs the unit tests on GdUnit4 API"
 
 inputs:
   test-includes:
-    description: "Paths to include for test run"
+    description: "The path to include tests to be run"
     required: true
   godot-bin:
     required: true
 
 runs:
   using: composite
+
   steps:
-    - name: "Unit Test"
+    - name: "Unit Test Linux"
+      if: ${{ runner.OS == 'Linux' }}
       env:
-        GODOT_BIN: ${{ inputs.godot-bin }}
+        GODOT_BIN: "/home/runner/godot-linux/godot"
       shell: bash
-      run: ./runtest.sh --add ${{ inputs.test-includes }} --continue
+      run: |
+        $GODOT_BIN --path ./test -e --quit
+        $GODOT_BIN --path ./test -d ./src/api/TestRunner.tscn --failfast --add src
+
+      #xvfb-run --auto-servernum ./addons/gdUnit4/runtest.sh --add ${{ inputs.test-includes }} --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --continue --verbose
+
