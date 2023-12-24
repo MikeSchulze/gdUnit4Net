@@ -18,6 +18,8 @@
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
+        <NoWarn>NU1605</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

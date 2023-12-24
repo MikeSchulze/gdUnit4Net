@@ -20,7 +20,7 @@ internal abstract class BaseTestExecutor
         ?? throw new Exception("Godot runtime is not set! Set evn 'GODOT_BIN' is missing!");
 
     protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e)
-        => frameworkHandle.SendMessage(TestMessageLevel.Informational, "Exited: " + e.GetType()));
+        => frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Exited: {e}"));
 
     protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => new((sender, args) =>
     {

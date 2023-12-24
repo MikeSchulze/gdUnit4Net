@@ -132,5 +132,8 @@ jobs:
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         timeout-minutes: 5
+        env:
+          GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
-          echo "TODO Run unit tests by ms test adapter"
+          $GODOT_BIN --path ./test -e --quit --headless
+          xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --settings ./test/.runsettings-ci

@@ -18,12 +18,8 @@
         </Loggers>
     </LoggerRunSettings>
 
-    <TestRunParameters>
-        <Parameter name="TEST_PARAM" value="test" />
-    </TestRunParameters>
-
     <GdUnit4>
         <!-- Additonal Godot runtime parameters-->
-        <Parameters></Parameters>
+        <Parameters>--audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --verbose</Parameters>
     </GdUnit4>
 </RunSettings>

@@ -7,18 +7,21 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System;
+using GdUnit4.TestAdapter.Settings;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace GdUnit4.TestAdapter.Execution;
 
 internal class TestExecutor : BaseTestExecutor, ITestExecutor
 {
     private Process? pProcess = null;
+    private readonly GdUnit4Settings gdUnit4Settings;
 
     private int ParallelTestCount { get; set; }
 
     private int SessionTimeOut { get; set; }
 
-    public TestExecutor(RunConfiguration configuration)
+    public TestExecutor(RunConfiguration configuration, GdUnit4Settings gdUnit4Settings)
     {
         ParallelTestCount = configuration.MaxCpuCount == 0
             ? 1
@@ -26,6 +29,8 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
         SessionTimeOut = (int)(configuration.TestSessionTimeout == 0
                 ? ITestExecutor.DEFAULT_SESSION_TIMEOUT
                 : configuration.TestSessionTimeout);
+
+        this.gdUnit4Settings = gdUnit4Settings;
     }
 
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IEnumerable<TestCase> testCases)
@@ -34,7 +39,6 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
         Dictionary<string, List<TestCase>> groupedTests = testCases
             .GroupBy(t => t.CodeFilePath!)
             .ToDictionary(group => group.Key, group => group.ToList());
-
 
         var thread = new Thread(() =>
         {
@@ -48,8 +52,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
             //        return t.GetPropertyValue(testProperty);
             //    }) == false)
             //    : testCases;
-
-            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"-d --path {workingDirectory} --testadapter --configfile='{configName}'")
+            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"-d --path {workingDirectory} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
             {
                 StandardOutputEncoding = Encoding.Default,
                 RedirectStandardOutput = true,

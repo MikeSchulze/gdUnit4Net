@@ -7,6 +7,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using GdUnit4.TestAdapter.Execution;
 using ITestExecutor = GdUnit4.TestAdapter.Execution.ITestExecutor;
+using GdUnit4.TestAdapter.Discovery;
+using GdUnit4.TestAdapter.Settings;
 
 namespace GdUnit4.TestAdapter;
 
@@ -40,19 +42,15 @@ public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectMod
         _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var settings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
-        foreach (var key in settings.Keys)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{key} = '{settings[key]}'");
-        }
-
+        var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
         var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, (propertyName) =>
         {
             SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
             return testProperty;
         });
 
-        _executor = new TestExecutor(runConfiguration);
+        _executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         _executor.Run(frameworkHandle, runContext, tests);
     }
 
@@ -64,7 +62,17 @@ public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectMod
     /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<string>? containers, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        frameworkHandle?.SendMessage(TestMessageLevel.Warning, $"RunTests:containers ${containers} NOT implemented!");
+        _ = containers ?? throw new ArgumentNullException(nameof(containers), "Argument 'containers' is null, abort!");
+        _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
+        _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
+
+        TestCaseDiscoverySink discoverySink = new();
+        new GdUnit4TestDiscoverer().DiscoverTests(containers, runContext, frameworkHandle, discoverySink);
+        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
+        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+
+        _executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
+        _executor.Run(frameworkHandle, runContext, discoverySink.TestCases);
     }
 
     /// <summary>

@@ -84,22 +84,12 @@ namespace GdUnit4.Executions
 
         private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
         {
-            if (Godot.OS.IsStdOutVerbose())
-            {
-                Godot.GD.PushError(e.Message);
-                Godot.GD.PushError(e.StackTrace);
-            }
             if (context.FailureReporting)
                 context.ReportCollector.Consume(new TestReport(TestReport.TYPE.FAILURE, e.LineNumber, e.Message));
         }
 
         private static void ReportAsException(ExecutionContext context, Exception e)
         {
-            if (Godot.OS.IsStdOutVerbose())
-            {
-                Godot.GD.PushError(e.Message);
-                Godot.GD.PushError(e.StackTrace);
-            }
             StackTrace stack = new StackTrace(e, true);
             var lineNumber = ScanFailureLineNumber(stack);
             context.ReportCollector.Consume(new TestReport(TestReport.TYPE.ABORT, lineNumber, e.Message));
