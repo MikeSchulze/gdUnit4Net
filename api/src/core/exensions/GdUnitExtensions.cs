@@ -8,6 +8,7 @@ using GdUnit4.Asserts;
 using System.Threading;
 using System.Diagnostics;
 using GdUnit4.Executions;
+using System.Globalization;
 
 namespace GdUnit4
 {
@@ -28,14 +29,27 @@ namespace GdUnit4
 
         private static string Format(this object? value)
         {
-            if (value is String asString)
-                return asString.Formated();
-            if (value is IEnumerable en)
-                return en.Formated();
-            if (value is Godot.Variant asVariant)
-                return asVariant.Formated();
-
-            return value?.ToString() ?? "<Null>";
+            switch (value)
+            {
+                case string asString:
+                    return asString.Formated();
+                case IEnumerable en:
+                    return en.Formated();
+                case Godot.Variant asVariant:
+                    return asVariant.Formated();
+                case float v:
+                    return v.ToString("G9", CultureInfo.InvariantCulture);
+                case double d:
+                    return d.ToString("G9", CultureInfo.InvariantCulture);
+                case decimal dec:
+                    return dec.ToString("G9", CultureInfo.InvariantCulture);
+                case int i:
+                    return i.ToString(CultureInfo.InvariantCulture);
+                case long l:
+                    return l.ToString(CultureInfo.InvariantCulture);
+                default:
+                    return value?.ToString() ?? "<Null>";
+            }
         }
 
 

@@ -70,10 +70,10 @@ internal abstract class BaseTestExecutor
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     {
-                        var testCase = tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+                        TestCase? testCase = FindTestCase(tests, e);
                         if (testCase == null)
                         {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
+                            //frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
                             return;
                         }
                         frameworkHandle.RecordStart(testCase);
@@ -81,10 +81,10 @@ internal abstract class BaseTestExecutor
                     break;
                 case TestEvent.TYPE.TESTCASE_AFTER:
                     {
-                        var testCase = tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+                        var testCase = FindTestCase(tests, e);
                         if (testCase == null)
                         {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
+                            //frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
                             return;
                         }
                         var testResult = new TestResult(testCase)
@@ -111,6 +111,11 @@ internal abstract class BaseTestExecutor
         }
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"stdout: {json}");
     });
+
+    private static TestCase? FindTestCase(IEnumerable<TestCase> tests, TestEvent e)
+    {
+        return tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+    }
 
     protected static string? LookupGodotProjectPath(string classPath)
     {

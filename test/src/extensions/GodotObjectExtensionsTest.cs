@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Extensions
 {
     using static Assertions;
 

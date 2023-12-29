@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Core
 {
     using System.IO;
     using Godot;

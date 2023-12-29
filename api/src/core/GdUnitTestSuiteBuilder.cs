@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using GdUnit4.Executions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -215,25 +216,9 @@ namespace GdUnit4.Core
                         // collect testcase if multipe TestCaseAttribute exists
                         var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                             .Cast<TestCaseAttribute>()
-                            .Select((attr, Index) =>
-                            {
-                                if (attr.Arguments == null || attr.Arguments.Length == 0)
-                                    return null;
-
-                                // TODO: needs to investigate to use Roslyn analyzer to verify the Attribute matches with the method signature
-                                //if (attr.Arguments.Length != mi.GetParameters().Count())
-                                //{
-                                //}
-                                if (attr.TestName != null)
-                                    return attr.TestName;
-                                return $"{attr.TestName ?? mi.Name}:{Index} [{attr.Arguments.Formated()}]";
-                            })
-                            .Where(attr => attr != null)
-                            .Aggregate(new List<string>(), (acc, attributes) =>
-                            {
-                                acc.Add(attributes!);
-                                return acc;
-                            });
+                            .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                            .Select(attr => TestCase.BuildTestCaseName(attr.TestName ?? mi.Name, attr))
+                            .ToList();
                         // create test
                         return new CsNode(mi.Name, classPath, lineNumber, testCases);
                     })

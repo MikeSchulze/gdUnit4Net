@@ -48,10 +48,9 @@ namespace GdUnit4.Executions
         private async Task RunParameterizedTest(ExecutionContext executionContext, TestCase testCase)
         {
             executionContext.FireBeforeTestEvent();
-            for (int testIndex = 0; testIndex < testCase.TestCaseAttributes.Count(); testIndex++)
+            foreach (var testAttribute in testCase.TestCaseAttributes)
             {
-                var testAttribute = testCase.TestCaseAttributes.ElementAt(testIndex);
-                using ExecutionContext testCaseContext = new(executionContext, testCase, testIndex, testAttribute);
+                using ExecutionContext testCaseContext = new(executionContext, testCase, testAttribute);
                 await RunTestCase(testCaseContext, testCase, testAttribute, testAttribute.Arguments);
             }
             executionContext.FireAfterTestEvent();

@@ -47,12 +47,12 @@ namespace GdUnit4.Executions
             IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         }
 
-        public ExecutionContext(ExecutionContext context, TestCase testCase, int testIndex, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+        public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
         {
             context.SubExecutionContexts.Add(this);
             CurrentTestCase = testCase;
             CurrentIteration = 0;
-            TestCaseName = BuildTestCaseName(testCase.Name, testIndex, testCaseAttribute);
+            TestCaseName = TestCase.BuildTestCaseName(testCase.Name, testCaseAttribute);
             IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         }
 
@@ -170,12 +170,7 @@ namespace GdUnit4.Executions
             Stopwatch.Stop();
         }
 
-        private static string BuildTestCaseName(string testName, int index, TestCaseAttribute attribute)
-        {
-            if (attribute.Arguments.Length > 1)
-                return $"{attribute.TestName ?? testName}:{index} [{attribute.Arguments.Formated()}]";
-            return testName;
-        }
+
 
         public void PrintDebug(string name = "")
         {

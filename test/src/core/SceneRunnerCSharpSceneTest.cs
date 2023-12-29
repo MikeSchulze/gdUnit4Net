@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Core
 {
     using Godot;
     using static Assertions;

@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
 
 namespace GdUnit4.TestAdapter;
 
@@ -54,26 +55,47 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                     .AsParallel()
                     .ForAll(mi =>
                     {
-                        var testName = mi.Name;
-                        var navData = codeNavigationProvider.GetNavigationData(className, testName);
+                        var navData = codeNavigationProvider.GetNavigationData(className, mi.Name);
                         if (!navData.IsValid)
-                            logger.SendMessage(TestMessageLevel.Informational, $"Error Discover test {className}:{testName}    GetNavigationData -> {navData.Source}:{navData.Line}");
+                            logger.SendMessage(TestMessageLevel.Informational, $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
 
-                        var fullyQualifiedName = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", className, testName);
-                        TestCase testCase = new(fullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), assemblyPath)
-                        {
-                            DisplayName = testName,
-                            FullyQualifiedName = fullyQualifiedName,
-                            CodeFilePath = navData.Source,
-                            LineNumber = navData.Line
-
-                        };
-                        testCase.SetPropertyValue(TestClassNameProperty, testCase.DisplayName);
-                        //logger.SendMessage(TestMessageLevel.Informational, $"Added TestCase: {testCase.DisplayName} {testCase}");
-                        discoverySink.SendTestCase(testCase);
+                        // Collect parameterized tests or build a single test
+                        mi.GetCustomAttributes(typeof(TestCaseAttribute))
+                            .Cast<TestCaseAttribute>()
+                            .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                            .Select(attr =>
+                            {
+                                var paramaterizedTestName = $"{attr.TestName ?? mi.Name}({attr.Arguments.Formated()})";
+                                return new
+                                {
+                                    TestName = paramaterizedTestName,
+                                    FullyQualifiedName = $"{mi.DeclaringType}.{mi.Name}.{paramaterizedTestName}"
+                                };
+                            })
+                            .DefaultIfEmpty(new
+                            {
+                                TestName = $"{mi.Name}",
+                                FullyQualifiedName = $"{mi.DeclaringType}.{mi.Name}"
+                            })
+                            .Select(test => BuildTestCase(test.FullyQualifiedName, test.TestName, assemblyPath, navData))
+                            .ToList()
+                            .ForEach(discoverySink.SendTestCase);
                     });
             };
         }
+    }
+
+    private TestCase BuildTestCase(string fullyQualifiedName, string testName, string assemblyPath, CodeNavigation navData)
+    {
+        TestCase testCase = new(fullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), assemblyPath)
+        {
+            DisplayName = testName,
+            FullyQualifiedName = fullyQualifiedName,
+            CodeFilePath = navData.Source,
+            LineNumber = navData.Line
+        };
+        testCase.SetPropertyValue(TestClassNameProperty, testCase.DisplayName);
+        return testCase;
     }
 
     private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>

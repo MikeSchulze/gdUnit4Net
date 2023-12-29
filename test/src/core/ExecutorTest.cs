@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Core
 {
     using GdUnit4.Asserts;
     using Executions;
@@ -109,7 +109,7 @@ namespace GdUnit4.Tests
             var index = 0;
             foreach (var testCaseParam in testCaseParams)
             {
-                string testCaseName = TestCaseName(testName, testCaseParam, index);
+                string testCaseName = ParameterizedTestCaseName(testName, testCaseParam, index);
                 expectedEvents.Add(Tuple(TESTCASE_BEFORE, suiteName, testCaseName, 0));
                 expectedEvents.Add(Tuple(TESTCASE_AFTER, suiteName, testCaseName, 0));
                 index++;
@@ -118,7 +118,7 @@ namespace GdUnit4.Tests
             return expectedEvents;
         }
 
-        private static string TestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}:{index} [{testCaseParam.Formated()}]";
+        private static string ParameterizedTestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}.{testName}({testCaseParam.Formated()})";
 
         [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
         public async Task Execute_Success()
@@ -668,19 +668,19 @@ namespace GdUnit4.Tests
             AssertEventStates(events).Contains(
                 Tuple(TESTSUITE_BEFORE, "Before", true, false, false, false),
                 Tuple(TESTCASE_BEFORE, "ParameterizedBoolValue", true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedBoolValue", new object[] { 0, false }, 0), true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedBoolValue", new object[] { 1, true }, 1), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedBoolValue", new object[] { 0, false }, 0), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedBoolValue", new object[] { 1, true }, 1), true, false, false, false),
                 Tuple(TESTCASE_AFTER, "ParameterizedBoolValue", true, false, false, false),
                 Tuple(TESTCASE_BEFORE, "ParameterizedIntValues", true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 1, 2, 3, 6 }, 0), true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 3, 4, 5, 12 }, 1), true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 6, 7, 8, 21 }, 2), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 1, 2, 3, 6 }, 0), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 3, 4, 5, 12 }, 1), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 6, 7, 8, 21 }, 2), true, false, false, false),
                 Tuple(TESTCASE_AFTER, "ParameterizedIntValues", true, false, false, false),
                 // a test with failing test cases
                 Tuple(TESTCASE_BEFORE, "ParameterizedIntValuesFail", true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 1, 2, 3, 6 }, 0), true, false, false, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }, 1), false, false, true, false),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }, 2), false, false, true, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 1, 2, 3, 6 }, 0), true, false, false, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }, 1), false, false, true, false),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }, 2), false, false, true, false),
                 Tuple(TESTCASE_AFTER, "ParameterizedIntValuesFail", false, false, true, false),
                 // test suite is failing
                 Tuple(TESTSUITE_AFTER, "After", false, false, true, false)
@@ -688,19 +688,19 @@ namespace GdUnit4.Tests
 
             AssertReports(events).Contains(
                 Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedBoolValue", new object[] { 0, false }, 0), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedBoolValue", new object[] { 1, true }, 1), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 1, 2, 3, 6 }, 0), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 3, 4, 5, 12 }, 1), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValues", new object[] { 6, 7, 8, 21 }, 2), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 1, 2, 3, 6 }, 0), new List<TestReport>()),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }, 1), new List<TestReport>(){
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedBoolValue", new object[] { 0, false }, 0), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedBoolValue", new object[] { 1, true }, 1), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 1, 2, 3, 6 }, 0), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 3, 4, 5, 12 }, 1), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValues", new object[] { 6, 7, 8, 21 }, 2), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 1, 2, 3, 6 }, 0), new List<TestReport>()),
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }, 1), new List<TestReport>(){
                     new TestReport(FAILURE, 30, """
                         Expecting be equal:
                             '11' but is '12'
                         """)
                 }),
-                Tuple(TESTCASE_AFTER, TestCaseName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }, 2), new List<TestReport>(){
+                Tuple(TESTCASE_AFTER, ParameterizedTestCaseName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }, 2), new List<TestReport>(){
                     new TestReport(FAILURE, 30, """
                         Expecting be equal:
                             '22' but is '21'

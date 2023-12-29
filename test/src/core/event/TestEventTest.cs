@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace GdUnit4.Tests.Asserts;
+namespace GdUnit4.Tests.Core.Event;
+
 using static Assertions;
 
 [TestSuite]

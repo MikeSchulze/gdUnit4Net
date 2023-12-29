@@ -45,13 +45,25 @@ namespace GdUnit4.Executions
         {
             return type.GetMethods()
                 .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-                .Where(m => includedTests?.Contains(m.Name) ?? true)
+                .Where(FilterByTestCaseName(includedTests))
                 .Select(mi =>
                 {
                     var lineNumber = syntaxTree != null ? GdUnitTestSuiteBuilder.TestCaseLineNumber(syntaxTree, mi.Name) : -1;
                     return new Executions.TestCase(mi, lineNumber);
-                });
+                })
+                .ToList();
         }
+
+        private Func<MethodInfo, bool> FilterByTestCaseName(IEnumerable<string>? includedTests) =>
+            (mi) => includedTests?.Any((testName) =>
+            {
+                var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
+                    .Cast<TestCaseAttribute>()
+                    .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                    .Select(attr => $"{attr.TestName ?? mi.Name}({attr.Arguments.Formated()})")
+                    .DefaultIfEmpty($"{mi.Name}");
+                return testCases.Contains(testName);
+            }) ?? true;
 
         public void Dispose()
         {
