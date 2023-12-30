@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -176,7 +177,7 @@ namespace GdUnit4.Core
                 var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
                 return FindTypeOnAssembly(className);
             }
-            Console.Error.WriteLine($"No class found in the provided code ({classPath}).");
+            Console.WriteLine($"Warning: No class found in the provided code ({classPath}).");
             return null;
         }
 
@@ -184,7 +185,7 @@ namespace GdUnit4.Core
         {
             if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
-                Console.Error.WriteLine($"Class `{classPath}` does not exist.");
+                Console.WriteLine($"Warning: Class `{classPath}` does not exist.");
                 return null;
             }
             return FindClassWithTestSuiteAttribute(classPath, isTestSuite);

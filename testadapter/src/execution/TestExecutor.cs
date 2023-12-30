@@ -35,6 +35,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
 
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IEnumerable<TestCase> testCases)
     {
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Start executing tests, {testCases.Count()} TestCases total.");
         // TODO split into multiple threads by using 'ParallelTestCount'
         Dictionary<string, List<TestCase>> groupedTests = testCases
             .GroupBy(t => t.CodeFilePath!)
@@ -44,6 +45,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
         {
             var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
             var configName = WriteTestRunnerConfig(groupedTests);
+            var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
             //var filteredTestCases = filterExpression != null
             //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
@@ -52,7 +54,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
             //        return t.GetPropertyValue(testProperty);
             //    }) == false)
             //    : testCases;
-            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"-d --path {workingDirectory} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
+            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
             {
                 StandardOutputEncoding = Encoding.Default,
                 RedirectStandardOutput = true,

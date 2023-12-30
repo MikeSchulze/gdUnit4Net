@@ -85,9 +85,10 @@ namespace GdUnit4.Executions
                 var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
                 task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
             }
+            // handle unexpected exceptions
             catch (Exception e)
             {
-                Godot.GD.PushError(e.Message);
+                Console.Error.WriteLine("Unexpected Exception: %s \nStackTrace: %s", e.Message, e.StackTrace);
             }
             finally
             {
@@ -100,16 +101,15 @@ namespace GdUnit4.Executions
             try
             {
                 if (!ReportOrphanNodesEnabled)
-                    Godot.GD.PushWarning("!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
+                    Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
                 await ISceneRunner.SyncProcessFrame;
                 using ExecutionContext context = new(testSuite, _eventListeners, ReportOrphanNodesEnabled);
                 await new TestSuiteExecutionStage(testSuite).Execute(context);
             }
+            // handle unexpected exceptions
             catch (Exception e)
             {
-                // unexpected exceptions
-                Godot.GD.PushError(e.Message);
-                Godot.GD.PushError(e.StackTrace);
+                Console.Error.WriteLine("Unexpected Exception: %s \nStackTrace: %s", e.Message, e.StackTrace);
             }
             finally
             {

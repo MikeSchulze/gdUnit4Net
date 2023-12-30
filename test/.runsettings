@@ -15,6 +15,11 @@
                     <Verbosity>detailed</Verbosity>
                 </Configuration>
             </Logger>
+            <Logger friendlyName="html" enabled="True">
+                <Configuration>
+                    <LogFileName>test-result.html</LogFileName>
+                </Configuration>
+            </Logger>
         </Loggers>
     </LoggerRunSettings>
 
@@ -25,5 +30,8 @@
     <GdUnit4>
         <!-- Additonal Godot runtime parameters-->
         <Parameters></Parameters>
+        <!-- Controlls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
+             This likely determines how the test names are displayed in the test results.-->
+        <DisplayName>FullyQualifiedName</DisplayName>
     </GdUnit4>
 </RunSettings>

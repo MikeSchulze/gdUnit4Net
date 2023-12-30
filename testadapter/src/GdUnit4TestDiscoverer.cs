@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using GdUnit4.TestAdapter.Discovery;
+using GdUnit4.TestAdapter.Settings;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
+using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
 
 namespace GdUnit4.TestAdapter;
 
@@ -19,9 +21,9 @@ namespace GdUnit4.TestAdapter;
 public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 {
 
-    internal static readonly TestProperty TestClassNameProperty = TestProperty.Register(
-            "GdUnit4.Test",
-            "SuiteName",
+    internal static readonly TestProperty TestMethodNameProperty = TestProperty.Register(
+            "GdUnit4.Property.TestMethodName",
+            "TestMethodName",
             typeof(string),
             TestPropertyAttributes.Hidden,
             typeof(TestCase));
@@ -32,11 +34,11 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        //logger.SendMessage(TestMessageLevel.Informational, $"RunSettings: {discoveryContext.RunSettings}:{discoveryContext.RunSettings?.SettingsXml}");
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
-        //logger.SendMessage(TestMessageLevel.Informational, $"RunConfiguration: {runConfiguration.TestSessionTimeout}");
-
+        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
         var filteredAssemblys = FilterWithoutTestAdapter(assemblyPaths);
+
         foreach (string assemblyPath in filteredAssemblys)
         {
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
@@ -45,17 +47,21 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             if (codeNavigationProvider.GetAssembly() == null) continue;
             Assembly assembly = codeNavigationProvider.GetAssembly()!;
 
+            int testsTotalDiscovered = 0;
+            int testSuiteDiscovered = 0;
             // discover GdUnit4 testsuites
             foreach (var type in assembly.GetTypes().Where(IsTestSuite))
             {
                 // discover test cases
+                var testCasesDiscovered = 0;
+                testSuiteDiscovered++;
                 var className = type.FullName!;
                 type.GetMethods()
                     .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
                     .AsParallel()
                     .ForAll(mi =>
                     {
-                        var navData = codeNavigationProvider.GetNavigationData(className, mi.Name);
+                        var navData = codeNavigationProvider.GetNavigationData(className, mi);
                         if (!navData.IsValid)
                             logger.SendMessage(TestMessageLevel.Informational, $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
 
@@ -77,26 +83,42 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                                 TestName = $"{mi.Name}",
                                 FullyQualifiedName = $"{mi.DeclaringType}.{mi.Name}"
                             })
-                            .Select(test => BuildTestCase(test.FullyQualifiedName, test.TestName, assemblyPath, navData))
+                            .Select(test => BuildTestCase(test.FullyQualifiedName, test.TestName, assemblyPath, navData, gdUnitSettings))
                             .ToList()
-                            .ForEach(discoverySink.SendTestCase);
+                            .ForEach(t =>
+                            {
+                                Interlocked.Increment(ref testsTotalDiscovered);
+                                Interlocked.Increment(ref testCasesDiscovered);
+                                discoverySink.SendTestCase(t);
+                            });
                     });
+                logger.SendMessage(TestMessageLevel.Informational, $"Discover:  TestSuite {className} with {testCasesDiscovered} TestCases found.");
             };
+
+            logger.SendMessage(TestMessageLevel.Informational, $"Discover tests done, {testSuiteDiscovered} TestSuites and total {testsTotalDiscovered} Tests found.");
         }
     }
 
-    private TestCase BuildTestCase(string fullyQualifiedName, string testName, string assemblyPath, CodeNavigation navData)
+    private TestCase BuildTestCase(string fullyQualifiedName, string testName, string assemblyPath, CodeNavigation navData, GdUnit4Settings gdUnitSettings)
     {
         TestCase testCase = new(fullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), assemblyPath)
         {
-            DisplayName = testName,
+            DisplayName = BuildDisplayName(testName, fullyQualifiedName, gdUnitSettings),
             FullyQualifiedName = fullyQualifiedName,
             CodeFilePath = navData.Source,
             LineNumber = navData.Line
         };
-        testCase.SetPropertyValue(TestClassNameProperty, testCase.DisplayName);
+        testCase.SetPropertyValue(TestMethodNameProperty, testName);
         return testCase;
     }
+
+    private static string BuildDisplayName(string testName, string fullyQualifiedName, GdUnit4Settings gdUnitSettings) =>
+        gdUnitSettings.DisplayName switch
+        {
+            DisplayNameOptions.SimpleName => testName,
+            DisplayNameOptions.FullyQualifiedName => fullyQualifiedName,
+            _ => testName
+        };
 
     private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>
         assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));

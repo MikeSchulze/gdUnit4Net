@@ -15,7 +15,16 @@ public class GdUnit4Settings : TestRunSettings
 
     private static readonly XmlSerializer Serializer = new(typeof(GdUnit4Settings));
 
+    public enum DisplayNameOptions
+    {
+        SimpleName,
+        FullyQualifiedName
+    }
+
     public string? Parameters { get; set; }
+
+
+    public DisplayNameOptions DisplayName { get; set; } = DisplayNameOptions.SimpleName;
 
     public GdUnit4Settings() : base(RunSettingsXmlNode)
     {

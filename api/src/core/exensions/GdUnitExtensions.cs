@@ -18,7 +18,6 @@ namespace GdUnit4
     /// </summary>
     public static class GdUnitExtensions
     {
-
         public static string ToSnakeCase(this string? input)
         {
             if (string.IsNullOrEmpty(input))
