@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Extensions
 {
     using static Assertions;
 

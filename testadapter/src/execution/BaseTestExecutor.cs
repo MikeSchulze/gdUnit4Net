@@ -17,17 +17,22 @@ internal abstract class BaseTestExecutor
 {
 
     protected string GodotBin { get; set; } = System.Environment.GetEnvironmentVariable("GODOT_BIN")
-        ?? throw new Exception("Godot runtime is not set! Set evn 'GODOT_BIN' is missing!");
+        ?? throw new Exception("Godot runtime is not set! Set env 'GODOT_BIN' is missing!");
 
-    protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e)
-        => frameworkHandle.SendMessage(TestMessageLevel.Informational, "Exited: " + e.GetType()));
+    protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e) =>
+    {
+        Console.Out.Flush();
+        if (sender is Process p)
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
+    });
 
     protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => new((sender, args) =>
     {
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
             return;
-        frameworkHandle.SendMessage(TestMessageLevel.Error, $"stderr: {message}");
+        // we do log errors to stdout otherwise runing `dotnet test` from console will fail with exit code 1
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Error: {message}");
     });
 
     protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites)
@@ -35,13 +40,15 @@ internal abstract class BaseTestExecutor
         var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
 
-        var testConfig = new TestRunnerConfig();
-        foreach (var testSuite in groupedTestSuites)
+        var testConfig = new TestRunnerConfig
         {
-            testConfig.Included.Add(testSuite.Key, testSuite.Value.Select(t => new TestCaseConfig() { Name = t.DisplayName }));
-        }
-        var jsonContent = JsonConvert.SerializeObject(testConfig, Formatting.Indented);
-        File.WriteAllText(filePath, jsonContent);
+            Included = groupedTestSuites.ToDictionary(
+                suite => suite.Key,
+                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(GdUnit4TestDiscoverer.TestMethodNameProperty, t.DisplayName) })
+            )
+        };
+
+        File.WriteAllText(filePath, JsonConvert.SerializeObject(testConfig, Formatting.Indented));
         return filePath;
     }
 
@@ -70,10 +77,10 @@ internal abstract class BaseTestExecutor
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                     {
-                        var testCase = tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+                        TestCase? testCase = FindTestCase(tests, e);
                         if (testCase == null)
                         {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
+                            //frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
                             return;
                         }
                         frameworkHandle.RecordStart(testCase);
@@ -81,10 +88,10 @@ internal abstract class BaseTestExecutor
                     break;
                 case TestEvent.TYPE.TESTCASE_AFTER:
                     {
-                        var testCase = tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+                        var testCase = FindTestCase(tests, e);
                         if (testCase == null)
                         {
-                            frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
+                            //frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
                             return;
                         }
                         var testResult = new TestResult(testCase)
@@ -104,13 +111,18 @@ internal abstract class BaseTestExecutor
                     }
                     break;
                 case TestEvent.TYPE.TESTSUITE_AFTER:
-                    //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Run Test Suite {e.SuiteName} {e.AsTestOutcome()}");
+                    //frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{e.AsTestOutcome()}");
                     break;
             }
             return;
         }
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"stdout: {json}");
     });
+
+    private static TestCase? FindTestCase(IEnumerable<TestCase> tests, TestEvent e)
+    {
+        return tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+    }
 
     protected static string? LookupGodotProjectPath(string classPath)
     {

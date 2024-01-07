@@ -5,6 +5,7 @@ bin/
 obj/
 .generated/
 *.*.import
+TestResults/
 
 # Mono-specific ignores
 .mono/

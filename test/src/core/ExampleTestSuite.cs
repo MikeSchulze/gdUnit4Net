@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace GdUnit4.Tests.Asserts
+namespace GdUnit4.Tests.Core
 {
     using static Assertions;
     using static Utils;

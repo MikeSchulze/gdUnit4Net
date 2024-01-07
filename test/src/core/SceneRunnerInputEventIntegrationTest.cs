@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Moq;
 
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Core
 {
     using System.Linq;
     using Godot;

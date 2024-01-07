@@ -34,10 +34,10 @@ public class CodeNavigationDataProvider : IDisposable
 
     public Assembly? GetAssembly() => assembly;
 
-    public CodeNavigation GetNavigationData(string className, string methodName)
+    public CodeNavigation GetNavigationData(string className, MethodInfo methodInfo)
     {
-        var navigationData = TryGetNavigationDataForMethod(className, methodName)
-            ?? TryGetNavigationDataForAsyncMethod(className, methodName);
+        var navigationData = TryGetNavigationDataForMethod(className, methodInfo)
+            ?? TryGetNavigationDataForAsyncMethod(methodInfo);
         return new CodeNavigation()
         {
             Line = navigationData?.MinLineNumber ?? -1,
@@ -45,30 +45,20 @@ public class CodeNavigationDataProvider : IDisposable
         };
     }
 
-    private DiaNavigationData? TryGetNavigationDataForMethod(string className, string methodName)
+    private DiaNavigationData? TryGetNavigationDataForMethod(string className, MethodInfo methodInfo)
     {
-        var navigationData = diaSession.GetNavigationData(className, methodName);
+        var navigationData = diaSession.GetNavigationData(className, methodInfo.Name);
         return string.IsNullOrEmpty(navigationData?.FileName) ? null : navigationData;
     }
 
-    private DiaNavigationData? TryGetNavigationDataForAsyncMethod(string className, string methodName)
+    private DiaNavigationData? TryGetNavigationDataForAsyncMethod(MethodInfo methodInfo)
     {
-        var methodInfo = GetMethod(className, methodName);
-        if (methodInfo == null) return null;
-
         var stateMachineAttribute = GetStateMachineAttribute(methodInfo);
         if (stateMachineAttribute == null) return null;
 
         var stateMachineType = GetStateMachineType(stateMachineAttribute);
         return diaSession.GetNavigationData(stateMachineType?.FullName ?? "", "MoveNext");
     }
-
-    MethodInfo? GetMethod(string className, string methodName) =>
-        assembly!.GetType(className)?
-           .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-           .Where(info => info.Name == methodName)
-           .OrderBy(info => info.GetParameters().Length)
-           .FirstOrDefault();
 
     static Attribute? GetStateMachineAttribute(MethodInfo method) =>
             method.GetCustomAttributes(false)

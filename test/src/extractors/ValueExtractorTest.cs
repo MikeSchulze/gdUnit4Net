@@ -1,4 +1,4 @@
-namespace GdUnit4.Tests
+namespace GdUnit4.Tests.Extractors
 {
     using GdUnit4.Asserts;
     using static Assertions;

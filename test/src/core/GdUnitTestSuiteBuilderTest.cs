@@ -2,7 +2,9 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace GdUnit4.Core.Tests
+using GdUnit4.Core;
+
+namespace GdUnit4.Tests.Core
 {
     using static Assertions;
     using static Utils;
@@ -234,8 +236,14 @@ namespace GdUnit4.Core.Tests
                     Tuple("TestBar", 42, new List<string>()),
                     Tuple("Waiting", 48, new List<string>()),
                     Tuple("TestFooBar", 54, new List<string>()),
-                    Tuple("TestCaseArguments", 62, new List<string> { "TestCaseArguments:0 [1, 2, 3, 6]", "TestCaseArguments:1 [3, 4, 5, 12]", "TestCaseArguments:2 [6, 7, 8, 21]" }),
-                    Tuple("TestCasesWithCustomTestName", 70, new List<string> { "TestCaseA", "TestCaseB", "TestCaseC" }));
+                    Tuple("TestCaseArguments", 62, new List<string> {
+                        "TestCaseArguments.TestCaseArguments(1, 2, 3, 6)",
+                        "TestCaseArguments.TestCaseArguments(3, 4, 5, 12)",
+                        "TestCaseArguments.TestCaseArguments(6, 7, 8, 21)" }),
+                    Tuple("TestCasesWithCustomTestName", 70, new List<string> {
+                        "TestCaseA.TestCaseA(1, 2, 3, 6)",
+                        "TestCaseB.TestCaseB(3, 4, 5, 12)",
+                        "TestCaseC.TestCaseC(6, 7, 8, 21)" }));
         }
     }
 }

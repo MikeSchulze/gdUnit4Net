@@ -14,6 +14,7 @@ runs:
       with:
         name: test_report_${{ inputs.report-name }}
         path: |
+          /test/TestResults/**
           reports/**
           /var/lib/systemd/coredump/**
           /var/log/syslog

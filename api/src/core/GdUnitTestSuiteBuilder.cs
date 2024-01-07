@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using GdUnit4.Executions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -175,7 +177,7 @@ namespace GdUnit4.Core
                 var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
                 return FindTypeOnAssembly(className);
             }
-            Console.Error.WriteLine($"No class found in the provided code ({classPath}).");
+            Console.WriteLine($"Warning: No class found in the provided code ({classPath}).");
             return null;
         }
 
@@ -183,7 +185,7 @@ namespace GdUnit4.Core
         {
             if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
             {
-                Console.Error.WriteLine($"Class `{classPath}` does not exist.");
+                Console.WriteLine($"Warning: Class `{classPath}` does not exist.");
                 return null;
             }
             return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
@@ -215,25 +217,9 @@ namespace GdUnit4.Core
                         // collect testcase if multipe TestCaseAttribute exists
                         var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                             .Cast<TestCaseAttribute>()
-                            .Select((attr, Index) =>
-                            {
-                                if (attr.Arguments == null || attr.Arguments.Length == 0)
-                                    return null;
-
-                                // TODO: needs to investigate to use Roslyn analyzer to verify the Attribute matches with the method signature
-                                //if (attr.Arguments.Length != mi.GetParameters().Count())
-                                //{
-                                //}
-                                if (attr.TestName != null)
-                                    return attr.TestName;
-                                return $"{attr.TestName ?? mi.Name}:{Index} [{attr.Arguments.Formated()}]";
-                            })
-                            .Where(attr => attr != null)
-                            .Aggregate(new List<string>(), (acc, attributes) =>
-                            {
-                                acc.Add(attributes!);
-                                return acc;
-                            });
+                            .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                            .Select(attr => TestCase.BuildTestCaseName(attr.TestName ?? mi.Name, attr))
+                            .ToList();
                         // create test
                         return new CsNode(mi.Name, classPath, lineNumber, testCases);
                     })

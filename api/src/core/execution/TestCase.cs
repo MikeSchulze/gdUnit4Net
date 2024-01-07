@@ -19,7 +19,9 @@ namespace GdUnit4.Executions
         public int Line
         { get; private set; }
 
-        public IEnumerable<TestCaseAttribute> TestCaseAttributes => MethodInfo.GetCustomAttributes<TestCaseAttribute>();
+        public IEnumerable<TestCaseAttribute> TestCaseAttributes => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter);
+
+        public Func<TestCaseAttribute, bool> TestParametersFilter { get; set; } = _ => true;
 
         public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
 
@@ -55,6 +57,13 @@ namespace GdUnit4.Executions
         }
 
         public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray<object>();
+
+        public static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
+        {
+            if (attribute.Arguments.Any())
+                return $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formated()})";
+            return testName;
+        }
 
     }
 }
