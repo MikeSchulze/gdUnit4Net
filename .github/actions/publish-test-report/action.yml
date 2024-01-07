@@ -19,6 +19,6 @@ runs:
       uses: dorny/test-reporter@v1.6.0
       with:
         name: test_report_${{ inputs.report-name }}
-        path: 'reports/**/results.xml'
-        reporter: java-junit
+        path: 'test/TestResults/test-result.trx'
+        reporter: dotnet-trx
         fail-on-error: 'false'

@@ -20,6 +20,11 @@
                     <LogFileName>test-result.html</LogFileName>
                 </Configuration>
             </Logger>
+            <Logger friendlyName="trx" enabled="True">
+                <Configuration>
+                    <LogFileName>test-result.trx</LogFileName>
+                </Configuration>
+            </Logger>
         </Loggers>
     </LoggerRunSettings>
 

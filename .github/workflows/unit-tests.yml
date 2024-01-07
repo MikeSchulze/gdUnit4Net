@@ -137,3 +137,20 @@ jobs:
         run: |
           $GODOT_BIN --path ./test -e --quit --headless
           xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci
+
+      - name: "Set Report Name"
+        if: ${{ always() }}
+        shell: bash
+        run: echo "REPORT_NAME=${{ inputs.os }}-${{ inputs.godot-version }}" >> "$GITHUB_ENV"
+
+      - name: "Publish Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-test-report
+        with:
+          report-name: ${{ env.REPORT_NAME }}
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/upload-test-report
+        with:
+          report-name: ${{ env.REPORT_NAME }}
