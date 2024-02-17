@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="gdUnit4Test"
+config/name="gdUnit4"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [dotnet]
 
-project/assembly_name="gdUnit4Test"
+project/assembly_name="gdUnit4"

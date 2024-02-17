@@ -11,6 +11,7 @@
                 "--path",
                 "${workspaceFolder}/test",
                 "-d",
+                "res://src/api/TestRunner.tscn",
                 "--failfast",
                 "--add",
                 "${workspaceFolder}/test/src"

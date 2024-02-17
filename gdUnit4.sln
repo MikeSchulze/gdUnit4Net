@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4", "gdUnit4.csproj", "{690AC2F1-77C0-4D25-A3E7-C4ADF4DA9FF2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.api", "./api/gdUnit4Api.csproj", "{E5ED8330-DA73-49CE-A060-103CD6B8DC6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test.adapter", "./testadapter/gdUnit4TestAdapter.csproj", "{42C45312-5065-4E36-BBB4-8FA958C5DA50}"

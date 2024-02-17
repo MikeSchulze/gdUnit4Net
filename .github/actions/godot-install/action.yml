@@ -4,28 +4,21 @@ description: "Installs the Godot Runtime"
 inputs:
   godot-version:
     description: "The Godot engine version"
-    type: string
     required: true
   godot-status-version:
     description: "The Godot engine status version"
-    type: string
     required: true
   godot-mono:
     required: false
-    type: boolean
-    default: false
+    default: "false"
   godot-bin-name:
-    type: string
     required: true
   godot-cache-path:
-    type: string
     required: true
-
 
 runs:
   using: composite
   steps:
-
     - name: "Set Cache Name"
       shell: bash
       run: |
@@ -36,7 +29,7 @@ runs:
         fi
 
     - name: "Build Cache"
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: godot-cache-binary
       with:
         path: ${{ inputs.godot-cache-path }}
