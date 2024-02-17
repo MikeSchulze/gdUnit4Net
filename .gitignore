@@ -6,6 +6,7 @@ obj/
 .generated/
 *.*.import
 TestResults/
+gdunit4_testadapter/
 
 # Mono-specific ignores
 .mono/

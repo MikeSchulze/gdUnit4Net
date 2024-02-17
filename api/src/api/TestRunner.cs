@@ -11,7 +11,7 @@ using GdUnit4.Core;
 using Newtonsoft.Json;
 
 
-partial class TestRunner : Godot.Node
+public partial class TestRunner : Godot.Node
 {
 
     public class Options

@@ -11,7 +11,7 @@
                 "--path",
                 "${workspaceFolder}/test",
                 "-d",
-                "res://src/api/TestRunner.tscn",
+                "res://gdunit4_testadapter/TestRunner.tscn",
                 "--failfast",
                 "--add",
                 "${workspaceFolder}/test/src"

@@ -1,7 +1,12 @@
 using System;
+using System.Runtime.CompilerServices;
+
+
+[assembly: InternalsVisibleTo("GdUnit4Test"), InternalsVisibleTo("gdUnit4.TestAdapter")]
 
 namespace GdUnit4
 {
+
     public class TestStageAttribute : Attribute
     {
 
