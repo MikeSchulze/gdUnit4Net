@@ -9,16 +9,11 @@ inputs:
 runs:
   using: composite
   steps:
-
-    - name: 'Fixing the dubious git 128 error'
-      shell: bash
-      run: |
-        git config --global --add safe.directory '*'
-
-    - name: 'Publish Test Results'
-      uses: dorny/test-reporter@v1.6.0
+    - name: "Publish Test Results"
+      uses: dorny/test-reporter@v1.8.0
       with:
-        name: test_report_${{ inputs.report-name }}
-        path: 'test/TestResults/test-result.trx'
+        name: ${{ inputs.report-name }}
+        path: "./test/TestResults/test-result.trx"
         reporter: dotnet-trx
-        fail-on-error: 'false'
+        fail-on-error: "false"
+        fail-on-empty: "false"

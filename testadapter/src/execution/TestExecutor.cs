@@ -54,7 +54,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
             //        return t.GetPropertyValue(testProperty);
             //    }) == false)
             //    : testCases;
-            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
+            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory}  res://src/api/TestRunner.tscn  --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
             {
                 StandardOutputEncoding = Encoding.Default,
                 RedirectStandardOutput = true,

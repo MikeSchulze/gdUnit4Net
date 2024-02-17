@@ -1,4 +1,4 @@
-name: upload-test-report
+name: "upload test report"
 description: "Uploads the GdUnit test reports"
 
 inputs:
@@ -9,10 +9,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Collect Test Artifacts
-      uses: actions/upload-artifact@v3
+    - name: "Upload Test Artifacts"
+      uses: actions/upload-artifact@v4
       with:
-        name: test_report_${{ inputs.report-name }}
+        retention-days: 10
+        name: artifact_${{ inputs.report-name }}
         path: |
           /test/TestResults/**
           reports/**
