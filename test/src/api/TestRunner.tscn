@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://5o7l4yufw1rw"]
-
-[ext_resource type="Script" path="res://src/api/TestRunner.cs" id="1"]
-
-[node name="Control" type="Control"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1")
