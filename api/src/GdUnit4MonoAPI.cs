@@ -21,8 +21,9 @@ namespace GdUnit4
 
         public static bool IsTestSuite(string classPath)
         {
-            var type = GdUnitTestSuiteBuilder.ParseType(NormalisizePath(classPath));
-            return type != null ? Attribute.IsDefined(type, typeof(TestSuiteAttribute)) : false;
+   
+            var type = GdUnitTestSuiteBuilder.ParseType(NormalisizePath(classPath),true);
+            return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
         }
 
         public static CsNode? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalisizePath(classPath));
