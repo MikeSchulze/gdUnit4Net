@@ -83,6 +83,9 @@ namespace GdUnit4.Executions
                     .Select(node => node.Name.ToString())
                     .ToList();
                 var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+                // use this call as workaround to hold the signal list, it is disposed for some unknown reason.
+                // could be related to https://github.com/godotengine/godot/issues/84254
+                GetSignalConnectionList("ExecutionCompleted");
                 task.GetAwaiter().OnCompleted(() => EmitSignal(SignalName.ExecutionCompleted));
             }
             // handle unexpected exceptions
