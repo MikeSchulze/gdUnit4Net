@@ -20,7 +20,6 @@ This project provides an API and a VS test adapter to run your Godot C# test in 
 * Parameterized Tests (Test Cases) for testing functions with multiple sets of inputs and expected outputs
 * Scene runner for simulating different kinds of inputs and actions, such as mouse clicks and keyboard inputs<br>
   For example, you can simulate mouse clicks and keyboard inputs by calling the appropriate methods on the runner instance. Additionally, you can wait for a specific signal to be emitted by the scene, or you can wait for a specific function to return a certain value.
-* Automatic update notifier to install the latest version of GdUnit from GitHub
 * Visual Studio Test Adapter to run and debug your tests
 
 
