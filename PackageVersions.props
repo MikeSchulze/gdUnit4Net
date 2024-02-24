@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <GodotVersion>4.2.0</GodotVersion>
+    <GodotVersion>4.2.1</GodotVersion>
     <GodotNetSdkVersion>$(GodotVersion)</GodotNetSdkVersion>
-    <MicrosoftSdkVersion>17.8.0</MicrosoftSdkVersion>
+    <MicrosoftSdkVersion>17.9.0</MicrosoftSdkVersion>
     <MicrosoftCodeAnalysisCSharpVersion>4.7.0</MicrosoftCodeAnalysisCSharpVersion>
     <MoqVersion>4.18.4</MoqVersion>
   </PropertyGroup>

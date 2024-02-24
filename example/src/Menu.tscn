@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://5hobjg6fgrwy"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 308.0
+offset_top = 188.0
+offset_right = 465.0
+offset_bottom = 228.0
+text = "Click me"

@@ -2,11 +2,6 @@
 # The C# GdUnit4 API
 
 
-### --------------------------------------------------------
-#### This is the initial version and not yet ready for use
-### --------------------------------------------------------
-
-
 ## What is GdUnit4.Api
 gdUnit4.api is the C# package to enable GdUnit4 to run/write unit tests in C#.
  
@@ -49,7 +44,6 @@ namespace GdUnit4.Tests
   * [Give Feedback](https://github.com/MikeSchulze/gdUnit4Mono/discussions)
   * [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
   * [Report Bugs](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2C+task&template=bug_report.md&title=)
-
 
 
 

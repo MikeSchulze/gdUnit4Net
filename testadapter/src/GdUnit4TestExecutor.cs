@@ -5,22 +5,23 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
-using GdUnit4.TestAdapter.Execution;
-using ITestExecutor = GdUnit4.TestAdapter.Execution.ITestExecutor;
+
 using GdUnit4.TestAdapter.Discovery;
 using GdUnit4.TestAdapter.Settings;
 
 namespace GdUnit4.TestAdapter;
 
 [ExtensionUri(ExecutorUri)]
-public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor
+public class GdUnit4TestExecutor : ITestExecutor
 {
     ///<summary>
-    /// The Uri used to identify the NUnitExecutor
+    /// The Uri used to identify the GdUnit4 Executor
     ///</summary>
-    public const string ExecutorUri = "executor://GdUnit4.TestAdapter/v1";
+    public const string ExecutorUri = "executor://GdUnit4.TestAdapter";
 
-    private ITestExecutor? _executor;
+    private Execution.ITestExecutor? _executor;
+
+    private IFrameworkHandle? _frameworkHandle;
 
     // Test properties supported for filtering
     private Dictionary<string, TestProperty> SupportedProperties = new(StringComparer.OrdinalIgnoreCase)
@@ -50,7 +51,9 @@ public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectMod
             return testProperty;
         });
 
-        _executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
+        _frameworkHandle = frameworkHandle;
+
+        _executor = new Execution.TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         _executor.Run(frameworkHandle, runContext, tests);
     }
 
@@ -71,7 +74,8 @@ public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectMod
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
 
-        _executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
+        _frameworkHandle = frameworkHandle;
+        _executor = new Execution.TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         _executor.Run(frameworkHandle, runContext, discoverySink.TestCases);
     }
 
@@ -80,6 +84,7 @@ public class GdUnit4TestExecutor : Microsoft.VisualStudio.TestPlatform.ObjectMod
     /// </summary>
     public void Cancel()
     {
+        _frameworkHandle?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
         _executor?.Cancel();
     }
 

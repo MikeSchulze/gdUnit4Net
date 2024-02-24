@@ -1,11 +1,12 @@
 # Project-specific ignores
 .history
 .godot
-bin/
 obj/
+nupkg/*
 .generated/
 *.*.import
 TestResults/
+gdunit4_testadapter/
 
 # Mono-specific ignores
 .mono/

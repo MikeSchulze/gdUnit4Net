@@ -5,42 +5,47 @@
   <PropertyGroup>
     <Title>gdUnit4TestAdapter</Title>
     <Version>1.0.0</Version>
-    <Description>The Test Adapter for GdUnit4Mono.</Description>
-    <Copyright>© 2023 Mike Schulze</Copyright>
+    <Description>
+      GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
+    </Description>
+    <Copyright>© 2024 Mike Schulze</Copyright>
     <Authors>Mike Schulze</Authors>
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
     <TargetFrameworks>net7.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
+    <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
+    <OutputType>Library</OutputType>
+    <OutputPath>./nupkg</OutputPath>
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
-    <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
     <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DebugType>portable</DebugType>
+    <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
+    <IsGodotToolsProject>true</IsGodotToolsProject>
   </PropertyGroup>
 
   <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>gdUnit4.test.adapter</PackageId>
-    <PackageVersion>1.0.0-rc.$([System.DateTime]::Now.ToString('yyyyMMddHHmm'))</PackageVersion>
+    <PackageVersion>1.0.0</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
-    <Description>
-      GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
-    </Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
   </PropertyGroup>  
 
   <ItemGroup>
+    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
+    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="All" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
