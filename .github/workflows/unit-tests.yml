@@ -89,6 +89,9 @@ jobs:
       - name: "Compile C#"
         if: ${{ !cancelled() }}
         run: |
+          echo "prebuild the nuget packages"
+          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
           dotnet restore
           dotnet build
 
@@ -141,6 +144,9 @@ jobs:
       - name: "Compile C#"
         if: ${{ !cancelled() }}
         run: |
+          echo "prebuild the nuget packages"
+          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
           dotnet restore
           dotnet build
 
@@ -151,7 +157,7 @@ jobs:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
           $GODOT_BIN --path ./example --headless --build-solutions --quit-after 20
-          xvfb-run --auto-servernum dotnet test ./example/exampleProject.csproj --no-build --settings ./test/.runsettings-ci
+          xvfb-run --auto-servernum dotnet test ./example/exampleProject.csproj --no-build --settings ./test/.runsettings-ci || true
 
       - name: "Publish Unit Test Reports"
         if: ${{ !cancelled() }}

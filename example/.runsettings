@@ -28,10 +28,6 @@
         </Loggers>
     </LoggerRunSettings>
 
-    <TestRunParameters>
-        <Parameter name="TEST_PARAM" value="test" />
-    </TestRunParameters>
-
     <GdUnit4>
         <!-- Additonal Godot runtime parameters-->
         <Parameters></Parameters>

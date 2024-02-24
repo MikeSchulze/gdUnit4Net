@@ -2,7 +2,7 @@
     <Import Project="../PackageVersions.props" />
     <PropertyGroup>
         <Version>4.2.0</Version>
-        <Copyright>© 2023 Mike Schulze</Copyright>
+        <Copyright>© 2024 Mike Schulze</Copyright>
         <Authors>Mike Schulze</Authors>
 
         <TargetFramework>net7.0</TargetFramework>

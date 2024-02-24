@@ -1,8 +1,8 @@
 # Project-specific ignores
 .history
 .godot
-bin/
 obj/
+nupkg/*
 .generated/
 *.*.import
 TestResults/
