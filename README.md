@@ -2,7 +2,7 @@
 <h2 align="center">A Unit Testing Framework in C# for Godot</h2>
 <p align="center">This version of GdUnit4 is based on Godot <strong>v4.2.1.stable.official [b09f793f5]</strong> (master branch)</p>
 </h2>
----
+
 <h1 align="center">Supported Godot Versions</h2>
 <p align="center">
   <img src="https://img.shields.io/badge/Godot-v4.2.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
@@ -25,8 +25,8 @@ This project provides an API and a VS test adapter to run your Godot C# test in 
 
 
 There are two packages you need to install
-**gdUnit4.api** is the package to enable GdUnit4 to write unit tests in C#.
-**gdUnit4.test.adapter** is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUnit4 with test frameworks supporting the Visual Studio Test Platform.
+* **gdUnit4.api** is the package to enable GdUnit4 to write unit tests in C#.
+* **gdUnit4.test.adapter** is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUnit4 with test frameworks supporting the Visual Studio Test Platform.
 
 
 ## Using the gdunit4.api
@@ -67,8 +67,7 @@ public class ExampleTest
 }
 ```
 The test run looks like.
-[!image](./example/assets/TestExplorerRun.png)
-
+<p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Mono"><img src="https://github.com/MikeSchulze/gdUnit4Mono/blob/master/example/assets/TestExplorerRun.png" width="100%"/></p><br/>
 
 
 ## Documentation
