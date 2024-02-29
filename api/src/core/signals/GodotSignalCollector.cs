@@ -130,7 +130,7 @@ namespace GdUnit4.Core.Signals
                     foreach (var signalName in _collectedSignals[emitter].Keys)
                     {
                         var args = _collectedSignals[emitter][signalName];
-                        WriteLine($"\t\t{signalName} {args.Formated()}");
+                        WriteLine($"\t\t{signalName} {args.Formatted()}");
                     }
                 }
             }

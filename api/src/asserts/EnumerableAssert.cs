@@ -1,214 +1,207 @@
+namespace GdUnit4.Asserts;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 using static GdUnit4.Assertions;
 
-namespace GdUnit4.Asserts
+
+internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAssert
 {
-    internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAssert
+    public EnumerableAssert(IEnumerable? current) : base(current) => Current = current?.Cast<object?>();
+
+    private new IEnumerable<object?>? Current { get; set; }
+
+    public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
     {
-        public EnumerableAssert(IEnumerable? current) : base(current)
-        {
-            Current = current?.Cast<object?>();
-        }
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
+        if (!result.Valid)
+            ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
+        return this;
+    }
 
-        private new IEnumerable<object?>? Current { get; set; }
+    public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
+    {
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
+        if (result.Valid)
+            ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
+        return this;
+    }
 
-        public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
-        {
-            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
-            if (!result.Valid)
-                ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
+    public IEnumerableAssert IsEmpty()
+    {
+        var count = Current?.Count() ?? -1;
+        if (count != 0)
+            ThrowTestFailureReport(AssertFailures.IsEmpty(count, Current == null), Current, count);
+        return this;
+    }
+
+    public IEnumerableAssert IsNotEmpty()
+    {
+        var count = Current?.Count() ?? -1;
+        if (count == 0)
+            ThrowTestFailureReport(AssertFailures.IsNotEmpty(), Current, null);
+        return this;
+    }
+
+    public IEnumerableAssert HasSize(int expected)
+    {
+        var count = Current?.Count();
+        if (count != expected)
+            ThrowTestFailureReport(AssertFailures.HasSize(count, expected), Current, null);
+        return this;
+    }
+
+    public IEnumerableAssert Contains(params object?[] expected)
+    {
+        // we test for contains nothing
+        if (expected.Length == 0)
             return this;
-        }
+        var notFound = ArrayContainsAll(Current, expected);
+        if (notFound.Count > 0)
+            ThrowTestFailureReport(AssertFailures.Contains(Current, expected, notFound), Current, expected);
+        return this;
+    }
 
-        public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
-        {
-            var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
-            if (result.Valid)
-                ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
+    public IEnumerableAssert Contains(IEnumerable expected)
+    {
+        var expectedArray = expected.Cast<object>().ToArray();
+        // we test for contains nothing
+        if (expectedArray.Length == 0)
             return this;
-        }
 
-        public IEnumerableAssert IsEmpty()
-        {
-            var count = Current?.Count() ?? -1;
-            if (count != 0)
-                ThrowTestFailureReport(AssertFailures.IsEmpty(count, Current == null), Current, count);
+        var notFound = ArrayContainsAll(Current, expectedArray);
+        if (notFound.Count > 0)
+            ThrowTestFailureReport(AssertFailures.Contains(Current, expectedArray, notFound), Current, expected);
+        return this;
+    }
+
+    public IEnumerableAssert ContainsExactly(params object?[] expected)
+    {
+        // we test for contains nothing
+        if (expected.Length == 0)
             return this;
-        }
-
-        public IEnumerableAssert IsNotEmpty()
-        {
-            var count = Current?.Count() ?? -1;
-            if (count == 0)
-                ThrowTestFailureReport(AssertFailures.IsNotEmpty(), Current, null);
+        // is equal than it contains same elements in same order
+        if (Comparable.IsEqual(Current, expected).Valid)
             return this;
-        }
+        var diff = DiffArray(Current, expected);
+        var notExpected = diff.NotExpected;
+        var notFound = diff.NotFound;
+        if (notFound.Count > 0 || notExpected.Count > 0 || (notFound.Count == 0 && notExpected.Count == 0))
+            ThrowTestFailureReport(AssertFailures.ContainsExactly(Current, expected, notFound, notExpected), Current, expected);
+        return this;
+    }
 
-        public IEnumerableAssert HasSize(int expected)
-        {
-            var count = Current?.Count();
-            if (count != expected)
-                ThrowTestFailureReport(AssertFailures.HasSize(count, expected), Current, null);
+    public IEnumerableAssert ContainsExactly(IEnumerable expected)
+    {
+        var expectedArray = expected is string ? new object?[] { expected } : expected.Cast<object?>().ToArray();
+        // we test for contains nothing
+        if (expectedArray.Length == 0)
             return this;
-        }
-
-        public IEnumerableAssert Contains(params object?[] expected)
-        {
-            // we test for contains nothing
-            if (expected.Length == 0)
-                return this;
-            var notFound = ArrayContainsAll(Current, expected);
-            if (notFound.Count > 0)
-                ThrowTestFailureReport(AssertFailures.Contains(Current, expected, notFound), Current, expected);
+        // is equal than it contains same elements in same order
+        if (Comparable.IsEqual(Current, expectedArray).Valid)
             return this;
-        }
 
-        public IEnumerableAssert Contains(IEnumerable expected)
-        {
-            var Expected = expected.Cast<object>().ToArray();
-            // we test for contains nothing
-            if (Expected.Length == 0)
-                return this;
+        var diff = DiffArray(Current, expectedArray);
+        var notExpected = diff.NotExpected;
+        var notFound = diff.NotFound;
+        if (notFound.Count > 0 || notExpected.Count > 0 || (notFound.Count == 0 && notExpected.Count == 0))
+            ThrowTestFailureReport(AssertFailures.ContainsExactly(Current, expectedArray, notFound, notExpected), Current, expected);
+        return this;
+    }
 
-            var notFound = ArrayContainsAll(Current, Expected);
-            if (notFound.Count > 0)
-                ThrowTestFailureReport(AssertFailures.Contains(Current, Expected, notFound), Current, expected);
+    public IEnumerableAssert ContainsExactlyInAnyOrder(params object?[] expected)
+    {
+        // we test for contains nothing
+        if (expected.Length == 0)
             return this;
-        }
+        var diff = DiffArray(Current, expected);
+        var notExpected = diff.NotExpected;
+        var notFound = diff.NotFound;
 
-        public IEnumerableAssert ContainsExactly(params object?[] expected)
-        {
-            // we test for contains nothing
-            if (expected.Length == 0)
-                return this;
-            // is equal than it contains same elements in same order
-            if (Comparable.IsEqual(Current, expected).Valid)
-                return this;
-            var diff = DiffArray(Current, expected);
-            var notExpected = diff.NotExpected;
-            var notFound = diff.NotFound;
-            if (notFound.Count > 0 || notExpected.Count > 0 || (notFound.Count == 0 && notExpected.Count == 0))
-                ThrowTestFailureReport(AssertFailures.ContainsExactly(Current, expected, notFound, notExpected), Current, expected);
+        // no difference and additions found
+        if (notExpected.Count != 0 || notFound.Count != 0)
+            ThrowTestFailureReport(AssertFailures.ContainsExactlyInAnyOrder(Current, expected, notFound, notExpected), Current, expected);
+        return this;
+    }
+
+    public IEnumerableAssert ContainsExactlyInAnyOrder(IEnumerable expected)
+    {
+        var expectedArray = expected.Cast<object?>().ToArray();
+        // we test for contains nothing
+        if (expectedArray.Length == 0)
             return this;
-        }
 
-        public IEnumerableAssert ContainsExactly(IEnumerable expected)
+        var diff = DiffArray(Current, expectedArray);
+        var notExpected = diff.NotExpected;
+        var notFound = diff.NotFound;
+        // no difference and additions found
+        if (notExpected.Count != 0 || notFound.Count != 0)
+            ThrowTestFailureReport(AssertFailures.ContainsExactlyInAnyOrder(Current, expectedArray, notFound, notExpected), Current, expected);
+        return this;
+    }
+
+    public IEnumerableAssert Extract(string funcName, params object[] args) => ExtractV(new ValueExtractor(funcName, args));
+
+    public IEnumerableAssert ExtractV(params IValueExtractor[] extractors)
+    {
+        Current = Current?.Select(v =>
         {
-            var Expected = expected is string ? new object?[] { expected } : expected.Cast<object?>().ToArray();
-            // we test for contains nothing
-            if (Expected.Length == 0)
-                return this;
-            // is equal than it contains same elements in same order
-            if (Comparable.IsEqual(Current, Expected).Valid)
-                return this;
+            var values = extractors.Select(e => e.ExtractValue(v)).ToArray();
+            return values.Length == 1 ? values.First() : Tuple(values);
+        }).ToList();
+        return this;
+    }
 
-            var diff = DiffArray(Current, Expected);
-            var notExpected = diff.NotExpected;
-            var notFound = diff.NotFound;
-            if (notFound.Count > 0 || notExpected.Count > 0 || (notFound.Count == 0 && notExpected.Count == 0))
-                ThrowTestFailureReport(AssertFailures.ContainsExactly(Current, Expected, notFound, notExpected), Current, expected);
-            return this;
-        }
+    public new IEnumerableAssert OverrideFailureMessage(string message)
+    {
+        base.OverrideFailureMessage(message);
+        return this;
+    }
 
-        public IEnumerableAssert ContainsExactlyInAnyOrder(params object?[] expected)
+    private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?>? right)
+    {
+        var notFound = right?.ToList() ?? new List<object?>();
+
+        if (left != null)
         {
-            // we test for contains nothing
-            if (expected.Length == 0)
-                return this;
-            var diff = DiffArray(Current, expected);
-            var notExpected = diff.NotExpected;
-            var notFound = diff.NotFound;
-
-            // no difference and additions found
-            if (notExpected.Count != 0 || notFound.Count != 0)
-                ThrowTestFailureReport(AssertFailures.ContainsExactlyInAnyOrder(Current, expected, notFound, notExpected), Current, expected);
-            return this;
-        }
-
-        public IEnumerableAssert ContainsExactlyInAnyOrder(IEnumerable expected)
-        {
-            var Expected = expected.Cast<object?>().ToArray();
-            // we test for contains nothing
-            if (Expected.Length == 0)
-                return this;
-
-            var diff = DiffArray(Current, Expected);
-            var notExpected = diff.NotExpected;
-            var notFound = diff.NotFound;
-            // no difference and additions found
-            if (notExpected.Count != 0 || notFound.Count != 0)
-                ThrowTestFailureReport(AssertFailures.ContainsExactlyInAnyOrder(Current, Expected, notFound, notExpected), Current, expected);
-            return this;
-        }
-
-        public IEnumerableAssert Extract(string funcName, params object[] args)
-        {
-            return ExtractV(new ValueExtractor(funcName, args));
-        }
-
-        public IEnumerableAssert ExtractV(params IValueExtractor[] extractors)
-        {
-            Current = Current?.Select(v =>
+            var leftList = left.ToList();
+            foreach (var c in leftList)
             {
-                object?[] values = extractors.Select(e => e.ExtractValue(v)).ToArray<object?>();
-                return values.Count() == 1 ? values.First() : Tuple(values);
-            }).ToList();
-            return this;
+                var found = right?.FirstOrDefault(e => Comparable.IsEqual(c, e).Valid);
+                if (found != null)
+                    notFound.Remove(found);
+            }
         }
+        return notFound;
+    }
 
-        public new IEnumerableAssert OverrideFailureMessage(string message)
+    private class ArrayDiff
+    {
+        public List<object?> NotExpected { get; set; } = new List<object?>();
+        public List<object?> NotFound { get; set; } = new List<object?>();
+    }
+
+    private ArrayDiff DiffArray(IEnumerable<object?>? left, IEnumerable<object?>? right)
+    {
+        var ll = left?.ToList() ?? new List<object?>();
+        var rr = right?.ToList() ?? new List<object?>();
+
+        var notExpected = left?.ToList() ?? new List<object?>();
+        var notFound = right?.ToList() ?? new List<object?>();
+
+        foreach (var c in ll)
         {
-            base.OverrideFailureMessage(message);
-            return this;
-        }
-
-        private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?>? right)
-        {
-            var notFound = right?.ToList() ?? new List<object?>();
-
-            if (left != null)
+            foreach (var e in rr)
             {
-                var leftList = left.ToList();
-                foreach (var c in leftList)
+                if (Comparable.IsEqual(c, e).Valid)
                 {
-                    var found = right?.FirstOrDefault(e => Comparable.IsEqual(c, e).Valid);
-                    if (found != null)
-                        notFound.Remove(found);
+                    notExpected.Remove(c);
+                    notFound.Remove(e);
+                    break;
                 }
             }
-            return notFound;
         }
-
-        private class ArrayDiff
-        {
-            public List<object?> NotExpected { get; set; } = new List<object?>();
-            public List<object?> NotFound { get; set; } = new List<object?>();
-        }
-
-        private ArrayDiff DiffArray(IEnumerable<object?>? left, IEnumerable<object?>? right)
-        {
-            var ll = left?.ToList<object?>() ?? new List<object?>();
-            var rr = right?.ToList<object?>() ?? new List<object?>();
-
-            var notExpected = left?.ToList<object?>() ?? new List<object?>();
-            var notFound = right?.ToList<object?>() ?? new List<object?>();
-
-            foreach (var c in ll)
-            {
-                foreach (var e in rr)
-                {
-                    if (Comparable.IsEqual(c, e).Valid)
-                    {
-                        notExpected.Remove(c);
-                        notFound.Remove(e);
-                        break;
-                    }
-                }
-            }
-            return new ArrayDiff() { NotExpected = notExpected, NotFound = notFound };
-        }
+        return new ArrayDiff() { NotExpected = notExpected, NotFound = notFound };
     }
 }

@@ -66,7 +66,7 @@ namespace GdUnit4.Executions
             {
                 var saveCulture = Thread.CurrentThread.CurrentCulture;
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
-                testName = $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formated()})";
+                testName = $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formatted()})";
                 Thread.CurrentThread.CurrentCulture = saveCulture;
             }
             return testName;

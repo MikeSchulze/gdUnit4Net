@@ -1,22 +1,22 @@
 namespace GdUnit4.Api;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+
 using GdUnit4.Executions;
 using GdUnit4.Core;
-using Newtonsoft.Json;
 
+using Newtonsoft.Json;
 
 public partial class TestRunner : Godot.Node
 {
 
     public class Options
     {
-        [Option(Required = false, HelpText = "If failfast=true the test run will abort on first test failure.")]
+        [Option(Required = false, HelpText = "If FailFast=true the test run will abort on first test failure.")]
         public bool FailFast { get; set; } = false;
 
         [Option(Required = false, HelpText = "Runs the Runner in test adapter mode.")]
@@ -105,7 +105,7 @@ public partial class TestRunner : Godot.Node
 
         while (stack.Count > 0)
         {
-            DirectoryInfo currentDir = stack.Pop();
+            var currentDir = stack.Pop();
             Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
 
             foreach (var filePath in Directory.EnumerateFiles(currentDir.FullName, searchPattern))

@@ -36,7 +36,7 @@ namespace GdUnit4
         public override string ToString()
         {
             if (ParameterizedTests.Count != 0)
-                return $"{Name}:{LineNumber} {ParameterizedTests.Formated()}";
+                return $"{Name}:{LineNumber} {ParameterizedTests.Formatted()}";
             return $"{Name}:{LineNumber}";
         }
     }

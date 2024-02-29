@@ -1,73 +1,69 @@
+namespace GdUnit4.Asserts;
+
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Exceptions;
+using Core.Signals;
 
-namespace GdUnit4.Asserts
+internal sealed partial class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
 {
-    using Exceptions;
-    using Core.Signals;
+    public SignalAssert(Godot.GodotObject current) : base(current)
+        => GodotSignalCollector.Instance.RegisterEmitter(current);
 
-    internal sealed partial class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
+    public async Task<ISignalAssert> IsEmitted(string signal, params Godot.Variant[] args)
     {
-        public SignalAssert(Godot.GodotObject current) : base(current)
-        {
-            GodotSignalCollector.Instance.RegisterEmitter(current);
-        }
+        IsNotNull();
+        IsSignalExists(signal);
 
-        public async Task<ISignalAssert> IsEmitted(string signal, params Godot.Variant[] args)
-        {
-            IsNotNull();
-            IsSignalExists(signal);
+        var lineNumber = new StackFrame(3, true).GetFileLineNumber();
+        var isEmitted = await IsEmittedTask(signal, args);
+        if (!isEmitted)
+            ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), lineNumber);
+        return this;
+    }
 
-            var lineNumber = new StackFrame(3, true).GetFileLineNumber();
-            var isEmitted = await IsEmittedTask(signal, args);
-            if (!isEmitted)
-                ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), lineNumber);
-            return this;
-        }
+    public async Task<ISignalAssert> IsNotEmitted(string signal, params Godot.Variant[] args)
+    {
+        IsNotNull();
+        IsSignalExists(signal);
 
-        public async Task<ISignalAssert> IsNotEmitted(string signal, params Godot.Variant[] args)
-        {
-            IsNotNull();
-            IsSignalExists(signal);
+        var lineNumber = new StackFrame(3, true).GetFileLineNumber();
+        var isEmitted = await IsEmittedTask(signal, args);
+        if (isEmitted)
+            ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), lineNumber);
+        return this;
+    }
 
-            var lineNumber = new StackFrame(3, true).GetFileLineNumber();
-            var isEmitted = await IsEmittedTask(signal, args);
-            if (isEmitted)
-                ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), lineNumber);
-            return this;
-        }
+    public ISignalAssert IsSignalExists(string signal)
+    {
+        IsNotNull();
+        if (!Current!.HasSignal(signal))
+            ThrowTestFailureReport(AssertFailures.IsSignalExists(Current, signal), Current, signal);
+        return this;
+    }
 
-        public ISignalAssert IsSignalExists(string signal)
-        {
-            IsNotNull();
-            if (!Current!.HasSignal(signal))
-                ThrowTestFailureReport(AssertFailures.IsSignalExists(Current, signal), Current, signal);
-            return this;
-        }
+    public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Godot.Variant[] args)
+    {
+        IsNotNull();
+        IsSignalExists(signal);
+        var count = GodotSignalCollector.Instance.Count(Current!, signal, args);
+        if (count != expectedCount)
+            ThrowTestFailureReport($"Expecting emitted count is {expectedCount} but was {count}", Current, signal);
+        return this;
+    }
 
-        public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Godot.Variant[] args)
-        {
-            IsNotNull();
-            IsSignalExists(signal);
-            var count = GodotSignalCollector.Instance.Count(Current!, signal, args);
-            if (count != expectedCount)
-                ThrowTestFailureReport($"Expecting emitted count is {expectedCount} but was {count}", Current, signal);
-            return this;
-        }
+    private async Task<bool> IsEmittedTask(string signal, params Godot.Variant[] args)
+    {
+        using var signalCancellationToken = new CancellationTokenSource();
+        Thread.SetData(Thread.GetNamedDataSlot("SignalCancellationToken"), signalCancellationToken);
+        return await Task.Run(() => GodotSignalCollector.Instance.IsEmitted(signalCancellationToken, Current!, signal, args), signalCancellationToken.Token);
+    }
 
-        private async Task<bool> IsEmittedTask(string signal, params Godot.Variant[] args)
-        {
-            using var SignalCancellationToken = new CancellationTokenSource();
-            Thread.SetData(Thread.GetNamedDataSlot("SignalCancellationToken"), SignalCancellationToken);
-            return await Task.Run<bool>(() => GodotSignalCollector.Instance.IsEmitted(SignalCancellationToken, Current!, signal, args), SignalCancellationToken.Token);
-        }
-
-        private void ThrowTestFailureReport(string message, int lineNumber)
-        {
-            CurrentFailureMessage = CustomFailureMessage ?? message;
-            throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);
-        }
+    private void ThrowTestFailureReport(string message, int lineNumber)
+    {
+        CurrentFailureMessage = CustomFailureMessage ?? message;
+        throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);
     }
 }

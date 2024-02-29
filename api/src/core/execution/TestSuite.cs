@@ -60,7 +60,7 @@ namespace GdUnit4.Executions
                 var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                     .Cast<TestCaseAttribute>()
                     .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
-                    .Select(attr => $"{attr.TestName ?? mi.Name}({attr.Arguments.Formated()})")
+                    .Select(attr => $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})")
                     .DefaultIfEmpty($"{mi.Name}");
                 return testCases.Contains(testName);
             }) ?? true;

@@ -1,12 +1,11 @@
-
+namespace GdUnit4.Api;
 using System;
+
 using GdUnit4.Core;
 
-namespace GdUnit4.Api;
-
-class TestReporter : ITestEventListener
+internal class TestReporter : ITestEventListener
 {
-    public bool IsFailed { get; set; } = false;
+    public bool IsFailed { get; set; }
 
     private static readonly GdUnitConsole Console = new();
 
@@ -23,9 +22,9 @@ class TestReporter : ITestEventListener
                 Console.Println($"Run Test Suite {testEvent.ResourcePath}", ConsoleColor.Blue);
                 break;
             case TestEvent.TYPE.TESTCASE_BEFORE:
-                Console.Print($"    {testEvent.SuiteName}", ConsoleColor.Cyan);
-                Console.Print($":{testEvent.TestName.PadRight(80 - testEvent.SuiteName.Length)} ", ConsoleColor.DarkCyan, GdUnitConsole.BOLD);
-                Console.SaveCursor("TestCaseState");
+                Console.Print($"    {testEvent.SuiteName}", ConsoleColor.Cyan)
+                    .Print($":{testEvent.TestName.PadRight(80 - testEvent.SuiteName.Length)} ", ConsoleColor.DarkCyan, GdUnitConsole.BOLD)
+                    .SaveCursor("TestCaseState");
                 Console.NewLine();
                 break;
             case TestEvent.TYPE.TESTCASE_AFTER:
@@ -38,8 +37,12 @@ class TestReporter : ITestEventListener
                 else if (testEvent.IsWarning)
                     Console.Print(" WARNING", ConsoleColor.Yellow, GdUnitConsole.BOLD);
                 else
-                    Console.Print(" FAILED", ConsoleColor.Red, GdUnitConsole.BOLD);
-                Console.Println($" {testEvent.ElapsedInMs.Humanize()}").NewLine();
+                    Console.Print(" FAILED", ConsoleColor.Red, GdUnitConsole.BOLD)
+                        .Println($" {testEvent.ElapsedInMs.Humanize()}").NewLine();
+                break;
+            case TestEvent.TYPE.INIT:
+            case TestEvent.TYPE.STOP:
+            default:
                 break;
         }
 
@@ -71,7 +74,7 @@ class TestReporter : ITestEventListener
 
     private static void WriteFailureReport(TestEvent testEvent)
     {
-        foreach (TestReport report in testEvent.Reports)
+        foreach (var report in testEvent.Reports)
         {
             Console.Println(report.ToString().RichTextNormalize().Indentation(2), ConsoleColor.DarkCyan);
         }

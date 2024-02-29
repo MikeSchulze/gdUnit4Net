@@ -19,6 +19,6 @@ namespace GdUnit4.Asserts
 
         public override int GetHashCode() => HashCode.Combine(Values);
 
-        public override string ToString() => $"tuple({Values.Formated()})";
+        public override string ToString() => $"tuple({Values.Formatted()})";
     }
 }

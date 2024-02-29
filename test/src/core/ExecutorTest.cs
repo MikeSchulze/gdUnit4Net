@@ -18,7 +18,7 @@ namespace GdUnit4.Tests.Core
         private Executor _executor = null!;
         private List<TestEvent> _events = new List<TestEvent>();
 
-        // enable to verbose debug event 
+        // enable to verbose debug event
         private bool _verbose = false;
 
         public bool IsFailed { get; set; }
@@ -118,7 +118,7 @@ namespace GdUnit4.Tests.Core
             return expectedEvents;
         }
 
-        private static string ParameterizedTestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}.{testName}({testCaseParam.Formated()})";
+        private static string ParameterizedTestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}.{testName}({testCaseParam.Formatted()})";
 
         [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
         public async Task Execute_Success()
@@ -465,7 +465,7 @@ namespace GdUnit4.Tests.Core
                     }
                 ),
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
-                // ends with failure and warnings 
+                // ends with failure and warnings
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() {
                     new TestReport(WARN, 0, """
                         WARNING:
@@ -586,7 +586,7 @@ namespace GdUnit4.Tests.Core
                 Tuple(TESTCASE_BEFORE, "TestCase1", true, false, false, false),
                 Tuple(TESTCASE_AFTER, "TestCase1", false, false, false, true),
 
-                //  test case is marked as failure 
+                //  test case is marked as failure
                 Tuple(TESTCASE_BEFORE, "TestCase2", true, false, false, false),
                 Tuple(TESTCASE_AFTER, "TestCase2", false, false, true, false),
 

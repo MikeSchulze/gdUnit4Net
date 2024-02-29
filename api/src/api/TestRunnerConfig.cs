@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-
 namespace GdUnit4.Api;
+using System.Collections.Generic;
 
 /// <summary>
 /// Represents configuration specific to a test case.
@@ -15,7 +14,7 @@ public class TestCaseConfig
     /// <summary>
     /// Gets or sets a value indicating whether the test case is skipped.
     /// </summary>
-    public bool Skipped { get; set; } = false;
+    public bool Skipped { get; set; }
 }
 
 /// <summary>

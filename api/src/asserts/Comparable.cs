@@ -1,42 +1,41 @@
-namespace GdUnit4
+namespace GdUnit4;
+
+internal sealed class Comparable
 {
-    internal sealed class Comparable
+
+    public class Result
     {
+        public static Result Equal => new(true, null, null);
 
-        public class Result
+        public Result(bool valid, object? left, object? right, Result? parent = null)
         {
-            public static Result Equal => new Result(true, null, null);
-
-            public Result(bool valid, object? left, object? right, Result? parent = null)
-            {
-                Valid = valid;
-                Left = left;
-                Right = right;
-                Parent = parent;
-            }
-
-            public Result WithProperty(string propertyName)
-            {
-                PropertyName = propertyName;
-                return this;
-            }
-
-            private object? Left { get; set; }
-
-            private object? Right { get; set; }
-
-            private string? PropertyName { get; set; }
-
-            private Result? Parent
-            { get; set; }
-
-            public bool Valid
-            { get; private set; }
+            Valid = valid;
+            Left = left;
+            Right = right;
+            Parent = parent;
         }
 
-        public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.MODE compareMode = GodotObjectExtensions.MODE.CASE_SENSITIVE, Result? r = null)
+        public Result WithProperty(string propertyName)
         {
-            return new Result(left.VariantEquals(right, compareMode), left, right, r);
+            PropertyName = propertyName;
+            return this;
         }
+
+#pragma warning disable IDE0052 // Remove unread private members
+        private object? Left { get; set; }
+
+        private object? Right { get; set; }
+
+        private string? PropertyName { get; set; }
+
+        private Result? Parent
+        { get; set; }
+#pragma warning restore IDE0052 // Remove unread private members
+
+        public bool Valid
+        { get; private set; }
     }
+
+    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.MODE compareMode = GodotObjectExtensions.MODE.CASE_SENSITIVE, Result? r = null)
+        => new(left.VariantEquals(right, compareMode), left, right, r);
 }

@@ -1,48 +1,44 @@
-using System;
-
-namespace GdUnit4.Asserts
+namespace GdUnit4.Asserts;
+internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
 {
-    internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
+    public ObjectAssert(object? current) : base(current)
     {
-        public ObjectAssert(object? current) : base(current)
-        {
-            Type? type = current?.GetType();
-            if (type != null && type.IsPrimitive)
-                ThrowTestFailureReport($"ObjectAssert inital error: current is primitive <{type}>", Current, null, 1);
-        }
+        var type = current?.GetType();
+        if (type != null && type.IsPrimitive)
+            ThrowTestFailureReport($"ObjectAssert initial error: current is primitive <{type}>", Current, null, 1);
+    }
 
-        public IObjectAssert IsNotInstanceOf<ExpectedType>()
-        {
-            if (Current is ExpectedType)
-                ThrowTestFailureReport(AssertFailures.NotInstanceOf(typeof(ExpectedType)), Current, typeof(ExpectedType));
-            return this;
-        }
+    public IObjectAssert IsNotInstanceOf<TExpectedType>()
+    {
+        if (Current is TExpectedType)
+            ThrowTestFailureReport(AssertFailures.NotInstanceOf(typeof(TExpectedType)), Current, typeof(TExpectedType));
+        return this;
+    }
 
-        public IObjectAssert IsNotSame(object expected)
-        {
-            if (Current == expected)
-                ThrowTestFailureReport(AssertFailures.IsNotSame(expected), Current, expected);
-            return this;
-        }
+    public IObjectAssert IsNotSame(object expected)
+    {
+        if (Current == expected)
+            ThrowTestFailureReport(AssertFailures.IsNotSame(expected), Current, expected);
+        return this;
+    }
 
-        public IObjectAssert IsSame(object expected)
-        {
-            if (Current != expected)
-                ThrowTestFailureReport(AssertFailures.IsSame(Current, expected), Current, expected);
-            return this;
-        }
+    public IObjectAssert IsSame(object expected)
+    {
+        if (Current != expected)
+            ThrowTestFailureReport(AssertFailures.IsSame(Current, expected), Current, expected);
+        return this;
+    }
 
-        public IObjectAssert IsInstanceOf<ExpectedType>()
-        {
-            if (!(Current is ExpectedType))
-                ThrowTestFailureReport(AssertFailures.IsInstanceOf(Current?.GetType(), typeof(ExpectedType)), Current, typeof(ExpectedType));
-            return this;
-        }
+    public IObjectAssert IsInstanceOf<TExpectedType>()
+    {
+        if (Current is not TExpectedType)
+            ThrowTestFailureReport(AssertFailures.IsInstanceOf(Current?.GetType(), typeof(TExpectedType)), Current, typeof(TExpectedType));
+        return this;
+    }
 
-        public new IObjectAssert OverrideFailureMessage(string message)
-        {
-            base.OverrideFailureMessage(message);
-            return this;
-        }
+    public new IObjectAssert OverrideFailureMessage(string message)
+    {
+        base.OverrideFailureMessage(message);
+        return this;
     }
 }
