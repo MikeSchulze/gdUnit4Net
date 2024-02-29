@@ -21,6 +21,7 @@
   "dotnet.unitTests.runSettingsPath": "./test/.runsettings",
   "cSpell.words": [
     "autofree",
+    "Callv",
     "Cmdline",
     "Extr",
     "GDUNIT",
