@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -71,7 +72,10 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                             .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
                             .Select(attr =>
                             {
+                                var saveCulture = Thread.CurrentThread.CurrentCulture;
+                                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
                                 var paramaterizedTestName = $"{attr.TestName ?? mi.Name}({attr.Arguments.Formated()})";
+                                Thread.CurrentThread.CurrentCulture = saveCulture;
                                 return new
                                 {
                                     TestName = paramaterizedTestName,

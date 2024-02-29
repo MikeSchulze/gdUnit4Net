@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace GdUnit4
 {
-    using System.Diagnostics.CodeAnalysis;
     using Asserts;
 
     /// <summary>
@@ -57,18 +56,28 @@ namespace GdUnit4
         public static IEnumerableAssert AssertArray(IEnumerable? current) => new EnumerableAssert(current);
 
         /// <summary>
+        /// An assertion method for all Godot vector types.
+        /// </summary>
+        /// <typeparam name="T">The type of Godot vector.</typeparam>
+        /// <param name="vector">The vector value to verify.</param>
+        /// <returns>An instance of IVectorAssert for further assertions.</returns>
+        public static IVectorAssert<T> AssertVector<T>(T vector) where T : notnull, IEquatable<T> => new VectorAssert<T>(vector);
+
+        /// <summary>
         /// An Assertion to verify Godot.Vector2 values
         /// </summary>
         /// <param name="current">The current vector2 value to verify</param>
         /// <returns></returns>
-        public static IVector2Assert AssertVec2(Godot.Vector2 current) => new Vector2Assert(current);
+        [Obsolete("AssertVec2 is deprecated, please use AssertVector instead.")]
+        public static IVectorAssert<Godot.Vector2> AssertVec2(Godot.Vector2 current) => AssertVector<Godot.Vector2>(current);
 
         /// <summary>
         /// An Assertion to verify Godot.Vector3 values
         /// </summary>
         /// <param name="current">The current vector3 value to verify</param>
         /// <returns></returns>
-        public static IVector3Assert AssertVec3(Godot.Vector3 current) => new Vector3Assert(current);
+        [Obsolete("AssertVec3 is deprecated, please use AssertVector instead.")]
+        public static IVectorAssert<Godot.Vector3> AssertVec3(Godot.Vector3 current) => AssertVector<Godot.Vector3>(current);
 
         /// <summary>
         /// An Assertion used by test generation to notify the test is not yet implemented
@@ -103,6 +112,7 @@ namespace GdUnit4
         public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
         public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
+
         public static IDictionaryAssert<K, V> AssertThat<K, V>(IDictionary<K, V>? current) where K : notnull
             => new DictionaryAssert<K, V>(current?.ToDictionary(e => e.Key, e => e.Value));
 
@@ -112,8 +122,18 @@ namespace GdUnit4
         public static IDictionaryAssert<TKey, TValue> AssertThat<[Godot.MustBeVariant] TKey, [Godot.MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current) where TKey : notnull
            => new DictionaryAssert<TKey, TValue>(current);
 
-        public static IVector2Assert AssertThat(Godot.Vector2 current) => new Vector2Assert(current);
-        public static IVector3Assert AssertThat(Godot.Vector3 current) => new Vector3Assert(current);
+
+        /// <summary>
+        /// The dynamic assertions for all Godot vector types.
+        /// </summary>
+        /// <param name="current">The vector value to verify.</param>
+        /// <returns>An instance of IVectorAssert for further assertions.</returns>
+        public static IVectorAssert<Godot.Vector2> AssertThat(Godot.Vector2 current) => new VectorAssert<Godot.Vector2>(current);
+        public static IVectorAssert<Godot.Vector2I> AssertThat(Godot.Vector2I current) => new VectorAssert<Godot.Vector2I>(current);
+        public static IVectorAssert<Godot.Vector3> AssertThat(Godot.Vector3 current) => new VectorAssert<Godot.Vector3>(current);
+        public static IVectorAssert<Godot.Vector3I> AssertThat(Godot.Vector3I current) => new VectorAssert<Godot.Vector3I>(current);
+        public static IVectorAssert<Godot.Vector4> AssertThat(Godot.Vector4 current) => new VectorAssert<Godot.Vector4>(current);
+        public static IVectorAssert<Godot.Vector4I> AssertThat(Godot.Vector4I current) => new VectorAssert<Godot.Vector4I>(current);
 
 
         /// <summary>
@@ -233,5 +253,14 @@ namespace GdUnit4
         ///  Builds an extractor by given method name and optional arguments
         /// </summary>
         public static IValueExtractor Extr(string methodName, params object[] args) => new ValueExtractor(methodName, args);
+
+
+        /// <summary>
+        /// Provides the expected line number via compile state.
+        /// Is primary designed to use on internal test coverage to validate the reported error line is correct.
+        /// </summary>
+        /// <param name="lineNumber"></param>
+        /// <returns></returns>
+        internal static int ExpectedLineNumber([System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0) => lineNumber - 1;
     }
 }

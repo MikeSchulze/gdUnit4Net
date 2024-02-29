@@ -9,6 +9,7 @@ using System.Threading;
 using System.Diagnostics;
 using GdUnit4.Executions;
 using System.Globalization;
+using System.Security.Authentication;
 
 namespace GdUnit4
 {
@@ -18,6 +19,7 @@ namespace GdUnit4
     /// </summary>
     public static class GdUnitExtensions
     {
+        private static CultureInfo CI = CultureInfo.GetCultureInfo("en-US");
         public static string ToSnakeCase(this string? input)
         {
             if (string.IsNullOrEmpty(input))
@@ -26,7 +28,7 @@ namespace GdUnit4
             return Regex.Replace(input, @"(\p{Ll})(\p{Lu})", "$1_$2").ToLower();
         }
 
-        private static string Format(this object? value)
+        internal static string Format(this object? value)
         {
             switch (value)
             {
@@ -34,27 +36,13 @@ namespace GdUnit4
                     return asString.Formated();
                 case IEnumerable en:
                     return en.Formated();
-                case Godot.Variant asVariant:
-                    return asVariant.Formated();
-                case float v:
-                    return v.ToString("G9", CultureInfo.InvariantCulture);
-                case double d:
-                    return d.ToString("G9", CultureInfo.InvariantCulture);
-                case decimal dec:
-                    return dec.ToString("G9", CultureInfo.InvariantCulture);
-                case int i:
-                    return i.ToString(CultureInfo.InvariantCulture);
-                case long l:
-                    return l.ToString(CultureInfo.InvariantCulture);
                 default:
                     return value?.ToString() ?? "<Null>";
             }
         }
 
-
         public static string Formated(this object? value) => Format(value);
         public static string Formated(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
-        public static string Formated(this Godot.Variant value) => value.ToString();
         public static string Formated(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formated())).Indentation(indentation);
         public static string Formated(this Godot.Collections.Array args, int indentation = 0) => args.Cast<IEnumerable>().Formated(indentation);
         public static string Formated(this object?[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formated)).Indentation(indentation);
