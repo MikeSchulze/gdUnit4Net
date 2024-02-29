@@ -7,10 +7,10 @@ internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue> 
     public NumberAssert(TValue current) : base(current)
     { }
 
-    public INumberAssert<TValue> IsBetween(TValue from, TValue to)
+    public INumberAssert<TValue> IsBetween(TValue min, TValue max)
     {
-        if (Current?.CompareTo(from) < 0 || Current?.CompareTo(to) > 0)
-            ThrowTestFailureReport(AssertFailures.IsBetween(Current, from, to), Current, new TValue[] { from, to });
+        if (Current?.CompareTo(min) < 0 || Current?.CompareTo(max) > 0)
+            ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, new TValue[] { min, max });
         return this;
     }
 

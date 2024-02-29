@@ -20,10 +20,15 @@
   "omnisharp.useModernNet": true,
   "dotnet.unitTests.runSettingsPath": "./test/.runsettings",
   "cSpell.words": [
+    "autofree",
     "Cmdline",
+    "Extr",
+    "GDUNIT",
+    "Millis",
     "Newtonsoft",
     "TESTCASE",
     "Testrun",
-    "TESTSUITE"
+    "TESTSUITE",
+    "Unconfigured"
   ]
 }
