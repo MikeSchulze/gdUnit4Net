@@ -9,14 +9,14 @@ namespace GdUnit4.Tests.Core
 
     using static Assertions;
     using static TestEvent.TYPE;
-    using static TestReport.TYPE;
+    using static TestReport.ReportType;
     using GdUnit4.Core;
 
     [TestSuite]
     public class ExecutorTest : ITestEventListener
     {
         private Executor _executor = null!;
-        private List<TestEvent> _events = new List<TestEvent>();
+        private List<TestEvent> _events = new();
 
         // enable to verbose debug event
         private bool _verbose = false;
@@ -38,8 +38,7 @@ namespace GdUnit4.Tests.Core
             testSuite.FilterDisabled = true;
             return testSuite;
         }
-
-        public void PublishEvent(TestEvent e)
+        void ITestEventListener.PublishEvent(TestEvent e)
         {
             if (_verbose)
             {
@@ -610,7 +609,7 @@ namespace GdUnit4.Tests.Core
                 // reports a test interruption due to a timeout
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>(){
-                    new TestReport(INTERUPTED, 33, "The execution has timed out after 1s.") }
+                    new TestReport(INTERRUPTED, 33, "The execution has timed out after 1s.") }
                 ),
 
                 // reports a test failure

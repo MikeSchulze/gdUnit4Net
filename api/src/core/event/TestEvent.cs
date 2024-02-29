@@ -1,13 +1,13 @@
+namespace GdUnit4;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-
-namespace GdUnit4;
-
-public class TestEvent : IEquatable<TestEvent>
+internal class TestEvent : IEquatable<TestEvent>
 {
+#pragma warning disable CA1707
     public enum TYPE
     {
         INIT,
@@ -31,11 +31,10 @@ public class TestEvent : IEquatable<TestEvent>
         FAILED_COUNT,
         SKIPPED_COUNT
     }
-
-#nullable enable
+#pragma warning restore CA1707
 
     // constructor needs to serialize/deserialize by JsonConvert
-    TestEvent() { }
+    private TestEvent() { }
 
     private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null, IEnumerable<TestReport>? reports = null)
     {
@@ -62,24 +61,21 @@ public class TestEvent : IEquatable<TestEvent>
 
 #nullable disable
 
-    public static IDictionary<STATISTIC_KEY, object> BuildStatistics(int orphan_count,
-        bool isError, int error_count,
-        bool isFailure, int failure_count,
-        bool is_warning,
-        bool is_skipped, int skippedCount,
-        long elapsed_since_ms)
-    {
-        return new Dictionary<STATISTIC_KEY, object>() {
-            { STATISTIC_KEY.ORPHAN_NODES, orphan_count},
-            { STATISTIC_KEY.ELAPSED_TIME, elapsed_since_ms},
-            { STATISTIC_KEY.WARNINGS, is_warning},
+    public static IDictionary<STATISTIC_KEY, object> BuildStatistics(int orphanCount,
+        bool isError, int errorCount,
+        bool isFailure, int failureCount,
+        bool isWarning,
+        bool isSkipped, int skippedCount,
+        long elapsedSinceMs) => new Dictionary<STATISTIC_KEY, object>() {
+            { STATISTIC_KEY.ORPHAN_NODES, orphanCount},
+            { STATISTIC_KEY.ELAPSED_TIME, elapsedSinceMs},
+            { STATISTIC_KEY.WARNINGS, isWarning},
             { STATISTIC_KEY.ERRORS, isError},
-            { STATISTIC_KEY.ERROR_COUNT, error_count},
+            { STATISTIC_KEY.ERROR_COUNT, errorCount},
             { STATISTIC_KEY.FAILED, isFailure},
-            { STATISTIC_KEY.FAILED_COUNT, failure_count},
-            { STATISTIC_KEY.SKIPPED, is_skipped},
+            { STATISTIC_KEY.FAILED_COUNT, failureCount},
+            { STATISTIC_KEY.SKIPPED, isSkipped},
             { STATISTIC_KEY.SKIPPED_COUNT, skippedCount}};
-    }
 
     public TYPE Type { get; set; }
     public string SuiteName { get; set; }
@@ -101,15 +97,14 @@ public class TestEvent : IEquatable<TestEvent>
     public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
     public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
 
+#pragma warning disable CA1854
     private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T default_value) =>
         Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : default_value;
-    public override string ToString()
-    {
-        return $"Event: {Type} {SuiteName}:{TestName}, {""} ";
-    }
+#pragma warning restore CA1854
+    public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
 
 #nullable enable
-    public override bool Equals(object? obj) => obj is TestEvent other && this.Equals(other);
+    public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
 #nullable disable
 
     public static bool operator ==(TestEvent lhs, TestEvent rhs) => lhs.Equals(rhs);

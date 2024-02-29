@@ -1,10 +1,9 @@
 
+namespace GdUnit4;
+
 using System.Collections.Generic;
 
-namespace GdUnit4
+public interface IValueProvider
 {
-    public interface IValueProvider
-    {
-        public IEnumerable<object> GetValues();
-    }
+    public IEnumerable<object> GetValues();
 }

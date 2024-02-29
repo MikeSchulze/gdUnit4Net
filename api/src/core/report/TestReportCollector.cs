@@ -1,27 +1,26 @@
+namespace GdUnit4;
+
 using System.Linq;
 using System.Collections.Generic;
 
-namespace GdUnit4
+public sealed partial class TestReportCollector : Godot.RefCounted
 {
-    public sealed partial class TestReportCollector : Godot.RefCounted
-    {
-        private List<TestReport> _reports = new List<TestReport>();
-        public TestReportCollector()
-        { }
+    private readonly List<TestReport> reports = new();
+    public TestReportCollector()
+    { }
 
-        public void Consume(TestReport report) => _reports.Add(report);
+    public void Consume(TestReport report) => reports.Add(report);
 
-        public void PushFront(TestReport report) => _reports.Insert(0, report);
+    public void PushFront(TestReport report) => reports.Insert(0, report);
 
-        public void Clear() => _reports.Clear();
+    public void Clear() => reports.Clear();
 
 
-        public IEnumerable<TestReport> Reports => _reports;
+    public IEnumerable<TestReport> Reports => reports;
 
-        public IEnumerable<TestReport> Failures => _reports.Where(r => r.IsFailure);
+    public IEnumerable<TestReport> Failures => reports.Where(r => r.IsFailure);
 
-        public IEnumerable<TestReport> Errors => _reports.Where(r => r.IsError);
+    public IEnumerable<TestReport> Errors => reports.Where(r => r.IsError);
 
-        public IEnumerable<TestReport> Warnings => _reports.Where(r => r.IsWarning);
-    }
+    public IEnumerable<TestReport> Warnings => reports.Where(r => r.IsWarning);
 }

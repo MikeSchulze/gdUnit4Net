@@ -36,6 +36,6 @@ internal sealed class Comparable
         { get; private set; }
     }
 
-    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.MODE compareMode = GodotObjectExtensions.MODE.CASE_SENSITIVE, Result? r = null)
+    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.MODE compareMode = GodotObjectExtensions.MODE.CaseSensitive, Result? r = null)
         => new(left.VariantEquals(right, compareMode), left, right, r);
 }

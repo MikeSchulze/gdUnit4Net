@@ -64,6 +64,6 @@ internal sealed partial class SignalAssert : AssertBase<Godot.GodotObject>, ISig
     private void ThrowTestFailureReport(string message, int lineNumber)
     {
         CurrentFailureMessage = CustomFailureMessage ?? message;
-        throw new TestFailedException(CurrentFailureMessage, 0, lineNumber);
+        throw new TestFailedException(CurrentFailureMessage, lineNumber);
     }
 }

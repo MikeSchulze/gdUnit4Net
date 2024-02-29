@@ -14,7 +14,7 @@ internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAss
 
     public IEnumerableAssert IsEqualIgnoringCase(IEnumerable expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CaseInsensitive);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -22,7 +22,7 @@ internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAss
 
     public IEnumerableAssert IsNotEqualIgnoringCase(IEnumerable expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CASE_INSENSITIVE);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.MODE.CaseInsensitive);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
         return this;

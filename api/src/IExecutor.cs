@@ -9,7 +9,7 @@ public interface IExecutor : IDisposable
 
     // this method is called form gdScript and can't handle 'Task'
     // we used explicit 'async void' to avoid  'Attempted to convert an unmarshalable managed type to Variant Task'
-    public void Execute(CsNode node);
+    public void Execute(CsNode testSuite);
 
     public IExecutor AddGdTestEventListener(Godot.GodotObject listener);
 

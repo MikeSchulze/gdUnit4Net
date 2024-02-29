@@ -53,6 +53,6 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
 #pragma warning restore
         var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
         CurrentFailureMessage = failureMessage;
-        throw new TestFailedException(failureMessage, stackFrameOffset, lineNumber);
+        throw new TestFailedException(failureMessage, lineNumber);
     }
 }

@@ -1,9 +1,8 @@
+namespace GdUnit4.Executions;
+
 using System.Threading.Tasks;
 
-namespace GdUnit4.Executions
+internal interface IExecutionStage
 {
-    internal interface IExecutionStage
-    {
-        public Task Execute(ExecutionContext context);
-    }
+    public Task Execute(ExecutionContext context);
 }

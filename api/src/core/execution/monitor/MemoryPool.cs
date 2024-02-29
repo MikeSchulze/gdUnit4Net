@@ -1,45 +1,44 @@
+namespace GdUnit4.Executions.Monitors;
+
 using System.Threading;
 using System.Collections.Generic;
 
-namespace GdUnit4.Executions.Monitors
+public class MemoryPool
 {
-    public class MemoryPool
+    private readonly List<Godot.GodotObject> registeredObjects = new();
+    private static readonly ThreadLocal<MemoryPool?> CurrentPool = new();
+
+    public string Name { get; private set; } = "Unknown";
+
+    public void SetActive(string name)
     {
-        private List<Godot.GodotObject> _registeredObjects = new List<Godot.GodotObject>();
-        private static readonly ThreadLocal<MemoryPool?> _currentPool = new ThreadLocal<MemoryPool?>();
+        Name = name;
+        CurrentPool.Value = this;
+    }
 
-        public string Name { get; private set; } = "Unknown";
+    public static T? RegisterForAutoFree<T>(T? obj) where T : Godot.GodotObject
+    {
+        if (obj != null)
+            CurrentPool.Value?.registeredObjects.Add(obj);
+        return obj;
+    }
 
-        public void SetActive(string name)
+    public void ReleaseRegisteredObjects()
+    {
+        var currentPool = CurrentPool.Value;
+        currentPool?.registeredObjects.ForEach(FreeInstance);
+        currentPool?.registeredObjects.Clear();
+    }
+
+    private void FreeInstance(Godot.GodotObject obj)
+    {
+        // needs to manually exclude JavaClass see https://github.com/godotengine/godot/issues/44932
+        if (Godot.GodotObject.IsInstanceValid(obj) && obj is not Godot.JavaClass)
         {
-            Name = name;
-            _currentPool.Value = this;
-        }
-
-        public static T? RegisterForAutoFree<T>(T? obj) where T : Godot.GodotObject
-        {
-            if (obj != null)
-                _currentPool.Value?._registeredObjects.Add(obj);
-            return obj;
-        }
-
-        public void ReleaseRegisteredObjects()
-        {
-            var currentPool = _currentPool.Value;
-            currentPool?._registeredObjects.ForEach(FreeInstance);
-            currentPool?._registeredObjects.Clear();
-        }
-
-        private void FreeInstance(Godot.GodotObject obj)
-        {
-            // needs to manually exculde JavaClass see https://github.com/godotengine/godot/issues/44932
-            if (Godot.GodotObject.IsInstanceValid(obj) && !(obj is Godot.JavaClass))
-            {
-                if (obj is Godot.RefCounted)
-                    obj.Notification((int)Godot.GodotObject.NotificationPredelete);
-                else
-                    obj.Free();
-            }
+            if (obj is Godot.RefCounted)
+                obj.Notification((int)Godot.GodotObject.NotificationPredelete);
+            else
+                obj.Free();
         }
     }
 }
