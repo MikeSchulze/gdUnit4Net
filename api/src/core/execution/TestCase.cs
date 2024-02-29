@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using System;
+using System.Threading;
+using System.Globalization;
 
 namespace GdUnit4.Executions
 {
@@ -61,7 +63,12 @@ namespace GdUnit4.Executions
         public static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
         {
             if (attribute.Arguments.Any())
-                return $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formated()})";
+            {
+                var saveCulture = Thread.CurrentThread.CurrentCulture;
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
+                testName = $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formated()})";
+                Thread.CurrentThread.CurrentCulture = saveCulture;
+            }
             return testName;
         }
 
