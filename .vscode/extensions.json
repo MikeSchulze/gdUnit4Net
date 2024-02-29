@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "EditorConfig.EditorConfig",
+    "selcukermaya.se-csproj-extensions",
+    "josefpihrt-vscode.roslynator",
+    "streetsidesoftware.code-spell-checker",
+    "DavidAnson.vscode-markdownlint"
+  ]
+}
