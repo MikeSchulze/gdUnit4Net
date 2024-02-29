@@ -82,7 +82,8 @@ The test run looks like.
 ### You Are Welcome To:
   * [Give Feedback](https://github.com/MikeSchulze/gdUnit4Mono/discussions)
   * [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
-  * [Report Bugs](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2C+task&template=bug_report.md&title=)
+  * [Report a Bug related to GdUnit4 API](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
+  * [Report a Bug related to GdUnit4 Test Adapter](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
 
 
 ---

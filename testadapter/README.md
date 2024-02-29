@@ -10,10 +10,18 @@ This is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUn
 * Install the C# Dev Kit. Detailed instructions can be found [here](https://code.visualstudio.com/docs/csharp/testing).
 * Setup your test settings:
   - It is important to use the correct C# Dev Kit version, which is currently a PreRelease. The property is newly introduced by this [issue](https://github.com/microsoft/vscode-dotnettools/issues/156).
-  - Open your `.vscode/settings.json` and add the following property to set up your custom test run settings:
+  - For **Visual Studio Code** prjects open your `.vscode/settings.json` and add the following property to set up your custom test run settings:
     ```json
     "dotnet.unitTests.runSettingsPath": "./test/.runsettings"
     ```
+  - For **Visual Studio** projects you need to add this settings in your project file:
+    ```
+    <PropertyGroup>
+      <RunSettingsFilePath>$(MSBuildProjectDirectory)\.runsettings</RunSettingsFilePath>
+    </PropertyGroup>
+    ```
+  - And you need to setup the Godot run environment `GODOT_BIN`, the full path to the godot executable.
+    Check the .settings you have set the **EnvironmentVariables**
 
 ## Install the gdunit NuGet Packages
 1. Add the `gdunit4.api` project reference to your test project:
@@ -36,6 +44,7 @@ Configure your test project to use GdUnit4 by adding the following to your .cspr
     <!-- ... other project settings ... -->
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
         <PackageReference Include="gdUnit4.api" Version="<version>" />
         <ProjectReference Include="gdUnit4.test.adapter" Version="<version>"/>
     </ItemGroup>
@@ -46,6 +55,7 @@ Configure your test project to use GdUnit4 by adding the following to your .cspr
 ## .runsettings Configuration
 
 To configure GdUnit4 test execution, you can use a .runsettings file. Below is an example .runsettings file:
+The full guide to configure the settings can be found [here](https://learn.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file?view=vs-2022)
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -56,6 +66,9 @@ To configure GdUnit4 test execution, you can use a .runsettings file. Below is a
         <TargetFrameworkVersion>net7.0</TargetFrameworkVersion>
         <TestSessionTimeout>180000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
+        <EnvironmentVariables>
+            <GODOT_BIN>c:\programs\Godot_v4.2.1-stable_mono_win64.exe</GODOT_BIN>
+        </EnvironmentVariables>
     </RunConfiguration>
 
     <LoggerRunSettings>
