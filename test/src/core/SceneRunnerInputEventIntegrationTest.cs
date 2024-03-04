@@ -1,11 +1,14 @@
 using System;
 using System.Threading.Tasks;
+
 using Moq;
 
 namespace GdUnit4.Tests.Core
 {
     using System.Linq;
+
     using Godot;
+
     using static Assertions;
 
     [TestSuite]
@@ -78,15 +81,15 @@ namespace GdUnit4.Tests.Core
         [TestCase]
         public void ToMouseButtonMask()
         {
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Left)).IsEqual(MouseButtonMask.Left);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Middle)).IsEqual(MouseButtonMask.Middle);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Right)).IsEqual(MouseButtonMask.Right);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelUp)).IsEqual((MouseButtonMask)8L);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelDown)).IsEqual((MouseButtonMask)16L);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelLeft)).IsEqual((MouseButtonMask)32L);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.WheelRight)).IsEqual((MouseButtonMask)64L);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Xbutton1)).IsEqual(MouseButtonMask.MbXbutton1);
-            AssertThat(GdUnit4.Core.SceneRunner.toMouseButtonMask(MouseButton.Xbutton2)).IsEqual(MouseButtonMask.MbXbutton2);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Left)).IsEqual(MouseButtonMask.Left);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Middle)).IsEqual(MouseButtonMask.Middle);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Right)).IsEqual(MouseButtonMask.Right);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelUp)).IsEqual((MouseButtonMask)8L);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelDown)).IsEqual((MouseButtonMask)16L);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelLeft)).IsEqual((MouseButtonMask)32L);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelRight)).IsEqual((MouseButtonMask)64L);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Xbutton1)).IsEqual(MouseButtonMask.MbXbutton1);
+            AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Xbutton2)).IsEqual(MouseButtonMask.MbXbutton2);
         }
 
         [TestCase]
@@ -294,7 +297,7 @@ namespace GdUnit4.Tests.Core
                     mouseEvent.ShiftPressed = isShift;
                     mouseEvent.Pressed = true;
                     mouseEvent.ButtonIndex = mouse_button;
-                    mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                    mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button);
                     //verify(_scene_spy, 1)._input(mouseEvent)
                     AssertThat(ActualMousePos()).IsEqual(Vector2.Zero);
                     AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsTrue();
@@ -543,7 +546,7 @@ namespace GdUnit4.Tests.Core
                 mouseEvent.GlobalPosition = gmp;
                 mouseEvent.Pressed = true;
                 mouseEvent.ButtonIndex = mouse_button;
-                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button);
                 //verify(_scene_spy, 1)._input(mouseEvent)
 
 
@@ -579,7 +582,7 @@ namespace GdUnit4.Tests.Core
                 mouseEvent.Pressed = true;
                 mouseEvent.DoubleClick = true;
                 mouseEvent.ButtonIndex = mouse_button;
-                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button);
                 //verify(_scene_spy, 1)._input(mouseEvent)
 
                 mouseEvent = new InputEventMouseButton();
@@ -614,7 +617,7 @@ namespace GdUnit4.Tests.Core
                 mouseEvent.GlobalPosition = gmp;
                 mouseEvent.Pressed = true;
                 mouseEvent.ButtonIndex = mouse_button;
-                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.toMouseButtonMask(mouse_button);
+                mouseEvent.ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button);
                 //verify(_scene_spy, 1)._input(mouseEvent)
                 AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsTrue();
                 AssertThat(Input.GetMouseButtonMask()).IsEqual(mouseEvent.ButtonMask);

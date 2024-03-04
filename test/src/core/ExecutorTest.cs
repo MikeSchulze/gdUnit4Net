@@ -9,16 +9,16 @@ namespace GdUnit4.Tests.Core
 
     using static Assertions;
     using static TestEvent.TYPE;
-    using static TestReport.TYPE;
+    using static TestReport.ReportType;
     using GdUnit4.Core;
 
     [TestSuite]
     public class ExecutorTest : ITestEventListener
     {
         private Executor _executor = null!;
-        private List<TestEvent> _events = new List<TestEvent>();
+        private List<TestEvent> _events = new();
 
-        // enable to verbose debug event 
+        // enable to verbose debug event
         private bool _verbose = false;
 
         public bool IsFailed { get; set; }
@@ -38,8 +38,7 @@ namespace GdUnit4.Tests.Core
             testSuite.FilterDisabled = true;
             return testSuite;
         }
-
-        public void PublishEvent(TestEvent e)
+        void ITestEventListener.PublishEvent(TestEvent e)
         {
             if (_verbose)
             {
@@ -118,7 +117,7 @@ namespace GdUnit4.Tests.Core
             return expectedEvents;
         }
 
-        private static string ParameterizedTestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}.{testName}({testCaseParam.Formated()})";
+        private static string ParameterizedTestCaseName(string testName, object[] testCaseParam, int index) => $"{testName}.{testName}({testCaseParam.Formatted()})";
 
         [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
         public async Task Execute_Success()
@@ -465,7 +464,7 @@ namespace GdUnit4.Tests.Core
                     }
                 ),
                 Tuple(TESTCASE_BEFORE, "TestCase2", new List<TestReport>()),
-                // ends with failure and warnings 
+                // ends with failure and warnings
                 Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>() {
                     new TestReport(WARN, 0, """
                         WARNING:
@@ -586,7 +585,7 @@ namespace GdUnit4.Tests.Core
                 Tuple(TESTCASE_BEFORE, "TestCase1", true, false, false, false),
                 Tuple(TESTCASE_AFTER, "TestCase1", false, false, false, true),
 
-                //  test case is marked as failure 
+                //  test case is marked as failure
                 Tuple(TESTCASE_BEFORE, "TestCase2", true, false, false, false),
                 Tuple(TESTCASE_AFTER, "TestCase2", false, false, true, false),
 
@@ -610,7 +609,7 @@ namespace GdUnit4.Tests.Core
                 // reports a test interruption due to a timeout
                 Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
                 Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport>(){
-                    new TestReport(INTERUPTED, 33, "The execution has timed out after 1s.") }
+                    new TestReport(INTERRUPTED, 33, "The execution has timed out after 1s.") }
                 ),
 
                 // reports a test failure

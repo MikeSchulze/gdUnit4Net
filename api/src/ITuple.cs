@@ -1,12 +1,10 @@
-/// A tuple implementation to hold two or many values 
+/// A tuple implementation to hold two or many values
+namespace GdUnit4.Asserts;
+
 using System;
 using System.Collections.Generic;
 
-namespace GdUnit4.Asserts
+public interface ITuple : IEquatable<object?>
 {
-    public interface ITuple : IEquatable<object?>
-    {
-        public IEnumerable<object?> Values
-        { get; set; }
-    }
+    public IEnumerable<object?> Values { get; set; }
 }

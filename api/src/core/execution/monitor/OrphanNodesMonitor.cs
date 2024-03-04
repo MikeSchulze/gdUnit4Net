@@ -1,40 +1,37 @@
+namespace GdUnit4.Executions.Monitors;
+
 using static Godot.Performance;
 
-namespace GdUnit4.Executions.Monitors
+public class OrphanNodesMonitor
 {
-    public class OrphanNodesMonitor
+
+    public OrphanNodesMonitor(bool reportOrphanNodesEnabled)
+        => ReportOrphanNodesEnabled = reportOrphanNodesEnabled;
+
+
+    public void Start(bool reset = false)
     {
-
-        public OrphanNodesMonitor(bool reportOrphanNodesEnabled)
+        if (ReportOrphanNodesEnabled)
         {
-            ReportOrphanNodesEnabled = reportOrphanNodesEnabled;
+            if (reset)
+                Reset();
+            OrphanNodesStart = GetMonitoredOrphanCount();
         }
-
-
-        public void Start(bool reset = false)
-        {
-            if (ReportOrphanNodesEnabled)
-            {
-                if (reset)
-                    Reset();
-                OrphanNodesStart = GetMonitoredOrphanCount();
-            }
-        }
-
-        public void Stop()
-        {
-            if (ReportOrphanNodesEnabled)
-                OrphanCount += GetMonitoredOrphanCount() - OrphanNodesStart;
-        }
-
-        private int GetMonitoredOrphanCount() => (int)GetMonitor(Godot.Performance.Monitor.ObjectOrphanNodeCount);
-
-        private bool ReportOrphanNodesEnabled { get; set; }
-
-        public int OrphanCount { get; private set; } = 0;
-
-        private int OrphanNodesStart { get; set; } = 0;
-
-        public void Reset() => OrphanCount = 0;
     }
+
+    public void Stop()
+    {
+        if (ReportOrphanNodesEnabled)
+            OrphanCount += GetMonitoredOrphanCount() - OrphanNodesStart;
+    }
+
+    private int GetMonitoredOrphanCount() => (int)GetMonitor(Monitor.ObjectOrphanNodeCount);
+
+    private bool ReportOrphanNodesEnabled { get; set; }
+
+    public int OrphanCount { get; private set; }
+
+    private int OrphanNodesStart { get; set; }
+
+    public void Reset() => OrphanCount = 0;
 }

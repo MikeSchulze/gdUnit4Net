@@ -1,23 +1,18 @@
+namespace GdUnit4;
 
 using System;
 using System.Collections.Generic;
 
-namespace GdUnit4
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+public class FuzzerAttribute : Attribute, IValueProvider
 {
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public class FuzzerAttribute : System.Attribute, IValueProvider
+    private int value;
+
+    public FuzzerAttribute(int value) => this.value = value;
+
+    public IEnumerable<object> GetValues()
     {
-
-        public int _value;
-        public FuzzerAttribute(int value)
-        {
-            _value = value;
-        }
-
-        public IEnumerable<object> GetValues()
-        {
-            _value += 1;
-            yield return _value;
-        }
+        value += 1;
+        yield return value;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
 namespace GdUnit4.Tests.Core.Event;
@@ -49,7 +50,7 @@ public class TestEventTest
         };
 
         List<TestReport> reports = new() {
-            new TestReport(TestReport.TYPE.FAILURE, 42, "test failed")
+            new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
         };
 
         TestEvent testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
@@ -57,7 +58,7 @@ public class TestEventTest
 
         TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
-        AssertThat(current!.Reports).Contains(new TestReport(TestReport.TYPE.FAILURE, 42, "test failed"));
+        AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current!.TestName).IsEqual("After");
         AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
@@ -87,7 +88,7 @@ public class TestEventTest
         };
 
         List<TestReport> reports = new() {
-            new TestReport(TestReport.TYPE.FAILURE, 42, "test failed")
+            new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
         };
 
         TestEvent testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
@@ -95,7 +96,7 @@ public class TestEventTest
 
         TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
-        AssertThat(current!.Reports).Contains(new TestReport(TestReport.TYPE.FAILURE, 42, "test failed"));
+        AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current!.TestName).IsEqual("TestCaseA");
         AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));

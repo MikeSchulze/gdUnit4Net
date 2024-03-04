@@ -4,12 +4,15 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+
 using GdUnit4.TestAdapter.Discovery;
 using GdUnit4.TestAdapter.Settings;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+
 using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
 using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
 
@@ -45,7 +48,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
 
             using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath, logger);
-            if (codeNavigationProvider.GetAssembly() == null) continue;
+            if (codeNavigationProvider.GetAssembly() == null)
+                continue;
             Assembly assembly = codeNavigationProvider.GetAssembly()!;
 
             int testsTotalDiscovered = 0;
@@ -74,7 +78,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                             {
                                 var saveCulture = Thread.CurrentThread.CurrentCulture;
                                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
-                                var paramaterizedTestName = $"{attr.TestName ?? mi.Name}({attr.Arguments.Formated()})";
+                                var paramaterizedTestName = $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})";
                                 Thread.CurrentThread.CurrentCulture = saveCulture;
                                 return new
                                 {

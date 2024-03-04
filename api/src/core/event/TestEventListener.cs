@@ -1,10 +1,9 @@
 
-namespace GdUnit4
-{
-    public interface ITestEventListener
-    {
-        bool IsFailed { get; protected set; }
+namespace GdUnit4;
 
-        void PublishEvent(TestEvent testEvent);
-    }
+internal interface ITestEventListener
+{
+    bool IsFailed { get; protected set; }
+
+    void PublishEvent(TestEvent testEvent);
 }

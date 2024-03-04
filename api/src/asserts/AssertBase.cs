@@ -1,60 +1,58 @@
-namespace GdUnit4.Asserts
+namespace GdUnit4.Asserts;
+
+using Exceptions;
+
+internal abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
-    using Exceptions;
+    protected TValue? Current { get; private set; }
 
-    internal abstract class AssertBase<V> : IAssertBase<V>
+    protected string? CustomFailureMessage { get; set; }
+
+    protected string CurrentFailureMessage { get; set; } = "";
+
+    protected AssertBase(TValue? current) => Current = current;
+
+    public IAssertBase<TValue> IsEqual(TValue expected)
     {
-        protected V? Current { get; private set; }
+        var result = Comparable.IsEqual(Current, expected);
+        if (!result.Valid)
+            ThrowTestFailureReport(AssertFailures.IsEqual(Current, expected), Current, expected);
+        return this;
+    }
 
-        protected string? CustomFailureMessage { get; set; } = null;
+    public IAssertBase<TValue> IsNotEqual(TValue expected)
+    {
+        var result = Comparable.IsEqual(Current, expected);
+        if (result.Valid)
+            ThrowTestFailureReport(AssertFailures.IsNotEqual(Current, expected), Current, expected);
+        return this;
+    }
+    public IAssertBase<TValue> IsNull()
+    {
+        if (Current != null)
+            ThrowTestFailureReport(AssertFailures.IsNull(Current), Current, null);
+        return this;
+    }
 
-        protected string CurrentFailureMessage { get; set; } = "";
+    public IAssertBase<TValue> IsNotNull()
+    {
+        if (Current == null)
+            ThrowTestFailureReport(AssertFailures.IsNotNull(), Current, null);
+        return this;
+    }
 
-        protected AssertBase(V? current)
-        {
-            Current = current;
-        }
+    public IAssert OverrideFailureMessage(string message)
+    {
+        CustomFailureMessage = message;
+        return this;
+    }
 
-        public IAssertBase<V> IsEqual(V expected)
-        {
-            var result = Comparable.IsEqual(Current, expected);
-            if (!result.Valid)
-                ThrowTestFailureReport(AssertFailures.IsEqual(Current, expected), Current, expected);
-            return this;
-        }
-
-        public IAssertBase<V> IsNotEqual(V expected)
-        {
-            var result = Comparable.IsEqual(Current, expected);
-            if (result.Valid)
-                ThrowTestFailureReport(AssertFailures.IsNotEqual(Current, expected), Current, expected);
-            return this;
-        }
-        public IAssertBase<V> IsNull()
-        {
-            if (Current != null)
-                ThrowTestFailureReport(AssertFailures.IsNull(Current), Current, null);
-            return this;
-        }
-
-        public IAssertBase<V> IsNotNull()
-        {
-            if (Current == null)
-                ThrowTestFailureReport(AssertFailures.IsNotNull(Current), Current, null);
-            return this;
-        }
-
-        public IAssert OverrideFailureMessage(string message)
-        {
-            CustomFailureMessage = message;
-            return this;
-        }
-
-        protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)
-        {
-            var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
-            CurrentFailureMessage = failureMessage;
-            throw new TestFailedException(failureMessage, stackFrameOffset, lineNumber);
-        }
+#pragma warning disable IDE0060
+    protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)
+    {
+#pragma warning restore
+        var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
+        CurrentFailureMessage = failureMessage;
+        throw new TestFailedException(failureMessage, lineNumber);
     }
 }

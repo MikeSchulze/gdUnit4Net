@@ -2,21 +2,21 @@ namespace GdUnit4.Asserts;
 using System;
 
 /// <summary> An Assertion tool to verify Godot.Vector values </summary>
-public interface IVectorAssert<T> : IAssertBase<T> where T : IEquatable<T>
+public interface IVectorAssert<TValue> : IAssertBase<TValue> where TValue : IEquatable<TValue>
 {
     /// <summary>
     /// Verifies that the current value is equal to expected one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public new IVectorAssert<T> IsEqual(T expected);
+    public new IVectorAssert<TValue> IsEqual(TValue expected);
 
     /// <summary>
     /// Verifies that the current value is not equal to expected one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public new IVectorAssert<T> IsNotEqual(T expected);
+    public new IVectorAssert<TValue> IsNotEqual(TValue expected);
 
     /// <summary>
     /// Verifies that the current and expected value are approximately equal.
@@ -24,35 +24,35 @@ public interface IVectorAssert<T> : IAssertBase<T> where T : IEquatable<T>
     /// <param name="expected">The expected value</param>
     /// <param name="approx">The approximal value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsEqualApprox(T expected, T approx);
+    public IVectorAssert<TValue> IsEqualApprox(TValue expected, TValue approx);
 
     /// <summary>
     /// Verifies that the current value is less than the given one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsLess(T expected);
+    public IVectorAssert<TValue> IsLess(TValue expected);
 
     /// <summary>
     /// Verifies that the current value is less than or equal the given one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsLessEqual(T expected);
+    public IVectorAssert<TValue> IsLessEqual(TValue expected);
 
     /// <summary>
     /// Verifies that the current value is greater than the given one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsGreater(T expected);
+    public IVectorAssert<TValue> IsGreater(TValue expected);
 
     /// <summary>
     /// Verifies that the current value is greater than or equal the given one.
     /// </summary>
     /// <param name="expected">The expected value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsGreaterEqual(T expected);
+    public IVectorAssert<TValue> IsGreaterEqual(TValue expected);
 
     /// <summary>
     /// Verifies that the current value is between the given boundaries (inclusive).
@@ -60,7 +60,7 @@ public interface IVectorAssert<T> : IAssertBase<T> where T : IEquatable<T>
     /// <param name="min">The minimal value</param>
     /// <param name="max">The maximal value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsBetween(T min, T max);
+    public IVectorAssert<TValue> IsBetween(TValue min, TValue max);
 
     /// <summary>
     /// Verifies that the current value is not between the given boundaries (inclusive).
@@ -68,12 +68,12 @@ public interface IVectorAssert<T> : IAssertBase<T> where T : IEquatable<T>
     /// <param name="min">The minimal value</param>
     /// <param name="max">The maximal value</param>
     /// <returns>IVectorAssert</returns>
-    public IVectorAssert<T> IsNotBetween(T min, T max);
+    public IVectorAssert<TValue> IsNotBetween(TValue min, TValue max);
 
     /// <summary>
     /// Overrides the default failure message by given custom message.
     /// </summary>
     /// <param name="message">The message to replace the default message</param>
     /// <returns>IVectorAssert</returns>
-    new IVectorAssert<T> OverrideFailureMessage(string message);
+    new IVectorAssert<TValue> OverrideFailureMessage(string message);
 }
