@@ -1,31 +1,34 @@
-using Godot;
-using System;
+namespace GdUnit4.Tests;
+
 using System.Threading.Tasks;
+
+using Godot;
 
 public partial class TestScene : Control
 {
     [Signal]
     public delegate void PanelColorChangeEventHandler(ColorRect box, Color color);
 
-    private static readonly Color[] COLOR_CYCLE = { Colors.RoyalBlue, Colors.Chartreuse, Colors.YellowGreen };
+    //private static readonly Color[] ColorCycle = { Colors.RoyalBlue, Colors.Chartreuse, Colors.YellowGreen };
 
-    private Color _initial_color = Colors.Red;
+    private Color initial_color = Colors.Red;
 
-    private RefCounted? _nullable;
-
-    bool _player_jump_action = false;
+    private RefCounted? nullable;
+    private bool player_jump_action;
 
 #pragma warning disable CS8618
-    public ColorRect _box1;
-    private ColorRect _box2;
-    private ColorRect _box3;
+
+    private ColorRect box0 = new();
+    public ColorRect Box1 { get; set; }
+    private ColorRect Box2 { get; set; }
+    private ColorRect Box3 { get; set; }
 
     public override void _Ready()
     {
-        _box1 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel1");
-        _box2 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel2");
-        _box3 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel3");
-        Connect(SignalName.PanelColorChange, Godot.Callable.From<ColorRect, Color>((cr, color) => _OnPanelColorChanged(cr, color)));
+        Box1 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel1");
+        Box2 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel2");
+        Box3 = GetNode<ColorRect>("VBoxContainer/PanelContainer/HBoxContainer/Panel3");
+        Connect(SignalName.PanelColorChange, Callable.From<ColorRect, Color>(OnPanelColorChanged));
         OnlyOneTimeCall();
     }
 
@@ -33,20 +36,20 @@ public partial class TestScene : Control
     {
     }
 
-    public async void _OnTestPressed(long buttonId)
+    public async void OnTestPressed(long buttonId)
     {
         // Console.WriteLine($"pressed {buttonId}");
         ColorRect box;
         switch (buttonId)
         {
             case 1:
-                box = _box1;
+                box = Box1;
                 break;
             case 2:
-                box = _box2;
+                box = Box2;
                 break;
             case 3:
-                box = _box3;
+                box = Box3;
                 break;
             default:
                 return;
@@ -61,23 +64,21 @@ public partial class TestScene : Control
         EmitSignal(SignalName.PanelColorChange, box, Colors.Gray);
     }
 
-    private void _OnGrayTimeout(ColorRect box)
-    {
-        EmitSignal(SignalName.PanelColorChange, box, Colors.Gray);
-    }
+    private void OnGrayTimeout(ColorRect box)
+        => EmitSignal(SignalName.PanelColorChange, box, Colors.Gray);
 
     private Timer CreateTimer(float timeout)
     {
-        Timer timer = new Timer();
+        var timer = new Timer();
         AddChild(timer);
-        timer.Connect(Timer.SignalName.Timeout, Callable.From(() => _OnTimeout(timer)));
+        timer.Connect(Timer.SignalName.Timeout, Callable.From(() => OnTimeout(timer)));
         timer.OneShot = true;
         timer.WaitTime = timeout;
         timer.Start();
         return timer;
     }
 
-    private void _OnTimeout(Timer timer)
+    private void OnTimeout(Timer timer)
     {
         RemoveChild(timer);
         timer.QueueFree();
@@ -87,57 +88,46 @@ public partial class TestScene : Control
     {
         GD.Print("color_cycle initial");
         await ToSignal(CreateTimer(0.5f), Timer.SignalName.Timeout);
-        EmitSignal(SignalName.PanelColorChange, _box1, Colors.Red);
+        EmitSignal(SignalName.PanelColorChange, Box1, Colors.Red);
         GD.Print("changed to RED");
         await ToSignal(CreateTimer(0.5f), Timer.SignalName.Timeout);
-        EmitSignal(SignalName.PanelColorChange, _box1, Colors.Blue);
+        EmitSignal(SignalName.PanelColorChange, Box1, Colors.Blue);
         GD.Print("changed to BLUE");
         await ToSignal(CreateTimer(0.5f), Timer.SignalName.Timeout);
-        EmitSignal(SignalName.PanelColorChange, _box1, Colors.Green);
+        EmitSignal(SignalName.PanelColorChange, Box1, Colors.Green);
         GD.Print("changed to GREEN");
         return "black";
     }
 
     public async void StartColorCycle()
-    {
-        await ColorCycle();
-    }
-
-    private Spell _CreateSpell()
-    {
-        return new Spell();
-    }
+        => await ColorCycle();
 
     public Spell CreateSpell()
     {
-        Spell spell = _CreateSpell();
-        spell.Connect(Spell.SignalName.SpellExplode, Callable.From<Spell>((s) => _DestroySpell(s)));
+        var spell = new Spell();
+        spell.Connect(Spell.SignalName.SpellExplode, Callable.From<Spell>(DestroySpell));
         return spell;
     }
 
-    private void _DestroySpell(Spell spell)
+    private void DestroySpell(Spell spell)
     {
         RemoveChild(spell);
         spell.QueueFree();
     }
 
-    public override void _Input(InputEvent inputEvent)
+    public override void _Input(InputEvent @event)
     {
         if (InputMap.HasAction("player_jump"))
-            _player_jump_action = Input.IsActionJustReleased("player_jump", true);
-        if (inputEvent.IsActionReleased("ui_accept"))
+            player_jump_action = Input.IsActionJustReleased("player_jump", true);
+        if (@event.IsActionReleased("ui_accept"))
         {
             AddChild(CreateSpell());
         }
     }
 
     public int Add(int a, int b)
-    {
-        return a + b;
-    }
+        => a + b;
 
-    private void _OnPanelColorChanged(ColorRect box, Color color)
-    {
-        box.Color = color;
-    }
+    private void OnPanelColorChanged(ColorRect box, Color color)
+        => box.Color = color;
 }

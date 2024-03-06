@@ -1,12 +1,12 @@
 // GdUnit generated TestSuite
 namespace GdUnit4.Tests.Asserts;
-using System.Globalization;
 
-using GdUnit4.Asserts;
+using System.Globalization;
 
 using Godot;
 
 using static Assertions;
+using GdUnit4.Asserts;
 
 [TestSuite]
 public class VectorAssertTest

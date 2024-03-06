@@ -179,7 +179,7 @@ public interface ISceneRunner : IDisposable
     /// <typeparam name="TValue">The expected result type</typeparam>
     /// <param name="methodName">The name of the method to wait</param>
     /// <returns>GodotMethodAwaiter</returns>
-    GdUnitAwaiter.GodotMethodAwaiter<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName);
+    GdUnitAwaiter.GodotMethodAwaiter<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName) where TValue : notnull;
 
     /// <summary>
     /// Waits for given signal is emitted.

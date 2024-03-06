@@ -114,13 +114,17 @@ public sealed class Assertions
     public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
 
-    public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary<TKey, TValue>? current) where TKey : notnull
+    public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary<TKey, TValue>? current)
+        where TKey : notnull
+        where TValue : notnull
         => new DictionaryAssert<TKey, TValue>(current?.ToDictionary(e => e.Key, e => e.Value));
 
     public static IDictionaryAssert<Godot.Variant, Godot.Variant> AssertThat(Godot.Collections.Dictionary? current)
        => new DictionaryAssert<Godot.Variant, Godot.Variant>(current);
 
-    public static IDictionaryAssert<TKey, TValue> AssertThat<[Godot.MustBeVariant] TKey, [Godot.MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current) where TKey : notnull
+    public static IDictionaryAssert<TKey, TValue> AssertThat<[Godot.MustBeVariant] TKey, [Godot.MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current)
+        where TKey : notnull
+        where TValue : notnull
        => new DictionaryAssert<TKey, TValue>(current);
 
 
@@ -241,7 +245,7 @@ public sealed class Assertions
     }
 
     ///<summary>
-    /// A litle helper to auto freeing your created objects after test execution
+    /// A little helper to auto freeing your created objects after test execution
     /// </summary>
     public static T? AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 

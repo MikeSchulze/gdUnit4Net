@@ -295,8 +295,8 @@ public class GdUnitTestSuiteBuilder
             .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
         if (method != null && method.Body != null)
             return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
-        // Test case not found or location not available
-        return -1;
+        // If method has no body, return the line of the method declaration
+        return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
     }
 
     internal static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>

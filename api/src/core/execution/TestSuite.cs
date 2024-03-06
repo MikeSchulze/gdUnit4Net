@@ -1,14 +1,14 @@
 namespace GdUnit4.Executions;
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
-using GdUnit4.Core;
-using System.IO;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using GdUnit4.Core;
 
 internal sealed class TestSuite : IDisposable
 {

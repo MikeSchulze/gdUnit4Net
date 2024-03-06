@@ -99,10 +99,10 @@ public static class GodotObjectExtensions
         return left!.Equals(right);
     }
 
-    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable elements)
+    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable elements) where TVariant : notnull
         => new(elements.ToGodotArray());
 
-    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args)
+    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args) where TVariant : notnull
         => new(ToGodotArray((IEnumerable)args));
 
     public static Godot.Collections.Array ToGodotArray(this object[] args)
@@ -129,7 +129,9 @@ public static class GodotObjectExtensions
         return converted;
     }
 
-    public static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<TKey, TValue>(this IDictionary<TKey, TValue> dict)
+    public static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
+        where TKey : notnull
+        where TValue : notnull
     {
         var converted = new Godot.Collections.Dictionary<Variant, Variant>();
         foreach (var (key, value) in dict)

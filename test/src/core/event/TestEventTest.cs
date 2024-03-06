@@ -1,9 +1,9 @@
+namespace GdUnit4.Tests.Core.Events;
+
 using System;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
-
-namespace GdUnit4.Tests.Core.Event;
 
 using static Assertions;
 
@@ -11,31 +11,31 @@ using static Assertions;
 public class TestEventTest
 {
     [TestCase]
-    public void SerializeDeserialize_Before()
+    public void SerializeDeserializeBefore()
     {
-        TestEvent testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100);
+        var testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100);
         var json = JsonConvert.SerializeObject(testEvent);
 
-        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsEqual(testEvent);
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current!.TestName).IsEqual("Before");
     }
 
     [TestCase]
-    public void SerializeDeserialize_BeforeTest()
+    public void SerializeDeserializeBeforeTest()
     {
-        TestEvent testEvent = TestEvent.BeforeTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
+        var testEvent = TestEvent.BeforeTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
         var json = JsonConvert.SerializeObject(testEvent);
 
-        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsEqual(testEvent);
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current!.TestName).IsEqual("TestCaseA");
     }
 
     [TestCase]
-    public void SerializeDeserialize_After()
+    public void SerializeDeserializeAfter()
     {
         Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
             { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
@@ -53,10 +53,10 @@ public class TestEventTest
             new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
         };
 
-        TestEvent testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
+        var testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
-        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
@@ -73,7 +73,7 @@ public class TestEventTest
     }
 
     [TestCase]
-    public void SerializeDeserialize_AfterTest()
+    public void SerializeDeserializeAfterTest()
     {
         Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
             { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
@@ -91,10 +91,10 @@ public class TestEventTest
             new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
         };
 
-        TestEvent testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
+        var testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
-        TestEvent? current = JsonConvert.DeserializeObject<TestEvent>(json);
+        var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");

@@ -334,8 +334,8 @@ internal sealed class SceneRunner : ISceneRunner
 
     public Node Scene() => CurrentScene;
 
-    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName) =>
-        new(CurrentScene, methodName);
+    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName) where TVariant : notnull
+        => new(CurrentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
     {
@@ -373,9 +373,10 @@ internal sealed class SceneRunner : ISceneRunner
         CurrentScene.Set(name, value);
     }
 
-    private bool PropertyExists(string name) =>
-        CurrentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Any(field => field.Name.Equals(name, StringComparison.Ordinal)) || CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+    private bool PropertyExists(string name)
+        => CurrentScene.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null
+            || CurrentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(field => field.Name.Equals(name, StringComparison.Ordinal))
+            || CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
 
     public Node FindChild(string name, bool recursive = true, bool owned = false) =>
         CurrentScene.FindChild(name, recursive, owned);

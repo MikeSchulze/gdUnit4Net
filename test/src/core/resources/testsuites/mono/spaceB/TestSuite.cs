@@ -1,9 +1,5 @@
-namespace GdUnit4.Tests.SpaceB
+namespace GdUnit4.Tests.SpaceB;
+
+public class TestSuite
 {
-
-    public class TestSuite
-    {
-
-    }
-
 }

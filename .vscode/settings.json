@@ -29,6 +29,7 @@
     "Fullqualified",
     "Fuzzer",
     "GDUNIT",
+    "Hashtable",
     "Lerp",
     "Millis",
     "Newtonsoft",
@@ -36,6 +37,9 @@
     "TESTCASE",
     "Testrun",
     "TESTSUITE",
-    "Unconfigured"
+    "testsuites",
+    "tscn",
+    "Unconfigured",
+    "Xbutton"
   ]
 }
