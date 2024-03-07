@@ -1,8 +1,10 @@
+namespace GdUnit4.TestAdapter.Execution;
+
 using System.Collections.Generic;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-namespace GdUnit4.TestAdapter.Execution;
 
 internal interface ITestExecutor
 {
