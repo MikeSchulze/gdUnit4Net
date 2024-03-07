@@ -1,45 +1,32 @@
-namespace GdUnit4.Tests.Resources
+namespace GdUnit4.Tests.Resources;
+
+using static Assertions;
+// will be ignored because of missing `[TestSuite]` annotation
+// used by executor integration test
+public class TestSuiteFailOnTestCase1
 {
-    using static Assertions;
-    // will be ignored because of missing `[TestSuite]` anotation
-    // used by executor integration test
-    public class TestSuiteFailOnTestCase1
-    {
 
-        [Before]
-        public void Before()
-        {
-            AssertString("Suite Before()").IsEqual("Suite Before()");
-        }
+    [Before]
+    public void Before()
+        => AssertString("Suite Before()").IsEqual("Suite Before()");
 
-        [After]
-        public void After()
-        {
-            AssertString("Suite After()").IsEqual("Suite After()");
-        }
+    [After]
+    public void After()
+        => AssertString("Suite After()").IsEqual("Suite After()");
 
-        [BeforeTest]
-        public void BeforeTest()
-        {
-            AssertString("Suite BeforeTest()").IsEqual("Suite BeforeTest()");
-        }
+    [BeforeTest]
+    public void BeforeTest()
+        => AssertString("Suite BeforeTest()").IsEqual("Suite BeforeTest()");
 
-        [AfterTest]
-        public void AfterTest()
-        {
-            AssertString("Suite AfterTest()").IsEqual("Suite AfterTest()");
-        }
+    [AfterTest]
+    public void AfterTest()
+        => AssertString("Suite AfterTest()").IsEqual("Suite AfterTest()");
 
-        [TestCase]
-        public void TestCase1()
-        {
-            AssertString("invalid").IsEqual("TestCase1");
-        }
+    [TestCase]
+    public void TestCase1()
+        => AssertString("invalid").IsEqual("TestCase1");
 
-        [TestCase]
-        public void TestCase2()
-        {
-            AssertString("TestCase2").IsEqual("TestCase2");
-        }
-    }
+    [TestCase]
+    public void TestCase2()
+        => AssertString("TestCase2").IsEqual("TestCase2");
 }

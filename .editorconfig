@@ -481,3 +481,6 @@ dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.CA1310.severity = none
 # Don't require culture info for String.ToUpper() or String.ToLower() without specifying a culture.
 dotnet_diagnostic.CA1311.severity = none
+
+# Default severity for analyzer diagnostics with category 'Usage'
+dotnet_analyzer_diagnostic.category-Usage.severity = warning

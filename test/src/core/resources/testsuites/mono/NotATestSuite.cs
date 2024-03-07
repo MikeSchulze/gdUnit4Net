@@ -1,14 +1,11 @@
-namespace GdUnit4.Tests.Resources
-{
-    using static GdUnit4.Assertions;
+namespace GdUnit4.Tests.Resources;
 
-    // will be ignored because of missing `[TestSuite]` anotation
-    public class NotATestSuite
-    {
-        [TestCase]
-        public void TestFoo()
-        {
-            AssertBool(true).IsEqual(false);
-        }
-    }
+using static GdUnit4.Assertions;
+
+// will be ignored because of missing `[TestSuite]` annotation
+public class NotATestSuite
+{
+    [TestCase]
+    public void TestFoo()
+        => AssertBool(true).IsEqual(false);
 }

@@ -95,18 +95,13 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private static int ScanFailureLineNumber(StackTrace stack)
     {
-        var isFound = false;
         foreach (var frame in stack.GetFrames().Reverse())
         {
             var fileName = frame.GetFileName();
             if (fileName == null)
                 continue;
-            if (fileName.Replace('\\', '/').EndsWith("src/core/execution/ExecutionStage.cs"))
-            {
-                isFound = true;
-                continue;
-            }
-            if (isFound)
+            var isTestCase = frame.GetMethod()?.IsDefined(typeof(TestCaseAttribute)) ?? false;
+            if (isTestCase)
                 return frame.GetFileLineNumber();
         }
         return stack.FrameCount > 1 ? stack.GetFrame(1)!.GetFileLineNumber() : -1;

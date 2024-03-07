@@ -1,36 +1,27 @@
+namespace GdUnit4.Asserts;
 // GdUnit generated TestSuite
 
-namespace GdUnit4.Asserts
+using System;
+
+internal sealed partial class ExampleNode : Godot.Node, IEquatable<ExampleNode>
 {
-    using System;
+    private int Value { get; set; }
+    private string Msg { get; set; }
 
-    partial class ExampleNode : Godot.Node, System.IEquatable<ExampleNode>
+    public ExampleNode(string msg, int value)
     {
-        int Value;
-        string msg;
-
-        public ExampleNode(string msg, int value)
-        {
-            this.msg = msg;
-            this.Value = value;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is ExampleNode example &&
-                   Value == example.Value &&
-                   msg == example.msg;
-        }
-
-        public bool Equals(ExampleNode? obj)
-        {
-            return obj is ExampleNode example &&
-                   Value == example.Value &&
-                   msg == example.msg;
-        }
-
-
-
-        public override int GetHashCode() => HashCode.Combine(Value, msg);
+        Msg = msg;
+        Value = value;
     }
+
+    public override bool Equals(object? obj)
+        => obj is ExampleNode example
+            && Value == example.Value
+            && Msg == example.Msg;
+
+    public bool Equals(ExampleNode? obj)
+        => obj is ExampleNode example
+            && Value == example.Value
+            && Msg == example.Msg;
+    public override int GetHashCode() => HashCode.Combine(Value, Msg);
 }

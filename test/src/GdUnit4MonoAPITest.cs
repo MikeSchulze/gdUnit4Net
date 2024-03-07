@@ -1,4 +1,3 @@
-
 namespace GdUnit4.Tests;
 
 using static GdUnit4.Assertions;
@@ -17,7 +16,5 @@ public class GdUnit4MonoAPITest
 
     [TestCase]
     public void Version()
-    {
-        AssertThat(GdUnit4MonoAPI.Version()).StartsWith("4.2");
-    }
+        => AssertThat(GdUnit4MonoAPI.Version()).StartsWith("4.2");
 }

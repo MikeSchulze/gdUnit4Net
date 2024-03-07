@@ -9,7 +9,7 @@ using static Assertions;
 
 public static class GdUnitAwaiter
 {
-    public sealed class GodotMethodAwaiter<[MustBeVariant] TVariant>
+    public sealed class GodotMethodAwaiter<[MustBeVariant] TVariant> where TVariant : notnull
     {
         private string MethodName { get; }
         private Node Instance { get; }

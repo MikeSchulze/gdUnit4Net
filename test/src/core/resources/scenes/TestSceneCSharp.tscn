@@ -99,6 +99,6 @@ points = PackedVector2Array(40, 0, 60, 0)
 width = 30.0
 default_color = Color(1, 0.0392157, 0.247059, 1)
 
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/test1" to="." method="_OnTestPressed" binds= [1]]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/test2" to="." method="_OnTestPressed" binds= [2]]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/test3" to="." method="_OnTestPressed" binds= [3]]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/test1" to="." method="OnTestPressed" binds= [1]]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/test2" to="." method="OnTestPressed" binds= [2]]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/test3" to="." method="OnTestPressed" binds= [3]]
