@@ -1,10 +1,12 @@
 
+namespace GdUnit4.TestAdapter.Settings;
+
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace GdUnit4.TestAdapter.Settings;
 
 
 [XmlRoot(RunSettingsXmlNode)]
@@ -22,7 +24,6 @@ public class GdUnit4Settings : TestRunSettings
     }
 
     public string? Parameters { get; set; }
-
 
     public DisplayNameOptions DisplayName { get; set; } = DisplayNameOptions.SimpleName;
 

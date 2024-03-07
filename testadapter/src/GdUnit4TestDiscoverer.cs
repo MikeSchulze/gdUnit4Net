@@ -1,12 +1,11 @@
+namespace GdUnit4.TestAdapter;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-
-using GdUnit4.TestAdapter.Discovery;
-using GdUnit4.TestAdapter.Settings;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -15,8 +14,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
 using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
+using GdUnit4.TestAdapter.Discovery;
+using GdUnit4.TestAdapter.Settings;
 
-namespace GdUnit4.TestAdapter;
 
 [DefaultExecutorUri(GdUnit4TestExecutor.ExecutorUri)]
 [ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
@@ -33,27 +33,27 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             typeof(TestCase));
 
     public void DiscoverTests(
-        IEnumerable<string> assemblyPaths,
+        IEnumerable<string> sources,
         IDiscoveryContext discoveryContext,
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
-        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
         var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
-        var filteredAssemblys = FilterWithoutTestAdapter(assemblyPaths);
+        var filteredAssemblys = FilterWithoutTestAdapter(sources);
 
-        foreach (string assemblyPath in filteredAssemblys)
+        foreach (var assemblyPath in filteredAssemblys)
         {
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
 
             using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath, logger);
             if (codeNavigationProvider.GetAssembly() == null)
                 continue;
-            Assembly assembly = codeNavigationProvider.GetAssembly()!;
+            var assembly = codeNavigationProvider.GetAssembly()!;
 
-            int testsTotalDiscovered = 0;
-            int testSuiteDiscovered = 0;
+            var testsTotalDiscovered = 0;
+            var testSuiteDiscovered = 0;
             // discover GdUnit4 testsuites
             foreach (var type in assembly.GetTypes().Where(IsTestSuite))
             {

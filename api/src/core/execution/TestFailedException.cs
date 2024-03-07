@@ -1,8 +1,10 @@
 namespace GdUnit4.Exceptions;
 
+using System;
 using System.Diagnostics;
 
-public sealed class TestFailedException : System.Exception
+[Serializable]
+public class TestFailedException : Exception
 {
     public int LineNumber
     { get; private set; }
@@ -21,5 +23,9 @@ public sealed class TestFailedException : System.Exception
                 return frame.GetFileLineNumber();
         }
         return -1;
+    }
+
+    protected TestFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+    {
     }
 }

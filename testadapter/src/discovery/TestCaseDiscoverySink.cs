@@ -1,12 +1,13 @@
+namespace GdUnit4.TestAdapter.Discovery;
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-namespace GdUnit4.TestAdapter.Discovery;
-
-class TestCaseDiscoverySink : ITestCaseDiscoverySink
+internal sealed class TestCaseDiscoverySink : ITestCaseDiscoverySink
 {
     private readonly ConcurrentBag<TestCase> testCases = new();
 

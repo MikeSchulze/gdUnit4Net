@@ -1,10 +1,11 @@
+namespace GdUnit4.TestAdapter.Discovery;
+
 using System;
 using System.Linq;
 using System.Reflection;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-
-namespace GdUnit4.TestAdapter.Discovery;
 
 public class CodeNavigationDataProvider : IDisposable
 {
@@ -16,8 +17,8 @@ public class CodeNavigationDataProvider : IDisposable
         public readonly bool IsValid => Source != null;
     }
 
-    internal readonly Assembly? assembly;
-    internal readonly DiaSession diaSession;
+    private readonly Assembly? assembly;
+    private readonly DiaSession diaSession;
 
     public CodeNavigationDataProvider(string assemblyPath, IMessageLogger logger)
     {
@@ -54,18 +55,19 @@ public class CodeNavigationDataProvider : IDisposable
     private DiaNavigationData? TryGetNavigationDataForAsyncMethod(MethodInfo methodInfo)
     {
         var stateMachineAttribute = GetStateMachineAttribute(methodInfo);
-        if (stateMachineAttribute == null) return null;
+        if (stateMachineAttribute == null)
+            return null;
 
         var stateMachineType = GetStateMachineType(stateMachineAttribute);
         return diaSession.GetNavigationData(stateMachineType?.FullName ?? "", "MoveNext");
     }
 
-    static Attribute? GetStateMachineAttribute(MethodInfo method) =>
+    private static Attribute? GetStateMachineAttribute(MethodInfo method) =>
             method.GetCustomAttributes(false)
                 .Cast<Attribute>()
                 .FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
 
-    static Type? GetStateMachineType(Attribute stateMachineAttribute) =>
+    private static Type? GetStateMachineType(Attribute stateMachineAttribute) =>
         stateMachineAttribute.GetType()
             .GetProperty("StateMachineType")?
             .GetValue(stateMachineAttribute) as Type ?? null;
@@ -73,5 +75,6 @@ public class CodeNavigationDataProvider : IDisposable
     public void Dispose()
     {
         diaSession?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,8 +1,8 @@
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-
 namespace GdUnit4.TestAdapter;
 
-static class GdUnit4TestAdapterExtensions
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
+internal static class GdUnit4TestAdapterExtensions
 {
     public static TestOutcome AsTestOutcome(this TestEvent e)
     {

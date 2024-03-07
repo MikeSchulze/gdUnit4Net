@@ -1,25 +1,28 @@
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using System.Linq;
+namespace GdUnit4.TestAdapter.Execution;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System;
-using GdUnit4.TestAdapter.Settings;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace GdUnit4.TestAdapter.Execution;
+using GdUnit4.TestAdapter.Settings;
 
-internal class TestExecutor : BaseTestExecutor, ITestExecutor
+internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor, IDisposable
 {
-    const string temp_test_runner_dir = "gdunit4_testadapter";
+    private const string TempTestRunnerDir = "gdunit4_testadapter";
 
-    private Process? pProcess = null;
+    private Process? pProcess;
     private readonly GdUnit4Settings gdUnit4Settings;
 
+#pragma warning disable IDE0052 // Remove unread private members
     private int ParallelTestCount { get; set; }
+#pragma warning restore IDE0052 // Remove unread private members
 
     private int SessionTimeOut { get; set; }
 
@@ -39,10 +42,9 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
     {
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Start executing tests, {testCases.Count()} TestCases total.");
         // TODO split into multiple threads by using 'ParallelTestCount'
-        Dictionary<string, List<TestCase>> groupedTests = testCases
+        var groupedTests = testCases
             .GroupBy(t => t.CodeFilePath!)
             .ToDictionary(group => group.Key, group => group.ToList());
-
 
         var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
         _ = workingDirectory ?? throw new ArgumentNullException(nameof(workingDirectory), "Cannot determine the godot.project!");
@@ -59,7 +61,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
         //        return t.GetPropertyValue(testProperty);
         //    }) == false)
         //    : testCases;
-        string testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";//Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
+        var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";//Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory} {testRunnerScene} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
         {
             StandardOutputEncoding = Encoding.Default,
@@ -102,7 +104,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
 
     private void InstallTestRunnerAndBuild(IFrameworkHandle frameworkHandle, string workingDirectory)
     {
-        string destinationFolderPath = Path.Combine(workingDirectory, @$"{temp_test_runner_dir}");
+        var destinationFolderPath = Path.Combine(workingDirectory, @$"{TempTestRunnerDir}");
         if (Directory.Exists(destinationFolderPath))
         {
             return;
@@ -158,7 +160,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
     private static void InstallTestRunnerClasses(string destinationFolderPath)
     {
         Directory.CreateDirectory(destinationFolderPath);
-        string srcTestRunner = """
+        var srcTestRunner = """
             namespace GdUnit4.TestAdapter;
 
             public partial class TestAdapterRunner : Api.TestRunner
@@ -171,7 +173,7 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
 
         File.WriteAllText(Path.Combine(destinationFolderPath, "TestAdapterRunner.cs"), srcTestRunner);
 
-        string srcTestRunnerScene = $"""
+        var srcTestRunnerScene = $"""
             [gd_scene load_steps=2 format=3 uid="uid://5o7l4yufw1rw"]
 
             [ext_resource type="Script" path="res://gdunit4_testadapter/TestAdapterRunner.cs" id="1"]
@@ -183,5 +185,11 @@ internal class TestExecutor : BaseTestExecutor, ITestExecutor
 
             """;
         File.WriteAllText(Path.Combine(destinationFolderPath, "TestAdapterRunner.tscn"), srcTestRunnerScene);
+    }
+
+    public void Dispose()
+    {
+        pProcess?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
