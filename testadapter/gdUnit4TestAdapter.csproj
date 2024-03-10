@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
     <OutputType>Library</OutputType>
@@ -41,7 +41,7 @@
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
