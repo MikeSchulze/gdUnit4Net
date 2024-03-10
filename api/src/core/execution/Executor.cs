@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-
+using System.IO;
+using Newtonsoft.Json;
 
 public sealed partial class Executor : Godot.RefCounted, IExecutor
 {
@@ -65,6 +66,32 @@ public sealed partial class Executor : Godot.RefCounted, IExecutor
 
     public bool IsExecutable(Godot.Node node) => node is CsNode;
 
+    private class GdUnitRunnerConfig
+    {
+        public Dictionary<string, IEnumerable<string>> Included { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Loads the list of included tests from GdUnitRunner.cfg if exists
+    /// </summary>
+    /// <param name="testSuite"></param>
+    /// <returns></returns>
+    private IEnumerable<string>? LoadTestFilter(CsNode testSuite)
+    {
+        // try to load runner config written by gdunit4 plugin
+        var configPath = Path.Combine(Directory.GetCurrentDirectory(), "addons/gdUnit4/GdUnitRunner.cfg");
+        if (!File.Exists(configPath))
+            return null;
+
+        var testSuitePath = testSuite.ResourcePath();
+        var json = File.ReadAllText(configPath);
+        var runnerConfig = JsonConvert.DeserializeObject<GdUnitRunnerConfig>(json);
+        // Filter by testSuitePath and add values from runnerConfig.Included to the list
+        var filteredTests = runnerConfig?.Included
+            .Where(entry => entry.Key.EndsWith(testSuitePath))
+            .SelectMany(entry => entry.Value);
+        return filteredTests?.Any() == true ? filteredTests : null;
+    }
 
     /// <summary>
     /// Execute a testsuite, is called externally from Godot test suite runner
@@ -74,12 +101,8 @@ public sealed partial class Executor : Godot.RefCounted, IExecutor
     {
         try
         {
-            var includedTests = testSuite.GetChildren()
-                .Cast<CsNode>()
-                .ToList()
-                .Select(node => node.Name.ToString())
-                .ToList();
-            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests));
+            var includedTests = LoadTestFilter(testSuite);
+            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests, true, true));
             // use this call as workaround to hold the signal list, it is disposed for some unknown reason.
             // could be related to https://github.com/godotengine/godot/issues/84254
             GetSignalConnectionList("ExecutionCompleted");
@@ -88,7 +111,7 @@ public sealed partial class Executor : Godot.RefCounted, IExecutor
         // handle unexpected exceptions
         catch (Exception e)
         {
-            Console.Error.WriteLine("Unexpected Exception: %s \nStackTrace: %s", e.Message, e.StackTrace);
+            Console.Error.WriteLine($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
         }
         finally
         {

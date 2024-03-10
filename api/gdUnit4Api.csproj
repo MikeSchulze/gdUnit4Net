@@ -33,7 +33,7 @@
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>gdUnit4.api</PackageId>
-    <PackageVersion>4.2.1</PackageVersion>
+    <PackageVersion>4.2.1.1</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 API release candidate.</PackageReleaseNotes>

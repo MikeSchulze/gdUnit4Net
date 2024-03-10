@@ -8,7 +8,7 @@ public partial class CsNode : Godot.Node
 
     public string ResourcePath() => resourcePath;
 
-    // wraper method to GdScript
+    // wrapper method to GdScript
     public Godot.Collections.Array<string> TestCaseNames() => ParameterizedTests.ToGodotArray<string>();
 
     public int LineNumber
@@ -39,4 +39,13 @@ public partial class CsNode : Godot.Node
             return $"{Name}:{LineNumber} {ParameterizedTests.Formatted()}";
         return $"{Name}:{LineNumber}";
     }
+
+#pragma warning disable CA1707, IDE1006, IDE0060 // Naming Styles, Remove unused parameter
+    /// <summary>
+    /// This method is called from GDScript and must be match the function name.
+    /// </summary>
+    /// <param name="index"></param>
+    public void set_test_parameter_index(int index)
+        => Godot.GD.PushWarning("Running a single parameterized test not supported!");
+#pragma warning restore CA1707, IDE1006, IDE0060 // Naming Styles
 }

@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using GdUnit4.Core;
+using System.Threading;
+using System.Globalization;
 
 internal sealed class TestSuite : IDisposable
 {
@@ -28,7 +30,7 @@ internal sealed class TestSuite : IDisposable
 
     public bool FilterDisabled { get; set; }
 
-    public TestSuite(string classPath, IEnumerable<string>? includedTests = null, bool checkIfTestSuite = true)
+    public TestSuite(string classPath, IEnumerable<string>? includedTests = null, bool checkIfTestSuite = true, bool primitiveFilter = false)
     {
         var type = GdUnitTestSuiteBuilder.ParseType(classPath, checkIfTestSuite)
             ?? throw new ArgumentException($"Can't parse testsuite {classPath}");
@@ -39,13 +41,13 @@ internal sealed class TestSuite : IDisposable
         ResourcePath = classPath;
         var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(classPath)).WithFilePath(classPath).GetCompilationUnitRoot();
         // we do lazy loading to only load test case one times
-        testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, syntaxTree, includedTests));
+        testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, syntaxTree, includedTests, primitiveFilter));
     }
 
-    private IEnumerable<TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null)
+    private IEnumerable<TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null, bool primitiveFilter = false)
         => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-            .Where(FilterByTestCaseName(includedTests))
+            .Where(FilterByTestCaseName(includedTests, primitiveFilter))
             .Select(mi =>
             {
                 var lineNumber = syntaxTree != null ? GdUnitTestSuiteBuilder.TestCaseLineNumber(syntaxTree, mi.Name) : -1;
@@ -53,16 +55,27 @@ internal sealed class TestSuite : IDisposable
             })
             .ToList();
 
-    private Func<MethodInfo, bool> FilterByTestCaseName(IEnumerable<string>? includedTests) =>
-        (mi) => includedTests?.Any((testName) =>
+    /// <summary>
+    /// filters test by given list, if primitiveFilter is set we do simply filter by test name ignoring the arguments
+    /// TODO: the primitiveFilter is just a temporary workaround to run selective c# tests from Godot Editor
+    /// </summary>
+    /// <param name="includedTests"></param>
+    /// <param name="primitiveFilter"></param>
+    /// <returns></returns>
+    private Func<MethodInfo, bool> FilterByTestCaseName(IEnumerable<string>? includedTests, bool primitiveFilter)
+        => mi =>
         {
+            var saveCulture = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
             var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                 .Cast<TestCaseAttribute>()
                 .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
-                .Select(attr => $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})")
-                .DefaultIfEmpty($"{mi.Name}");
-            return testCases.Contains(testName);
-        }) ?? true;
+                .Select(attr => primitiveFilter ? mi.Name : $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})")
+                .DefaultIfEmpty($"{mi.Name}")
+                .ToList();
+            Thread.CurrentThread.CurrentCulture = saveCulture;
+            return includedTests?.Any(testName => testCases.Contains(testName)) ?? true;
+        };
 
     public void Dispose()
     {
