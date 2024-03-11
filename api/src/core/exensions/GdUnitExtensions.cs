@@ -35,7 +35,7 @@ public static partial class GdUnitExtensions
     public static string Formatted(this object? value) => value.Format();
     public static string Formatted(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
     public static string Formatted(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formatted())).Indentation(indentation);
-    public static string Formatted(this Godot.Collections.Array args, int indentation = 0) => args.Cast<IEnumerable>().Formatted(indentation);
+    public static string Formatted(this Godot.Collections.Array args, int indentation = 0) => args.UnboxVariant()?.Formatted(indentation) ?? "<empty>";
     public static string Formatted(this object?[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formatted)).Indentation(indentation);
     public static string Formatted(this IEnumerable args, int indentation = 0) => string.Join(", ", args.Cast<object>().Select(Formatted)).Indentation(indentation);
     public static string UnixFormat(this string value) => value.Replace("\r", string.Empty);

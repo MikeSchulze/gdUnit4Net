@@ -25,7 +25,7 @@ public static class GodotVariantExtensions
         return value;
     }
 
-    private static IDictionary<object, object?> UnboxVariant(this Godot.Collections.Dictionary dict)
+    private static Dictionary<object, object?> UnboxVariant(this Godot.Collections.Dictionary dict)
     {
         var unboxed = new Dictionary<object, object?>();
         foreach (var kvp in dict)
@@ -33,7 +33,7 @@ public static class GodotVariantExtensions
         return unboxed;
     }
 
-    private static ICollection<object?> UnboxVariant(this Godot.Collections.Array values)
+    private static List<object?> UnboxVariant(this Godot.Collections.Array values)
     {
         var unboxed = new List<object?>();
         foreach (var value in values)
@@ -41,7 +41,7 @@ public static class GodotVariantExtensions
         return unboxed;
     }
 
-    private static ICollection<object?> UnboxVariant(this Variant[] values)
+    private static List<object?> UnboxVariant(this Variant[] values)
     {
         var unboxed = new List<object?>();
         foreach (var value in values)

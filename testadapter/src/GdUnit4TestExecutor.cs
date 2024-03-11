@@ -12,14 +12,14 @@ using GdUnit4.TestAdapter.Discovery;
 using GdUnit4.TestAdapter.Settings;
 
 [ExtensionUri(ExecutorUri)]
-public class GdUnit4TestExecutor : ITestExecutor
+public class GdUnit4TestExecutor : ITestExecutor, IDisposable
 {
     ///<summary>
     /// The Uri used to identify the GdUnit4 Executor
     ///</summary>
     public const string ExecutorUri = "executor://GdUnit4.TestAdapter";
 
-    private Execution.ITestExecutor? executor;
+    private Execution.TestExecutor? executor;
 
     private IFrameworkHandle? frameworkHandle;
 
@@ -88,4 +88,9 @@ public class GdUnit4TestExecutor : ITestExecutor
         executor?.Cancel();
     }
 
+    public void Dispose()
+    {
+        executor?.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

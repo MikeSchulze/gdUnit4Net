@@ -214,7 +214,7 @@ public class GdUnitTestSuiteBuilder
                     // collect testcase if multiple TestCaseAttribute exists
                     var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                         .Cast<TestCaseAttribute>()
-                        .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                        .Where(attr => attr != null && attr.Arguments?.Length != 0)
                         .Select(attr => TestCase.BuildTestCaseName(attr.TestName ?? mi.Name, attr))
                         .ToList();
                     // create test

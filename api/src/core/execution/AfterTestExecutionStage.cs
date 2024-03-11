@@ -26,13 +26,13 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
         context.FireAfterTestEvent();
     }
 
-    private static TestStageAttribute? AfterTestAttribute(ExecutionContext context) => context.TestSuite.Instance
+    private static AfterTestAttribute? AfterTestAttribute(ExecutionContext context) => context.TestSuite.Instance
         .GetType()
         .GetMethods()
         .FirstOrDefault(m => m.IsDefined(typeof(AfterTestAttribute)))
         ?.GetCustomAttribute<AfterTestAttribute>();
 
-    private static TestStageAttribute? BeforeTestAttribute(ExecutionContext context) => context.TestSuite.Instance
+    private static BeforeTestAttribute? BeforeTestAttribute(ExecutionContext context) => context.TestSuite.Instance
         .GetType()
         .GetMethods()
         .FirstOrDefault(m => m.IsDefined(typeof(BeforeTestAttribute)))

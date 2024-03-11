@@ -45,7 +45,7 @@ internal sealed class TestCase
         return new object[] { input };
     }
 
-    private IEnumerable<object> InitialParameters()
+    private List<object> InitialParameters()
         => MethodInfo.GetParameters()
             .SelectMany(pi => pi.GetCustomAttributesData()
                 .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
@@ -55,13 +55,13 @@ internal sealed class TestCase
                     return attr.Constructor.Invoke(arguments);
                 }
             )
-         ).ToArray();
+         ).ToList();
 
     public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
 
     public static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
     {
-        if (attribute.Arguments.Any())
+        if (attribute.Arguments.Length > 0)
         {
             var saveCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
