@@ -63,7 +63,7 @@ The full guide to configure the settings can be found [here](https://learn.micro
     <RunConfiguration>
         <MaxCpuCount>1</MaxCpuCount>
         <ResultsDirectory>./TestResults</ResultsDirectory>
-        <TargetFrameworkVersion>net7.0</TargetFrameworkVersion>
+        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
         <TestSessionTimeout>180000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
         <EnvironmentVariables>
