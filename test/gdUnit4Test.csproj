@@ -5,7 +5,7 @@
         <Copyright>© 2024 Mike Schulze</Copyright>
         <Authors>Mike Schulze</Authors>
 
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0</TargetFrameworks>
         <LangVersion>11.0</LangVersion>
         <Nullable>enable</Nullable>
         <NullableReferenceTypes>true</NullableReferenceTypes>

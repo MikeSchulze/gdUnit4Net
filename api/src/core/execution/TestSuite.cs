@@ -44,7 +44,7 @@ internal sealed class TestSuite : IDisposable
         testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, syntaxTree, includedTests, primitiveFilter));
     }
 
-    private IEnumerable<TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null, bool primitiveFilter = false)
+    private List<TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null, bool primitiveFilter = false)
         => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
             .Where(FilterByTestCaseName(includedTests, primitiveFilter))
@@ -69,7 +69,7 @@ internal sealed class TestSuite : IDisposable
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
             var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                 .Cast<TestCaseAttribute>()
-                .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                .Where(attr => attr != null && attr.Arguments?.Length != 0)
                 .Select(attr => primitiveFilter ? mi.Name : $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})")
                 .DefaultIfEmpty($"{mi.Name}")
                 .ToList();

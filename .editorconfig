@@ -484,3 +484,6 @@ dotnet_diagnostic.CA1311.severity = none
 
 # Default severity for analyzer diagnostics with category 'Usage'
 dotnet_analyzer_diagnostic.category-Usage.severity = warning
+
+# allow constant arrays as arguments
+dotnet_diagnostic.CA1861.severity = none

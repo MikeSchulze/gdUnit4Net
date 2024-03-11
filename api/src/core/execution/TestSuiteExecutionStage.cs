@@ -13,16 +13,16 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         AfterTestStage = new AfterTestExecutionStage(testSuite);
     }
 
-    private IExecutionStage BeforeStage
+    private BeforeExecutionStage BeforeStage
     { get; set; }
 
-    private IExecutionStage AfterStage
+    private AfterExecutionStage AfterStage
     { get; set; }
 
-    private IExecutionStage BeforeTestStage
+    private BeforeTestExecutionStage BeforeTestStage
     { get; set; }
 
-    private IExecutionStage AfterTestStage
+    private AfterTestExecutionStage AfterTestStage
     { get; set; }
 
     public async Task Execute(ExecutionContext testSuiteContext)

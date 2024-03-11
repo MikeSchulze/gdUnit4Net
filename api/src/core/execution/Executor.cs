@@ -132,7 +132,7 @@ public sealed partial class Executor : Godot.RefCounted, IExecutor
         // handle unexpected exceptions
         catch (Exception e)
         {
-            Console.Error.WriteLine("Unexpected Exception: %s \nStackTrace: %s", e.Message, e.StackTrace);
+            Console.Error.WriteLine($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
         }
         finally
         {

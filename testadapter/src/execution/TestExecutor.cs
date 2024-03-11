@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using GdUnit4.TestAdapter.Settings;
 
-internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor, IDisposable
+internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 {
     private const string TempTestRunnerDir = "gdunit4_testadapter";
 
@@ -47,7 +47,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor, IDisposabl
             .ToDictionary(group => group.Key, group => group.ToList());
 
         var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
-        _ = workingDirectory ?? throw new ArgumentNullException(nameof(workingDirectory), "Cannot determine the godot.project!");
+        _ = workingDirectory ?? throw new InvalidOperationException($"Cannot determine the godot.project! The workingDirectory is not set");
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
 
         frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run tests -------->");

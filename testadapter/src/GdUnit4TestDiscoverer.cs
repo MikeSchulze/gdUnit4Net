@@ -73,7 +73,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                         // Collect parameterized tests or build a single test
                         mi.GetCustomAttributes(typeof(TestCaseAttribute))
                             .Cast<TestCaseAttribute>()
-                            .Where(attr => attr != null && (attr.Arguments?.Any() ?? false))
+                            .Where(attr => attr != null && attr.Arguments?.Length != 0)
                             .Select(attr =>
                             {
                                 var saveCulture = Thread.CurrentThread.CurrentCulture;

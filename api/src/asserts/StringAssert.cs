@@ -14,7 +14,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert ContainsIgnoringCase(string expected)
     {
-        if (Current == null || !Current.ToLower().Contains(expected.ToLower()))
+        if (Current == null || !Current.ToLower().Contains(expected.ToLower(), System.StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.ContainsIgnoringCase(Current, expected), Current, expected);
         return this;
     }
@@ -102,7 +102,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert NotContainsIgnoringCase(string expected)
     {
-        if (Current != null && Current.ToLower().Contains(expected.ToLower()))
+        if (Current != null && Current.ToLower().Contains(expected.ToLower(), System.StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.NotContainsIgnoringCase(Current, expected), Current, expected);
         return this;
     }

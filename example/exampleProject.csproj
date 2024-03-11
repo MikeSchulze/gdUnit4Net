@@ -1,7 +1,7 @@
 <Project Sdk="Godot.NET.Sdk/4.2.1">
   <Import Project="../PackageVersions.props" />
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

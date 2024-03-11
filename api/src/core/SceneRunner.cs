@@ -110,7 +110,7 @@ internal sealed class SceneRunner : ISceneRunner
     /// </summary>
     /// <param name="inputEvent"></param>
     /// <returns></returns>
-    private ISceneRunner HandleInputEvent(InputEvent inputEvent)
+    private SceneRunner HandleInputEvent(InputEvent inputEvent)
     {
         if (inputEvent is InputEventMouse ie)
             Input.WarpMouse(ie.Position);
