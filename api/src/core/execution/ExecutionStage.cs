@@ -62,21 +62,20 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         }
         catch (TargetInvocationException e)
         {
-            var baseException = e.GetBaseException();
-            if (baseException is TestFailedException ex)
+            if (e.GetBaseException() is TestFailedException ex)
             {
                 ReportAsFailure(context, ex);
             }
             else
             {
-                // unexpected exceptions
-                ReportAsException(context, baseException);
+                // handle unexpected exceptions
+                ReportUnexpectedException(context, e);
             }
         }
         // unexpected exceptions
         catch (Exception e)
         {
-            ReportAsException(context, e);
+            ReportUnexpectedException(context, e);
         }
     }
 
@@ -86,11 +85,12 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             context.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, e.LineNumber, e.Message));
     }
 
-    private static void ReportAsException(ExecutionContext context, Exception e)
+    private static void ReportUnexpectedException(ExecutionContext context, Exception exception)
     {
+        var e = exception.InnerException ?? exception.GetBaseException();
         var stack = new StackTrace(e, true);
         var lineNumber = ScanFailureLineNumber(stack);
-        context.ReportCollector.Consume(new TestReport(TestReport.ReportType.ABORT, lineNumber, e.Message));
+        context.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, lineNumber, e.Message));
     }
 
     private static int ScanFailureLineNumber(StackTrace stack)

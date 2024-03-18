@@ -20,11 +20,11 @@ public class AssertionsTest
     public void AssertThatVariants()
     {
         // Godot number Variants
-        AssertObject(AssertThat(Variant.From((sbyte)-1))).IsInstanceOf<INumberAssert<long>>();
-        AssertObject(AssertThat(Variant.From(11))).IsInstanceOf<INumberAssert<long>>();
-        AssertObject(AssertThat(Variant.From(12L))).IsInstanceOf<INumberAssert<long>>();
-        AssertObject(AssertThat(Variant.From(1.4f))).IsInstanceOf<INumberAssert<double>>();
-        AssertObject(AssertThat(Variant.From(1.5d))).IsInstanceOf<INumberAssert<double>>();
+        AssertObject(AssertThat(Variant.From((sbyte)-1))).IsInstanceOf<INumberAssert<int>>();
+        AssertObject(AssertThat(Variant.From(11))).IsInstanceOf<INumberAssert<int>>();
+        AssertObject(AssertThat(Variant.From(12L))).IsInstanceOf<INumberAssert<int>>();
+        AssertObject(AssertThat(Variant.From(1.4f))).IsInstanceOf<INumberAssert<float>>();
+        AssertObject(AssertThat(Variant.From(1.5d))).IsInstanceOf<INumberAssert<float>>();
     }
 
     [TestCase]

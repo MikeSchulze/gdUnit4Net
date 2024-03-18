@@ -350,11 +350,17 @@ internal sealed class SceneRunner : ISceneRunner
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
 
+
     public Variant Invoke(string name, params Variant[] args)
+        => GodotObjectExtensions.Invoke(CurrentScene, name, args)
+            .GetAwaiter()
+            .GetResult()
+            .ToVariant();
+
+    public async Task<Variant> InvokeAsync(string name, params Variant[] args)
     {
-        if (!CurrentScene.HasMethod(name))
-            throw new MissingMethodException($"The method '{name}' not exist on loaded scene.");
-        return CurrentScene.Call(name, args);
+        var result = await GodotObjectExtensions.Invoke(CurrentScene, name, args);
+        return result.ToVariant();
     }
 
     public dynamic? GetProperty(string name)

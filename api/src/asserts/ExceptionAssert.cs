@@ -1,6 +1,8 @@
 namespace GdUnit4.Asserts;
 using System;
-
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.ExceptionServices;
 
 using Exceptions;
 
@@ -14,7 +16,11 @@ internal sealed class ExceptionAssert<T> : IExceptionAssert
     {
         try
         { action.Invoke(); }
-        catch (Exception e) { Current = e; }
+        catch (Exception e)
+        {
+            var capturedException = ExceptionDispatchInfo.Capture(e.InnerException ?? e);
+            Current = capturedException.SourceException;
+        }
     }
 
     public ExceptionAssert(Exception e) => Current = e;
@@ -32,6 +38,25 @@ internal sealed class ExceptionAssert<T> : IExceptionAssert
         var current = Current?.Message.RichTextNormalize() ?? "";
         if (!current.Equals(message, StringComparison.Ordinal))
             ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
+        return this;
+    }
+
+    public IExceptionAssert HasFileLineNumber(int lineNumber)
+    {
+        var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+        var currentLine = stackFrame?.GetFileLineNumber();
+        if (currentLine != lineNumber)
+            ThrowTestFailureReport(AssertFailures.IsEqual(currentLine, lineNumber));
+        return this;
+    }
+
+    public IExceptionAssert HasFileName(string fileName)
+    {
+        var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+        var currentFileName = stackFrame?.GetFileName() ?? "";
+        var fullPath = Path.GetFullPath(fileName);
+        if (!currentFileName.Equals(fullPath, StringComparison.Ordinal))
+            ThrowTestFailureReport(AssertFailures.IsEqual(currentFileName ?? "", fullPath));
         return this;
     }
 
