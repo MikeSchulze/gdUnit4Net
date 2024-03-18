@@ -221,21 +221,37 @@ public static class GodotObjectExtensions
 
     internal static async Task<object?> Invoke(object instance, string methodName, params Variant[] args)
     {
-        if (instance is GodotObject goi && goi.HasMethod(methodName))
+        // if the instance has an GDScript attached we have to use the Godot `Call` method
+        if (instance is GodotObject goi && goi.GetScript().UnboxVariant() is GDScript)
         {
+            if (!goi.HasMethod(methodName))
+                throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
             var current = goi.Call(methodName, args);
-            if (current.VariantType != Variant.Type.Nil && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
+            if (current.VariantType == Variant.Type.Object && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
             {
                 var results = await goi.ToSignal(current.As<GodotObject>(), "completed");
                 return results[0].UnboxVariant();
             }
             return current;
         }
-
-        object?[] parameters = args.UnboxVariant()?.ToArray() ?? Array.Empty<object>();
-        var methodInfo = instance.GetType().GetMethod(methodName);
-
-        var result = methodInfo!.Invoke(instance, parameters);
+        // for C# implementations we use Invoke
+        var mi = instance.GetType().GetMethod(methodName)
+             ?? throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
+        object?[]? parameters = args.Length == 0 ? Array.Empty<object>() : args.UnboxVariant()?.ToArray();
+        object? result;
+        var parameterInfo = mi.GetParameters();
+        if (mi.IsStatic == false)
+        {
+            result = parameterInfo.Length == 0
+                ? mi.Invoke(instance, null)
+                : mi.Invoke(instance, parameters);
+        }
+        else
+        {
+            result = parameterInfo.Length == 0
+                ? mi.Invoke(null, null)
+                : mi.Invoke(null, parameters);
+        }
         if (result is Task task)
         {
             await task.ConfigureAwait(false);

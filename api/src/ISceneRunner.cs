@@ -228,6 +228,15 @@ public interface ISceneRunner : IDisposable
     public Variant Invoke(string name, params Variant[] args);
 
     /// <summary>
+    /// Invokes an async method by given name and arguments.
+    /// </summary>
+    /// <param name="name">The name of method to invoke</param>
+    /// <param name="args">The function arguments</param>
+    /// <returns>The return value of invoked method</returns>
+    /// <exception cref="MissingMethodException"/>
+    public Task<Variant> InvokeAsync(string name, params Variant[] args);
+
+    /// <summary>
     /// Returns the value of the property with the specified name.
     /// </summary>
     /// <param name="name">The name of the property.</param>

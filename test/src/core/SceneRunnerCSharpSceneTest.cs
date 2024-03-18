@@ -65,7 +65,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertString(sceneRunner.Invoke("Add", 10, 12).ToString()).IsEqual("22");
         AssertThrown(() => sceneRunner.Invoke("Sub", 12, 10))
             .IsInstanceOf<System.MissingMethodException>()
-            .HasMessage("The method 'Sub' not exist on loaded scene.");
+            .HasMessage("The method 'Sub' not exist on this instance.");
     }
 
     [TestCase(Timeout = 1200)]

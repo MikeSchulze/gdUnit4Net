@@ -75,6 +75,8 @@ public static class GodotVariantExtensions
 
     private static Variant ToVariantByType(object obj)
     {
+        if (obj is Variant v)
+            return v;
         if (obj is System.Collections.IList list)
             return list.ToGodotArray();
 
@@ -88,8 +90,8 @@ public static class GodotVariantExtensions
     {
         Variant.Type.Nil => null,
         Variant.Type.Bool => v.AsBool(),
-        Variant.Type.Int => v.AsInt64(),
-        Variant.Type.Float => v.AsDouble(),
+        Variant.Type.Int => v.AsInt32(),
+        Variant.Type.Float => v.AsSingle(),
         Variant.Type.String => v.AsString(),
         Variant.Type.Vector2 => v.AsVector2(),
         Variant.Type.Vector2I => v.AsVector2I(),

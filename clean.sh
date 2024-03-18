@@ -4,6 +4,8 @@ rm -rf ./api/nupkg/net7.0/
 rm -rf ./api/nupkg/*.nupkg
 rm -rf ./api/obj
 
+rm -rf .godot
+
 rm -rf ./test/.godot
 rm -rf ./test/gdunit4_testadapter
 

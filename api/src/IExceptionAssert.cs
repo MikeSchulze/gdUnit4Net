@@ -14,6 +14,18 @@ public interface IExceptionAssert : IAssert
     IExceptionAssert IsInstanceOf<TExpectedType>();
 
 
+    /// <summary>
+    /// Verifies the exception is thrown at expected file line number.
+    /// </summary>
+    /// <param name="lineNumber"></param>
+    IExceptionAssert HasFileLineNumber(int lineNumber);
+
+    /// <summary>
+    /// Verifies the exception is thrown at expected file name.
+    /// </summary>
+    /// <param name="fileName"></param>
+    IExceptionAssert HasFileName(string fileName);
+
     /// <summary> Verifies that the exception has the expected property value.</summary>
     IExceptionAssert HasPropertyValue(string propertyName, object expected);
 }
