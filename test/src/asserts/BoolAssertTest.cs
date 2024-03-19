@@ -13,7 +13,7 @@ public class BoolAssertTest
         AssertBool(true).IsTrue();
         AssertThrown(() => AssertBool(false).IsTrue())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 14)
+            .HasFileLineNumber(14)
             .HasMessage("Expecting: 'True' but is 'False'");
     }
 
@@ -23,7 +23,7 @@ public class BoolAssertTest
         AssertBool(false).IsFalse();
         AssertThrown(() => AssertBool(true).IsFalse())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 24)
+            .HasFileLineNumber(24)
             .HasMessage("Expecting: 'False' but is 'True'");
     }
 
@@ -32,7 +32,7 @@ public class BoolAssertTest
     {
         AssertThrown(() => AssertBool(true).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 33)
+            .HasFileLineNumber(33)
             .StartsWithMessage("""
                 Expecting be <Null>:
                  but is
@@ -40,7 +40,7 @@ public class BoolAssertTest
                 """);
         AssertThrown(() => AssertBool(false).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 41)
+            .HasFileLineNumber(41)
             .StartsWithMessage("""
                 Expecting be <Null>:
                  but is
@@ -62,7 +62,7 @@ public class BoolAssertTest
         AssertBool(false).IsEqual(false);
         AssertThrown(() => AssertBool(true).IsEqual(false))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 63)
+            .HasFileLineNumber(63)
             .HasMessage("""
                 Expecting be equal:
                     'False' but is 'True'
@@ -76,7 +76,7 @@ public class BoolAssertTest
         AssertBool(false).IsNotEqual(true);
         AssertThrown(() => AssertBool(true).IsNotEqual(true))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 77)
+            .HasFileLineNumber(77)
             .HasMessage("""
                 Expecting be NOT equal:
                     'True' but is 'True'
@@ -94,7 +94,7 @@ public class BoolAssertTest
     public void OverrideFailureMessage()
         => AssertThrown(() => AssertBool(true).OverrideFailureMessage("Custom failure message").IsFalse())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 95)
+            .HasFileLineNumber(95)
             .HasMessage("Custom failure message");
 
     [TestCase]

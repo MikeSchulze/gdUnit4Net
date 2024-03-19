@@ -31,7 +31,7 @@ public class DictionaryAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNotNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 30)
+            .HasFileLineNumber(30)
             .HasMessage("Custom failure message");
 
     [TestCase]
@@ -54,7 +54,7 @@ public class DictionaryAssertTest
         current.Add("a3", 300);
         AssertThrown(() => AssertThat(current).IsEqual(expected))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 55)
+            .HasFileLineNumber(55)
             .HasMessage("""
                 Expecting be equal:
                     {"a1", "100"}; {"a2", "200"}

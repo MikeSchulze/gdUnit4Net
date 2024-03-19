@@ -82,7 +82,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
     private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
     {
         if (context.FailureReporting)
-            context.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, e.LineNumber, e.Message));
+            context.ReportCollector.Consume(new TestReport(e));
     }
 
     private static void ReportUnexpectedException(ExecutionContext context, Exception exception)

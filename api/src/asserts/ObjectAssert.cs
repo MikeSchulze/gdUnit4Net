@@ -5,7 +5,7 @@ internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
     {
         var type = current?.GetType();
         if (type != null && type.IsPrimitive)
-            ThrowTestFailureReport($"ObjectAssert initial error: current is primitive <{type}>", Current, null, 1);
+            ThrowTestFailureReport($"ObjectAssert initial error: current is primitive <{type}>", Current, null);
     }
 
     public IObjectAssert IsNotInstanceOf<TExpectedType>()
