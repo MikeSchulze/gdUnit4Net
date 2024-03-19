@@ -33,7 +33,7 @@ internal abstract class BaseTestExecutor
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
             return;
-        // we do log errors to stdout otherwise runing `dotnet test` from console will fail with exit code 1
+        // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Error: {message}");
     });
 
@@ -105,7 +105,7 @@ internal abstract class BaseTestExecutor
                     foreach (var report in e.Reports)
                     {
                         testResult.ErrorMessage = report.Message.RichTextNormalize();
-                        testResult.ErrorStackTrace = $"StackTrace    at {testCase.FullyQualifiedName}() in {testCase.CodeFilePath}:line {report.LineNumber}";
+                        testResult.ErrorStackTrace = report.StackTrace;
                     }
                     frameworkHandle.RecordResult(testResult);
                     frameworkHandle.RecordEnd(testCase, testResult.Outcome);

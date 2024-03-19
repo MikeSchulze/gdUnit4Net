@@ -9,10 +9,8 @@ public interface IExceptionAssert : IAssert
     /// <summary> Verifies that the exception message starts with the given value.</summary>
     IExceptionAssert StartsWithMessage(string value);
 
-
     /// <summary> Verifies that the exception message starts with the given value.</summary>
     IExceptionAssert IsInstanceOf<TExpectedType>();
-
 
     /// <summary>
     /// Verifies the exception is thrown at expected file line number.
@@ -21,7 +19,7 @@ public interface IExceptionAssert : IAssert
     IExceptionAssert HasFileLineNumber(int lineNumber);
 
     /// <summary>
-    /// Verifies the exception is thrown at expected file name.
+    /// Verifies the exception is thrown in expected file name.
     /// </summary>
     /// <param name="fileName"></param>
     IExceptionAssert HasFileName(string fileName);

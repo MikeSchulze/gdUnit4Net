@@ -47,12 +47,13 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
         return this;
     }
 
-#pragma warning disable IDE0060
-    protected void ThrowTestFailureReport(string message, object? current, object? expected, int stackFrameOffset = 0, int lineNumber = -1)
+
+#pragma warning disable IDE0060 // Remove unused parameter
+    protected void ThrowTestFailureReport(string message, object? current, object? expected)
+#pragma warning restore IDE0060 // Remove unused parameter
     {
-#pragma warning restore
         var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
         CurrentFailureMessage = failureMessage;
-        throw new TestFailedException(failureMessage, lineNumber);
+        throw new TestFailedException(failureMessage);
     }
 }

@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using GdUnit4.Exceptions;
+
+using Newtonsoft.Json;
 
 public sealed class TestReport : IEquatable<TestReport>
 {
@@ -19,18 +22,30 @@ public sealed class TestReport : IEquatable<TestReport>
         ABORT
     }
 
-    public TestReport(ReportType type, int lineNumber, string message)
+    [JsonConstructor]
+    public TestReport(ReportType type, int lineNumber, string message, string? stackTrace = null)
     {
         Type = type;
         LineNumber = lineNumber;
         Message = message.UnixFormat();
+        StackTrace = stackTrace;
+    }
+
+    public TestReport(TestFailedException e)
+    {
+        Type = ReportType.FAILURE;
+        LineNumber = e.LineNumber;
+        Message = e.Message;
+        StackTrace = e.StackTrace;
     }
 
     public ReportType Type { get; private set; }
 
-    public int LineNumber { get; set; }
+    public int LineNumber { get; set; } = -1;
 
     public string Message { get; private set; }
+
+    public string? StackTrace { get; set; }
 
     private static IEnumerable<ReportType> ErrorTypes => new[] { ReportType.TERMINATED, ReportType.INTERRUPTED, ReportType.ABORT };
 

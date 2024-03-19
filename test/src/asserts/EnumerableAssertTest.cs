@@ -19,7 +19,7 @@ public partial class EnumerableAssertTest
         // should fail because the current is not null
         AssertThrown(() => AssertArray(Array.Empty<object>()).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 20)
+            .HasFileLineNumber(20)
             .HasMessage("""
                     Expecting be <Null>:
                      but is
@@ -27,7 +27,7 @@ public partial class EnumerableAssertTest
                     """);
         AssertThrown(() => AssertArray(Array.Empty<int>()).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 28)
+            .HasFileLineNumber(28)
             .HasMessage("""
                     Expecting be <Null>:
                      but is
@@ -36,7 +36,7 @@ public partial class EnumerableAssertTest
         // with godot array
         AssertThrown(() => AssertArray(new Godot.Collections.Array()).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 37)
+            .HasFileLineNumber(37)
             .HasMessage("""
                     Expecting be <Null>:
                      but is
@@ -55,7 +55,7 @@ public partial class EnumerableAssertTest
         // should fail because the current is null
         AssertThrown(() => AssertArray(null).IsNotNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 56)
+            .HasFileLineNumber(56)
             .HasMessage("Expecting be NOT <Null>:");
     }
 
@@ -71,7 +71,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 3, 4, 2, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 72)
+            .HasFileLineNumber(72)
             .HasMessage("""
                     Expecting be equal:
                         [1, 2, 3, 4, 2, 5]
@@ -80,7 +80,7 @@ public partial class EnumerableAssertTest
                     """);
         AssertThrown(() => AssertArray(new Godot.Collections.Array(new Variant[] { 1, 2, 4, 5 })).IsEqual(new Godot.Collections.Array(new Variant[] { 1, 2, 3, 4, 2, 5 })))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 81)
+            .HasFileLineNumber(81)
             .HasMessage("""
                     Expecting be equal:
                         [1, 2, 3, 4, 2, 5]
@@ -89,7 +89,7 @@ public partial class EnumerableAssertTest
                     """);
         AssertThrown(() => AssertArray(null).IsEqual(Array.Empty<object>()))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 90)
+            .HasFileLineNumber(90)
             .HasMessage("""
                     Expecting be equal:
                         <Empty>
@@ -106,7 +106,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
                 .IsEqualIgnoringCase(new string[] { "This", "is", "an", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 106)
+            .HasFileLineNumber(106)
             .HasMessage("""
                     Expecting be equal (ignoring case):
                         ["This", "is", "an", "Message"]
@@ -116,7 +116,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(null)
                .IsEqualIgnoringCase(new string[] { "This", "is" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 116)
+            .HasFileLineNumber(116)
             .HasMessage("""
                     Expecting be equal (ignoring case):
                         ["This", "is"]
@@ -133,7 +133,7 @@ public partial class EnumerableAssertTest
         // should fail because the array  contains same elements
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).IsNotEqual(new int[] { 1, 2, 3, 4, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 134)
+            .HasFileLineNumber(134)
             .HasMessage("""
                     Expecting be NOT equal:
                         [1, 2, 3, 4, 5]
@@ -151,7 +151,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
                 .IsNotEqualIgnoringCase(new string[] { "This", "is", "a", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 151)
+            .HasFileLineNumber(151)
             .HasMessage("""
                     Expecting be NOT equal (ignoring case):
                         ["This", "is", "a", "Message"]
@@ -167,14 +167,14 @@ public partial class EnumerableAssertTest
         // should fail because the array is not empty it has a size of one
         AssertThrown(() => AssertArray(new int[] { 1 }).IsEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 168)
+            .HasFileLineNumber(168)
             .HasMessage("""
                     Expecting be empty:
                      but has size '1'
                     """);
         AssertThrown(() => AssertArray(null).IsEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 175)
+            .HasFileLineNumber(175)
             .HasMessage("""
                     Expecting be empty:
                      but is <Null>
@@ -189,7 +189,7 @@ public partial class EnumerableAssertTest
         // should fail because the array is empty
         AssertThrown(() => AssertArray(Array.Empty<int>()).IsNotEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 190)
+            .HasFileLineNumber(190)
             .HasMessage("""
                     Expecting being NOT empty:
                      but is empty
@@ -204,14 +204,14 @@ public partial class EnumerableAssertTest
         // should fail because the array has a size of 5
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).HasSize(4))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 205)
+            .HasFileLineNumber(205)
             .HasMessage("""
                     Expecting size:
                         '4' but is '5'
                     """);
         AssertThrown(() => AssertArray(null).HasSize(4))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 212)
+            .HasFileLineNumber(212)
             .HasMessage("""
                     Expecting size:
                         '4' but is unknown
@@ -227,7 +227,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 'xxx' and 'yyy'
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee" }).Contains(new string[] { "bbb", "xxx", "yyy" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 228)
+            .HasFileLineNumber(228)
             .HasMessage("""
                     Expecting contains elements:
                         ["aaa", "bbb", "ccc", "ddd", "eee"]
@@ -238,7 +238,7 @@ public partial class EnumerableAssertTest
                     """);
         AssertThrown(() => AssertArray(null).Contains(new string[] { "bbb", "xxx", "yyy" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 239)
+            .HasFileLineNumber(239)
             .HasMessage("""
                     Expecting contains elements:
                         <Null>
@@ -258,7 +258,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 7 and 6
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee" }).Contains("bbb", "xxx", "yyy"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 259)
+            .HasFileLineNumber(259)
             .HasMessage("""
                     Expecting contains elements:
                         ["aaa", "bbb", "ccc", "ddd", "eee"]
@@ -278,7 +278,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 7 and 6
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).Contains(new int[] { 2, 7, 6 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 279)
+            .HasFileLineNumber(279)
             .HasMessage("""
                     Expecting contains elements:
                         [1, 2, 3, 4, 5]
@@ -298,7 +298,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 7 and 6
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).Contains(2, 7, 6))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 299)
+            .HasFileLineNumber(299)
             .HasMessage("""
                     Expecting contains elements:
                         [1, 2, 3, 4, 5]
@@ -316,7 +316,7 @@ public partial class EnumerableAssertTest
         AssertArray(new string[] { "abc" }).ContainsExactly(new string[] { "abc" });
         AssertThrown(() => AssertArray(new string[] { "abc" }).ContainsExactly(new string[] { "abXc" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 317)
+            .HasFileLineNumber(317)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc"]
@@ -333,7 +333,7 @@ public partial class EnumerableAssertTest
         // should fail because if contains the same elements but in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly(new string[] { "abc", "xyz", "def" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 334)
+            .HasFileLineNumber(334)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "xyz"]
@@ -346,7 +346,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains more elements and in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "foo", "bar", "xyz" }).ContainsExactly(new string[] { "abc", "xyz", "def" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 347)
+            .HasFileLineNumber(347)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "foo", "bar", "xyz"]
@@ -359,7 +359,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains less elements and in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly(new string[] { "abc", "def", "bar", "foo", "xyz" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 360)
+            .HasFileLineNumber(360)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "xyz"]
@@ -370,7 +370,7 @@ public partial class EnumerableAssertTest
                     """);
         AssertThrown(() => AssertArray(null).ContainsExactly(new string[] { "abc", "def", "bar", "foo", "xyz" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 371)
+            .HasFileLineNumber(371)
             .HasMessage("""
                     Expecting contains exactly elements:
                         <Null>
@@ -388,7 +388,7 @@ public partial class EnumerableAssertTest
         AssertArray(new string[] { "abc" }).ContainsExactly("abc");
         AssertThrown(() => AssertArray(new string[] { "abc" }).ContainsExactly("abXc"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 389)
+            .HasFileLineNumber(389)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc"]
@@ -404,7 +404,7 @@ public partial class EnumerableAssertTest
         // should fail because if contains the same elements but in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly("abc", "xyz", "def"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 405)
+            .HasFileLineNumber(405)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "xyz"]
@@ -416,7 +416,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains more elements and in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "foo", "bar", "xyz" }).ContainsExactly("abc", "xyz", "def"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 417)
+            .HasFileLineNumber(417)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "foo", "bar", "xyz"]
@@ -428,7 +428,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains less elements and in a different order
         AssertThrown(() => AssertArray(new string[] { "abc", "def", "xyz" }).ContainsExactly("abc", "def", "bar", "foo", "xyz"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 429)
+            .HasFileLineNumber(429)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["abc", "def", "xyz"]
@@ -446,7 +446,7 @@ public partial class EnumerableAssertTest
         AssertArray(new int[] { 1 }).ContainsExactly(new int[] { 1 });
         AssertThrown(() => AssertArray(new int[] { 1 }).ContainsExactly(new int[] { 2 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 447)
+            .HasFileLineNumber(447)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1]
@@ -462,7 +462,7 @@ public partial class EnumerableAssertTest
         // should fail because if contains the same elements but in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 463)
+            .HasFileLineNumber(463)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5]
@@ -474,7 +474,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains more elements and in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5, 6, 7 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 475)
+            .HasFileLineNumber(475)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5, 6, 7]
@@ -486,7 +486,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains less elements and in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(new int[] { 1, 4, 3, 2, 5, 6, 7 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 487)
+            .HasFileLineNumber(487)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5]
@@ -504,7 +504,7 @@ public partial class EnumerableAssertTest
         AssertArray(new int[] { 1 }).ContainsExactly(1);
         AssertThrown(() => AssertArray(new int[] { 1 }).ContainsExactly(2))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 505)
+            .HasFileLineNumber(505)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1]
@@ -520,7 +520,7 @@ public partial class EnumerableAssertTest
         // should fail because if contains the same elements but in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(1, 4, 3, 2, 5))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 521)
+            .HasFileLineNumber(521)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5]
@@ -532,7 +532,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains more elements and in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5, 6, 7 }).ContainsExactly(1, 4, 3, 2, 5))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 533)
+            .HasFileLineNumber(533)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5, 6, 7]
@@ -544,7 +544,7 @@ public partial class EnumerableAssertTest
         // should fail because it contains less elements and in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).ContainsExactly(1, 4, 3, 2, 5, 6, 7))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 545)
+            .HasFileLineNumber(545)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 3, 4, 5]
@@ -566,7 +566,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd" })
                 .ContainsExactlyInAnyOrder(new string[] { "xxx", "aaa", "yyy", "bbb", "ccc", "ddd" }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 566)
+            .HasFileLineNumber(566)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["aaa", "bbb", "ccc", "ddd"]
@@ -579,7 +579,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee", "fff" })
                 .ContainsExactlyInAnyOrder(new string[] { "fff", "aaa", "ddd", "bbb", "eee", }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 579)
+            .HasFileLineNumber(579)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["aaa", "bbb", "ccc", "ddd", "eee", "fff"]
@@ -591,7 +591,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(null)
                 .ContainsExactlyInAnyOrder(new string[] { "fff", "aaa", "ddd", "bbb", "eee", }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 591)
+            .HasFileLineNumber(591)
             .HasMessage("""
                     Expecting contains exactly elements:
                         <Null>
@@ -613,7 +613,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd" })
                 .ContainsExactlyInAnyOrder("xxx", "aaa", "yyy", "bbb", "ccc", "ddd"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 613)
+            .HasFileLineNumber(613)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["aaa", "bbb", "ccc", "ddd"]
@@ -626,7 +626,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new string[] { "aaa", "bbb", "ccc", "ddd", "eee", "fff" })
                 .ContainsExactlyInAnyOrder("fff", "aaa", "ddd", "bbb", "eee"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 626)
+            .HasFileLineNumber(626)
             .HasMessage("""
                     Expecting contains exactly elements:
                         ["aaa", "bbb", "ccc", "ddd", "eee", "fff"]
@@ -647,7 +647,7 @@ public partial class EnumerableAssertTest
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 4, 5 }).ContainsExactlyInAnyOrder(new int[] { 5, 3, 2, 4, 1, 9, 10 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 648)
+            .HasFileLineNumber(648)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 6, 4, 5]
@@ -661,7 +661,7 @@ public partial class EnumerableAssertTest
         //should fail because is contains the same elements but in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 9, 10, 4, 5 }).ContainsExactlyInAnyOrder(new int[] { 5, 3, 2, 4, 1 }))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 662)
+            .HasFileLineNumber(662)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 6, 9, 10, 4, 5]
@@ -684,7 +684,7 @@ public partial class EnumerableAssertTest
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 4, 5 }).ContainsExactlyInAnyOrder(5, 3, 2, 4, 1, 9, 10))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 685)
+            .HasFileLineNumber(685)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 6, 4, 5]
@@ -698,7 +698,7 @@ public partial class EnumerableAssertTest
         //should fail because is contains the same elements but in a different order
         AssertThrown(() => AssertArray(new int[] { 1, 2, 6, 9, 10, 4, 5 }).ContainsExactlyInAnyOrder(5, 3, 2, 4, 1))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 699)
+            .HasFileLineNumber(699)
             .HasMessage("""
                     Expecting contains exactly elements:
                         [1, 2, 6, 9, 10, 4, 5]
@@ -742,7 +742,7 @@ public partial class EnumerableAssertTest
         // must fail we can't extract from a null instance
         AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 743)
+            .HasFileLineNumber(743)
             .HasMessage("""
                     Expecting contains exactly elements:
                         <Null>
@@ -799,7 +799,7 @@ public partial class EnumerableAssertTest
                 .ExtractV(Extr("GetName"), Extr("GetValue"), Extr("GetX"))
                 .ContainsExactly(Tuple("A", 10, null)))
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 798)
+            .HasFileLineNumber(798)
             .HasMessage("""
                     Expecting contains exactly elements:
                         <Null>
@@ -885,7 +885,7 @@ public partial class EnumerableAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasPropertyValue("LineNumber", 884)
+            .HasFileLineNumber(884)
             .HasMessage("Custom failure message");
 
     [TestCase]
