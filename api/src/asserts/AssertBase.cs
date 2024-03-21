@@ -27,6 +27,7 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
             ThrowTestFailureReport(AssertFailures.IsNotEqual(Current, expected), Current, expected);
         return this;
     }
+
     public IAssertBase<TValue> IsNull()
     {
         if (Current != null)

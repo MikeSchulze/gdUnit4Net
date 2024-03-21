@@ -154,10 +154,7 @@ internal sealed class EnumerableAssert : AssertBase<IEnumerable>, IEnumerableAss
     }
 
     public new IEnumerableAssert OverrideFailureMessage(string message)
-    {
-        base.OverrideFailureMessage(message);
-        return this;
-    }
+        => (IEnumerableAssert)base.OverrideFailureMessage(message);
 
     private List<object?> ArrayContainsAll(IEnumerable<object?>? left, IEnumerable<object?>? right)
     {

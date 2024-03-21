@@ -3,6 +3,8 @@ namespace GdUnit4.Tests.Asserts;
 
 using System.Threading.Tasks;
 
+using GdUnit4.Asserts;
+
 using static Assertions;
 
 
@@ -55,10 +57,11 @@ public partial class SignalAssertTest
                 .IsInstanceOf<Exceptions.TestFailedException>()
                 .HasMessage("""
                     Expecting do emitting signal:
-                        "SignalC(abc, 101)"
+                        "SignalC("abc", 101)"
                      by
-                        <GdUnit4.Tests.Asserts.SignalAssertTest+TestEmitter>
-                    """));
+                        $obj
+                    """
+                        .Replace("$obj", AssertFailures.AsObjectId(node))));
     }
 
     [TestCase]
@@ -77,8 +80,9 @@ public partial class SignalAssertTest
                     Expecting do NOT emitting signal:
                         "visibility_changed()"
                      by
-                        <Godot.Node2D>
-                    """));
+                        $obj
+                    """
+                        .Replace("$obj", AssertFailures.AsObjectId(node))));
     }
 
     [TestCase]
@@ -100,8 +104,9 @@ public partial class SignalAssertTest
                     Expecting do emitting signal:
                         "visibility_changed()"
                      by
-                        <Godot.Node2D>
-                    """));
+                        $obj
+                    """
+                        .Replace("$obj", AssertFailures.AsObjectId(node))));
 
         node.Show();
         await AssertSignal(node).IsEmitted("draw").WithTimeout(200);
@@ -125,7 +130,8 @@ public partial class SignalAssertTest
                 Expecting signal exists:
                     "not_existing_signal()"
                  on
-                    <Godot.Node2D>
-                """);
+                    $obj
+                """
+                    .Replace("$obj", AssertFailures.AsObjectId(node)));
     }
 }

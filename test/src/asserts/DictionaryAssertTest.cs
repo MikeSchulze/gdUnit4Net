@@ -4,15 +4,53 @@ namespace GdUnit4.Tests.Asserts;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
+
+using Exceptions;
+
+using GdUnit4.Asserts;
 
 using static Assertions;
-using Exceptions;
 
 [TestSuite]
 public class DictionaryAssertTest
 {
-    // TestSuite generated from
-    private const string SourceClazzPath = "D:/develop/workspace/gdUnit4Mono/src/asserts/DictionaryAssert.cs";
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Mono/issues/46
+    private static readonly object[] TestDataPointA = new object[]{
+            // system dictionary types
+            new object[]{new Hashtable(){{"a1", new object()}}},
+            new object[]{new Dictionary<string, object>(){{"a1", new object()}}},
+            new object[]{new SortedDictionary<string, object>(){{"a1", new object()}}},
+            // Godot dictionary types
+            new object[]{new Godot.Collections.Dictionary<string, Godot.Variant>(){{"a1", new Godot.RefCounted()}}},
+            new object[]{new Godot.Collections.Dictionary(){{"a1", new Godot.RefCounted()}}}
+        };
+
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Mono/issues/46
+    public static readonly object[] TestDataPointB = new object[]{
+            // system dictionary types
+            new object[]{new Hashtable(){{"a1", 100}, {"a2", 200}}, new Hashtable(){{"a1", 100}, {"a2", 200}}},
+            new object[]{new Dictionary<string, long>(){{"a1", 100},{"a2", 200}}, new Dictionary<string, long>(){{"a1", 100},{"a2", 200}}},
+            new object[]{new SortedDictionary<string, long>(){{"a1", 100},{"a2", 200}}, new SortedDictionary<string, long>(){{"a1", 100},{"a2", 200}}},
+            // Godot dictionary types
+            new object[]{new Godot.Collections.Dictionary(){{"a1", 100}, {"a2", 200 }}, new Godot.Collections.Dictionary(){{"a1", 100}, {"a2", 200 }}},
+            new object[]{new Godot.Collections.Dictionary<string, long>{{"a1", 100},{"a2", 200}}, new Godot.Collections.Dictionary<string, long>(){{"a1", 100},{"a2", 200}}},
+        };
+    private static readonly string[] TEST_KEYS = new string[]{
+        new("a1"),
+        new("aa2"),
+        new("aaa3"),
+        new("aaaa4"),
+    };
+
+    private static readonly object[] TestDataPointKeys = new object[]{
+            // system dictionary types
+            new ListDictionary(){{TEST_KEYS[0], 100}, {TEST_KEYS[1], 200}},
+            new Dictionary<string, int>(){{TEST_KEYS[0], 100}, {TEST_KEYS[1], 200}},
+            // Godot dictionary types
+            new Godot.Collections.Dictionary(){{TEST_KEYS[0], 100}, {TEST_KEYS[1], 200}},
+            new Godot.Collections.Dictionary<Godot.Variant, int>(){{TEST_KEYS[0], 100}, {TEST_KEYS[1], 200}},
+        };
 
     [TestCase]
     public void VerifyDictionaryTypes()
@@ -31,7 +69,7 @@ public class DictionaryAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNotNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(30)
+            .HasFileLineNumber(68)
             .HasMessage("Custom failure message");
 
     [TestCase]
@@ -54,7 +92,7 @@ public class DictionaryAssertTest
         current.Add("a3", 300);
         AssertThrown(() => AssertThat(current).IsEqual(expected))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(55)
+            .HasFileLineNumber(93)
             .HasMessage("""
                 Expecting be equal:
                     {"a1", "100"}; {"a2", "200"}
@@ -338,6 +376,41 @@ public class DictionaryAssertTest
              .HasMessage("Expecting be NOT <Null>:");
     }
 
+    [TestCase(0, TestName = "IDictionary")]
+    [TestCase(1, TestName = "IDictionary<string, int>")]
+    [TestCase(2, TestName = "GodotDictionary")]
+    [TestCase(3, TestName = "GodotDictionary<string, int>")]
+    public void ContainsSameKeys(int dataPointIndex)
+    {
+        dynamic current = TestDataPointKeys[dataPointIndex];
+        var key1 = TEST_KEYS[0];
+        var key2 = TEST_KEYS[1];
+        var key3 = TEST_KEYS[2];
+        var key4 = TEST_KEYS[3];
+        AssertThat(current).ContainsSameKeys(key1, key2);
+        // we handle strings by equal regardless of object reference
+        var key_1 = new string(key1.ToCharArray());
+        AssertThat(current).ContainsSameKeys(key_1, key2);
+
+        AssertThrown(() => AssertThat(current).ContainsSameKeys(key4, key2, key3, key1))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting contains elements:
+                    [$key1, $key2]
+                 do contains (in any order)
+                    [$key4, $key2, $key3, $key1]
+                 but could not find elements:
+                    [$key4, $key3]
+                """
+                    .Replace("$key1", key1.Formatted())
+                    .Replace("$key2", key2.Formatted())
+                    .Replace("$key3", key3.Formatted())
+                    .Replace("$key4", key4.Formatted()));
+        AssertThrown(() => AssertThat((IDictionary?)null).ContainsSameKeys(key1))
+             .IsInstanceOf<TestFailedException>()
+             .HasMessage("Expecting be NOT <Null>:");
+    }
+
     [TestCase]
     public void NotContainsKeys()
     {
@@ -373,6 +446,42 @@ public class DictionaryAssertTest
              .HasMessage("Expecting be NOT <Null>:");
     }
 
+
+    [TestCase(0, TestName = "IDictionary")]
+    [TestCase(1, TestName = "IDictionary<string, int>")]
+    [TestCase(2, TestName = "GodotDictionary")]
+    [TestCase(3, TestName = "GodotDictionary<string, int>")]
+    public void NotContainsSameKeys(int dataPointIndex)
+    {
+        dynamic current = TestDataPointKeys[dataPointIndex];
+        var key1 = TEST_KEYS[0];
+        var key2 = TEST_KEYS[1];
+        var key3 = TEST_KEYS[2];
+        var key4 = TEST_KEYS[3];
+        AssertThat(current).NotContainsSameKeys(key3, key4);
+        // we handle strings by equal regardless of object reference
+        var key_3 = new string(key3.ToCharArray());
+        AssertThat(current).NotContainsSameKeys(key_3, key4);
+
+        AssertThrown(() => AssertThat(current).NotContainsSameKeys(key4, key2, key3, key1))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting:
+                    [$key1, $key2]
+                 do NOT contains (in any order)
+                    [$key4, $key2, $key3, $key1]
+                 but found elements:
+                    [$key2, $key1]
+                """
+                    .Replace("$key1", key1.Formatted())
+                    .Replace("$key2", key2.Formatted())
+                    .Replace("$key3", key3.Formatted())
+                    .Replace("$key4", key4.Formatted()));
+        AssertThrown(() => AssertThat((IDictionary?)null).NotContainsSameKeys(key1))
+             .IsInstanceOf<TestFailedException>()
+             .HasMessage("Expecting be NOT <Null>:");
+    }
+
     [TestCase]
     public void ContainsKeyValue()
     {
@@ -399,5 +508,81 @@ public class DictionaryAssertTest
         AssertThrown(() => AssertThat((IDictionary?)null).ContainsKeyValue("a1", 200L))
              .IsInstanceOf<TestFailedException>()
              .HasMessage("Expecting be NOT <Null>:");
+    }
+
+    [TestCase(0, TestName = "Hashtable")]
+    [TestCase(1, TestName = "Dictionary<string, object>")]
+    [TestCase(2, TestName = "SortedDictionary<string, object>")]
+    [TestCase(3, TestName = "GodotDictionary<string, Godot.Variant>")]
+    [TestCase(4, TestName = "GodotDictionary")]
+    public void ContainsSameKeyValue(int dataPointIndex)
+    {
+        var dataPoint = TestDataPointA[dataPointIndex] as object[];
+        dynamic current = dataPoint![0];
+        dynamic same = current["a1"];
+        var notSame = new Godot.RefCounted();
+
+        AssertThat(current).ContainsSameKeyValue("a1", same);
+
+        AssertThrown(() => AssertThat(current).ContainsSameKeyValue("a1", notSame))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting do contain entry:
+                    {"a1", $obj1}
+                 found key but value is
+                    $obj2
+                """
+                    .Replace("$obj1", AssertFailures.AsObjectId(notSame))
+                    .Replace("$obj2", AssertFailures.AsObjectId(same)));
+        AssertThrown(() => AssertThat(current).ContainsSameKeyValue("a3", notSame))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting do contain entry:
+                    {"a3", $obj1}
+                """.Replace("$obj1", AssertFailures.AsObjectId(notSame)));
+    }
+
+    [TestCase(0, TestName = "Hashtable")]
+    [TestCase(1, TestName = "Dictionary<string, long>")]
+    [TestCase(2, TestName = "SortedDictionary<string, long>")]
+    [TestCase(3, TestName = "GodotCollectionsDictionary")]
+    [TestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
+    public void IsSame(int dataPointIndex)
+    {
+        var dataPoint = TestDataPointB[dataPointIndex] as object[];
+        dynamic current = dataPoint![0];
+        dynamic other = dataPoint![1];
+
+        AssertThat(current).IsSame(current);
+        AssertThrown(() => AssertThat(current).IsSame(other))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting be same:
+                    {"a1", 100}; {"a2", 200}
+                 to refer to the same object
+                    {"a1", 100}; {"a2", 200}
+                """);
+    }
+
+    [TestCase(0, TestName = "Hashtable")]
+    [TestCase(1, TestName = "Dictionary<string, long>")]
+    [TestCase(2, TestName = "SortedDictionary<string, long>")]
+    [TestCase(3, TestName = "GodotCollectionsDictionary")]
+    [TestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
+    public void IsNotSame(int dataPointIndex)
+    {
+        var dataPoint = TestDataPointB[dataPointIndex] as object[];
+        dynamic current = dataPoint![0];
+        dynamic other = dataPoint![1];
+
+        AssertThat(current).IsNotSame(other);
+        AssertThrown(() => AssertThat(current).IsNotSame(current))
+            .IsInstanceOf<TestFailedException>()
+            .HasMessage("""
+                Expecting be same:
+                    {"a1", 100}; {"a2", 200}
+                 to refer to the same object
+                    {"a1", 100}; {"a2", 200}
+                """);
     }
 }

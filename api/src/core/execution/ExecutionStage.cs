@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 using Exceptions;
+using System.Runtime.ExceptionServices;
+using static GdUnit4.TestReport;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
@@ -46,7 +48,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             // if the method is defined asynchronously, the return type must be a Task
             if (IsAsync != IsTask)
             {
-                context.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, ExecutionLineNumber(context), $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
+                context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, ExecutionLineNumber(context), $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
                 return;
             }
             await ExecuteStage(context);
@@ -54,7 +56,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         catch (ExecutionTimeoutException e)
         {
             if (context.FailureReporting)
-                context.ReportCollector.Consume(new TestReport(TestReport.ReportType.INTERRUPTED, e.LineNumber, e.Message));
+                context.ReportCollector.Consume(new TestReport(ReportType.INTERRUPTED, e.LineNumber, e.Message));
         }
         catch (TestFailedException e)
         {
@@ -87,21 +89,19 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private static void ReportUnexpectedException(ExecutionContext context, Exception exception)
     {
-        var e = exception.InnerException ?? exception.GetBaseException();
-        var stack = new StackTrace(e, true);
+        var ei = ExceptionDispatchInfo.Capture(exception.InnerException ?? exception);
+        var stack = new StackTrace(ei.SourceException, true);
         var lineNumber = ScanFailureLineNumber(stack);
-        context.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, lineNumber, e.Message));
+        context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, lineNumber, ei.SourceException.Message, stack.ToString()));
     }
 
     private static int ScanFailureLineNumber(StackTrace stack)
     {
         foreach (var frame in stack.GetFrames().Reverse())
         {
-            var fileName = frame.GetFileName();
-            if (fileName == null)
+            if (frame.GetFileName() == null)
                 continue;
-            var isTestCase = frame.GetMethod()?.IsDefined(typeof(TestCaseAttribute)) ?? false;
-            if (isTestCase)
+            if (frame.GetMethod()?.IsDefined(typeof(TestCaseAttribute)) ?? false)
                 return frame.GetFileLineNumber();
         }
         return stack.FrameCount > 1 ? stack.GetFrame(1)!.GetFileLineNumber() : -1;

@@ -1,7 +1,9 @@
 namespace GdUnit4;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using Godot;
 
@@ -10,8 +12,15 @@ using Godot;
 /// </summary>
 public static class GodotVariantExtensions
 {
+
+    public static bool IsGenericGodotDictionary(this Type type) => type.GetInterfaces()
+                .Where(interfaceType => interfaceType.FullName == "Godot.Collections.IGenericGodotDictionary")
+                .Any();
+
     public static dynamic? UnboxVariant<T>(this T? value)
     {
+        if (value == null)
+            return null;
         if (value is Variant v)
             return v.UnboxVariant();
         if (value is StringName sn)
@@ -20,9 +29,45 @@ public static class GodotVariantExtensions
             return gd.UnboxVariant();
         if (value is Godot.Collections.Array ga)
             return ga.UnboxVariant();
+        if (value.GetType().IsGenericGodotDictionary() && value is IEnumerable godotDict)
+            return godotDict.UnboxGenericGodotDictionary();
         if (value is Variant[] parameters)
             return parameters.UnboxVariant();
         return value;
+    }
+
+    private static IDictionary UnboxGenericGodotDictionary(this IEnumerable value)
+    {
+        var type = value.GetType()!;
+        if (!type.IsGenericGodotDictionary())
+            throw new InvalidOperationException($"The given value {value} is not Godot.Collections.IGenericGodotDictionary!");
+        try
+        {
+            var dictionaryTypeArgs = type.GetGenericArguments();
+            var keyType = dictionaryTypeArgs[0];
+            var valueType = dictionaryTypeArgs[1];
+
+            // Get the key and value properties of KeyValuePair<,> using reflection
+            var typedDictionary = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(keyType, valueType))!;
+            var keyValuePairType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+            var keyProperty = keyValuePairType.GetProperty("Key")!;
+            var valueProperty = keyValuePairType.GetProperty("Value")!;
+
+            foreach (var entryObj in value)
+            {
+                if (entryObj.GetType() == keyValuePairType)
+                {
+                    var k = keyProperty.GetValue(entryObj);
+                    var v = valueProperty.GetValue(entryObj);
+                    typedDictionary.Add(k!, v);
+                }
+            }
+            return typedDictionary;
+        }
+        catch (Exception e)
+        {
+            throw new InvalidOperationException($"The given value {value} can't be unboxed to IDictionary!", e);
+        }
     }
 
     private static Dictionary<object, object?> UnboxVariant(this Godot.Collections.Dictionary dict)
@@ -77,7 +122,7 @@ public static class GodotVariantExtensions
     {
         if (obj is Variant v)
             return v;
-        if (obj is System.Collections.IList list)
+        if (obj is IList list)
             return list.ToGodotArray();
 
         if (obj is IDictionary<string, object> dict)

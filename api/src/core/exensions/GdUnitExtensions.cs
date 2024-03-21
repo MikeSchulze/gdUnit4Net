@@ -16,7 +16,7 @@ using GdUnit4.Executions;
 /// </summary>
 public static partial class GdUnitExtensions
 {
-    public static string ToSnakeCase(this string? input)
+    internal static string ToSnakeCase(this string? input)
     {
         if (string.IsNullOrEmpty(input))
             return input!;
@@ -24,23 +24,40 @@ public static partial class GdUnitExtensions
         return RegexToSnakeCase().Replace(input, "$1_$2").ToLower();
     }
 
-    internal static string Format(this object? value)
-        => value switch
+    internal static string FormatAsValueOrClass(object value)
+    {
+        // is class than we render the object with an identifier
+        if ((value.GetType().IsClass && value is not string) || value is Type)
+            return AssertFailures.AsObjectId(value);
+        // fallback to default formatting
+        return value.ToString() ?? "<Null>";
+    }
+
+    internal static string Formatted(this object? value)
+    {
+        if (value == null)
+            return "<Null>";
+        if (value is Godot.Variant v)
+            value = v.UnboxVariant();
+        if (value is string asString)
+            return asString.Formatted();
+        return value switch
         {
-            string asString => asString.Formatted(),
             IEnumerable en => en.Formatted(),
-            _ => value?.ToString() ?? "<Null>",
+            Asserts.Tuple tuple => tuple.ToString(),
+            _ => FormatAsValueOrClass(value!),
         };
+    }
 
-    public static string Formatted(this object? value) => value.Format();
-    public static string Formatted(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
-    public static string Formatted(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formatted())).Indentation(indentation);
-    public static string Formatted(this Godot.Collections.Array args, int indentation = 0) => args.UnboxVariant()?.Formatted(indentation) ?? "<empty>";
-    public static string Formatted(this object?[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formatted)).Indentation(indentation);
-    public static string Formatted(this IEnumerable args, int indentation = 0) => string.Join(", ", args.Cast<object>().Select(Formatted)).Indentation(indentation);
-    public static string UnixFormat(this string value) => value.Replace("\r", string.Empty);
+    internal static string Formatted(this Asserts.Tuple? value) => value?.ToString() ?? "<Null>";
+    internal static string Formatted(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
+    internal static string Formatted(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formatted())).Indentation(indentation);
+    internal static string Formatted(this Godot.Collections.Array args, int indentation = 0) => args.UnboxVariant()?.Formatted(indentation) ?? "<empty>";
+    internal static string Formatted(this object?[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formatted)).Indentation(indentation);
+    internal static string Formatted(this IEnumerable args, int indentation = 0) => string.Join(", ", args.Cast<object>().Select(Formatted)).Indentation(indentation);
+    internal static string UnixFormat(this string value) => value.Replace("\r", string.Empty);
 
-    public static string Indentation(this string value, int indentation)
+    internal static string Indentation(this string value, int indentation)
     {
         if (indentation == 0 || string.IsNullOrEmpty(value))
             return value;
@@ -49,7 +66,7 @@ public static partial class GdUnitExtensions
         return string.Join("\n", lines.Select(line => indent + line));
     }
 
-    public static string Humanize(this TimeSpan t)
+    internal static string Humanize(this TimeSpan t)
     {
         var parts = new List<string>();
         if (t.Hours > 1)
@@ -63,7 +80,7 @@ public static partial class GdUnitExtensions
         return string.Join(" ", parts);
     }
 
-    public static string RichTextNormalize(this string? input) => RegexTextNormalize().Replace(input?.UnixFormat() ?? "", string.Empty);
+    internal static string RichTextNormalize(this string? input) => RegexTextNormalize().Replace(input?.UnixFormat() ?? "", string.Empty);
 
     private static int GetWithTimeoutLineNumber()
     {

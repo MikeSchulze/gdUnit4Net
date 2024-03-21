@@ -5,6 +5,7 @@
     "selcukermaya.se-csproj-extensions",
     "josefpihrt-vscode.roslynator",
     "streetsidesoftware.code-spell-checker",
-    "DavidAnson.vscode-markdownlint"
+    "DavidAnson.vscode-markdownlint",
+    "Gruntfuggly.todo-tree"
   ]
 }
