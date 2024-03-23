@@ -21,8 +21,5 @@ internal sealed class BoolAssert : AssertBase<bool>, IBoolAssert
     }
 
     public new IBoolAssert OverrideFailureMessage(string message)
-    {
-        base.OverrideFailureMessage(message);
-        return this;
-    }
+        => (IBoolAssert)base.OverrideFailureMessage(message);
 }

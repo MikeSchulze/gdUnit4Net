@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 
 using Asserts;
 
@@ -58,10 +57,11 @@ public sealed class Assertions
     /// <summary>
     /// An assertion method for all Godot vector types.
     /// </summary>
-    /// <typeparam name="T">The type of Godot vector.</typeparam>
+    /// <typeparam name="TValue">The type of Godot vector.</typeparam>
     /// <param name="vector">The vector value to verify.</param>
     /// <returns>An instance of IVectorAssert for further assertions.</returns>
-    public static IVectorAssert<T> AssertVector<T>(T vector) where T : notnull, IEquatable<T> => new VectorAssert<T>(vector);
+    public static IVectorAssert<TValue> AssertVector<TValue>(TValue vector) where TValue : notnull, IEquatable<TValue>
+        => new VectorAssert<TValue>(vector);
 
     /// <summary>
     /// An Assertion to verify Godot.Vector2 values
@@ -83,7 +83,7 @@ public sealed class Assertions
     /// An Assertion used by test generation to notify the test is not yet implemented
     /// </summary>
     /// <returns></returns>
-    public static bool AssertNotYetImplemented() => throw new Exceptions.TestFailedException("Test not yet implemented!", -1);
+    public static bool AssertNotYetImplemented() => throw new Exceptions.TestFailedException("Test not yet implemented!");
 
     /// <summary>
     /// An Assertion to verify Godot signals
@@ -113,11 +113,16 @@ public sealed class Assertions
     public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
     public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
-
+    /**
+        public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary? current)
+            where TKey : notnull
+            where TValue : notnull
+            => new DictionaryAssert<TKey, TValue>(current);
+*/
     public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary<TKey, TValue>? current)
         where TKey : notnull
         where TValue : notnull
-        => new DictionaryAssert<TKey, TValue>(current?.ToDictionary(e => e.Key, e => e.Value));
+        => new DictionaryAssert<TKey, TValue>(current);
 
     public static IDictionaryAssert<Godot.Variant, Godot.Variant> AssertThat(Godot.Collections.Dictionary? current)
        => new DictionaryAssert<Godot.Variant, Godot.Variant>(current);
@@ -152,17 +157,16 @@ public sealed class Assertions
     /// <summary>
     /// A dynamic assertion based on the input type.
     /// </summary>
-    /// <typeparam name="T">The type of the input.</typeparam>
+    /// <typeparam name="TValue">The type of the input.</typeparam>
     /// <param name="current">The input value to be asserted.</param>
     /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
-    public static dynamic AssertThat<T>(T? current)
+    public static dynamic AssertThat<TValue>(TValue? current)
     {
-        var type = typeof(T);
+        var type = typeof(TValue);
+
         if (type == typeof(IDictionary) && current == null)
-        {
-            var assertType = typeof(DictionaryAssert<,>).MakeGenericType(typeof(object), typeof(object));
-            return Activator.CreateInstance(assertType, current)!;
-        }
+            return DictionaryAssert<object, object?>.From(null);
+
         if (current is IDictionary dv)
         {
             if (type.IsGenericType)
@@ -173,9 +177,7 @@ public sealed class Assertions
                 var assertType = typeof(DictionaryAssert<,>).MakeGenericType(keyType, valueType);
                 return Activator.CreateInstance(assertType, dv)!;
             }
-            return new DictionaryAssert<object, object?>(dv
-                .Cast<DictionaryEntry>()
-                .ToDictionary(entry => entry.Key, entry => entry.Value));
+            return DictionaryAssert<object, object?>.From(dv);
         }
 
         if (current is IEnumerable ev)
@@ -203,7 +205,7 @@ public sealed class Assertions
     /// </summary>
     /// <param name="task">A task where throw possible exceptions</param>
     /// <returns>a task of <c>IExceptionAssert</c> to await</returns>
-    public static async Task<IExceptionAssert?> AssertThrown<T>(Task<T> task)
+    public static async Task<IExceptionAssert?> AssertThrown<TAction>(Task<TAction> task)
     {
         try
         {
@@ -212,7 +214,7 @@ public sealed class Assertions
         }
         catch (Exception e)
         {
-            return new ExceptionAssert<T>(e);
+            return new ExceptionAssert<Exception>(e);
         }
     }
 
@@ -225,7 +227,7 @@ public sealed class Assertions
         }
         catch (Exception e)
         {
-            return new ExceptionAssert<object>(e);
+            return new ExceptionAssert<Exception>(e);
         }
     }
 
@@ -235,7 +237,7 @@ public sealed class Assertions
     /// Adds the Node on actual SceneTree to be processed during test execution.
     /// The node is auto freed and can be disabled by set autoFree = false.
     /// </summary>
-    public static T AddNode<T>(T node, bool autoFree = true) where T : Godot.Node
+    public static TNode AddNode<TNode>(TNode node, bool autoFree = true) where TNode : Godot.Node
     {
         if (autoFree)
             AutoFree(node);
@@ -247,7 +249,8 @@ public sealed class Assertions
     ///<summary>
     /// A little helper to auto freeing your created objects after test execution
     /// </summary>
-    public static T? AutoFree<T>(T? obj) where T : Godot.GodotObject => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
+    public static TValue? AutoFree<TValue>(TValue? obj) where TValue : Godot.GodotObject
+        => Executions.Monitors.MemoryPool.RegisterForAutoFree(obj);
 
     /// <summary>
     /// Builds a tuple by given values

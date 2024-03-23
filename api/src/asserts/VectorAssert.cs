@@ -2,68 +2,68 @@ namespace GdUnit4.Asserts;
 using System;
 using System.Globalization;
 
-internal class VectorAssert<T> : AssertBase<T>, IVectorAssert<T> where T : notnull, IEquatable<T>
+internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : notnull, IEquatable<TValue>
 {
 
-    public VectorAssert(T current) : base(current)
+    public VectorAssert(TValue current) : base(current)
     {
     }
 
-    public IVectorAssert<T> IsBetween(T min, T max)
+    public IVectorAssert<TValue> IsBetween(TValue min, TValue max)
     {
         if (CompareTo(Current, min) < 0 || CompareTo(Current, max) > 0)
             ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, min);
         return this;
     }
 
-    public new IVectorAssert<T> IsEqual(T expected) => (IVectorAssert<T>)base.IsEqual(expected);
+    public new IVectorAssert<TValue> IsEqual(TValue expected) => (IVectorAssert<TValue>)base.IsEqual(expected);
 
-    public IVectorAssert<T> IsEqualApprox(T expected, T approx)
+    public IVectorAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
         var minMax = MinMax(expected, approx);
         return IsBetween(minMax.Item1, minMax.Item2);
     }
 
-    public IVectorAssert<T> IsGreater(T expected)
+    public IVectorAssert<TValue> IsGreater(TValue expected)
     {
         if (CompareTo(Current, expected) <= 0)
             ThrowTestFailureReport(AssertFailures.IsGreater(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<T> IsGreaterEqual(T expected)
+    public IVectorAssert<TValue> IsGreaterEqual(TValue expected)
     {
         if (CompareTo(Current, expected) < 0)
             ThrowTestFailureReport(AssertFailures.IsGreaterEqual(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<T> IsLess(T expected)
+    public IVectorAssert<TValue> IsLess(TValue expected)
     {
         if (CompareTo(Current, expected) >= 0)
             ThrowTestFailureReport(AssertFailures.IsLess(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<T> IsLessEqual(T expected)
+    public IVectorAssert<TValue> IsLessEqual(TValue expected)
     {
         if (CompareTo(Current, expected) > 0)
             ThrowTestFailureReport(AssertFailures.IsLessEqual(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<T> IsNotBetween(T from, T to)
+    public IVectorAssert<TValue> IsNotBetween(TValue from, TValue to)
     {
         if (CompareTo(Current, from) >= 0 && CompareTo(Current, to) <= 0)
             ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, from, to), Current, from);
         return this;
     }
 
-    public new IVectorAssert<T> IsNotEqual(T expected) => (IVectorAssert<T>)base.IsNotEqual(expected);
+    public new IVectorAssert<TValue> IsNotEqual(TValue expected) => (IVectorAssert<TValue>)base.IsNotEqual(expected);
 
-    public new IVectorAssert<T> OverrideFailureMessage(string message) => (IVectorAssert<T>)base.OverrideFailureMessage(message);
+    public new IVectorAssert<TValue> OverrideFailureMessage(string message) => (IVectorAssert<TValue>)base.OverrideFailureMessage(message);
 
-    private static int CompareTo(T? left, T right)
+    private static int CompareTo(TValue? left, TValue right)
     {
         if (left == null)
             return -1;
@@ -80,15 +80,15 @@ internal class VectorAssert<T> : AssertBase<T>, IVectorAssert<T> where T : notnu
     }
 
 #pragma warning disable CS8619
-    private static (T, T) MinMax(T left, T right) => (left, right) switch
+    private static (TValue, TValue) MinMax(TValue left, TValue right) => (left, right) switch
     {
-        (Godot.Vector2 l, Godot.Vector2 r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        (Godot.Vector2I l, Godot.Vector2I r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        (Godot.Vector3 l, Godot.Vector3 r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        (Godot.Vector3I l, Godot.Vector3I r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        (Godot.Vector4 l, Godot.Vector4 r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        (Godot.Vector4I l, Godot.Vector4I r) => ((T)Convert.ChangeType(l - r, typeof(T), CultureInfo.InvariantCulture), (T)Convert.ChangeType(l + r, typeof(T), CultureInfo.InvariantCulture)),
-        _ => (default(T), default(T))
+        (Godot.Vector2 l, Godot.Vector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Godot.Vector2I l, Godot.Vector2I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Godot.Vector3 l, Godot.Vector3 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Godot.Vector3I l, Godot.Vector3I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Godot.Vector4 l, Godot.Vector4 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Godot.Vector4I l, Godot.Vector4I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        _ => (default(TValue), default(TValue))
     };
 #pragma warning restore CS8619
 

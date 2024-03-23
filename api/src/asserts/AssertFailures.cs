@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 internal sealed class AssertFailures
 {
@@ -11,14 +12,22 @@ internal sealed class AssertFailures
     public const string ERROR_COLOR = "#CD5C5C";
     public const string VALUE_COLOR = "#1E90FF";
 
-    private static string SimpleClassName(Type type)
-    {
-        var name = type.FullName?.Replace("[", "")?.Replace("]", "")!;
-        if (!type.IsGenericType)
-            return name;
 
-        var genericArguments = string.Join(", ", type.GetGenericArguments().Select(SimpleClassName));
-        return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
+    internal static string AsObjectId(object value)
+    {
+        if (value is Godot.Variant gv)
+            value = gv.UnboxVariant()!;
+        var type = value.GetType();
+        var name = type.FullName?.Replace("[", "")?.Replace("]", "")!;
+        if (value is Godot.GodotObject go)
+            value = $"id: {go.GetInstanceId()}";
+        else
+            value = $"id: {RuntimeHelpers.GetHashCode(value)}";
+        return $"<{name}>({value})";
+
+        //if (!type.IsGenericType)
+        //var genericArguments = string.Join(", ", type.GetGenericArguments().Select(a => SimpleClassName(a, null)));
+        //return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
     }
 
     private static string FormatDictionary(IDictionary dict, string color)
@@ -26,14 +35,9 @@ internal sealed class AssertFailures
         if (dict.Keys.Count == 0)
             return $"[color={color}]<Empty>[/color]";
 
-        var keyValues = new ArrayList();
-        foreach (DictionaryEntry entry in dict)
-        {
-            var key = entry.Key;
-            var value = entry.Value;
-            keyValues.Add($"{{{key.Formatted()}, {value.Formatted()}}}");
-        }
-        var pairs = string.Join("; ", keyValues.ToArray());
+        var sortedKeys = dict.Keys.Cast<object>().OrderBy(k => k.ToString());
+        var keyValues = sortedKeys.Select(key => $"{{{key.Formatted()}, {dict[key].Formatted()}}}");
+        var pairs = string.Join("; ", keyValues);
         return $"[color={color}]{pairs}[/color]";
     }
 
@@ -78,29 +82,34 @@ internal sealed class AssertFailures
         if (value is Type)
             return $"[color={color}]<{value}>[/color]";
 
+        if (value is Godot.Variant gv)
+            value = value.UnboxVariant();
 
+        var type = value!.GetType();
         if (value is IDictionary dict)
             return FormatDictionary(dict, color);
 
         if (value is Godot.Collections.Dictionary gDict)
             return FormatDictionary(gDict, color);
 
-        if (value is IEnumerable values)
-            return FormatEnumerable(values, color);
+        if (type.IsGenericGodotDictionary())
+            return FormatDictionary(value.UnboxVariant(), color);
 
-        var type = value.GetType();
-        if (type.IsArray)
+        if (value is IEnumerable values)
         {
-            var asArray = ((IEnumerable)value).Cast<object>()
-                         .Select(x => x?.ToString() ?? "<Null>")
-                         .ToArray();
-            return asArray.Length == 0
-                ? (type.IsArray || value is Godot.Collections.Array ? "[]" : "")
-                : "[color=" + color + "][" + string.Join(", ", asArray) + "][/color]";
+            if (!type.IsArray)
+                return FormatEnumerable(values, color);
+
+            var asArray = values.Cast<object>()
+                         .Select(x => x?.Formatted() ?? "<Null>")
+                         .ToList();
+            return asArray.Count == 0
+                ? (type.IsArray || value is Godot.Collections.Array ? "<Empty>" : "")
+               : "[color=" + color + "][" + string.Join(", ", asArray) + "][/color]";
         }
 
         if ((type.IsClass && value is not string) || value is Type)
-            return $"[color={color}]<{SimpleClassName(type)}>[/color]";
+            return $"[color={color}]{AsObjectId(value)}[/color]";
         return quoted ? $"'[color={color}]{value.Formatted()}[/color]'" : $"[color={color}]{value.Formatted()}[/color]";
     }
 

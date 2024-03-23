@@ -97,4 +97,18 @@ public class AssertionsTest
         var obj = AutoFree((Node)null!);
         AssertThat(obj).IsNull();
     }
+
+    [TestCase]
+    public void AsObjectId()
+    {
+        var obj1 = new object();
+        var obj2 = new object();
+
+        AssertThat(AssertFailures.AsObjectId(obj1)).IsEqual($"<System.Object>(id: {obj1.GetHashCode()})");
+        AssertThat(AssertFailures.AsObjectId(obj1)).IsNotEqual(AssertFailures.AsObjectId(obj2));
+
+        var obj3 = new RefCounted();
+        AssertThat(AssertFailures.AsObjectId(obj3)).IsEqual($"<Godot.RefCounted>(id: {obj3.GetInstanceId()})");
+    }
+
 }

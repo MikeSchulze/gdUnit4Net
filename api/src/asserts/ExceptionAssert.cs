@@ -6,9 +6,9 @@ using System.Runtime.ExceptionServices;
 
 using Exceptions;
 
-internal sealed class ExceptionAssert<T> : IExceptionAssert
+internal sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
 {
-    private Exception? Current { get; set; }
+    private TException? Current { get; set; }
 
     private string? CustomFailureMessage { get; set; }
 
@@ -19,11 +19,11 @@ internal sealed class ExceptionAssert<T> : IExceptionAssert
         catch (Exception e)
         {
             var capturedException = ExceptionDispatchInfo.Capture(e.InnerException ?? e);
-            Current = capturedException.SourceException;
+            Current = (TException)capturedException.SourceException;
         }
     }
 
-    public ExceptionAssert(Exception e) => Current = e;
+    public ExceptionAssert(TException e) => Current = e;
 
     public IExceptionAssert IsInstanceOf<TExpectedType>()
     {
