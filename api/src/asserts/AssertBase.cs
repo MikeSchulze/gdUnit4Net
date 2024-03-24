@@ -57,4 +57,14 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
         CurrentFailureMessage = failureMessage;
         throw new TestFailedException(failureMessage);
     }
+
+    protected static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
+    {
+        var left = lKey.UnboxVariant();
+        var right = rKey.UnboxVariant();
+
+        if (((left is string) || left?.GetType().IsPrimitive) ?? false)
+            return Equals(left, right);
+        return ReferenceEquals(left, right);
+    }
 }

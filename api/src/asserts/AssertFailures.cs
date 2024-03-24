@@ -13,11 +13,19 @@ internal sealed class AssertFailures
     public const string VALUE_COLOR = "#1E90FF";
 
 
-    internal static string AsObjectId(object value)
+    internal static string AsObjectId(object? value)
     {
-        if (value is Godot.Variant gv)
-            value = gv.UnboxVariant()!;
+        if (value == null)
+            return "<Null>";
         var type = value.GetType();
+        if (value is Godot.Variant gv)
+        {
+            value = gv.UnboxVariant()!;
+            if (value != null)
+                type = value.GetType();
+            else
+                return $"<Godot.Variant>(Null)";
+        }
         var name = type.FullName?.Replace("[", "")?.Replace("]", "")!;
         if (value is Godot.GodotObject go)
             value = $"id: {go.GetInstanceId()}";
@@ -68,7 +76,7 @@ internal sealed class AssertFailures
         {
             keyValues.Add(enumerator.Current);
         } while (enumerator.MoveNext());
-        return $"[color={color}][{keyValues.Formatted()}][/color]";
+        return $"[color={color}]{keyValues.Formatted()}[/color]";
     }
 
     public static string FormatValue(object? value, string color, bool quoted)
@@ -96,17 +104,7 @@ internal sealed class AssertFailures
             return FormatDictionary(value.UnboxVariant(), color);
 
         if (value is IEnumerable values)
-        {
-            if (!type.IsArray)
-                return FormatEnumerable(values, color);
-
-            var asArray = values.Cast<object>()
-                         .Select(x => x?.Formatted() ?? "<Null>")
-                         .ToList();
-            return asArray.Count == 0
-                ? (type.IsArray || value is Godot.Collections.Array ? "<Empty>" : "")
-               : "[color=" + color + "][" + string.Join(", ", asArray) + "][/color]";
-        }
+            return FormatEnumerable(values, color);
 
         if ((type.IsClass && value is not string) || value is Type)
             return $"[color={color}]{AsObjectId(value)}[/color]";
@@ -223,7 +221,7 @@ internal sealed class AssertFailures
                 {FormatExpected(expected).Indentation(1)} but is {FormatCurrent(current)}
                 """;
 
-    public static string IsSame(object? current, object expected) =>
+    public static string IsSame<TValue>(TValue? current, TValue expected) =>
         $"""
                 {FormatFailure("Expecting be same:")}
                 {FormatExpected(expected).Indentation(1)}
@@ -231,7 +229,7 @@ internal sealed class AssertFailures
                 {FormatCurrent(current).Indentation(1)}
                 """;
 
-    public static string IsNotSame(object? expected) =>
+    public static string IsNotSame<TValue>(TValue? expected) =>
         $"{FormatFailure("Expecting be NOT same:")} {FormatExpected(expected)}";
 
     public static string IsBetween(object? current, object from, object to) =>
@@ -332,7 +330,7 @@ internal sealed class AssertFailures
                 {FormatExpected(expected).Indentation(1)}
                 """;
 
-    public static string Contains<T>(IEnumerable<T>? current, IEnumerable<T> expected, List<T> notFound) =>
+    public static string Contains<TValue>(IEnumerable<TValue?>? current, IEnumerable<TValue?> expected, IEnumerable<TValue?> notFound) =>
         $"""
                 {FormatFailure("Expecting contains elements:")}
                 {FormatCurrent(current).Indentation(1)}
@@ -342,50 +340,46 @@ internal sealed class AssertFailures
                 {FormatExpected(notFound).Indentation(1)}
                 """;
 
-    public static string ContainsExactly(IEnumerable<object?>? current, IEnumerable<object?> expected, List<object?> notFound, List<object?> notExpected)
+    public static string ContainsExactly<TValue>(IEnumerable<TValue>? current, IEnumerable<TValue> expected, List<TValue> notFound, List<TValue> notExpected)
     {
-        if (notExpected.Count == 0 && notFound.Count == 0)
-            return $"""
+        if (notExpected.Count != 0 && notExpected.Count == notFound.Count)
+        {
+            var diff = notExpected.FindAll(e => !notFound.Any(e2 => Equals(e.UnboxVariant(), e2.UnboxVariant())));
+            if (diff?.Count == 0)
+            {
+                return $"""
                     {FormatFailure("Expecting contains exactly elements:")}
                     {FormatCurrent(current).Indentation(1)}
                      do contains (in same order)
                     {FormatExpected(expected).Indentation(1)}
-                     but has different order {FindFirstDiff(current, expected)}
+                     but there has differences in order:
+                    {ListDifferences(notFound, notExpected)}
                     """;
-
+            }
+        }
         var message = $"""
                 {FormatFailure("Expecting contains exactly elements:")}
                 {FormatCurrent(current).Indentation(1)}
                  do contains (in same order)
                 {FormatExpected(expected).Indentation(1)}
                 """;
-
         if (notExpected.Count > 0)
             message += $"""
 
-                     but some elements where not expected:
+                     but others where not expected:
                     {FormatExpected(notExpected).Indentation(1)}
                     """;
         if (notFound.Count > 0)
             message += $"""
 
-                     {(notExpected.Count == 0 ? "but" : "and")} could not find elements:
+                     {(notExpected.Count == 0 ? "but" : "and")} some elements not found:
                     {FormatExpected(notFound).Indentation(1)}
                     """;
         return message.UnixFormat();
     }
 
-    public static string ContainsExactlyInAnyOrder(IEnumerable<object?>? current, IEnumerable<object?> expected, List<object?> notFound, List<object?> notExpected)
+    public static string ContainsExactlyInAnyOrder<TValue>(IEnumerable<TValue>? current, IEnumerable<TValue> expected, List<TValue> notFound, List<TValue> notExpected)
     {
-        if (notExpected.Count == 0 && notFound.Count == 0)
-            return $"""
-                    {FormatFailure("Expecting contains exactly elements:")}
-                    {FormatCurrent(current).Indentation(1)}
-                     do contains (in any order)
-                    {FormatExpected(expected).Indentation(1)}
-                     but has different order {FindFirstDiff(current, expected)}
-                    """;
-
         var message = $"""
                 {FormatFailure("Expecting contains exactly elements:")}
                 {FormatCurrent(current).Indentation(1)}
@@ -526,17 +520,15 @@ internal sealed class AssertFailures
                 {FormatCurrent(current).Indentation(1)}
                 """;
 
-    private static string? FindFirstDiff(IEnumerable<object?>? left, IEnumerable<object?>? right)
+    private static string? ListDifferences<TValue>(IEnumerable<TValue> left, IEnumerable<TValue> right)
     {
-        if (left is null || right is null)
-            return null;
+        var output = new List<string>();
         foreach (var it in left.Select((value, i) => new { Value = value, Index = i }))
         {
             var l = it.Value;
-            var r = right?.ElementAt(it.Index);
-            if (!Comparable.IsEqual(l, r).Valid)
-                return $"at position {FormatCurrent(it.Index)}\n    {FormatCurrent(l)} vs {FormatExpected(r)}";
+            var r = right.ElementAt(it.Index);
+            output.Add($"- element at index {it.Index} expect {FormatCurrent(l.UnboxVariant())} but is {FormatExpected(r.UnboxVariant())}");
         }
-        return null;
+        return string.Join("\n", output).Indentation(1);
     }
 }

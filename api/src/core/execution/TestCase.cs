@@ -60,12 +60,16 @@ internal sealed class TestCase
     public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
 
     public static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
+        => BuildTestCaseName(testName, attribute.TestName ?? testName, attribute.Arguments);
+
+    public static string BuildTestCaseName(string testName, string parameterizedName, params object?[] arguments)
     {
-        if (attribute.Arguments.Length > 0)
+        if (arguments.Length > 0)
         {
             var saveCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
-            testName = $"{testName}.{attribute.TestName ?? testName}({attribute.Arguments.Formatted()})";
+            var parameters = string.Join(", ", arguments.ToArray().Select(GdUnitExtensions.Formatted));
+            testName = $"{testName}.{parameterizedName}({parameters})";
             Thread.CurrentThread.CurrentCulture = saveCulture;
         }
         return testName;

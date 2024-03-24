@@ -52,7 +52,12 @@ public sealed class Assertions
     /// </summary>
     /// <param name="current">The current array value to verify</param>
     /// <returns></returns>
-    public static IEnumerableAssert AssertArray(IEnumerable? current) => new EnumerableAssert(current);
+    public static IEnumerableAssert<TValue?> AssertArray<TValue>(IEnumerable<TValue?>? current)
+        => new EnumerableAssert<TValue?>(current);
+
+    public static IEnumerableAssert<object?> AssertArray(IEnumerable<object?>? current)
+        => new EnumerableAssert<object?>(current);
+
 
     /// <summary>
     /// An assertion method for all Godot vector types.
@@ -134,6 +139,30 @@ public sealed class Assertions
 
 
     /// <summary>
+    /// The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <param name="current">The enumerable value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
+    public static IEnumerableAssert<object?> AssertThat(IEnumerable? current)
+        => new EnumerableAssert<object?>(current);
+
+    public static IEnumerableAssert<bool> AssertThat(BitArray? current)
+        => new EnumerableAssert<bool>(current);
+
+    public static IEnumerableAssert<TValue?> AssertThat<TValue>(IEnumerable<TValue?>? current)
+        => new EnumerableAssert<TValue?>(current);
+
+    public static IEnumerableAssert<TValue?> AssertThat<TValue>(params TValue?[]? current)
+        => new EnumerableAssert<TValue?>(current);
+
+    public static IEnumerableAssert<Godot.Variant> AssertThat(Godot.Collections.Array? current)
+        => new EnumerableAssert<Godot.Variant>(current);
+
+    public static IEnumerableAssert<TValue?> AssertThat<[Godot.MustBeVariant] TValue>(Godot.Collections.Array<TValue>? current)
+        => new EnumerableAssert<TValue?>(current);
+
+
+    /// <summary>
     /// The dynamic assertions for all Godot vector types.
     /// </summary>
     /// <param name="current">The vector value to verify.</param>
@@ -162,8 +191,10 @@ public sealed class Assertions
     /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
     public static dynamic AssertThat<TValue>(TValue? current)
     {
-        var type = typeof(TValue);
+        if (current is string str)
+            return AssertThat(str);
 
+        var type = typeof(TValue);
         if (type == typeof(IDictionary) && current == null)
             return DictionaryAssert<object, object?>.From(null);
 
@@ -179,9 +210,17 @@ public sealed class Assertions
             }
             return DictionaryAssert<object, object?>.From(dv);
         }
-
         if (current is IEnumerable ev)
-            return new EnumerableAssert(ev);
+        {
+            if (type.IsGenericType)
+            {
+                var dictionaryTypeArgs = type.GetGenericArguments();
+                var valueType = dictionaryTypeArgs[0];
+                var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType);
+                return Activator.CreateInstance(assertType, ev)!;
+            }
+            return AssertThat(ev);
+        }
         return new ObjectAssert(current);
     }
 

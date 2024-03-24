@@ -57,7 +57,7 @@ public partial class SignalAssertTest
                 .IsInstanceOf<Exceptions.TestFailedException>()
                 .HasMessage("""
                     Expecting do emitting signal:
-                        "SignalC("abc", 101)"
+                        "SignalC(["abc", 101])"
                      by
                         $obj
                     """
@@ -78,7 +78,7 @@ public partial class SignalAssertTest
                 .IsInstanceOf<Exceptions.TestFailedException>()
                 .HasMessage("""
                     Expecting do NOT emitting signal:
-                        "visibility_changed()"
+                        "visibility_changed(<Empty>)"
                      by
                         $obj
                     """
@@ -102,7 +102,7 @@ public partial class SignalAssertTest
                .IsInstanceOf<Exceptions.TestFailedException>()
                .HasMessage("""
                     Expecting do emitting signal:
-                        "visibility_changed()"
+                        "visibility_changed(<Empty>)"
                      by
                         $obj
                     """

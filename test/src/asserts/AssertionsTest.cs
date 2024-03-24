@@ -73,12 +73,13 @@ public class AssertionsTest
     [TestCase]
     public void AssertThatEnumerable()
     {
-        AssertObject(AssertThat(System.Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert>();
-        AssertObject(AssertThat(new System.Collections.ArrayList())).IsInstanceOf<IEnumerableAssert>();
-        AssertObject(AssertThat(new System.Collections.BitArray(new bool[] { true, false }))).IsInstanceOf<IEnumerableAssert>();
-        AssertObject(AssertThat(new System.Collections.Generic.HashSet<byte>())).IsInstanceOf<IEnumerableAssert>();
-        AssertObject(AssertThat(new System.Collections.Generic.List<byte>())).IsInstanceOf<IEnumerableAssert>();
-        AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert>();
+        AssertObject(AssertThat(System.Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(new System.Collections.ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
+        AssertObject(AssertThat(new System.Collections.BitArray(new bool[] { true, false }))).IsInstanceOf<IEnumerableAssert<bool>>();
+        AssertObject(AssertThat(new System.Collections.Generic.HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(new System.Collections.Generic.List<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert<Variant>>();
+        AssertObject(AssertThat(new Godot.Collections.Array<int>())).IsInstanceOf<IEnumerableAssert<int>>();
     }
 
     [TestCase]
@@ -104,11 +105,22 @@ public class AssertionsTest
         var obj1 = new object();
         var obj2 = new object();
 
+        AssertThat(AssertFailures.AsObjectId(null)).IsEqual($"<Null>");
         AssertThat(AssertFailures.AsObjectId(obj1)).IsEqual($"<System.Object>(id: {obj1.GetHashCode()})");
         AssertThat(AssertFailures.AsObjectId(obj1)).IsNotEqual(AssertFailures.AsObjectId(obj2));
 
+        // on Godot Objects
         var obj3 = new RefCounted();
         AssertThat(AssertFailures.AsObjectId(obj3)).IsEqual($"<Godot.RefCounted>(id: {obj3.GetInstanceId()})");
+        var obj4 = new QuadMesh();
+        AssertThat(AssertFailures.AsObjectId(obj4)).IsEqual($"<Godot.QuadMesh>(id: {obj4.GetInstanceId()})");
+
+        // on Godot Variants
+        var obj5 = new RefCounted();
+        AssertThat(AssertFailures.AsObjectId(obj5.ToVariant())).IsEqual($"<Godot.RefCounted>(id: {obj5.GetInstanceId()})");
+
+        object? obj6 = null;
+        AssertThat(AssertFailures.AsObjectId(obj6.ToVariant())).IsEqual($"<Godot.Variant>(Null)");
     }
 
 }
