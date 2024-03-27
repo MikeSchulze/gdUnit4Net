@@ -1,9 +1,12 @@
 namespace GdUnit4.Asserts;
 
 using System;
+using System.Numerics;
 
 /// <summary> Base interface for number assertions.</summary>
-public interface INumberAssert<TValue> : IAssertBase<TValue> where TValue : IComparable, IComparable<TValue>
+public interface INumberAssert<TValue> : IAssertBase<TValue>
+    where TValue : notnull, IComparable, IComparable<TValue>, IEquatable<TValue>,
+    IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
     /// <summary> Verifies that the current value is less than the given one.</summary>
     public INumberAssert<TValue> IsLess(TValue expected);
@@ -16,6 +19,9 @@ public interface INumberAssert<TValue> : IAssertBase<TValue> where TValue : ICom
 
     /// <summary> Verifies that the current value is greater than or equal the given one.</summary>
     public INumberAssert<TValue> IsGreaterEqual(TValue expected);
+
+    /// <summary> Verifies that the current and expected value are approximately equal.</summary>
+    public INumberAssert<TValue> IsEqualApprox(TValue expected, TValue approx);
 
     /// <summary> Verifies that the current value is even.</summary>
     public INumberAssert<TValue> IsEven();

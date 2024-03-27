@@ -11,7 +11,7 @@ public class NumberAssertTest
 {
     [TestCase]
     public void IsNull()
-        => AssertThrown(() => AssertInt(23).IsNull())
+        => AssertThrown(() => AssertThat(23).IsNull())
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(14)
             .HasMessage("""
@@ -23,19 +23,19 @@ public class NumberAssertTest
     [TestCase]
     public void IsNotNull()
     {
-        AssertInt(-23).IsNotNull();
-        AssertInt(0).IsNotNull();
-        AssertInt(23).IsNotNull();
+        AssertThat(-23).IsNotNull();
+        AssertThat(0).IsNotNull();
+        AssertThat(23).IsNotNull();
     }
 
     [TestCase]
     public void IsEqual()
     {
-        AssertInt(-23).IsEqual(-23);
-        AssertInt(0).IsEqual(0);
-        AssertInt(23).IsEqual(23);
+        AssertThat(-23).IsEqual(-23);
+        AssertThat(0).IsEqual(0);
+        AssertThat(23).IsEqual(23);
         // this assertion fails because 23 are not equal to 42
-        AssertThrown(() => AssertInt(38).IsEqual(42))
+        AssertThrown(() => AssertThat(38).IsEqual(42))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(38)
             .HasMessage("""
@@ -47,10 +47,10 @@ public class NumberAssertTest
     [TestCase]
     public void IsNotEqual()
     {
-        AssertInt(23).IsNotEqual(-23);
-        AssertInt(23).IsNotEqual(42);
+        AssertThat(23).IsNotEqual(-23);
+        AssertThat(23).IsNotEqual(42);
         // this assertion fails because 23 are equal to 23
-        AssertThrown(() => AssertInt(23).IsNotEqual(23))
+        AssertThrown(() => AssertThat(23).IsNotEqual(23))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(53)
             .HasMessage("""
@@ -62,32 +62,32 @@ public class NumberAssertTest
     [TestCase]
     public void IsLess()
     {
-        AssertInt(-23).IsLess(-22);
-        AssertInt(23).IsLess(42);
-        AssertInt(23).IsLess(24);
+        AssertThat(-23).IsLess(-22);
+        AssertThat(23).IsLess(42);
+        AssertThat(23).IsLess(24);
         // this assertion fails because 23 is not less than 23
-        AssertThrown(() => AssertInt(23).IsLess(23))
+        AssertThrown(() => AssertThat(23).IsLess(23))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(69)
             .HasMessage("""
                 Expecting to be less than:
                     '23' but is '23'
                 """);
-        AssertThrown(() => AssertInt(23).IsLess(22))
+        AssertThrown(() => AssertThat(23).IsLess(22))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(76)
             .HasMessage("""
                 Expecting to be less than:
                     '22' but is '23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsLess(-23))
+        AssertThrown(() => AssertThat(-23).IsLess(-23))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(83)
             .HasMessage("""
                 Expecting to be less than:
                     '-23' but is '-23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsLess(-24))
+        AssertThrown(() => AssertThat(-23).IsLess(-24))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(90)
             .HasMessage("""
@@ -99,20 +99,20 @@ public class NumberAssertTest
     [TestCase]
     public void IsLessEqual()
     {
-        AssertInt(-23).IsLessEqual(-22);
-        AssertInt(-23).IsLessEqual(-23);
-        AssertInt(0).IsLessEqual(0);
-        AssertInt(23).IsLessEqual(23);
-        AssertInt(23).IsLessEqual(42);
+        AssertThat(-23).IsLessEqual(-22);
+        AssertThat(-23).IsLessEqual(-23);
+        AssertThat(0).IsLessEqual(0);
+        AssertThat(23).IsLessEqual(23);
+        AssertThat(23).IsLessEqual(42);
         // this assertion fails because 23 is not less than or equal to 22
-        AssertThrown(() => AssertInt(23).IsLessEqual(22)).IsInstanceOf<TestFailedException>()
+        AssertThrown(() => AssertThat(23).IsLessEqual(22)).IsInstanceOf<TestFailedException>()
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(108)
             .HasMessage("""
                 Expecting to be less than or equal:
                     '22' but is '23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsLessEqual(-24))
+        AssertThrown(() => AssertThat(-23).IsLessEqual(-24))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(115)
             .HasMessage("""
@@ -124,33 +124,33 @@ public class NumberAssertTest
     [TestCase]
     public void IsGreater()
     {
-        AssertInt(-23).IsGreater(-24);
-        AssertInt(1).IsGreater(0);
-        AssertInt(23).IsGreater(20);
-        AssertInt(23).IsGreater(22);
+        AssertThat(-23).IsGreater(-24);
+        AssertThat(1).IsGreater(0);
+        AssertThat(23).IsGreater(20);
+        AssertThat(23).IsGreater(22);
         // this assertion fails because 23 is not greater than 23
-        AssertThrown(() => AssertInt(23).IsGreater(23))
+        AssertThrown(() => AssertThat(23).IsGreater(23))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(132)
             .HasMessage("""
                 Expecting to be greater than:
                     '23' but is '23'
                 """);
-        AssertThrown(() => AssertInt(23).IsGreater(24))
+        AssertThrown(() => AssertThat(23).IsGreater(24))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(139)
             .HasMessage("""
                 Expecting to be greater than:
                     '24' but is '23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsGreater(-23))
+        AssertThrown(() => AssertThat(-23).IsGreater(-23))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(146)
             .HasMessage("""
                 Expecting to be greater than:
                     '-23' but is '-23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsGreater(-22))
+        AssertThrown(() => AssertThat(-23).IsGreater(-22))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(153)
             .HasMessage("""
@@ -162,20 +162,20 @@ public class NumberAssertTest
     [TestCase]
     public void IsGreaterEqual()
     {
-        AssertInt(-23).IsGreaterEqual(-24);
-        AssertInt(-23).IsGreaterEqual(-23);
-        AssertInt(0).IsGreaterEqual(0);
-        AssertInt(23).IsGreaterEqual(20);
-        AssertInt(23).IsGreaterEqual(23);
+        AssertThat(-23).IsGreaterEqual(-24);
+        AssertThat(-23).IsGreaterEqual(-23);
+        AssertThat(0).IsGreaterEqual(0);
+        AssertThat(23).IsGreaterEqual(20);
+        AssertThat(23).IsGreaterEqual(23);
         // this assertion fails because 23 is not greater than 23
-        AssertThrown(() => AssertInt(23).IsGreaterEqual(24))
+        AssertThrown(() => AssertThat(23).IsGreaterEqual(24))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(171)
             .HasMessage("""
                 Expecting to be greater than or equal:
                     '24' but is '23'
                 """);
-        AssertThrown(() => AssertInt(-23).IsGreaterEqual(-22))
+        AssertThrown(() => AssertThat(-23).IsGreaterEqual(-22))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(178)
             .HasMessage("""
@@ -185,24 +185,50 @@ public class NumberAssertTest
     }
 
     [TestCase]
+    public void IsEqualApprox()
+    {
+        AssertThat(42).IsEqualApprox(42, 0);
+        AssertThat(42).IsEqualApprox(40, 2);
+        AssertThat(42.333).IsEqualApprox(42.333, 0);
+        AssertThat(42.333).IsEqualApprox(40, 2.333);
+
+        AssertThrown(() => AssertThat(42).IsEqualApprox(40, 1))
+            .HasFileLineNumber(195)
+            .HasMessage("""
+                Expecting:
+                    '42'
+                 in range between
+                    '39' <> '41'
+                """);
+        AssertThrown(() => AssertThat(42.333).IsEqualApprox(40, 2.133))
+            .HasFileLineNumber(203)
+            .HasMessage("""
+                Expecting:
+                    '42.333'
+                 in range between
+                    '37.867' <> '42.133'
+                """);
+    }
+
+    [TestCase]
     public void IsEven()
     {
-        AssertInt(-200).IsEven();
-        AssertInt(-22).IsEven();
-        AssertInt(0).IsEven();
-        AssertInt(22).IsEven();
-        AssertInt(200).IsEven();
+        AssertThat(-200).IsEven();
+        AssertThat(-22).IsEven();
+        AssertThat(0).IsEven();
+        AssertThat(22).IsEven();
+        AssertThat(200).IsEven();
 
-        AssertThrown(() => AssertInt(-13).IsEven())
+        AssertThrown(() => AssertThat(-13).IsEven())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(196)
+            .HasFileLineNumber(222)
             .HasMessage("""
                 Expecting be even:
                  but is '-13'
                 """);
-        AssertThrown(() => AssertInt(13).IsEven())
+        AssertThrown(() => AssertThat(13).IsEven())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(203)
+            .HasFileLineNumber(229)
             .HasMessage("""
                 Expecting be even:
                  but is '13'
@@ -212,25 +238,25 @@ public class NumberAssertTest
     [TestCase]
     public void IsOdd()
     {
-        AssertInt(-13).IsOdd();
-        AssertInt(13).IsOdd();
-        AssertThrown(() => AssertInt(-12).IsOdd())
+        AssertThat(-13).IsOdd();
+        AssertThat(13).IsOdd();
+        AssertThrown(() => AssertThat(-12).IsOdd())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(217)
+            .HasFileLineNumber(243)
             .HasMessage("""
                 Expecting be odd:
                  but is '-12'
                 """);
-        AssertThrown(() => AssertInt(0).IsOdd())
+        AssertThrown(() => AssertThat(0).IsOdd())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(224)
+            .HasFileLineNumber(250)
             .HasMessage("""
                 Expecting be odd:
                  but is '0'
                 """);
-        AssertThrown(() => AssertInt(12).IsOdd())
+        AssertThrown(() => AssertThat(12).IsOdd())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(231)
+            .HasFileLineNumber(257)
             .HasMessage("""
                 Expecting be odd:
                  but is '12'
@@ -240,18 +266,18 @@ public class NumberAssertTest
     [TestCase]
     public void IsNegative()
     {
-        AssertInt(-1).IsNegative();
-        AssertInt(-23).IsNegative();
-        AssertThrown(() => AssertInt(0).IsNegative())
+        AssertThat(-1).IsNegative();
+        AssertThat(-23).IsNegative();
+        AssertThrown(() => AssertThat(0).IsNegative())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(245)
+            .HasFileLineNumber(271)
             .HasMessage("""
                 Expecting be negative:
                  but is '0'
                 """);
-        AssertThrown(() => AssertInt(13).IsNegative())
+        AssertThrown(() => AssertThat(13).IsNegative())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(252)
+            .HasFileLineNumber(278)
             .HasMessage("""
                 Expecting be negative:
                  but is '13'
@@ -261,18 +287,18 @@ public class NumberAssertTest
     [TestCase]
     public void IsNotNegative()
     {
-        AssertInt(0).IsNotNegative();
-        AssertInt(13).IsNotNegative();
-        AssertThrown(() => AssertInt(-1).IsNotNegative())
+        AssertThat(0).IsNotNegative();
+        AssertThat(13).IsNotNegative();
+        AssertThrown(() => AssertThat(-1).IsNotNegative())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(266)
+            .HasFileLineNumber(292)
             .HasMessage("""
                 Expecting be NOT negative:
                  but is '-1'
                 """);
-        AssertThrown(() => AssertInt(-13).IsNotNegative())
+        AssertThrown(() => AssertThat(-13).IsNotNegative())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(273)
+            .HasFileLineNumber(299)
             .HasMessage("""
                 Expecting be NOT negative:
                  but is '-13'
@@ -282,18 +308,18 @@ public class NumberAssertTest
     [TestCase]
     public void IsZero()
     {
-        AssertInt(0).IsZero();
+        AssertThat(0).IsZero();
         // this assertion fail because the value is not zero
-        AssertThrown(() => AssertInt(-1).IsZero())
+        AssertThrown(() => AssertThat(-1).IsZero())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(287)
+            .HasFileLineNumber(313)
             .HasMessage("""
                 Expecting be zero:
                  but is '-1'
                 """);
-        AssertThrown(() => AssertInt(1).IsZero())
+        AssertThrown(() => AssertThat(1).IsZero())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(294)
+            .HasFileLineNumber(320)
             .HasMessage("""
                 Expecting be zero:
                  but is '1'
@@ -303,12 +329,12 @@ public class NumberAssertTest
     [TestCase]
     public void IsNotZero()
     {
-        AssertInt(-1).IsNotZero();
-        AssertInt(1).IsNotZero();
+        AssertThat(-1).IsNotZero();
+        AssertThat(1).IsNotZero();
         // this assertion fail because the value is not zero
-        AssertThrown(() => AssertInt(0).IsNotZero())
+        AssertThrown(() => AssertThat(0).IsNotZero())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(309)
+            .HasFileLineNumber(335)
             .HasMessage("""
                 Expecting be NOT zero:
                  but is '0'
@@ -318,21 +344,21 @@ public class NumberAssertTest
     [TestCase]
     public void IsIn()
     {
-        AssertInt(5).IsIn(3, 4, 5, 6);
-        AssertInt(5).IsIn(new int[] { 3, 4, 5, 6 });
+        AssertThat(5).IsIn(3, 4, 5, 6);
+        AssertThat(5).IsIn(new int[] { 3, 4, 5, 6 });
         // this assertion fail because 7 is not in [3, 4, 5, 6]
-        AssertThrown(() => AssertInt(7).IsIn(new int[] { 3, 4, 5, 6 }))
+        AssertThrown(() => AssertThat(7).IsIn(new int[] { 3, 4, 5, 6 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(324)
+            .HasFileLineNumber(350)
             .HasMessage("""
                 Expecting:
                     '7'
                  is in
                     [3, 4, 5, 6]
                 """);
-        AssertThrown(() => AssertInt(7).IsIn(Array.Empty<int>()))
+        AssertThrown(() => AssertThat(7).IsIn(Array.Empty<int>()))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(333)
+            .HasFileLineNumber(359)
             .HasMessage("""
                 Expecting:
                     '7'
@@ -344,14 +370,14 @@ public class NumberAssertTest
     [TestCase]
     public void IsNotIn()
     {
-        AssertInt(5).IsNotIn();
-        AssertInt(5).IsNotIn(Array.Empty<int>());
-        AssertInt(5).IsNotIn(new int[] { 3, 4, 6, 7 });
-        AssertInt(5).IsNotIn(3, 4, 6, 7);
+        AssertThat(5).IsNotIn();
+        AssertThat(5).IsNotIn(Array.Empty<int>());
+        AssertThat(5).IsNotIn(new int[] { 3, 4, 6, 7 });
+        AssertThat(5).IsNotIn(3, 4, 6, 7);
         // this assertion fail because 7 is not in [3, 4, 5, 6]
-        AssertThrown(() => AssertInt(5).IsNotIn(new int[] { 3, 4, 5, 6 }))
+        AssertThrown(() => AssertThat(5).IsNotIn(new int[] { 3, 4, 5, 6 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(352)
+            .HasFileLineNumber(378)
             .HasMessage("""
                 Expecting:
                     '5'
@@ -362,32 +388,32 @@ public class NumberAssertTest
 
     [TestCase(Iterations = 40)]
     public void IsBetween([Fuzzer(-20)] int value)
-        => AssertInt(value).IsBetween(-20, 20);
+        => AssertThat(value).IsBetween(-20, 20);
 
     [TestCase]
     public void IsBetweenMustFail()
     {
-        AssertThrown(() => AssertInt(-10).IsBetween(-9, 0))
+        AssertThrown(() => AssertThat(-10).IsBetween(-9, 0))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(370)
+            .HasFileLineNumber(396)
             .HasMessage("""
                 Expecting:
                     '-10'
                  in range between
                     '-9' <> '0'
                 """);
-        AssertThrown(() => AssertInt(0).IsBetween(1, 10))
+        AssertThrown(() => AssertThat(0).IsBetween(1, 10))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(379)
+            .HasFileLineNumber(405)
             .HasMessage("""
                 Expecting:
                     '0'
                  in range between
                     '1' <> '10'
                 """);
-        AssertThrown(() => AssertInt(10).IsBetween(11, 21))
+        AssertThrown(() => AssertThat(10).IsBetween(11, 21))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(388)
+            .HasFileLineNumber(414)
             .HasMessage("""
                 Expecting:
                     '10'
@@ -398,11 +424,11 @@ public class NumberAssertTest
 
     [TestCase]
     public void OverrideFailureMessage()
-        => AssertThrown(() => AssertInt(10)
+        => AssertThrown(() => AssertThat(10)
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(401)
+            .HasFileLineNumber(427)
             .HasMessage("Custom failure message");
 
     [TestCase]
@@ -412,7 +438,7 @@ public class NumberAssertTest
         if (ExecutionContext.Current != null)
             ExecutionContext.Current.FailureReporting = false;
         // force an assertion failure
-        AssertInt(10).IsZero();
+        AssertThat(10).IsZero();
 
         // expect this line will never called because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();

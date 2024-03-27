@@ -2,10 +2,8 @@ namespace GdUnit4.Executions;
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
 using System.Linq;
-using System.Threading;
 
 internal sealed class TestCase
 {
@@ -66,11 +64,8 @@ internal sealed class TestCase
     {
         if (arguments.Length > 0)
         {
-            var saveCulture = Thread.CurrentThread.CurrentCulture;
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
             var parameters = string.Join(", ", arguments.ToArray().Select(GdUnitExtensions.Formatted));
             testName = $"{testName}.{parameterizedName}({parameters})";
-            Thread.CurrentThread.CurrentCulture = saveCulture;
         }
         return testName;
     }
