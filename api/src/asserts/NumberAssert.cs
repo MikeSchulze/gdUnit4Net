@@ -1,8 +1,10 @@
 namespace GdUnit4.Asserts;
 using System;
+using System.Numerics;
 
-
-internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue> where TValue : notnull, IComparable, IComparable<TValue>
+internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
+    where TValue : notnull, IComparable, IComparable<TValue>, IEquatable<TValue>,
+    IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
     public NumberAssert(TValue current) : base(current)
     { }
@@ -34,6 +36,9 @@ internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue> 
             ThrowTestFailureReport(AssertFailures.IsGreaterEqual(Current, expected), Current, expected);
         return this;
     }
+
+    public INumberAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
+        => IsBetween(expected - approx, expected + approx);
 
     public INumberAssert<TValue> IsIn(params TValue[] expected)
     {

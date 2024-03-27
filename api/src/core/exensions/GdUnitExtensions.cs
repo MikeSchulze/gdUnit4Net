@@ -10,6 +10,7 @@ using GdUnit4.Asserts;
 using System.Threading;
 using System.Diagnostics;
 using GdUnit4.Executions;
+using System.Globalization;
 
 /// <summary>
 /// A util extension to format Godot object into a string representation
@@ -30,7 +31,16 @@ public static partial class GdUnitExtensions
         if ((value.GetType().IsClass && value is not string) || value is Type)
             return AssertFailures.AsObjectId(value);
         // fallback to default formatting
-        return value.ToString() ?? "<Null>";
+        var saveCulture = Thread.CurrentThread.CurrentCulture;
+        Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+        try
+        {
+            return value.ToString() ?? "<Null>";
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = saveCulture;
+        }
     }
 
     internal static string Formatted(this object? value)

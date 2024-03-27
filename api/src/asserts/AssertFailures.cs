@@ -232,7 +232,7 @@ internal sealed class AssertFailures
     public static string IsNotSame<TValue>(TValue? expected) =>
         $"{FormatFailure("Expecting be NOT same:")} {FormatExpected(expected)}";
 
-    public static string IsBetween(object? current, object from, object to) =>
+    public static string IsBetween<TValue>(TValue? current, TValue from, TValue to) =>
         $"""
                 {FormatFailure("Expecting:")}
                 {FormatCurrent(current).Indentation(1)}
