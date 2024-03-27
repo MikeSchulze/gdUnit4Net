@@ -19,16 +19,6 @@ internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, 
     public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
     { }
 
-    internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
-    {
-        var left = lKey?.UnboxVariant() ?? null;
-        var right = rKey?.UnboxVariant() ?? null;
-
-        if ((left is string) || left?.GetType().IsPrimitive)
-            return Equals(left, right);
-        return ReferenceEquals(left, right);
-    }
-
     public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
         => new(current);
 

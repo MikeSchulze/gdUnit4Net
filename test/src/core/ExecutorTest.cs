@@ -85,16 +85,16 @@ public class ExecutorTest : ITestEventListener
         return expectedEvents;
     }
 
-    private IEnumerableAssert AssertTestCaseNames(List<TestEvent> events) =>
+    private IEnumerableAssert<object?> AssertTestCaseNames(List<TestEvent> events) =>
         AssertArray(events).ExtractV(Extr("Type"), Extr("SuiteName"), Extr("TestName"), Extr("TotalCount"));
 
-    private IEnumerableAssert AssertEventCounters(List<TestEvent> events) =>
+    private IEnumerableAssert<object?> AssertEventCounters(List<TestEvent> events) =>
         AssertArray(events).ExtractV(Extr("Type"), Extr("TestName"), Extr("ErrorCount"), Extr("FailedCount"), Extr("OrphanCount"));
 
-    private IEnumerableAssert AssertEventStates(List<TestEvent> events) =>
+    private IEnumerableAssert<object?> AssertEventStates(List<TestEvent> events) =>
          AssertArray(events).ExtractV(Extr("Type"), Extr("TestName"), Extr("IsSuccess"), Extr("IsWarning"), Extr("IsFailed"), Extr("IsError"));
 
-    private IEnumerableAssert AssertReports(List<TestEvent> events)
+    private IEnumerableAssert<object?> AssertReports(List<TestEvent> events)
     {
         var extractedEvents = events.ConvertAll(e =>
         {
@@ -121,7 +121,7 @@ public class ExecutorTest : ITestEventListener
     }
 
     private static string ParameterizedTestCaseName(string testName, object[] testCaseParam)
-        => $"{testName}.{testName}({testCaseParam.Formatted()})";
+        => TestCase.BuildTestCaseName(testName, testName, testCaseParam);
 
     [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
     public async Task ExecuteSuccess()

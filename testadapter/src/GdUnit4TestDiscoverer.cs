@@ -2,7 +2,6 @@ namespace GdUnit4.TestAdapter;
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -41,9 +40,9 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
         var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
         var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
-        var filteredAssemblys = FilterWithoutTestAdapter(sources);
+        var filteredAssembles = FilterWithoutTestAdapter(sources);
 
-        foreach (var assemblyPath in filteredAssemblys)
+        foreach (var assemblyPath in filteredAssembles)
         {
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
 
@@ -76,14 +75,11 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                             .Where(attr => attr != null && attr.Arguments?.Length != 0)
                             .Select(attr =>
                             {
-                                var saveCulture = Thread.CurrentThread.CurrentCulture;
-                                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
-                                var paramaterizedTestName = $"{attr.TestName ?? mi.Name}({attr.Arguments.Formatted()})";
-                                Thread.CurrentThread.CurrentCulture = saveCulture;
+                                var parameterizedTestName = Executions.TestCase.BuildTestCaseName(mi.Name, attr);
                                 return new
                                 {
-                                    TestName = paramaterizedTestName,
-                                    FullyQualifiedName = $"{mi.DeclaringType}.{mi.Name}.{paramaterizedTestName}"
+                                    TestName = parameterizedTestName,
+                                    FullyQualifiedName = $"{mi.DeclaringType}.{parameterizedTestName}"
                                 };
                             })
                             .DefaultIfEmpty(new

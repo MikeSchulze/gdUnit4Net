@@ -65,7 +65,7 @@ public interface IDictionaryAssert<TKey, TValue> : IAssertBase<IEnumerable> wher
     /// Verifies that the current dictionary is the same.
     /// </summary>
     /// <remarks>
-    /// Compares the current by object reference equals.
+    /// Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase.IsEqual(TValue)"/>
     /// </remarks>
     /// <param name="expected"></param>
     public IDictionaryAssert<TKey, TValue> IsSame(IDictionary<TKey, TValue> expected);
@@ -75,7 +75,7 @@ public interface IDictionaryAssert<TKey, TValue> : IAssertBase<IEnumerable> wher
     /// Verifies that the current dictionary is NOT the same.
     /// </summary>
     /// <remarks>
-    /// Compares the current by object reference equals.
+    /// Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase.IsNotEqual(TValue)"/>
     /// </remarks>
     /// <param name="expected"></param>
     /// <returns></returns>

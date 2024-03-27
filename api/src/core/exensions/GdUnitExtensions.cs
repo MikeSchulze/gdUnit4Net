@@ -35,10 +35,10 @@ public static partial class GdUnitExtensions
 
     internal static string Formatted(this object? value)
     {
-        if (value == null)
-            return "<Null>";
         if (value is Godot.Variant v)
             value = v.UnboxVariant();
+        if (value == null)
+            return "<Null>";
         if (value is string asString)
             return asString.Formatted();
         return value switch
@@ -49,12 +49,24 @@ public static partial class GdUnitExtensions
         };
     }
 
-    internal static string Formatted(this Asserts.Tuple? value) => value?.ToString() ?? "<Null>";
-    internal static string Formatted(this string? value) => $"\"{value?.ToString()}\"" ?? "<Null>";
-    internal static string Formatted(this Godot.Variant[] args, int indentation = 0) => string.Join(", ", args.Cast<Godot.Variant>().Select(v => v.Formatted())).Indentation(indentation);
-    internal static string Formatted(this Godot.Collections.Array args, int indentation = 0) => args.UnboxVariant()?.Formatted(indentation) ?? "<empty>";
-    internal static string Formatted(this object?[] args, int indentation = 0) => string.Join(", ", args.ToArray().Select(Formatted)).Indentation(indentation);
-    internal static string Formatted(this IEnumerable args, int indentation = 0) => string.Join(", ", args.Cast<object>().Select(Formatted)).Indentation(indentation);
+    internal static string Formatted(this Godot.Variant value)
+        => Formatted(value as object);
+    internal static string Formatted(this Asserts.Tuple? value)
+        => value?.ToString() ?? "<Null>";
+    internal static string Formatted(this string? value)
+        => $"\"{value?.ToString()}\"" ?? "<Null>";
+
+    internal static string Formatted(this Godot.Collections.Array args, int indentation = 0)
+        => args.ToArray().Formatted(indentation);
+    internal static string Formatted<[Godot.MustBeVariant] TValue>(this Godot.Collections.Array<TValue> args, int indentation = 0)
+        => args.ToArray().Formatted(indentation);
+    internal static string Formatted<TValue>(this TValue?[] args, int indentation = 0)
+        => args.Length == 0
+            ? "<Empty>"
+            : "[" + string.Join(", ", args.ToArray().Select(v => Formatted(v))).Indentation(indentation) + "]";
+    internal static string Formatted(this IEnumerable args, int indentation = 0)
+        => Formatted(args.Cast<object?>().ToArray(), indentation);
+
     internal static string UnixFormat(this string value) => value.Replace("\r", string.Empty);
 
     internal static string Indentation(this string value, int indentation)

@@ -17,5 +17,17 @@ internal sealed class Tuple : ITuple
 
     public override int GetHashCode() => HashCode.Combine(Values);
 
-    public override string ToString() => $"tuple({Values.Formatted()})";
+    public override string ToString()
+        => $"tuple({string.Join(", ", Values.Cast<object>().Select(GdUnitExtensions.Formatted)).Indentation(0)})";
+
+    public static bool operator ==(Tuple? tuple1, Tuple? tuple2)
+    {
+        if (ReferenceEquals(tuple1, tuple2))
+            return true;
+        if (tuple1 is null || tuple2 is null)
+            return false;
+        return tuple1.Values.VariantEquals(tuple2.Values);
+    }
+
+    public static bool operator !=(Tuple? tuple1, Tuple? tuple2) => !(tuple1 == tuple2);
 }

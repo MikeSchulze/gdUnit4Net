@@ -94,8 +94,14 @@ public static class GodotVariantExtensions
         return unboxed;
     }
 
-    internal static Variant ToVariant(this object? obj) =>
-        Type.GetTypeCode(obj?.GetType()) switch
+    internal static Variant ToVariant(this GodotObject? obj)
+        => Variant.From(obj);
+
+    internal static Variant ToVariant(this object? obj)
+    {
+        if (obj == null)
+            return new Variant();
+        return Type.GetTypeCode(obj?.GetType()) switch
         {
             TypeCode.Empty => new Variant(),
             TypeCode.String => Variant.CreateFrom((string)obj!),
@@ -117,18 +123,26 @@ public static class GodotVariantExtensions
             TypeCode.DateTime => ToVariantByType(obj!),
             _ => ToVariantByType(obj!)
         };
+    }
 
     private static Variant ToVariantByType(object obj)
     {
-        if (obj is Variant v)
-            return v;
-        if (obj is IList list)
-            return list.ToGodotArray();
+        try
+        {
+            if (obj is Variant v)
+                return v;
+            if (obj is IList list)
+                return list.ToGodotArray();
 
-        if (obj is IDictionary<string, object> dict)
-            return dict.ToGodotTypedDictionary();
+            if (obj is IDictionary<string, object> dict)
+                return dict.ToGodotTypedDictionary();
 
-        throw new NotImplementedException($"Cannot convert '{obj?.GetType()}' to Variant!");
+            return Variant.From(obj);
+        }
+        catch (Exception)
+        {
+            throw new InvalidOperationException($"Cannot convert '{obj?.GetType()}' to Variant!");
+        }
     }
 
     private static dynamic? UnboxVariant(this Variant v) => v.VariantType switch
