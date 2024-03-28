@@ -70,12 +70,23 @@ public interface ISceneRunner : IDisposable
     ISceneRunner SimulateMouseMove(Vector2 position);
 
     /// <summary>
+    /// Simulates a mouse move to the absolute coordinates.
+    /// </summary>
+    /// <param name="position">The final position of the mouse.</param>
+    /// <param name="time">The time to move the mouse to the final position in seconds (default is 1 second).</param>
+    /// <param name="transitionType">Sets the type of transition used (default is Linear).</param>
+    /// <returns>SceneRunner</returns>
+    Task SimulateMouseMoveAbsolute(Vector2 position, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
+
+
+    /// <summary>
     /// Simulates a mouse move to the relative coordinates (offset).
     /// </summary>
     /// <param name="relative">The relative position, e.g. the mouse position offset</param>
-    /// <param name="speed">The mouse speed in pixels per second.</param>
+    /// <param name="time">The time to move the mouse by the relative position in seconds (default is 1 second).</param>
+    /// <param name="transitionType">Sets the type of transition used (default is Linear).</param>
     /// <returns>SceneRunner</returns>
-    Task SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default);
+    Task SimulateMouseMoveRelative(Vector2 relative, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
 
     /// <summary>
     /// Simulates a mouse button pressed.

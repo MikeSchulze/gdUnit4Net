@@ -10,6 +10,44 @@ using System.Linq;
 
 using Godot;
 
+/// <summary>
+/// An helper to simulate an mouse moving form a source to final position
+/// </summary>
+internal partial class MouseMoveTask : Node, IDisposable
+{
+    private Vector2 CurrentMousePosition { get; set; }
+
+    private Vector2 FinalMousePosition { get; }
+
+    public MouseMoveTask(Vector2 currentPosition, Vector2 finalPosition)
+    {
+        CurrentMousePosition = currentPosition;
+        FinalMousePosition = finalPosition;
+    }
+
+    public new void Dispose()
+    {
+        QueueFree();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public async Task WaitOnFinalPosition(ISceneRunner sceneRunner, double time, Tween.TransitionType transitionType)
+    {
+        using var tween = sceneRunner.Scene().CreateTween();
+        tween.TweenProperty(this, "CurrentMousePosition", FinalMousePosition, time).SetTrans(transitionType);
+        tween.Play();
+
+        while (!sceneRunner.GetMousePosition().IsEqualApprox(FinalMousePosition))
+        {
+            sceneRunner.SimulateMouseMove(CurrentMousePosition);
+            await ISceneRunner.SyncProcessFrame;
+        }
+        sceneRunner.SimulateMouseMove(FinalMousePosition);
+        await ISceneRunner.SyncProcessFrame;
+    }
+}
+
 internal sealed class SceneRunner : ISceneRunner
 {
     private SceneTree SceneTree { get; set; }
@@ -205,28 +243,14 @@ internal sealed class SceneRunner : ISceneRunner
         return HandleInputEvent(inputEvent);
     }
 
+    public async Task SimulateMouseMoveRelative(Vector2 relative, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear)
+        => await SimulateMouseMoveAbsolute(GetMousePosition() + relative, time, transitionType);
 
-    public async Task SimulateMouseMoveRelative(Vector2 relative, Vector2 speed = default)
+    public async Task SimulateMouseMoveAbsolute(Vector2 position, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear)
     {
-        if (LastInputEvent is InputEventMouse lastInputEvent)
-        {
-            var current_pos = lastInputEvent.Position;
-            var final_pos = current_pos + relative;
-            var delta_millis = speed.X * 0.1;
-            var t = 0.0;
-
-            while (!current_pos.IsEqualApprox(final_pos))
-            {
-                t += delta_millis * speed.X;
-                SimulateMouseMove(current_pos);
-                await AwaitMillis((uint)(delta_millis * 1000));
-                current_pos = current_pos.Lerp(final_pos, (float)t);
-            }
-            SimulateMouseMove(final_pos);
-            await ISceneRunner.SyncProcessFrame;
-        }
+        using var mouseMove = new MouseMoveTask(GetMousePosition(), position);
+        await mouseMove.WaitOnFinalPosition(this, time, transitionType);
     }
-
 
     public ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex, bool doubleClick = false)
     {
