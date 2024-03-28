@@ -354,17 +354,42 @@ public sealed class SceneRunnerInputEventIntegrationTest
         //verify(_scene_spy, 1)._input(mouseEvent)
     }
 
-    [TestCase(Timeout = 4000)]
+    [TestCase(Timeout = 2000)]
     public async Task SimulateMouseMoveRelative()
     {
-        sceneRunner.SimulateMouseMove(new Vector2(10, 10));
+        var sourcePosition = new Vector2(10, 10);
+        sceneRunner.SimulateMouseMove(sourcePosition);
         await ISceneRunner.SyncProcessFrame;
         // initial pos
-        AssertThat(ActualMousePos()).IsEqual(new Vector2(10, 10));
+        AssertThat(ActualMousePos()).IsEqual(sourcePosition);
 
-        await sceneRunner.SimulateMouseMoveRelative(new Vector2(900, 400), new Vector2(.2f, 1));
-        // final pos
+        // now move it from source position with offset, in 1s
+        await sceneRunner.SimulateMouseMoveRelative(new Vector2(900, 400));
+        // check relative position is reached
         AssertThat(ActualMousePos()).IsEqual(new Vector2(910, 410));
+
+        // and now move it back to source position, in 500ms
+        await sceneRunner.SimulateMouseMoveRelative(new Vector2(-900, -400), .5);
+        AssertThat(ActualMousePos()).IsEqual(sourcePosition);
+    }
+
+    [TestCase(Timeout = 2000)]
+    public async Task SimulateMouseMoveAbsolute()
+    {
+        var sourcePosition = new Vector2(10, 10);
+        sceneRunner.SimulateMouseMove(sourcePosition);
+        await ISceneRunner.SyncProcessFrame;
+        // initial pos
+        AssertThat(ActualMousePos()).IsEqual(sourcePosition);
+
+        // now move it to new position, in 1s
+        await sceneRunner.SimulateMouseMoveAbsolute(new Vector2(900, 400));
+        // check relative position is reached
+        AssertThat(ActualMousePos()).IsEqual(new Vector2(900, 400));
+
+        // and now move it back to source position, in 500ms
+        await sceneRunner.SimulateMouseMoveAbsolute(sourcePosition, .5);
+        AssertThat(ActualMousePos()).IsEqual(sourcePosition);
     }
 
     [TestCase]
