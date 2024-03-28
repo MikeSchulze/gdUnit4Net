@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using GdUnit4.TestAdapter.Settings;
+using System.Reflection;
 
 internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 {
@@ -62,44 +63,76 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    }) == false)
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";//Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory} {testRunnerScene} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
-        {
-            StandardOutputEncoding = Encoding.Default,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
-            WorkingDirectory = @$"{workingDirectory}"
-        };
+        var arguments = @$"{debugArg} --path {workingDirectory} {testRunnerScene} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}";
 
-        using (pProcess = new() { StartInfo = processStartInfo })
+        if (runContext.IsBeingDebugged)
         {
-            pProcess.EnableRaisingEvents = true;
-            pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
-            pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-            pProcess.Exited += ExitHandler(frameworkHandle);
-            pProcess.Start();
-            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+            // List the dependencies
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, "Dependencies:");
+            foreach (var referencedAssembly in Assembly.Load("gdUnit4Api").GetReferencedAssemblies())
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"referencedAssembly {referencedAssembly.FullName}");
 
-            pProcess.BeginErrorReadLine();
-            pProcess.BeginOutputReadLine();
-            while (!pProcess.WaitForExit(SessionTimeOut))
-            {
-                Thread.Sleep(100);
-            }
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"CurrentDomain {assembly.FullName}");
             try
             {
-                pProcess.Kill(true);
+                // crashes with not implemented
+                var processId = frameworkHandle.LaunchProcessWithDebuggerAttached(GodotBin, workingDirectory, arguments, new Dictionary<string, string?>());
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"LaunchProcessWithDebuggerAttached {processId}");
+                pProcess = Process.GetProcessById(processId);
+                pProcess.EnableRaisingEvents = true;
+                pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
+                pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                pProcess.Exited += ExitHandler(frameworkHandle);
+                pProcess.WaitForExit();
                 frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
             }
             catch (Exception e)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with {e.Message}");
+                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run Debug TestRunner ends with {e.Message}");
             }
             File.Delete(configName);
-        };
+        }
+        else
+        {
+            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
+            {
+                StandardOutputEncoding = Encoding.Default,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = @$"{workingDirectory}"
+            };
+            using (pProcess = new() { StartInfo = processStartInfo })
+            {
+                pProcess.EnableRaisingEvents = true;
+                pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
+                pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                pProcess.Exited += ExitHandler(frameworkHandle);
+                pProcess.Start();
+                //AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+
+                pProcess.BeginErrorReadLine();
+                pProcess.BeginOutputReadLine();
+                while (!pProcess.WaitForExit(SessionTimeOut))
+                {
+                    Thread.Sleep(100);
+                }
+                try
+                {
+                    pProcess.Kill(true);
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                }
+                catch (Exception e)
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with {e.Message}");
+                }
+                File.Delete(configName);
+            };
+        }
     }
 
     private void InstallTestRunnerAndBuild(IFrameworkHandle frameworkHandle, string workingDirectory)

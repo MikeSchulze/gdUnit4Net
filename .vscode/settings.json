@@ -19,6 +19,8 @@
   "omnisharp.organizeImportsOnFormat": true,
   "omnisharp.useModernNet": true,
   "dotnet.unitTests.runSettingsPath": "./test/.runsettings",
+  // check https://github.com/microsoft/vscode-dotnettools/issues/910
+  // "dotnet.testWindow.useTestingPlatformProtocol": false,
   "cSpell.words": [
     "Aabb",
     "autofree",

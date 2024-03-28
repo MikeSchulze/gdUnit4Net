@@ -49,6 +49,7 @@
     <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
     <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
+    <PackageReference Include="Microsoft.TestPlatform" Version="$(MicrosoftSdkVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="All" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
