@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Title>gdUnit4TestAdapter</Title>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Description>
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
@@ -33,7 +33,7 @@
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>gdUnit4.test.adapter</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.0.1</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
@@ -41,6 +41,8 @@
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+      <!-- ingnore dependency warnings to pre release version of gdunit.api -->
+    <NoWarn>NU5104</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
