@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 
 using GdUnit4.Api;
 using Godot;
+using GdUnit4.TestAdapter.Extensions;
 
 internal abstract class BaseTestExecutor
 {
@@ -46,7 +47,7 @@ internal abstract class BaseTestExecutor
         {
             Included = groupedTestSuites.ToDictionary(
                 suite => suite.Key,
-                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(GdUnit4TestDiscoverer.TestMethodNameProperty, t.DisplayName) })
+                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.DisplayName) })
             )
         };
 
@@ -127,7 +128,7 @@ internal abstract class BaseTestExecutor
     });
 
     private static TestCase? FindTestCase(IEnumerable<TestCase> tests, TestEvent e)
-        => tests.FirstOrDefault(t => t.FullyQualifiedName.EndsWith(e.FullyQualifiedName));
+        => tests.FirstOrDefault(t => e.FullyQualifiedName.Equals(t.FullyQualifiedName, StringComparison.Ordinal));
 
     protected static string? LookupGodotProjectPath(string classPath)
     {

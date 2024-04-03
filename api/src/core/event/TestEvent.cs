@@ -61,6 +61,12 @@ internal class TestEvent : IEquatable<TestEvent>
 
 #nullable disable
 
+    internal TestEvent WithFullyQualifiedName(string name)
+    {
+        FullyQualifiedName = name;
+        return this;
+    }
+
     public static IDictionary<STATISTIC_KEY, object> BuildStatistics(int orphanCount,
         bool isError, int errorCount,
         bool isFailure, int failureCount,
@@ -80,7 +86,7 @@ internal class TestEvent : IEquatable<TestEvent>
     public TYPE Type { get; set; }
     public string SuiteName { get; set; }
     public string TestName { get; set; }
-    public string FullyQualifiedName => SuiteName + "." + TestName;
+    public string FullyQualifiedName { get; set; }
     public string ResourcePath { get; set; }
     public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
     public IEnumerable<TestReport> Reports { get; set; } = new List<TestReport>();

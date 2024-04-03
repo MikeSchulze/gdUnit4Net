@@ -98,7 +98,10 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             {
                 frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with {e.Message}");
             }
-            File.Delete(configName);
+            finally
+            {
+                File.Delete(configName);
+            }
         };
     }
 

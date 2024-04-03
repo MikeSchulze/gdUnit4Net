@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Title>gdUnit4TestAdapter</Title>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Description>
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
@@ -33,7 +33,7 @@
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
     <PackageId>gdUnit4.test.adapter</PackageId>
-    <PackageVersion>1.0.1</PackageVersion>
+    <PackageVersion>1.1.0</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
@@ -49,7 +49,8 @@
     <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
     <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="None" />
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <ProjectReference Include="..\api\gdUnit4Api.csproj"/>

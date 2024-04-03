@@ -215,7 +215,7 @@ public class GdUnitTestSuiteBuilder
                     var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                         .Cast<TestCaseAttribute>()
                         .Where(attr => attr != null && attr.Arguments?.Length != 0)
-                        .Select(attr => TestCase.BuildTestCaseName(attr.TestName ?? mi.Name, attr))
+                        .Select(attr => TestCase.BuildDisplayName(mi.Name, attr))
                         .ToList();
                     // create test
                     return new CsNode(mi.Name, classPath, lineNumber, testCases);
