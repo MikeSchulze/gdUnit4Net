@@ -230,12 +230,12 @@ public class GdUnitTestSuiteBuilderTest
                 Tuple("Waiting", 48, new List<string>()),
                 Tuple("TestFooBar", 52, new List<string>()),
                 Tuple("TestCaseArguments", 58, new List<string> {
-                    "TestCaseArguments.TestCaseArguments(1, 2, 3, 6)",
-                    "TestCaseArguments.TestCaseArguments(3, 4, 5, 12)",
-                    "TestCaseArguments.TestCaseArguments(6, 7, 8, 21)" }),
+                    "TestCaseArguments(1, 2, 3, 6)",
+                    "TestCaseArguments(3, 4, 5, 12)",
+                    "TestCaseArguments(6, 7, 8, 21)" }),
                 Tuple("TestCasesWithCustomTestName", 64, new List<string> {
-                    "TestCaseA.TestCaseA(1, 2, 3, 6)",
-                    "TestCaseB.TestCaseB(3, 4, 5, 12)",
-                    "TestCaseC.TestCaseC(6, 7, 8, 21)" }));
+                    "TestCaseA(1, 2, 3, 6)",
+                    "TestCaseB(3, 4, 5, 12)",
+                    "TestCaseC(6, 7, 8, 21)" }));
     }
 }

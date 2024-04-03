@@ -57,16 +57,35 @@ internal sealed class TestCase
 
     public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
 
-    public static string BuildTestCaseName(string testName, TestCaseAttribute attribute)
-        => BuildTestCaseName(testName, attribute.TestName ?? testName, attribute.Arguments);
+    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute)
+    {
+        var name = attribute.TestName ?? testName;
+        if (attribute.Arguments.Length > 0)
+        {
+            var parameters = string.Join(", ", attribute!.Arguments.Select(GdUnitExtensions.Formatted));
+            return $"{name}({parameters})";
+        }
+        return name;
+    }
 
-    public static string BuildTestCaseName(string testName, string parameterizedName, params object?[] arguments)
+    internal static string BuildDisplayName(string testName)
+        => testName;
+
+    internal static string BuildDisplayName(string testName, params object[] arguments)
     {
         if (arguments.Length > 0)
         {
-            var parameters = string.Join(", ", arguments.ToArray().Select(GdUnitExtensions.Formatted));
-            testName = $"{testName}.{parameterizedName}({parameters})";
+            var parameters = string.Join(", ", arguments.Select(GdUnitExtensions.Formatted));
+            return $"{testName}({parameters})";
         }
         return testName;
+    }
+
+    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute? attr)
+    {
+        if (attr == null)
+            return $"{classNameSpace}.{testName}";
+        var parameterizedTestName = BuildDisplayName(testName, attr);
+        return $"{classNameSpace}.{testName}.{parameterizedTestName}";
     }
 }
