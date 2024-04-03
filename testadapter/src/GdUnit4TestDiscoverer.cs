@@ -21,6 +21,7 @@ using GdUnit4.TestAdapter.Settings;
 using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
 using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
 using static GdUnit4.TestAdapter.Extensions.TestCaseExtensions;
+using static GdUnit4.TestAdapter.Utilities.Utils;
 
 [DefaultExecutorUri(GdUnit4TestExecutor.ExecutorUri)]
 [ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
@@ -120,23 +121,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
     }
 
-    private bool CheckGdUnit4ApiVersion(IMessageLogger logger, Version minVersion)
-    {
-        var dependencies = Assembly
-            .GetExecutingAssembly()
-            .GetReferencedAssemblies()
-            .Where(assemblyName => "gdUnit4Api".Equals(assemblyName.Name, StringComparison.Ordinal));
-        if (!dependencies.Any())
-            throw new InvalidOperationException($"No 'gdUnit4Api' is installed!");
-        var version = dependencies.First().Version;
-        logger.SendMessage(TestMessageLevel.Informational, $"CheckGdUnit4ApiVersion gdUnit4Api, Version={version}");
-        if (version < minVersion)
-        {
-            logger.SendMessage(TestMessageLevel.Error, $"Wrong gdUnit4Api, Version={version} found, you need to upgrade to minimum version: '{minVersion}'");
-            return false;
-        }
-        return true;
-    }
+
     private List<Trait> TestCasePropertiesAsTraits(MethodInfo mi)
         => mi.GetCustomAttributes(typeof(TestCaseAttribute))
                                     .Cast<TestCaseAttribute>()
