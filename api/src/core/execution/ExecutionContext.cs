@@ -41,7 +41,8 @@ internal sealed class ExecutionContext : IDisposable
     public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
     {
         context.SubExecutionContexts.Add(this);
-        TestCaseName = testCase.Name;
+        TestCaseName = TestCase.BuildDisplayName(testCase.Name);
+        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
         CurrentTestCase = testCase;
         CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
@@ -52,7 +53,8 @@ internal sealed class ExecutionContext : IDisposable
         context.SubExecutionContexts.Add(this);
         CurrentTestCase = testCase;
         CurrentIteration = 0;
-        TestCaseName = TestCase.BuildTestCaseName(testCase.Name, testCaseAttribute);
+        TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCaseAttribute);
+        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCaseAttribute);
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 
@@ -122,6 +124,8 @@ internal sealed class ExecutionContext : IDisposable
 
     private int ErrorCount => ReportCollector.Errors.Count();
 
+    public string FullyQualifiedName { get; private set; } = "";
+
     public int OrphanCount(bool recursive)
     {
         var orphanCount = OrphanMonitor.OrphanCount;
@@ -149,10 +153,14 @@ internal sealed class ExecutionContext : IDisposable
         FireTestEvent(TestEvent.After(TestSuite.ResourcePath, TestSuite.Name, BuildStatistics(OrphanCount(false)), CollectReports));
 
     public void FireBeforeTestEvent() =>
-        FireTestEvent(TestEvent.BeforeTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName));
+        FireTestEvent(TestEvent
+            .BeforeTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
+            .WithFullyQualifiedName(FullyQualifiedName));
 
     public void FireAfterTestEvent() =>
-        FireTestEvent(TestEvent.AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports));
+        FireTestEvent(TestEvent
+            .AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
+            .WithFullyQualifiedName(FullyQualifiedName));
 
     public static void RegisterDisposable(IDisposable disposable) =>
         Current?.Disposables.Add(disposable);

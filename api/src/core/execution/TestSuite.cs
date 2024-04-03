@@ -70,7 +70,7 @@ internal sealed class TestSuite : IDisposable
             var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                 .Cast<TestCaseAttribute>()
                 .Where(attr => attr != null && attr.Arguments?.Length != 0)
-                .Select(attr => primitiveFilter ? mi.Name : TestCase.BuildTestCaseName(mi.Name, attr))
+                .Select(attr => primitiveFilter ? mi.Name : TestCase.BuildDisplayName(mi.Name, attr))
                 .DefaultIfEmpty($"{mi.Name}")
                 .ToList();
             Thread.CurrentThread.CurrentCulture = saveCulture;
