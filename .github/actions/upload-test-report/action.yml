@@ -1,21 +1,23 @@
-name: "upload test report"
-description: "Uploads the GdUnit test reports"
+name: 'upload test report'
+description: 'Uploads the GdUnit test reports'
 
 inputs:
   report-name:
-    description: "Name of the report to be upload."
+    description: 'Name of the report to be upload.'
     required: true
 
 runs:
   using: composite
   steps:
-    - name: "Upload Test Artifacts"
+    - name: 'Upload Test Artifacts'
       uses: actions/upload-artifact@v4
       with:
         retention-days: 10
         name: artifact_${{ inputs.report-name }}
         path: |
-          /test/TestResults/**
-          reports/**
+          ./test/TestResults/test-result.trx
+          ./test/reports/**
+          ./example/TestResults/test-result.trx
+          ./example/reports/**
           /var/lib/systemd/coredump/**
           /var/log/syslog
