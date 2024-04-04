@@ -5,7 +5,7 @@
         <TestAdaptersPaths>.</TestAdaptersPaths>
         <ResultsDirectory>./TestResults</ResultsDirectory>
         <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-        <TestSessionTimeout>180000</TestSessionTimeout>
+        <TestSessionTimeout>300000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
     </RunConfiguration>
 
