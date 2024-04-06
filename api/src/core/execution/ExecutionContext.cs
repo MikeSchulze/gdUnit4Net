@@ -51,10 +51,10 @@ internal sealed class ExecutionContext : IDisposable
     public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
     {
         context.SubExecutionContexts.Add(this);
-        CurrentTestCase = testCase;
-        CurrentIteration = 0;
         TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCaseAttribute);
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCaseAttribute);
+        CurrentTestCase = testCase;
+        CurrentIteration = 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 

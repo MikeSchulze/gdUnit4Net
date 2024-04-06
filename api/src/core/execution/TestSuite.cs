@@ -9,8 +9,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using GdUnit4.Core;
-using System.Threading;
-using System.Globalization;
 
 internal sealed class TestSuite : IDisposable
 {
@@ -65,15 +63,10 @@ internal sealed class TestSuite : IDisposable
     private Func<MethodInfo, bool> FilterByTestCaseName(IEnumerable<string>? includedTests, bool primitiveFilter)
         => mi =>
         {
-            var saveCulture = Thread.CurrentThread.CurrentCulture;
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", true);
             var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
                 .Cast<TestCaseAttribute>()
-                .Where(attr => attr != null && attr.Arguments?.Length != 0)
-                .Select(attr => primitiveFilter ? mi.Name : TestCase.BuildDisplayName(mi.Name, attr))
-                .DefaultIfEmpty($"{mi.Name}")
+                .Select(attr => primitiveFilter ? mi.Name : TestCase.BuildFullyQualifiedName(mi.DeclaringType!.FullName!, mi.Name, attr))
                 .ToList();
-            Thread.CurrentThread.CurrentCulture = saveCulture;
             return includedTests?.Any(testName => testCases.Contains(testName)) ?? true;
         };
 
