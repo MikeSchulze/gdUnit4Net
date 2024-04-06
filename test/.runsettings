@@ -38,6 +38,6 @@
         <Parameters></Parameters>
         <!-- Controlls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
              This likely determines how the test names are displayed in the test results.-->
-        <DisplayName>SimpleName</DisplayName>
+        <DisplayName>FullyQualifiedName</DisplayName>
     </GdUnit4>
 </RunSettings>

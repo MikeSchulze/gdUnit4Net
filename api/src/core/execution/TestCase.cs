@@ -83,7 +83,7 @@ internal sealed class TestCase
 
     internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute? attr)
     {
-        if (attr == null)
+        if (attr == null || attr.Arguments.Length == 0)
             return $"{classNameSpace}.{testName}";
         var parameterizedTestName = BuildDisplayName(testName, attr);
         return $"{classNameSpace}.{testName}.{parameterizedTestName}";

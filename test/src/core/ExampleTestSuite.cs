@@ -48,7 +48,7 @@ public class ExampleTestSuite
     public async Task Waiting()
         => await DoWait(200);
 
-    [TestCase]
+    [TestCase(TestName = "Customized")]
     public void TestFooBar()
         => AssertBool(true).IsEqual(true);
 

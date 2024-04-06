@@ -228,7 +228,7 @@ public class GdUnitTestSuiteBuilderTest
                 Tuple("TestFoo", 36, new List<string>()),
                 Tuple("TestBar", 44, new List<string>()),
                 Tuple("Waiting", 48, new List<string>()),
-                Tuple("TestFooBar", 52, new List<string>()),
+                Tuple("Customized", 52, new List<string>()),
                 Tuple("TestCaseArguments", 58, new List<string> {
                     "TestCaseArguments(1, 2, 3, 6)",
                     "TestCaseArguments(3, 4, 5, 12)",
