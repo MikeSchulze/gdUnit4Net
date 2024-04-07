@@ -47,6 +47,12 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             .GroupBy(t => t.CodeFilePath!)
             .ToDictionary(group => group.Key, group => group.ToList());
 
+        if (groupedTests.Count == 0)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Stop test run, no tests found!");
+            return;
+        }
+
         var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
         _ = workingDirectory ?? throw new InvalidOperationException($"Cannot determine the godot.project! The workingDirectory is not set");
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
@@ -64,6 +70,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";//Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
         var arguments = @$"{debugArg} --path {workingDirectory} {testRunnerScene} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}";
+
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"CurrentDomain {assembly.FullName}");
 
         if (runContext.IsBeingDebugged)
         {
@@ -86,6 +95,11 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                 pProcess.Exited += ExitHandler(frameworkHandle);
                 pProcess.WaitForExit();
                 frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+            }
+            catch (NotImplementedException e)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run Debug TestRunner ends with {e.Message}");
+                //throw new Exception("Abnormal abort.", e);
             }
             catch (Exception e)
             {
