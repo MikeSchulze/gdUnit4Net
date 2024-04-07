@@ -21,6 +21,7 @@ using GdUnit4.TestAdapter.Settings;
 using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
 using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
 using static GdUnit4.TestAdapter.Extensions.TestCaseExtensions;
+using static GdUnit4.TestAdapter.Utilities.Utils;
 
 [DefaultExecutorUri(GdUnit4TestExecutor.ExecutorUri)]
 [ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
@@ -82,28 +83,19 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                         hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
                         hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = methodName;
                         var isAsync = MatchReturnType(mi, typeof(Task));
-                        // Collect parameterized tests or build a single test
+                        // Collect test cases or build a single test
                         mi.GetCustomAttributes(typeof(TestCaseAttribute))
                             .Cast<TestCaseAttribute>()
-                            .Where(attr => attr != null && attr.Arguments?.Length != 0)
-                            .Select(attr => new TestCaseDescriptor
+                            .Select((attr, index) => new TestCaseDescriptor
                             {
                                 ManagedType = managedType,
                                 ManagedMethod = managedMethod,
                                 HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
-                                DisplayName = Executions.TestCase.BuildDisplayName(mi.Name, attr),
+                                DisplayName = BuildDisplayName(mi.Name, index, attr, gdUnitSettings),
                                 FullyQualifiedName = Executions.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
                                 Traits = TestCasePropertiesAsTraits(mi)
                             })
-                            .DefaultIfEmpty(new TestCaseDescriptor
-                            {
-                                ManagedType = managedType,
-                                ManagedMethod = managedMethod,
-                                HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
-                                DisplayName = Executions.TestCase.BuildDisplayName(mi.Name),
-                                FullyQualifiedName = Executions.TestCase.BuildFullyQualifiedName(managedType, mi.Name, null)
-                            })
-                            .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData, gdUnitSettings))
+                            .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData))
                             .OrderBy(t => t.DisplayName)
                             .ToList()
                             .ForEach(t =>
@@ -120,44 +112,28 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
     }
 
-    private bool CheckGdUnit4ApiVersion(IMessageLogger logger, Version minVersion)
-    {
-        var dependencies = Assembly
-            .GetExecutingAssembly()
-            .GetReferencedAssemblies()
-            .Where(assemblyName => "gdUnit4Api".Equals(assemblyName.Name, StringComparison.Ordinal));
-        if (!dependencies.Any())
-            throw new InvalidOperationException($"No 'gdUnit4Api' is installed!");
-        var version = dependencies.First().Version;
-        logger.SendMessage(TestMessageLevel.Informational, $"CheckGdUnit4ApiVersion gdUnit4Api, Version={version}");
-        if (version < minVersion)
-        {
-            logger.SendMessage(TestMessageLevel.Error, $"Wrong gdUnit4Api, Version={version} found, you need to upgrade to minimum version: '{minVersion}'");
-            return false;
-        }
-        return true;
-    }
+
     private List<Trait> TestCasePropertiesAsTraits(MethodInfo mi)
         => mi.GetCustomAttributes(typeof(TestCaseAttribute))
                                     .Cast<TestCaseAttribute>()
-                                    .Where(attr => attr != null && attr.Arguments?.Length != 0)
+                                    .Where(attr => attr.Arguments?.Length != 0)
                                     .Select(attr => attr.Name == null
                                             ? new Trait(string.Empty, attr.Arguments.Formatted())
                                             : new Trait(attr.Name, attr.Arguments.Formatted())
                                     )
                                     .ToList();
 
-    private TestCase BuildTestCase(TestCaseDescriptor descriptor, string assemblyPath, CodeNavigation navData, GdUnit4Settings gdUnitSettings)
+    private TestCase BuildTestCase(TestCaseDescriptor descriptor, string assemblyPath, CodeNavigation navData)
     {
         TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), assemblyPath)
         {
             Id = GenerateTestId(descriptor, assemblyPath, navData),
-            DisplayName = BuildDisplayName(descriptor.DisplayName, descriptor.FullyQualifiedName, gdUnitSettings),
+            DisplayName = descriptor.DisplayName,
             FullyQualifiedName = descriptor.FullyQualifiedName,
             CodeFilePath = navData.Source,
             LineNumber = navData.Line
         };
-        testCase.SetPropertyValue(TestCaseNameProperty, testCase.DisplayName);
+        testCase.SetPropertyValue(TestCaseNameProperty, descriptor.FullyQualifiedName);
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
         if (descriptor.HierarchyValues?.Count > 0)
@@ -171,19 +147,27 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     {
         var idProvider = new TestIdProvider();
         idProvider.AppendString(assemblyPath);
+        idProvider.AppendString(descriptor.FullyQualifiedName);
         idProvider.AppendString(GdUnit4TestExecutor.ExecutorUri);
         idProvider.AppendString(navData.Source ?? "");
-        idProvider.AppendString(descriptor.FullyQualifiedName);
         return idProvider.GetId();
     }
 
-    private static string BuildDisplayName(string testName, string fullyQualifiedName, GdUnit4Settings gdUnitSettings) =>
-        gdUnitSettings.DisplayName switch
+    private static string BuildDisplayName(string testName, long index, TestCaseAttribute attr, GdUnit4Settings gdUnitSettings)
+        => gdUnitSettings.DisplayName switch
         {
-            DisplayNameOptions.SimpleName => testName,
-            DisplayNameOptions.FullyQualifiedName => fullyQualifiedName,
+            DisplayNameOptions.SimpleName => BuildSimpleDisplayName(testName, index, attr),
+            DisplayNameOptions.FullyQualifiedName => Executions.TestCase.BuildDisplayName(testName, attr),
             _ => testName
         };
+
+    private static string BuildSimpleDisplayName(string testName, long index, TestCaseAttribute attribute)
+    {
+        var displayName = attribute.TestName ?? testName;
+        if (index == -1 || attribute.Arguments.Length == 0)
+            return displayName;
+        return $"{displayName}'{index}";
+    }
 
     private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>
         assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));

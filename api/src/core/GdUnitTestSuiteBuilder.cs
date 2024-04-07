@@ -212,13 +212,15 @@ public class GdUnitTestSuiteBuilder
                 {
                     var lineNumber = TestCaseLineNumber(syntaxTree, mi.Name);
                     // collect testcase if multiple TestCaseAttribute exists
-                    var testCases = mi.GetCustomAttributes(typeof(TestCaseAttribute))
-                        .Cast<TestCaseAttribute>()
-                        .Where(attr => attr != null && attr.Arguments?.Length != 0)
+                    var attributes = mi.GetCustomAttributes(typeof(TestCaseAttribute))
+                            .Cast<TestCaseAttribute>();
+                    var testCases = attributes
+                        .Where(attr => attr.Arguments?.Length != 0)
                         .Select(attr => TestCase.BuildDisplayName(mi.Name, attr))
                         .ToList();
                     // create test
-                    return new CsNode(mi.Name, classPath, lineNumber, testCases);
+                    var testName = attributes.Count() == 1 ? attributes.First().TestName ?? mi.Name : mi.Name;
+                    return new CsNode(testName, classPath, lineNumber, testCases);
                 })
                 .Aggregate(new CsNode(classDefinition.Name, classPath), (acc, node) =>
                 {

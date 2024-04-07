@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using GdUnit4.TestAdapter.Discovery;
 using GdUnit4.TestAdapter.Settings;
+using static GdUnit4.TestAdapter.Utilities.Utils;
 
 [ExtensionUri(ExecutorUri)]
 public class GdUnit4TestExecutor : ITestExecutor, IDisposable
@@ -68,6 +69,12 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'containers' is null, abort!");
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
+
+        if (!CheckGdUnit4ApiVersion(frameworkHandle, new Version("4.2.2")))
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, $"Abort the test discovery.");
+            return;
+        }
 
         TestCaseDiscoverySink discoverySink = new();
         new GdUnit4TestDiscoverer().DiscoverTests(tests, runContext, frameworkHandle, discoverySink);

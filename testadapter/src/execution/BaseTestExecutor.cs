@@ -47,7 +47,7 @@ internal abstract class BaseTestExecutor
         {
             Included = groupedTestSuites.ToDictionary(
                 suite => suite.Key,
-                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.DisplayName) })
+                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
             )
         };
 
