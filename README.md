@@ -9,11 +9,12 @@
   <img src="https://img.shields.io/badge/Godot-v4.2.1-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
 </p>
 
-## What is GdUnit4Mono
+## What is gdUnit4Net
+
 This project provides an API and a VS test adapter to run your Godot C# test in Visual Studio (Code) and JetBrains.
 
-
 ### Main Features
+
 * Writing, executing and debuging tests
 * Configurable template for generating new test-suites when creating test-cases
 * Wide range of assertion methods for verifying the behavior and output of your code
@@ -22,25 +23,27 @@ This project provides an API and a VS test adapter to run your Godot C# test in 
   For example, you can simulate mouse clicks and keyboard inputs by calling the appropriate methods on the runner instance. Additionally, you can wait for a specific signal to be emitted by the scene, or you can wait for a specific function to return a certain value.
 * Visual Studio Test Adapter to run and debug your tests
 
-
 There are two packages you need to install
+
 * **gdUnit4.api** is the package to enable GdUnit4 to write unit tests in C#.
 * **gdUnit4.test.adapter** is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUnit4 with test frameworks supporting the Visual Studio Test Platform.
 
-
 ## Using the gdunit4.api
+
 Checkout the [readme](api/README.md) to install the `gdunit4.api` package.
 
 ## Install the gdUnit4.test.adapter
+
 The GdUnit4.testadapter implements the Microsoft test adapter framework.
-https://github.com/Microsoft/vstest-docs/blob/main/RFCs/0004-Adapter-Extensibility.md#adapter-specific-settings
+<https://github.com/Microsoft/vstest-docs/blob/main/RFCs/0004-Adapter-Extensibility.md#adapter-specific-settings>
 
 Checkout the [readme](testadapter/README.md) to install the `gdunit4.test.adapater` package.
 
-
 ### Example Project
-This [example project](https://github.com/MikeSchulze/gdUnit4Mono/tree/master/example) gives you a short inshigt how to setup a Godot project to use the GdUnit4 API and test adapter.
+
+This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/example) gives you a short inshigt how to setup a Godot project to use the GdUnit4 API and test adapter.
 It contains a single test suite as axample with two tests, the first test will succed and the second test will fail.
+
 ```c#
 namespace Examples;
 
@@ -65,11 +68,12 @@ public class ExampleTest
 
 }
 ```
-The test run looks like.
-<p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Mono"><img src="https://github.com/MikeSchulze/gdUnit4Mono/blob/master/example/assets/TestExplorerRun.png" width="100%"/></p><br/>
 
+The test run looks like.
+<p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Net"><img src="https://github.com/MikeSchulze/gdUnit4Net/blob/master/example/assets/TestExplorerRun.png" width="100%"/></p><br/>
 
 ## Documentation
+
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
   <a href="https://mikeschulze.github.io/gdUnit4/first_steps/install/">How to Install GdUnit</a>
 </p>
@@ -78,19 +82,19 @@ The test run looks like.
   <a href="https://mikeschulze.github.io/gdUnit4/">API Documentation</a>
 </p>
 
+### You Are Welcome To
 
-### You Are Welcome To:
-  * [Give Feedback](https://github.com/MikeSchulze/gdUnit4Mono/discussions)
-  * [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
-  * [Report a Bug related to GdUnit4 API](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
-  * [Report a Bug related to GdUnit4 Test Adapter](https://github.com/MikeSchulze/gdUnit4Mono/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
-
+* [Give Feedback](https://github.com/MikeSchulze/gdUnit4Net/discussions)
+* [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
+* [Report a Bug related to GdUnit4 API](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
+* [Report a Bug related to GdUnit4 Test Adapter](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
 
 ---
+
 ### Contribution Guidelines
 
 **Thank you for your interest in contributing to GdUnit4!**<br>
-To ensure a smooth and collaborative contribution process, please review our [contribution guidelines](https://github.com/MikeSchulze/gdUnit4Mono/blob/master/CONTRIBUTING.md) before getting started. These guidelines outline the standards and expectations we uphold in this project.
+To ensure a smooth and collaborative contribution process, please review our [contribution guidelines](https://github.com/MikeSchulze/gdUnit4Net/blob/master/CONTRIBUTING.md) before getting started. These guidelines outline the standards and expectations we uphold in this project.
 
 Code of Conduct: We strictly adhere to the Godot code of conduct in this project. As a contributor, it is important to respect and follow this code to maintain a positive and inclusive community.
 
@@ -102,6 +106,8 @@ We value your input and appreciate your contributions to make GdUnit4 even bette
   <a href="https://discord.gg/rdq36JwuaJ"><img src="https://discordapp.com/api/guilds/885149082119733269/widget.png?style=banner4" alt="Join GdUnit Server"/></a>
 </p>
 
-### Thank you for supporting my project!
+### Thank you for supporting my project
+
 ---
-## Sponsors:
+
+## Sponsors

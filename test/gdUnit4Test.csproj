@@ -1,32 +1,30 @@
 <Project Sdk="Godot.NET.Sdk">
-    <Import Project="../PackageVersions.props" />
-    <PropertyGroup>
-        <Version>4.2.0</Version>
-        <Copyright>© 2024 Mike Schulze</Copyright>
-        <Authors>Mike Schulze</Authors>
+  <Import Project="../PackageVersions.props" />
+  <PropertyGroup>
+    <Version>4.2.0</Version>
+    <Copyright>© 2024 Mike Schulze</Copyright>
+    <Authors>Mike Schulze</Authors>
 
-        <TargetFrameworks>net8.0</TargetFrameworks>
-        <LangVersion>11.0</LangVersion>
-        <Nullable>enable</Nullable>
-        <NullableReferenceTypes>true</NullableReferenceTypes>
-        <RootNamespace>GdUnit4.Tests</RootNamespace>
-    </PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <LangVersion>11.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <NullableReferenceTypes>true</NullableReferenceTypes>
+    <RootNamespace>GdUnit4.Tests</RootNamespace>
+  </PropertyGroup>
 
-    <PropertyGroup>
-        <AssemblyName>gdUnit4Test</AssemblyName>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-        <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
-        <NoWarn>NU1605</NoWarn>
-    </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>gdUnit4Test</AssemblyName>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
+    <NoWarn>NU1605</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
-        <!--<PackageReference Include="gdUnit4.api" Version="4.2.0-rc*" / -->
-        <ProjectReference Include="..\api\gdUnit4Api.csproj" />
-        <!--ProjectReference Include="gdUnit4.test.adapter" Version="1.0.0-rc*"/-->
-        <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
+    <ProjectReference Include="..\api\gdUnit4Api.csproj" />
+    <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
+  </ItemGroup>
 </Project>
