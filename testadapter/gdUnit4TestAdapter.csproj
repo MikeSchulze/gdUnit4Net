@@ -31,7 +31,7 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Mono</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
     <PackageId>gdUnit4.test.adapter</PackageId>
     <PackageVersion>1.1.0</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -40,7 +40,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Mono</RepositoryUrl>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
       <!-- ingnore dependency warnings to pre release version of gdunit.api -->
     <NoWarn>NU5104</NoWarn>
   </PropertyGroup>

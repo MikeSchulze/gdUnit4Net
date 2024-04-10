@@ -57,7 +57,7 @@ public class ExceptionAssertTest
     {
         await ISceneRunner.SyncProcessFrame;
         // we want to collect the stack trace inclusive sub method calls and this failure line number
-        // https://github.com/MikeSchulze/gdUnit4Mono/issues/49
+        // https://github.com/MikeSchulze/gdUnit4Net/issues/49
         var assertion = AssertThrown(() => AssertInner(0, true, true))
             .HasFileLineNumber(73)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");

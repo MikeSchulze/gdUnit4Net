@@ -1385,7 +1385,7 @@ public partial class EnumerableAssertTest
                         .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Mono/issues/46
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
     public static readonly object[] TestDataPointEmptyArrays = new object[]{
         Array.Empty<object>(),
         new List<object>(),
