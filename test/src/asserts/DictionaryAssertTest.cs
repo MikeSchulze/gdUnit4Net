@@ -15,7 +15,7 @@ using static Assertions;
 [TestSuite]
 public class DictionaryAssertTest
 {
-    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Mono/issues/46
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
     private static readonly object[] TestDataPointA = new object[]{
             // system dictionary types
             new object[]{new Hashtable(){{"a1", new object()}}},
@@ -26,7 +26,7 @@ public class DictionaryAssertTest
             new object[]{new Godot.Collections.Dictionary(){{"a1", new Godot.RefCounted()}}}
         };
 
-    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Mono/issues/46
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
     public static readonly object[] TestDataPointB = new object[]{
             // system dictionary types
             new object[]{new Hashtable(){{"a1", 100}, {"a2", 200}}, new Hashtable(){{"a1", 100}, {"a2", 200}}},

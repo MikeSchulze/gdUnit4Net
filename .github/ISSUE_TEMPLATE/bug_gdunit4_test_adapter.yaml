@@ -1,4 +1,4 @@
-name: GdUnit4 Test Adapter Bug Report 
+name: GdUnit4 Test Adapter Bug Report
 description: Report a GdUnit4 bug related to the Test Adapter
 title: "GD-XXX: Describe the issue briefly"
 labels: ["bug", "gdunit4.test.adapter"]
@@ -11,7 +11,7 @@ body:
     attributes:
       value: |
         ### Thanks for taking your time to fill out this bug report!
-        - Please search [open](https://github.com/MikeSchulze/gdUnit4Mono/issues?q=is%3Aissue) for existing issues for potential duplicates before submit yours.
+        - Please search [open](https://github.com/MikeSchulze/gdUnit4Net/issues?q=is%3Aissue) for existing issues for potential duplicates before submit yours.
         - Verify that you are using a [supported Godot version](https://docs.godotengine.org/en/stable/about/release_policy.html). Please always check if your issue is reproducible in the latest version – it may already have been fixed!
 
 
@@ -65,12 +65,12 @@ body:
       label: Steps to Reproduce
       description: |
         Provide a detailed list of steps or sample code that reproduces the issue.
-        Having reproducible issues is crucial for contributors to be able to solve them. 
+        Having reproducible issues is crucial for contributors to be able to solve them.
         If applicable, include information such as input data, specific configurations, or screenshots.
       placeholder: Describe the steps to reproduce the issue.
       value: |
         Example:
-        1. Creata a test like described below 
+        1. Creata a test like described below
         2. Use the Test Explorer and check the listed tests
         The name is not displayed as configured, it shows `MyTest` and should show `BugedName`
 
@@ -81,7 +81,7 @@ body:
 
         using GdUnit4;
         using static GdUnit4.Assertions;
-        
+
         [TestSuite]
         public class ExampleTest
         {
