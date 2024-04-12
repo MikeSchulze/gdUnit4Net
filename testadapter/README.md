@@ -19,7 +19,7 @@ The GdUnit4.testadapter implements the Microsoft test adapter framework. [VSTest
 > ❌ - not supported<br>
 > 🔜 - not yet implemented<br>
 
-The full documentation can be found [here](http://localhost:4000/gdUnit4](https://mikeschulze.github.io/gdUnit4)/faq/vstest-adapter/)
+The full documentation can be found [here](https://mikeschulze.github.io/gdUnit4/faq/vstest-adapter/)
 
 
 
