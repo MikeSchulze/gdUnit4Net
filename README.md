@@ -34,9 +34,6 @@ Checkout the [readme](api/README.md) to install the `gdunit4.api` package.
 
 ## Install the gdUnit4.test.adapter
 
-The GdUnit4.testadapter implements the Microsoft test adapter framework.
-<https://github.com/Microsoft/vstest-docs/blob/main/RFCs/0004-Adapter-Extensibility.md#adapter-specific-settings>
-
 Checkout the [readme](testadapter/README.md) to install the `gdunit4.test.adapater` package.
 
 ### Example Project
