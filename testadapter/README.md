@@ -3,120 +3,51 @@
 
 This is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUnit4 with test frameworks supporting the Visual Studio Test Platform.
 
-## Getting Started
+The GdUnit4.testadapter implements the Microsoft test adapter framework. [VSTest](https://github.com/microsoft/vstest?tab=readme-ov-file#vstest).
 
-### Preconditions
+## Supported IDE's
 
-* Install the C# Dev Kit. Detailed instructions can be found [here](https://code.visualstudio.com/docs/csharp/testing).
-* Setup your test settings:
-  * It is important to use the correct C# Dev Kit version, which is currently a PreRelease. The property is newly introduced by this [issue](https://github.com/microsoft/vscode-dotnettools/issues/156).
-  * For **Visual Studio Code** prjects open your `.vscode/settings.json` and add the following property to set up your custom test run settings:
 
-    ```json
-    "dotnet.unitTests.runSettingsPath": "./test/.runsettings"
-    ```
+|IDE|Test Discovery|Test Run|Test Debug|Jump to Failure|Solution test config file|Test Filter|Parallel Test Execution|
+|---|---|---|---|---|---|---|---|
+|Visual Studio     |✅|✅|✅|✅|✅|🔜|❌|
+|Visual Studio Code|✅|✅|✅|✅|✅|🔜|❌|
+|JetBrains Rider   |✅|✅|[☑️](#test-debug-workaround-for-jetbrains-rider)|✅|✅|🔜|❌|
 
-  * For **Visual Studio** projects you need to add this settings in your project file:
+> ✅ - supported<br>
+> ☑️ - supported by a workaround (link)<br>
+> ❌ - not supported<br>
+> 🔜 - not yet implemented<br>
 
-    ```
-    <PropertyGroup>
-      <RunSettingsFilePath>$(MSBuildProjectDirectory)\.runsettings</RunSettingsFilePath>
-    </PropertyGroup>
-    ```
+The full documentation can be found [here](https://mikeschulze.github.io/gdUnit4/faq/vstest-adapter/)
 
-  * And you need to setup the Godot run environment `GODOT_BIN`, the full path to the godot executable.
-    Check the .settings you have set the **EnvironmentVariables**
 
-## Install the gdunit NuGet Packages
 
-1. Add the `gdunit4.api` project reference to your test project:
+### You Are Welcome To
 
-   ```bash
-   dotnet add package gdunti.api
-   ```
+* [Give Feedback](https://github.com/MikeSchulze/gdUnit4Net/discussions)
+* [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
+* [Report a Bug related to GdUnit4 API](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
+* [Report a Bug related to GdUnit4 Test Adapter](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
 
-2. Add the `gdunit4.test.adapter` project reference to your test project:
+---
 
-   ```bash
-   dotnet add package gdunit4.test.adapter
-   ```
+### Contribution Guidelines
 
-## Manually Add the gdunit NuGet Packages
+**Thank you for your interest in contributing to GdUnit4!**<br>
+To ensure a smooth and collaborative contribution process, please review our [contribution guidelines](https://github.com/MikeSchulze/gdUnit4Net/blob/master/CONTRIBUTING.md) before getting started. These guidelines outline the standards and expectations we uphold in this project.
 
-Configure your test project to use GdUnit4 by adding the following to your .csproj file:
+Code of Conduct: We strictly adhere to the Godot code of conduct in this project. As a contributor, it is important to respect and follow this code to maintain a positive and inclusive community.
 
-```xml
-<Project Sdk="Godot.NET.Sdk">
+Using GitHub Issues: We utilize GitHub issues for tracking feature requests and bug reports. If you have a general question or wish to engage in discussions, we recommend joining the [GdUnit Discord Server](https://discord.gg/rdq36JwuaJ) for specific inquiries.
 
-    <!-- ... other project settings ... -->
+We value your input and appreciate your contributions to make GdUnit4 even better!
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-        <PackageReference Include="gdUnit4.api" Version="<version>" />
-        <ProjectReference Include="gdUnit4.test.adapter" Version="<version>"/>
-    </ItemGroup>
+<p align="left">
+  <a href="https://discord.gg/rdq36JwuaJ"><img src="https://discordapp.com/api/guilds/885149082119733269/widget.png?style=banner4" alt="Join GdUnit Server"/></a>
+</p>
 
-</Project>
-```
-
-## .runsettings Configuration
-
-To configure GdUnit4 test execution, you can use a .runsettings file. Below is an example .runsettings file:
-The full guide to configure the settings can be found [here](https://learn.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file?view=vs-2022)
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-    <RunConfiguration>
-        <MaxCpuCount>1</MaxCpuCount>
-        <ResultsDirectory>./TestResults</ResultsDirectory>
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-        <TestSessionTimeout>180000</TestSessionTimeout>
-        <TreatNoTestsAsError>true</TreatNoTestsAsError>
-        <EnvironmentVariables>
-            <GODOT_BIN>c:\programs\Godot_v4.2.1-stable_mono_win64.exe</GODOT_BIN>
-        </EnvironmentVariables>
-    </RunConfiguration>
-
-    <LoggerRunSettings>
-        <Loggers>
-            <Logger friendlyName="console" enabled="True">
-                <Configuration>
-                    <Verbosity>detailed</Verbosity>
-                </Configuration>
-            </Logger>
-            <Logger friendlyName="html" enabled="True">
-                <Configuration>
-                    <LogFileName>test-result.html</LogFileName>
-                </Configuration>
-            </Logger>
-            <Logger friendlyName="trx" enabled="True">
-                <Configuration>
-                    <LogFileName>test-result.trx</LogFileName>
-                </Configuration>
-            </Logger>
-        </Loggers>
-    </LoggerRunSettings>
-
-    <GdUnit4>
-        <!-- Additonal Godot runtime parameters-->
-        <Parameters></Parameters>
-        <!-- Controlls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
-             This likely determines how the test names are displayed in the test results.-->
-        <DisplayName>FullyQualifiedName</DisplayName>
-    </GdUnit4>
-</RunSettings>
-```
-
-Ensure to customize the values inside the `<Parameters>` element based on your specific requirements. This configuration is crucial for successful test execution, especially in headless environments.
-
-## Run Tests from Terminal
-
-`dotnet test exampleProject.csproj --settings .runsettings`
-
-## Contributing
-
-If you encounter issues or have suggestions for improvements, please feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/MikeSchulze/gdUnit4Net/issues/new/choose).
+### Thank you for supporting my project
 
 ## License
 
