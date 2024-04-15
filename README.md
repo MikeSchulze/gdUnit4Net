@@ -11,7 +11,7 @@
 
 ## What is gdUnit4Net
 
-This project provides an API and a VS test adapter to run your Godot C# test in Visual Studio (Code) and JetBrains.
+This project provides an API and a VS test adapter to run your Godot C# test in Visual Studio (Code) and JetBrains Rider.
 
 ### Main Features
 
