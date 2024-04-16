@@ -21,7 +21,8 @@ body:
       label: The used Test Adapter version
       description: Which **gdunit4.test.adapter** version are you using?
       options:
-        - 1.1.0 (Pre Release/Master branch)
+        - 1.2.0 (Pre Release/Master branch)
+        - 1.1.0
         - 1.0.0
       default: 0
     validations:
