@@ -21,8 +21,9 @@ body:
       label: The used API version
       description: Which **gdunit4.api** version are you using?
       options:
-        - 4.2.2-rc1 (Pre Release/Master branch)
-        - 4.2.1.1 (Latest Release)
+        - 4.2.3-rc1 (Pre Release/Master branch)
+        - 4.2.2 (Latest Release)
+        - 4.2.1.1
         - 4.2.1
         - 4.2.0
       default: 1
