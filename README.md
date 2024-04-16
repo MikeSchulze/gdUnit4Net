@@ -15,7 +15,7 @@ This project provides an API and a VS test adapter to run your Godot C# test in 
 
 ### Main Features
 
-* Writing, executing and debuging tests
+* Writing, executing and debugging tests
 * Configurable template for generating new test-suites when creating test-cases
 * Wide range of assertion methods for verifying the behavior and output of your code
 * Parameterized Tests (Test Cases) for testing functions with multiple sets of inputs and expected outputs
@@ -38,8 +38,8 @@ Checkout the [readme](testadapter/README.md) to install the `gdunit4.test.adapat
 
 ### Example Project
 
-This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/example) gives you a short inshigt how to setup a Godot project to use the GdUnit4 API and test adapter.
-It contains a single test suite as axample with two tests, the first test will succed and the second test will fail.
+This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/example) gives you a short insight into how to set up a Godot project to use the GdUnit4 API and test adapter.
+It contains a single test suite as an example with two tests, the first test will succeed and the second test will fail.
 
 ```c#
 namespace Examples;
@@ -66,7 +66,7 @@ public class ExampleTest
 }
 ```
 
-The test run looks like.
+The test run looks like this.
 <p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Net"><img src="https://github.com/MikeSchulze/gdUnit4Net/blob/master/example/assets/TestExplorerRun.png" width="100%"/></p><br/>
 
 ## Documentation
