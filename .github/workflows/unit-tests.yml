@@ -168,11 +168,11 @@ jobs:
             local section="$1"
             local expected_content="$2"
 
-            grep -A 10 "$section" ./example/TestResults/test-result.trx | sed -e 's/^[ \t]*//' | tee output.txt >/dev/null
+            grep -A 50 "$section" ./example/TestResults/test-result.trx | sed -e 's/^[ \t]*//' | tee output.txt >/dev/null
             if grep -qF "$expected_content" output.txt; then
               echo "Test validation passed. The expected text is present in $section."
             else
-              echo "Test validation failed. The " + $expected_content + " is not present in:"
+              echo "Test validation failed. The expected content '$expected_content' is not present in:"
               echo ""
               cat output.txt
               echo ""
@@ -180,12 +180,12 @@ jobs:
             fi
           }
 
-          validate_section '<Output>' 'Discover tests done, 1 TestSuites and total 2 Tests found.'
-          validate_section '<Output>' 'Start executing tests, 2 TestCases total.'
+          validate_section '<Output>' 'Discover tests done, 2 TestSuites and total 11 Tests found.'
+          validate_section '<Output>' 'Start executing tests, 11 TestCases total.'
           validate_section '<Results>' "<Message>Expecting: 'True' but is 'False'</Message>"
           validate_section '<Results>' '<StackTrace>   at Examples.ExampleTest.failed() in /home/runner/work/gdUnit4Net/gdUnit4Net/example/test/ExampleTest.cs:line 19'
           validate_section '<ResultSummary' '<ResultSummary outcome="Failed">'
-          validate_section '<ResultSummary' '<Counters total="2" executed="2" passed="1" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
+          validate_section '<ResultSummary' '<Counters total="11" executed="11" passed="10" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
           echo "All tests passes."
 
       - name: "Publish Unit Test Reports"

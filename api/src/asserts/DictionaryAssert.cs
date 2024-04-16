@@ -7,7 +7,7 @@ using System.Linq;
 
 using CommandLine;
 
-internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
+public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
 {
 
     private bool IsGeneric => CurrentTyped != null;
@@ -19,7 +19,9 @@ internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, 
     public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
     { }
 
+#pragma warning disable CA1000 // Do not declare static members on generic types
     public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
+#pragma warning restore CA1000 // Do not declare static members on generic types
         => new(current);
 
     private DictionaryAssert(IDictionary? current) : base(current)
