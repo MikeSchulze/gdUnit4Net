@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
 {
 
     public EnumerableAssert(IEnumerable? current) : base(current?.Cast<TValue?>())

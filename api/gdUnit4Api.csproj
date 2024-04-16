@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Title>gdUnit4Api</Title>
-    <Version>4.2.2-rc.1</Version>
+    <Version>4.2.3</Version>
     <Description>
       GdUnit4 API is the C# extention to enable GdUnit4 to run/write unit tests in C#.
     </Description>
@@ -27,13 +27,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
     <IsGodotToolsProject>true</IsGodotToolsProject>
+    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
     <PackageId>gdUnit4.api</PackageId>
-    <PackageVersion>4.2.2-rc.1</PackageVersion>
+    <PackageVersion>4.2.3</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 API release candidate.</PackageReleaseNotes>

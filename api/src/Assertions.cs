@@ -191,35 +191,25 @@ public sealed class Assertions
     /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
     public static dynamic AssertThat<TValue>(TValue? current)
     {
-        if (current is string str)
-            return AssertThat(str);
+        var valueType = typeof(TValue);
 
-        var type = typeof(TValue);
-        if (type == typeof(IDictionary) && current == null)
-            return DictionaryAssert<object, object?>.From(null);
-
-        if (current is IDictionary dv)
+        if (typeof(IDictionary).IsAssignableFrom(valueType))
         {
-            if (type.IsGenericType)
+            if (valueType.IsGenericType)
             {
-                var dictionaryTypeArgs = type.GetGenericArguments();
-                var keyType = dictionaryTypeArgs[0];
-                var valueType = dictionaryTypeArgs[1];
-                var assertType = typeof(DictionaryAssert<,>).MakeGenericType(keyType, valueType);
-                return Activator.CreateInstance(assertType, dv)!;
+                var assertType = typeof(DictionaryAssert<,>).MakeGenericType(valueType.GenericTypeArguments);
+                return Activator.CreateInstance(assertType, current)!;
             }
-            return DictionaryAssert<object, object?>.From(dv);
+            return DictionaryAssert<object, object?>.From(current as IDictionary);
         }
-        if (current is IEnumerable ev)
+        if (typeof(IEnumerable).IsAssignableFrom(valueType))
         {
-            if (type.IsGenericType)
+            if (valueType.IsGenericType)
             {
-                var dictionaryTypeArgs = type.GetGenericArguments();
-                var valueType = dictionaryTypeArgs[0];
-                var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType);
-                return Activator.CreateInstance(assertType, ev)!;
+                var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType.GenericTypeArguments[0]);
+                return Activator.CreateInstance(assertType, current)!;
             }
-            return AssertThat(ev);
+            return AssertThat(current as IEnumerable);
         }
         return new ObjectAssert(current);
     }

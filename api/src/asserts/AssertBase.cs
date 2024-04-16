@@ -2,7 +2,7 @@ namespace GdUnit4.Asserts;
 
 using Exceptions;
 
-internal abstract class AssertBase<TValue> : IAssertBase<TValue>
+public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected TValue? Current { get; private set; }
 
