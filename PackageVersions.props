@@ -5,5 +5,7 @@
     <MicrosoftSdkVersion>17.9.0</MicrosoftSdkVersion>
     <MicrosoftCodeAnalysisCSharpVersion>4.9.2</MicrosoftCodeAnalysisCSharpVersion>
     <MoqVersion>4.18.4</MoqVersion>
+    <GdUnitAPIVersion>4.2.3</GdUnitAPIVersion>
+    <GdUnitTestAdapterVersion>1.1.1</GdUnitTestAdapterVersion>
   </PropertyGroup>
 </Project>

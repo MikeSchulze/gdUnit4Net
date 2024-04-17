@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Title>gdUnit4TestAdapter</Title>
-    <Version>1.1.0</Version>
+    <Version>$(GdUnitTestAdapterVersion)</Version>
     <Description>
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
@@ -33,7 +33,7 @@
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
     <PackageId>gdUnit4.test.adapter</PackageId>
-    <PackageVersion>1.1.0</PackageVersion>
+    <PackageVersion>$(GdUnitTestAdapterVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
