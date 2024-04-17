@@ -3,7 +3,7 @@
   <Import Project="../PackageVersions.props" />
 
   <PropertyGroup>
-    <Title>gdUnit4TestAdapter</Title>
+    <Title>gdUnit4 TestAdapter</Title>
     <Version>$(GdUnitTestAdapterVersion)</Version>
     <Description>
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
@@ -36,7 +36,7 @@
     <PackageVersion>$(GdUnitTestAdapterVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>GdUnit4 Test Adapter beta.</PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
@@ -56,6 +56,7 @@
     <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
 
     <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/" />
     <None Include="LICENSE" Pack="true" PackagePath="/" />
     <None Include="icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>

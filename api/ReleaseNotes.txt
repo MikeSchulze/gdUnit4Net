@@ -1,0 +1,38 @@
+
+v4.2.3
+
+Bug Fixes:
+- Fix `AssertThat` for dynamic assert type resolving
+
+-------------------------------------------------------------------------------------------------------
+
+v4.2.2
+
+What's Changed:
+
+- Rename repository from `gdUnit4Mono` to `gdUnit4Net`
+- Update project to GodotSharp v4.1.0
+- Format and fix warnings according to C# standards
+- Format the tests according to the C# Formatting rules
+- Format the code to C# standard
+- Support both net7 and net8 at once
+- Add full .NET8 support
+- Provide generic vector assert to support all Godot vector types
+- Revision of the stack trace collection for failed tests
+- Complete missing features for `IDictionaryAssert`
+- Complete missing features for `IEnumerableAssert`
+- Complete missing features for `INumberAssert`
+- Add missing `SimulateMouseMoveRelative` and `SimulateMouseMoveAbsolute` to `ISceneRunner`
+
+Bug Fixes:
+- SceneRunner: Fix InputEvent handling
+- Calling Invoke on `SceneRunner` must propagate exceptions
+- Fix GdUnit4MonoAPI `IsTestSuite` cannot run TestSuite
+- Fix test run stops at some point
+- Parameterized test cases are not run from Godot Editor GdUnit4 inspector
+
+-------------------------------------------------------------------------------------------------------
+
+v4.2.0
+
+- gdUnit4 API initial version.

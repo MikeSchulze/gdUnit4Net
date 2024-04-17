@@ -37,7 +37,7 @@
     <PackageVersion>$(GdUnitAPIVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>GdUnit4 API release candidate.</PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
@@ -55,6 +55,7 @@
     <Content Include="LICENSE" />
     <None Include="README.md" Pack="true" PackagePath="/" />
     <None Include="CONTRIBUTING.md" Pack="true" PackagePath="/" />
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/" />
     <None Include="LICENSE" Pack="true" PackagePath="/" />
     <None Include="icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>

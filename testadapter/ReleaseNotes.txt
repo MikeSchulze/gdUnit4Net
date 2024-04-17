@@ -1,0 +1,22 @@
+v1.1.1
+
+Bug Fixes:
+- Fixes space in folder name prevents tests from running
+
+--------------------------------------------------------------------------
+
+v1.1.0
+
+Bug Fixes:
+- Fix parameterized tests are incorrect grouped
+- Fix DisplayName resolving
+
+Other Changes:
+- Add example to show usage of gdUnit4.test.adapter
+- Support both net7 and net8 at once
+
+--------------------------------------------------------------------------
+
+v1.0.0
+
+- Initial version
