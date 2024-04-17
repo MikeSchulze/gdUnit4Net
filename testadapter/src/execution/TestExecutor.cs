@@ -48,9 +48,13 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
         var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
         _ = workingDirectory ?? throw new InvalidOperationException($"Cannot determine the godot.project! The workingDirectory is not set");
-        InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run tests -------->");
+        if (Directory.Exists(workingDirectory))
+        {
+            Directory.SetCurrentDirectory(workingDirectory);
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
+        }
+        InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
         var configName = WriteTestRunnerConfig(groupedTests);
         var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
@@ -62,7 +66,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    }) == false)
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";//Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"{debugArg} --path {workingDirectory} {testRunnerScene} --testadapter --configfile='{configName}' {gdUnit4Settings.Parameters}")
+        var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
+        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
         {
             StandardOutputEncoding = Encoding.Default,
             RedirectStandardOutput = true,
@@ -114,7 +120,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         }
         frameworkHandle.SendMessage(TestMessageLevel.Informational, "Install GdUnit4 TestRunner");
         InstallTestRunnerClasses(destinationFolderPath);
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"--path {workingDirectory} --headless --build-solutions --quit-after 20")
+        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @$"--path . --headless --build-solutions --quit-after 20")
         {
             RedirectStandardOutput = false,
             RedirectStandardError = false,

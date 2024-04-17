@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <Title>gdUnit4Api</Title>
-    <Version>4.2.3</Version>
+    <Version>$(GdUnitAPIVersion)</Version>
     <Description>
       GdUnit4 API is the C# extention to enable GdUnit4 to run/write unit tests in C#.
     </Description>
@@ -34,7 +34,7 @@
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
     <PackageId>gdUnit4.api</PackageId>
-    <PackageVersion>4.2.3</PackageVersion>
+    <PackageVersion>$(GdUnitAPIVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>GdUnit4 API release candidate.</PackageReleaseNotes>
