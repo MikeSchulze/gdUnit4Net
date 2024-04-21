@@ -40,6 +40,10 @@ internal abstract class BaseTestExecutor
 
     protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites)
     {
+        try
+        { CleanupRunnerConfigurations(); }
+        catch (Exception) { }
+
         var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
 
@@ -54,6 +58,11 @@ internal abstract class BaseTestExecutor
         File.WriteAllText(filePath, JsonConvert.SerializeObject(testConfig, Formatting.Indented));
         return filePath;
     }
+
+    private static void CleanupRunnerConfigurations()
+        => Directory.GetFiles(Directory.GetCurrentDirectory(), "GdUnitRunner_*.cfg")
+            .ToList()
+            .ForEach(File.Delete);
 
     protected static void AttachDebuggerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
     {
