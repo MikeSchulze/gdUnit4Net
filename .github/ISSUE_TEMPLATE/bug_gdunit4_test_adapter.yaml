@@ -1,8 +1,7 @@
 name: GdUnit4 Test Adapter Bug Report
 description: Report a GdUnit4 bug related to the Test Adapter
-title: "GD-XXX: Describe the issue briefly"
-labels: ["bug", "gdunit4.test.adapter"]
-projects: ["projects/6"]
+title: 'GD-XXX: Describe the issue briefly'
+labels: ['bug', 'gdunit4.test.adapter']
 assignees:
   - MikeSchulze
 
@@ -14,7 +13,6 @@ body:
         - Please search [open](https://github.com/MikeSchulze/gdUnit4Net/issues?q=is%3Aissue) for existing issues for potential duplicates before submit yours.
         - Verify that you are using a [supported Godot version](https://docs.godotengine.org/en/stable/about/release_policy.html). Please always check if your issue is reproducible in the latest version – it may already have been fixed!
 
-
   - type: dropdown
     id: gdunit4-api-version
     attributes:
@@ -22,6 +20,7 @@ body:
       description: Which **gdunit4.test.adapter** version are you using?
       options:
         - 1.2.0 (Pre Release/Master branch)
+        - 1.1.1
         - 1.1.0
         - 1.0.0
       default: 0
@@ -44,7 +43,7 @@ body:
       description: |
         What operating system are you using?
         - Specify the OS version, and when relevant hardware information.
-      placeholder: "Example: macOS Big Sur"
+      placeholder: 'Example: macOS Big Sur'
     validations:
       required: true
 
