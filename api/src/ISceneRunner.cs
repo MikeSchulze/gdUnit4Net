@@ -35,6 +35,28 @@ public interface ISceneRunner : IDisposable
     /// <returns></returns>
     public static ISceneRunner Load(string resourcePath, bool autofree = false, bool verbose = false) => new Core.SceneRunner(resourcePath, autofree, verbose);
 
+
+    /// <summary>
+    /// Simulates that an action has been pressed.
+    /// </summary>
+    /// <param name="action">The name of the action, e.g., "ui_up".</param>
+    /// <returns>The SceneRunner instance.</returns>
+    ISceneRunner SimulateActionPressed(string action);
+
+    /// <summary>
+    /// Simulates that an action is press.
+    /// </summary>
+    /// <param name="action">The name of the action, e.g., "ui_up".</param>
+    /// <returns>The SceneRunner instance.</returns>
+    ISceneRunner SimulateActionPress(string action);
+
+    /// <summary>
+    /// Simulates that an action has been released.
+    /// </summary>
+    /// <param name="action">The name of the action, e.g., "ui_up".</param>
+    /// <returns>The SceneRunner instance.</returns>
+    ISceneRunner SimulateActionRelease(string action);
+
     /// <summary>
     /// Simulates that a key has been pressed.
     /// </summary>

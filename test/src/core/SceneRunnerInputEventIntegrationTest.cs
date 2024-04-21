@@ -97,6 +97,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         sceneRunner.SimulateMouseButtonPress(MouseButton.Middle);
         sceneRunner.SimulateKeyPress(Key.Key0);
         sceneRunner.SimulateKeyPress(Key.X);
+        sceneRunner.SimulateActionPress("ui_up");
         await ISceneRunner.SyncProcessFrame;
 
         AssertThat(Input.IsMouseButtonPressed(MouseButton.Left)).IsTrue();
@@ -106,6 +107,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsPhysicalKeyPressed(Key.Key0)).IsTrue();
         AssertThat(Input.IsKeyPressed(Key.X)).IsTrue();
         AssertThat(Input.IsPhysicalKeyPressed(Key.X)).IsTrue();
+        AssertThat(Input.IsActionPressed("ui_up")).IsTrue();
 
         // unreference the scene SceneRunner to enforce reset to initial Input state
         sceneRunner.Dispose();
@@ -118,6 +120,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsPhysicalKeyPressed(Key.Key0)).IsFalse();
         AssertThat(Input.IsKeyPressed(Key.X)).IsFalse();
         AssertThat(Input.IsPhysicalKeyPressed(Key.X)).IsFalse();
+        AssertThat(Input.IsActionPressed("ui_up")).IsFalse();
     }
 
     [TestCase]
@@ -135,6 +138,62 @@ public sealed class SceneRunnerInputEventIntegrationTest
         sceneRunner.SimulateKeyPressed(Key.Space);
         AssertThat(Input.IsActionJustPressed("player_jump")).IsTrue();
         AssertThat(sceneRunner.GetProperty("player_jump_action")).IsTrue();
+    }
+
+    [TestCase]
+    public async Task SimulateActionPress()
+    {
+        // iterate over some example actions
+        var actionsToSimulate = new string[] { "ui_up", "ui_down", "ui_left", "ui_right" };
+        foreach (var action in actionsToSimulate)
+        {
+            AssertThat(InputMap.HasAction(action)).IsTrue();
+            sceneRunner.SimulateActionPress(action);
+            await ISceneRunner.SyncProcessFrame;
+
+            AssertThat(Input.IsActionPressed(action))
+                .OverrideFailureMessage($"Expect the action '{action}' is pressed")
+                .IsTrue();
+        }
+
+        // verify all this actions are still handled as pressed
+        foreach (var action in actionsToSimulate)
+            AssertThat(Input.IsActionPressed(action))
+                .OverrideFailureMessage("Expect the action '{action}' is pressed")
+                .IsTrue();
+        // other actions are not pressed
+        foreach (var action in new[] { "ui_accept", "ui_select", "ui_cancel" })
+            AssertThat(Input.IsActionPressed(action))
+                .OverrideFailureMessage("Expect the action '{action}' is NOT pressed")
+                .IsFalse();
+    }
+
+    [TestCase]
+    public async Task SimulateActionRelease()
+    {
+        // setup do run actions as press
+        var actionsToSimulate = new string[] { "ui_up", "ui_down", "ui_left", "ui_right" };
+        foreach (var action in actionsToSimulate)
+        {
+            AssertThat(InputMap.HasAction(action)).IsTrue();
+            sceneRunner.SimulateActionPress(action);
+            await ISceneRunner.SyncProcessFrame;
+        }
+        // now do release all actions
+        foreach (var action in actionsToSimulate)
+        {
+            // precondition
+            AssertThat(Input.IsActionPressed(action))
+                .OverrideFailureMessage($"Expect the action '{action}' is pressed")
+                .IsTrue();
+            // test
+            sceneRunner.SimulateActionRelease(action);
+            await ISceneRunner.SyncProcessFrame;
+            // validate
+            AssertThat(Input.IsActionPressed(action))
+                .OverrideFailureMessage($"Expect the action '{action}' is released")
+                .IsFalse();
+        }
     }
 
     [TestCase]

@@ -1,4 +1,14 @@
 
+V4.2.4
+
+Improvements:
+- Added input action handling to the SceneRunner
+  - `SimulateActionPressed(string action)`
+  - `SimulateActionPress(string action)`
+  - `SimulateActionRelease(string action)`
+
+-------------------------------------------------------------------------------------------------------
+
 v4.2.3
 
 Bug Fixes:
