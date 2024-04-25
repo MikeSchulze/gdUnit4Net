@@ -106,21 +106,43 @@ public class AssertionsTest
         var obj2 = new object();
 
         AssertThat(AssertFailures.AsObjectId(null)).IsEqual($"<Null>");
-        AssertThat(AssertFailures.AsObjectId(obj1)).IsEqual($"<System.Object>(id: {obj1.GetHashCode()})");
+        AssertThat(AssertFailures.AsObjectId(obj1)).IsEqual($"<System.Object> (objId: {obj1.GetHashCode()})");
         AssertThat(AssertFailures.AsObjectId(obj1)).IsNotEqual(AssertFailures.AsObjectId(obj2));
 
         // on Godot Objects
         var obj3 = new RefCounted();
-        AssertThat(AssertFailures.AsObjectId(obj3)).IsEqual($"<Godot.RefCounted>(id: {obj3.GetInstanceId()})");
+        AssertThat(AssertFailures.AsObjectId(obj3)).IsEqual($"<Godot.RefCounted> (objId: {obj3.GetInstanceId()})");
         var obj4 = new QuadMesh();
-        AssertThat(AssertFailures.AsObjectId(obj4)).IsEqual($"<Godot.QuadMesh>(id: {obj4.GetInstanceId()})");
+        AssertThat(AssertFailures.AsObjectId(obj4)).IsEqual($"<Godot.QuadMesh> (objId: {obj4.GetInstanceId()})");
 
         // on Godot Variants
         var obj5 = new RefCounted();
-        AssertThat(AssertFailures.AsObjectId(obj5.ToVariant())).IsEqual($"<Godot.RefCounted>(id: {obj5.GetInstanceId()})");
+        AssertThat(AssertFailures.AsObjectId(obj5.ToVariant())).IsEqual($"<Godot.RefCounted> (objId: {obj5.GetInstanceId()})");
 
         object? obj6 = null;
-        AssertThat(AssertFailures.AsObjectId(obj6.ToVariant())).IsEqual($"<Godot.Variant>(Null)");
+        AssertThat(AssertFailures.AsObjectId(obj6.ToVariant())).IsEqual($"<Godot.Variant> (Null)");
+
+        // without overrides ToString
+        var obj7 = new ClassWithoutToString("Custom");
+        AssertThat(AssertFailures.AsObjectId(obj7)).IsEqual($"<GdUnit4.Tests.Asserts.AssertionsTest+ClassWithoutToString> (objId: {obj7.GetHashCode()})");
+        // with overrides ToString
+        var obj8 = new ClassWithToString("Custom");
+        AssertThat(AssertFailures.AsObjectId(obj8)).IsEqual($"Custom (objId: {obj8.GetHashCode()})");
     }
 
+    private class ClassWithoutToString
+    {
+        public string Value { get; }
+
+        public ClassWithoutToString(string value)
+            => Value = value;
+    }
+
+    private sealed class ClassWithToString : ClassWithoutToString
+    {
+        public ClassWithToString(string value) : base(value)
+        {
+        }
+        public override string ToString() => $"{Value}";
+    }
 }
