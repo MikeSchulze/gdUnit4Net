@@ -12,6 +12,11 @@ internal sealed class AssertFailures
     public const string ERROR_COLOR = "#CD5C5C";
     public const string VALUE_COLOR = "#1E90FF";
 
+    internal static bool HasOverriddenToString(object obj)
+    {
+        var toStringMethod = obj.GetType().GetMethod("ToString");
+        return toStringMethod?.DeclaringType != typeof(object);
+    }
 
     internal static string AsObjectId(object? value)
     {
@@ -24,19 +29,27 @@ internal sealed class AssertFailures
             if (value != null)
                 type = value.GetType();
             else
-                return $"<Godot.Variant>(Null)";
+                return $"<Godot.Variant> (Null)";
         }
-        var name = type.FullName?.Replace("[", "")?.Replace("]", "")!;
+
+        var instanceId = "";
+        var name = $"<{type.FullName?.Replace("[", "")?.Replace("]", "")!}>";
         if (value is Godot.GodotObject go)
-            value = $"id: {go.GetInstanceId()}";
+            instanceId = $"objId: {go.GetInstanceId()}";
         else
-            value = $"id: {RuntimeHelpers.GetHashCode(value)}";
-        return $"<{name}>({value})";
+        {
+            instanceId = $"objId: {RuntimeHelpers.GetHashCode(value)}";
+            if (HasOverriddenToString(value))
+                name = value.ToString();
+        }
+        return $"{name} ({instanceId})";
 
         //if (!type.IsGenericType)
         //var genericArguments = string.Join(", ", type.GetGenericArguments().Select(a => SimpleClassName(a, null)));
         //return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
     }
+
+
 
     private static string FormatDictionary(IDictionary dict, string color)
     {
