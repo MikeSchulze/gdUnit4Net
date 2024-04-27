@@ -648,14 +648,15 @@ public class ExecutorTest : ITestEventListener
         AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] {
             "ParameterizedBoolValue",
             "ParameterizedIntValues",
-            "ParameterizedIntValuesFail" });
+            "ParameterizedIntValuesFail",
+            "ParameterizedSingleTest" });
 
         var events = await ExecuteTestSuite(testSuite);
 
         var suiteName = "TestSuiteParameterizedTests";
         var expectedEvents = new List<ITuple>
         {
-            Tuple(TESTSUITE_BEFORE, suiteName, "Before", 3)
+            Tuple(TESTSUITE_BEFORE, suiteName, "Before", 4)
         };
         expectedEvents.AddRange(ExpectedTestCase(suiteName, "ParameterizedBoolValue", new List<object[]> {
             new object[] { 0, false }, new object[] { 1, true } }));
@@ -663,6 +664,8 @@ public class ExecutorTest : ITestEventListener
             new object[] { 1, 2, 3, 6 }, new object[] { 3, 4, 5, 12 }, new object[] { 6, 7, 8, 21 } }));
         expectedEvents.AddRange(ExpectedTestCase(suiteName, "ParameterizedIntValuesFail", new List<object[]> {
             new object[] { 1, 2, 3, 6 }, new object[] { 3, 4, 5, 11 }, new object[] { 6, 7, 8, 22 } }));
+        expectedEvents.AddRange(ExpectedTestCase(suiteName, "ParameterizedSingleTest", new List<object[]> {
+            new object[] { true } }));
         expectedEvents.Add(Tuple(TESTSUITE_AFTER, suiteName, "After", 0));
         AssertTestCaseNames(events).ContainsExactly(expectedEvents);
 
@@ -683,6 +686,11 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new object[] { 3, 4, 5, 11 }), false, false, true, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new object[] { 6, 7, 8, 22 }), false, false, true, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail"), false, false, true, false),
+            // the single parameterized test
+            Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest", true, false, false, false),
+            Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest(True)", true, false, false, false),
+            Tuple(TESTCASE_AFTER, "ParameterizedSingleTest(True)", true, false, false, false),
+            Tuple(TESTCASE_AFTER, "ParameterizedSingleTest", true, false, false, false),
             // test suite is failing
             Tuple(TESTSUITE_AFTER, "After", false, false, true, false)
         );
