@@ -23,4 +23,8 @@ public class TestSuiteParameterizedTests
     [TestCase(6, 7, 8, 22)]
     public void ParameterizedIntValuesFail(int a, int b, int c, int expected)
         => AssertThat(a + b + c).IsEqual(expected);
+
+    [TestCase(true)]
+    public void ParameterizedSingleTest(bool value)
+        => AssertThat(value).IsTrue();
 }

@@ -67,4 +67,8 @@ public class ExampleTestSuite
         AssertThat(a + b + c).IsEqual(expect);
 #pragma warning restore IDE0022 // Use expression body for method
     }
+
+    [TestCase(true)]
+    public void ParameterizedSingleTest(bool value)
+        => AssertThat(value).IsTrue();
 }

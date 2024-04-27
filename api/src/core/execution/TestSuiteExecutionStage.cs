@@ -31,7 +31,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         foreach (var testCase in testSuiteContext.TestSuite.TestCases)
         {
             using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
-            if (testCase.TestCaseAttributes.Count() > 1)
+            if (testCase.IsParameterized)
                 await RunParameterizedTest(testCaseContext, testCase);
             else
                 await RunTestCase(testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);

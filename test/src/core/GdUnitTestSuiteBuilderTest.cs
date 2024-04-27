@@ -236,6 +236,8 @@ public class GdUnitTestSuiteBuilderTest
                 Tuple("TestCasesWithCustomTestName", 64, new List<string> {
                     "TestCaseA(1, 2, 3, 6)",
                     "TestCaseB(3, 4, 5, 12)",
-                    "TestCaseC(6, 7, 8, 21)" }));
+                    "TestCaseC(6, 7, 8, 21)" }),
+                Tuple("ParameterizedSingleTest", 72, new List<string> {
+                    "ParameterizedSingleTest(True)" }));
     }
 }

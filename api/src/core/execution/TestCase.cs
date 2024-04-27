@@ -26,6 +26,8 @@ internal sealed class TestCase
 
     public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
 
+    internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
+
     public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
     private IEnumerable<object> Parameters
