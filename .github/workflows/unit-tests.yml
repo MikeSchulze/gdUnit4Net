@@ -54,6 +54,7 @@ jobs:
           godot-version: ${{ inputs.godot-version }}
           godot-status: ${{ inputs.godot-status }}
           godot-net: true
+          project_dir: './example/'
           paths: |
             res://test/src
           timeout: 5
