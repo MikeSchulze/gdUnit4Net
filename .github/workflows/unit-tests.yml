@@ -49,7 +49,7 @@ jobs:
           lfs: true
 
       - name: 'Test GdUnit4 - Godot_${{ inputs.godot-version }}-${{ inputs.godot-status }}-net'
-        uses: MikeSchulze/gdUnit4-action@v1.0.3
+        uses: MikeSchulze/gdUnit4-action@v1.0.8
         with:
           godot-version: ${{ inputs.godot-version }}
           godot-status: ${{ inputs.godot-status }}
@@ -58,7 +58,8 @@ jobs:
             res://test/src
           timeout: 5
           retries: 3 # We have set the number of repetitions to 3 because Godot mono randomly crashes during C# tests
-          report-name: Report_GdUnit4Action-${{ inputs.godot-version }}-${{ inputs.godot-status }}
+          publish-report: false
+          report-name: gdUnit4Action-${{ inputs.godot-version }}-${{ inputs.godot-status }}
 
 
   unit-test-adapter:
