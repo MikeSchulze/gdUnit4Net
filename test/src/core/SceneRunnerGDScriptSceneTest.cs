@@ -36,7 +36,7 @@ public class SceneRunnerGDScriptSceneTest
     public void LoadSceneInvalidResource()
         => AssertThrown(() => ISceneRunner.Load("res://src/core/resources/scenes/NotExistingScene.tscn", true))
             .IsInstanceOf<FileNotFoundException>()
-            .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource not exists.");
+            .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource does not exists.");
 
     [TestCase]
     public void GetProperty()

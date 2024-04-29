@@ -63,12 +63,14 @@ internal sealed class SceneRunner : ISceneRunner
 
     public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false)
     {
-        if (!Godot.FileAccess.FileExists(resourcePath))
-            throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource not exists.");
+        if (!ResourceLoader.Exists(resourcePath))
+            throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource does not exists.");
         Verbose = verbose;
         SceneAutoFree = autoFree;
         Executions.ExecutionContext.RegisterDisposable(this);
         SceneTree = (SceneTree)Engine.GetMainLoop();
+        if (!resourcePath.EndsWith(".tscn") && !resourcePath.EndsWith(".scn") && !resourcePath.StartsWith("uid://"))
+            throw new ArgumentException($"GdUnitSceneRunner: The given resource: '{resourcePath}' is not a scene.");
         CurrentScene = ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
         SceneTree.Root.AddChild(CurrentScene);
         SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
