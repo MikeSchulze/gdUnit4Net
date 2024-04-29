@@ -32,9 +32,44 @@ public sealed class SceneRunnerCSharpSceneTest
 
     [TestCase]
     public void LoadSceneInvalidResource()
-        => AssertThrown(() => ISceneRunner.Load("res://src/core/resources/scenes/NotExistingScene.tscn", true))
+    {
+        AssertThrown(() => ISceneRunner.Load("res://src/core/resources/scenes/NotExistingScene.tscn", true))
             .IsInstanceOf<FileNotFoundException>()
-            .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource not exists.");
+            .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource does not exists.");
+        AssertThrown(() => ISceneRunner.Load("res://src/core/resources/scenes/TestScene.gd", true))
+            .IsInstanceOf<System.ArgumentException>()
+            .HasMessage("GdUnitSceneRunner: The given resource: 'res://src/core/resources/scenes/TestScene.gd' is not a scene.");
+    }
+
+    [TestCase]
+    public void LoadSceneByUid()
+    {
+        using var runner = ISceneRunner.Load("uid://cn8ucy2rheu0f", true);
+        AssertThat(runner.Scene())
+            .IsInstanceOf<Node2D>()
+            .IsNotNull();
+        AssertThrown(() => ISceneRunner.Load("uid://invalid_uid", true))
+            .IsInstanceOf<FileNotFoundException>()
+            .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'uid://invalid_uid'. The resource does not exists.");
+    }
+
+    [TestCase]
+    public void LoadSceneTSCNFormat()
+    {
+        using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.tscn", true);
+        AssertThat(runner.Scene())
+            .IsInstanceOf<Node2D>()
+            .IsNotNull();
+    }
+
+    [TestCase]
+    public void LoadSceneBinaryFormat()
+    {
+        using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.scn", true);
+        AssertThat(runner.Scene())
+            .IsInstanceOf<Node2D>()
+            .IsNotNull();
+    }
 
     [TestCase]
     public void GetProperty()
