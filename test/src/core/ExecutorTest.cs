@@ -4,12 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using GdUnit4.Asserts;
+using GdUnit4.Core;
+using GdUnit4.Executions;
+
 using static Assertions;
 using static TestEvent.TYPE;
 using static TestReport.ReportType;
-using GdUnit4.Asserts;
-using Executions;
-
 
 [TestSuite]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
@@ -32,6 +33,15 @@ public class ExecutorTest : ITestEventListener
         executor = new Executor();
         executor.AddTestEventListener(this);
     }
+
+    [BeforeTest]
+    public void InitTest()
+        => Godot.ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, true);
+
+    [AfterTest]
+    public void TeardownTest()
+        => Godot.ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, true);
+
 
     private static TestSuite LoadTestSuite(string clazzPath)
     {
@@ -56,12 +66,11 @@ public class ExecutorTest : ITestEventListener
         events.Add(e);
     }
 
-    private async Task<List<TestEvent>> ExecuteTestSuite(TestSuite testSuite, bool enableOrphanDetection = true)
+    private async Task<List<TestEvent>> ExecuteTestSuite(TestSuite testSuite)
     {
         var testSuiteName = testSuite.Name;
         events.Clear();
 
-        executor.ReportOrphanNodesEnabled = enableOrphanDetection;
         if (verbose)
             Console.WriteLine($"Execute {testSuiteName}.");
         await executor.ExecuteInternally(testSuite);
@@ -501,7 +510,8 @@ public class ExecutorTest : ITestEventListener
         AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly(new string[] { "TestCase1", "TestCase2" });
 
         // simulate test suite execution with disabled orphan detection
-        var events = await ExecuteTestSuite(testSuite, false);
+        Godot.ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, false);
+        var events = await ExecuteTestSuite(testSuite);
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrphansDetected", "TestCase1", "TestCase2"));
