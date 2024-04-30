@@ -7,6 +7,8 @@ using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
 
+using GdUnit4.Core;
+
 public sealed partial class Executor : Godot.RefCounted, IExecutor
 {
     [Godot.Signal]
@@ -62,7 +64,7 @@ public sealed partial class Executor : Godot.RefCounted, IExecutor
     internal void AddTestEventListener(ITestEventListener listener)
         => eventListeners.Add(listener);
 
-    public bool ReportOrphanNodesEnabled { get; set; } = true;
+    private bool ReportOrphanNodesEnabled => GdUnit4Settings.IsVerboseOrphans();
 
     public bool IsExecutable(Godot.Node node) => node is CsNode;
 
