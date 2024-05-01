@@ -1,9 +1,15 @@
 
 namespace GdUnit4.Tests.Asserts;
 
-using Godot;
-using GdUnit4.Asserts;
+using System;
+using System.Globalization;
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Godot;
+
+using GdUnit4.Asserts;
+using GdUnit4.Executions;
 using static Assertions;
 
 [TestSuite]
@@ -13,7 +19,7 @@ public class AssertionsTest
     [TestCase]
     public void DoAssertNotYetImplemented()
         => AssertThrown(() => AssertNotYetImplemented())
-            .HasFileLineNumber(15)
+            .HasFileLineNumber(21)
             .HasMessage("Test not yet implemented!");
 
     [TestCase]
@@ -73,7 +79,7 @@ public class AssertionsTest
     [TestCase]
     public void AssertThatEnumerable()
     {
-        AssertObject(AssertThat(System.Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new System.Collections.ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
         AssertObject(AssertThat(new System.Collections.BitArray(new bool[] { true, false }))).IsInstanceOf<IEnumerableAssert<bool>>();
         AssertObject(AssertThat(new System.Collections.Generic.HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
@@ -128,6 +134,37 @@ public class AssertionsTest
         // with overrides ToString
         var obj8 = new ClassWithToString("Custom");
         AssertThat(AssertFailures.AsObjectId(obj8)).IsEqual($"Custom (objId: {obj8.GetHashCode()})");
+    }
+
+    [TestCase]
+    public void UsingMSTestAssertions()
+    {
+        var currentCulture = CultureInfo.DefaultThreadCurrentCulture;
+        var currentUICulture = CultureInfo.DefaultThreadCurrentUICulture;
+
+        try
+        {
+            // we want to test against english culture
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+            var assertion = AssertThrown(() => Assert.AreEqual(1, 2))
+                .IsInstanceOf<AssertFailedException>()
+                .StartsWithMessage("Assert.AreEqual failed. Expected:<1>. Actual:<2>.");
+            AssertTrimmedExceptionStackTrace(assertion)
+                .NotContains("Microsoft.VisualStudio.TestTools");
+        }
+        finally
+        {
+            CultureInfo.DefaultThreadCurrentCulture = currentCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = currentUICulture;
+        }
+    }
+
+    private static IStringAssert AssertTrimmedExceptionStackTrace(IExceptionAssert? exceptionAssert)
+    {
+        var stackTrace = (exceptionAssert as ExceptionAssert<Exception>)?.GetExceptionStackTrace()!;
+        var trimmedStackTrace = ExecutionStage<int>.TrimStackTrace(stackTrace);
+        return AssertString(trimmedStackTrace);
     }
 
     private class ClassWithoutToString
