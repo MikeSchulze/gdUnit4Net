@@ -5,7 +5,7 @@ We appreciate your input and want to make the contribution process as easy and t
 
 ## Reporting Bugs
 
-If you encounter any bugs or issues, please use GitHub's issue tracking system. You can report a bug by [opening a new issue](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2C+task&template=bug_report.md&title=). When submitting a bug report, please provide detailed information, including the steps to reproduce the issue, relevant background information, and sample code if possible.
+If you encounter any bugs or issues, please use GitHub's issue tracking system. You can report a bug by [opening a new issue](https://github.com/MikeSchulze/gdUnit4Net/issues/new/choose). When submitting a bug report, please provide detailed information, including the steps to reproduce the issue, relevant background information, and sample code if possible.
 
 ## Development on GitHub
 
@@ -16,14 +16,14 @@ We follow the <a href='https://docs.github.com/en/get-started/quickstart/github-
 
 1. Select an open issue to work on or create a new issue if none exists.
    - Assign the issue to yourself and set its status to "In Progress."<br>
-   ![Alt text](./assets/work-on-issue.png)
+   ![Alt text](https://github.com/MikeSchulze/gdUnit4/blob/master/assets/work-on-issue.png)
 2. Fork the repository and create a branch from the `master` branch.
    - Use the issue number as the branch name, e.g., GD-111.
 3. If you have made changes to the code that should be tested, please include appropriate tests.
 4. If you have modified any APIs, ensure that the documentation is updated accordingly.
 5. Create a pull request and provide information in the "Why" and "What" sections:
    - Link the pull request to the corresponding issue.<br>
-   ![Alt text](./assets/link-issue.png)
+   ![Alt text](https://github.com/MikeSchulze/gdUnit4/blob/master/assets/link-issue.png)
    - Assign the pull request to yourself.
    - Make sure each pull request is associated with only one issue.
    - If the pull request is still in progress, mark it as a draft.
@@ -33,7 +33,7 @@ We follow the <a href='https://docs.github.com/en/get-started/quickstart/github-
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the same <a href='https://github.com/MikeSchulze/gdUnit4Net/blob/master/LICENSE' target="_blank">MIT License</a> that covers the project. If you have any concerns, please reach out to the maintainers.
+By contributing to this project, you agree that your contributions will be licensed under the same <a href='https://github.com/MikeSchulze/gdUnit4Net/blob/master/api/LICENSE' target="_blank">MIT License</a> that covers the project. If you have any concerns, please reach out to the maintainers.
 
 ## Coding Style
 
