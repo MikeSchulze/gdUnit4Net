@@ -91,7 +91,7 @@ The test run looks like this.
 ### Contribution Guidelines
 
 **Thank you for your interest in contributing to GdUnit4!**<br>
-To ensure a smooth and collaborative contribution process, please review our [contribution guidelines](https://github.com/MikeSchulze/gdUnit4Net/blob/master/CONTRIBUTING.md) before getting started. These guidelines outline the standards and expectations we uphold in this project.
+To ensure a smooth and collaborative contribution process, please review our [contribution guidelines](https://github.com/MikeSchulze/gdUnit4Net/blob/master/api/CONTRIBUTING.md) before getting started. These guidelines outline the standards and expectations we uphold in this project.
 
 Code of Conduct: We strictly adhere to the Godot code of conduct in this project. As a contributor, it is important to respect and follow this code to maintain a positive and inclusive community.
 
