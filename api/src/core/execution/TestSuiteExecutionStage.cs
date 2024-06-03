@@ -1,7 +1,6 @@
 namespace GdUnit4.Executions;
 
 using System.Threading.Tasks;
-using System.Linq;
 
 internal sealed class TestSuiteExecutionStage : IExecutionStage
 {
