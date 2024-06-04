@@ -27,7 +27,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
     <IsGodotToolsProject>true</IsGodotToolsProject>
-    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
