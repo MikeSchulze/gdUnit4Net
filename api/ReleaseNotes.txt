@@ -2,10 +2,22 @@
 V4.2.4
 
 Improvements:
-- Added input action handling to the SceneRunner
-  - `SimulateActionPressed(string action)`
-  - `SimulateActionPress(string action)`
-  - `SimulateActionRelease(string action)`
+* GD-89: Add input action support to the `SceneRunner` by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/92
+    - Added input action handling to the SceneRunner
+    - `SimulateActionPressed(string action)`
+    - `SimulateActionPress(string action)`
+    - `SimulateActionRelease(string action)`
+* GD-94: Improve assertions error message when comparing objects by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/95
+* GD-99: Add support to load a scene by `uid://` path to the Scene Runner by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/100
+
+
+Bug Fixes:
+* GD-90: Cleanup old runner configuration before run new tests by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/93
+* GD-96: Fix methods with a single parameterized test case are not executed by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/97
+* GD-101: Respect the GdUnit4 settings to notify about orphan nodes by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/102
+* GD-103: Trim MSTest assert stack trace by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/105
+* GD-104: Fix exception failure message propagation by @MikeSchulze in https://github.com/MikeSchulze/gdUnit4Net/pull/108
+
 
 -------------------------------------------------------------------------------------------------------
 

@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
-    <GodotVersion>4.2.1</GodotVersion>
+    <GodotVersion>4.2.2</GodotVersion>
     <GodotNetSdkVersion>$(GodotVersion)</GodotNetSdkVersion>
     <MicrosoftSdkVersion>17.9.0</MicrosoftSdkVersion>
     <MicrosoftCodeAnalysisCSharpVersion>4.9.2</MicrosoftCodeAnalysisCSharpVersion>
     <MoqVersion>4.18.4</MoqVersion>
-    <GdUnitAPIVersion>4.2.4-rc3</GdUnitAPIVersion>
+    <GdUnitAPIVersion>4.2.4</GdUnitAPIVersion>
     <GdUnitTestAdapterVersion>1.1.1</GdUnitTestAdapterVersion>
   </PropertyGroup>
 </Project>
