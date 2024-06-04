@@ -1,12 +1,13 @@
 
 <h2 align="center">A Unit Testing Framework in C# for Godot</h2>
-<p align="center">This version of GdUnit4 is based on Godot <strong>v4.2.1.stable.official [b09f793f5]</strong> (master branch)</p>
+<p align="center">This version of GdUnit4.api is based on Godot <strong>v4.2.2.stable.mono.official [15073afe3] (master branch)</p>
 </h2>
 
 <h1 align="center">Supported Godot Versions</h2>
 <p align="center">
   <img src="https://img.shields.io/badge/Godot-v4.2.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
   <img src="https://img.shields.io/badge/Godot-v4.2.1-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
+  <img src="https://img.shields.io/badge/Godot-v4.2.2-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
 </p>
 
 ## What is gdUnit4Net
