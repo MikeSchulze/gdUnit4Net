@@ -1,6 +1,7 @@
 namespace GdUnit4;
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 using Godot;
@@ -33,7 +34,19 @@ public interface ISceneRunner : IDisposable
     /// <param name="autofree">If true the loaded scene will be automatic freed when the runner is freed.</param>
     /// <param name="verbose">Prints detailed infos on scene simulation.</param>
     /// <returns></returns>
-    public static ISceneRunner Load(string resourcePath, bool autofree = false, bool verbose = false) => new Core.SceneRunner(resourcePath, autofree, verbose);
+    public static ISceneRunner Load(string resourcePath, bool autofree = false, bool verbose = false)
+    {
+        if (!ResourceLoader.Exists(resourcePath))
+            throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource does not exists.");
+        if (!resourcePath.EndsWith(".tscn") && !resourcePath.EndsWith(".scn") && !resourcePath.StartsWith("uid://"))
+            throw new ArgumentException($"GdUnitSceneRunner: The given resource: '{resourcePath}' is not a scene.");
+
+        var currentScene = ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
+
+        return Load(currentScene, autofree, verbose);
+    }
+
+    public static ISceneRunner Load(Node currentScene, bool autofree = false, bool verbose = false) => new Core.SceneRunner(currentScene, autofree, verbose);
 
 
     /// <summary>

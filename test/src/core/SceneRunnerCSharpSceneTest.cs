@@ -71,6 +71,16 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsNotNull();
     }
 
+
+    [TestCase]
+    public void LoadSceneNode()
+    {
+        using var runner = ISceneRunner.Load(new Node(), true);
+        AssertThat(runner.Scene())
+            .IsInstanceOf<Node>()
+            .IsNotNull();
+    }
+
     [TestCase]
     public void GetProperty()
     {

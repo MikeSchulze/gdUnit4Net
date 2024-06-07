@@ -2,7 +2,6 @@ namespace GdUnit4.Core;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
@@ -61,17 +60,13 @@ internal sealed class SceneRunner : ISceneRunner
     private readonly ICollection<Key> keyOnPress = new HashSet<Key>();
     private readonly ICollection<MouseButton> mouseButtonOnPress = new HashSet<MouseButton>();
 
-    public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false)
+    public SceneRunner(Node currentScene, bool autoFree = false, bool verbose = false)
     {
-        if (!ResourceLoader.Exists(resourcePath))
-            throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource does not exists.");
         Verbose = verbose;
         SceneAutoFree = autoFree;
         Executions.ExecutionContext.RegisterDisposable(this);
         SceneTree = (SceneTree)Engine.GetMainLoop();
-        if (!resourcePath.EndsWith(".tscn") && !resourcePath.EndsWith(".scn") && !resourcePath.StartsWith("uid://"))
-            throw new ArgumentException($"GdUnitSceneRunner: The given resource: '{resourcePath}' is not a scene.");
-        CurrentScene = ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
+        CurrentScene = currentScene;
         SceneTree.Root.AddChild(CurrentScene);
         SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
         SetTimeFactor(1.0);
