@@ -75,10 +75,11 @@ public sealed class SceneRunnerCSharpSceneTest
     [TestCase]
     public void LoadSceneNode()
     {
-        using var runner = ISceneRunner.Load(new Node(), true);
+        var currentScene = new Node();
+        using var runner = ISceneRunner.Load(currentScene, true);
         AssertThat(runner.Scene())
             .IsInstanceOf<Node>()
-            .IsNotNull();
+            .IsSame(currentScene);
     }
 
     [TestCase]
