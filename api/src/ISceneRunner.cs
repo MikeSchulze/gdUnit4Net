@@ -1,7 +1,6 @@
 namespace GdUnit4;
 
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 using Godot;
