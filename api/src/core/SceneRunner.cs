@@ -61,17 +61,28 @@ internal sealed class SceneRunner : ISceneRunner
     private readonly ICollection<Key> keyOnPress = new HashSet<Key>();
     private readonly ICollection<MouseButton> mouseButtonOnPress = new HashSet<MouseButton>();
 
-    public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false)
+    public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false) : this(LoadScene(resourcePath), autoFree, verbose)
+    {
+    }
+
+    private static Node LoadScene(string resourcePath)
     {
         if (!ResourceLoader.Exists(resourcePath))
             throw new FileNotFoundException($"GdUnitSceneRunner: Can't load scene by given resource path: '{resourcePath}'. The resource does not exists.");
+        if (!resourcePath.EndsWith(".tscn") && !resourcePath.EndsWith(".scn") && !resourcePath.StartsWith("uid://"))
+            throw new ArgumentException($"GdUnitSceneRunner: The given resource: '{resourcePath}' is not a scene.");
+
+        return ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
+    }
+
+
+    public SceneRunner(Node currentScene, bool autoFree = false, bool verbose = false)
+    {
         Verbose = verbose;
         SceneAutoFree = autoFree;
         Executions.ExecutionContext.RegisterDisposable(this);
         SceneTree = (SceneTree)Engine.GetMainLoop();
-        if (!resourcePath.EndsWith(".tscn") && !resourcePath.EndsWith(".scn") && !resourcePath.StartsWith("uid://"))
-            throw new ArgumentException($"GdUnitSceneRunner: The given resource: '{resourcePath}' is not a scene.");
-        CurrentScene = ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
+        CurrentScene = currentScene;
         SceneTree.Root.AddChild(CurrentScene);
         SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
         SetTimeFactor(1.0);

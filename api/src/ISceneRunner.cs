@@ -35,6 +35,8 @@ public interface ISceneRunner : IDisposable
     /// <returns></returns>
     public static ISceneRunner Load(string resourcePath, bool autofree = false, bool verbose = false) => new Core.SceneRunner(resourcePath, autofree, verbose);
 
+    public static ISceneRunner Load(Node currentScene, bool autofree = false, bool verbose = false) => new Core.SceneRunner(currentScene, autofree, verbose);
+
 
     /// <summary>
     /// Simulates that an action has been pressed.

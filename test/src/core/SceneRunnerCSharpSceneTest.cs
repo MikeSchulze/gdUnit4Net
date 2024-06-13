@@ -3,6 +3,8 @@ namespace GdUnit4.Tests.Core;
 using System.IO;
 using System.Threading.Tasks;
 
+using core.resources.scenes;
+
 using Godot;
 
 using static Assertions;
@@ -69,6 +71,28 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertThat(runner.Scene())
             .IsInstanceOf<Node2D>()
             .IsNotNull();
+    }
+
+
+    [TestCase]
+    public void InitializeSceneBeforeAddingToSceneTree()
+    {
+        var currentScene = ((PackedScene)ResourceLoader.Load("res://src/core/resources/scenes/TestSceneWithInitialization.tscn")).Instantiate<TestSceneWithInitialization>();
+
+        currentScene.Initialize();
+
+        AssertThat(currentScene.MethodCalls.Count).IsEqual(1);
+        AssertThat(currentScene.MethodCalls[0]).IsEqual("Initialize");
+
+        using var runner = ISceneRunner.Load(currentScene, true);
+        AssertThat(runner.Scene())
+            .IsInstanceOf<TestSceneWithInitialization>()
+            .IsSame(currentScene);
+
+        var actualScene = ((TestSceneWithInitialization)runner.Scene());
+        AssertThat(actualScene.MethodCalls.Count).IsEqual(2);
+        AssertThat(actualScene.MethodCalls[0]).IsEqual("Initialize");
+        AssertThat(actualScene.MethodCalls[1]).IsEqual("_Ready");
     }
 
     [TestCase]
