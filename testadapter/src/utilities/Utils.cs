@@ -11,13 +11,8 @@ internal static class Utils
 
     internal static bool CheckGdUnit4ApiVersion(IMessageLogger logger, Version minVersion)
     {
-        var dependencies = Assembly
-            .GetExecutingAssembly()
-            .GetReferencedAssemblies()
-            .Where(assemblyName => "gdUnit4Api".Equals(assemblyName.Name, StringComparison.Ordinal));
-        if (!dependencies.Any())
-            throw new InvalidOperationException($"No 'gdUnit4Api' is installed!");
-        var version = dependencies.First().Version;
+        var gdUnit4ApiAssembly = Assembly.Load("gdUnit4Api") ?? throw new InvalidOperationException($"No 'gdUnit4Api' is installed!");
+        var version = gdUnit4ApiAssembly.GetName().Version;
         logger.SendMessage(TestMessageLevel.Informational, $"CheckGdUnit4ApiVersion gdUnit4Api, Version={version}");
         if (version < minVersion)
         {
