@@ -87,10 +87,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
             pProcess.Exited += ExitHandler(frameworkHandle);
             pProcess.Start();
-            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
-
             pProcess.BeginErrorReadLine();
             pProcess.BeginOutputReadLine();
+            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
             while (!pProcess.WaitForExit(SessionTimeOut))
             {
                 Thread.Sleep(100);
@@ -102,7 +101,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             }
             catch (Exception e)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with {e.Message}");
+                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
             }
             finally
             {
