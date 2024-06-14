@@ -46,10 +46,10 @@
     </DataCollectionRunSettings>
 
     <GdUnit4>
-        <!-- Additonal Godot runtime parameters-->
+        <!-- Additional Godot runtime parameters-->
         <!-- These parameters are crucial for configuring the Godot runtime to work in headless environments, such as those used in automated testing or CI/CD pipelines.-->
         <Parameters>--audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --verbose</Parameters>
-        <!-- Controlls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
+        <!-- Controls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
              This likely determines how the test names are displayed in the test results.-->
         <DisplayName>FullyQualifiedName</DisplayName>
     </GdUnit4>

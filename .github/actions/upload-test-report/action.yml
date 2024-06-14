@@ -13,7 +13,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         retention-days: 10
-        name: ${{ inputs.report-name }}
+        name: artifact_${{ inputs.report-name }}
         path: |
           ./test/TestResults/test-result.trx
           ./test/reports/**
