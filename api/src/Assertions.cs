@@ -65,7 +65,7 @@ public sealed class Assertions
     /// <typeparam name="TValue">The type of Godot vector.</typeparam>
     /// <param name="vector">The vector value to verify.</param>
     /// <returns>An instance of IVectorAssert for further assertions.</returns>
-    public static IVectorAssert<TValue> AssertVector<TValue>(TValue vector) where TValue : notnull, IEquatable<TValue>
+    public static IVectorAssert<TValue> AssertVector<TValue>(TValue vector) where TValue : IEquatable<TValue>
         => new VectorAssert<TValue>(vector);
 
     /// <summary>
@@ -118,12 +118,6 @@ public sealed class Assertions
     public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
     public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
-    /**
-        public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary? current)
-            where TKey : notnull
-            where TValue : notnull
-            => new DictionaryAssert<TKey, TValue>(current);
-*/
     public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary<TKey, TValue>? current)
         where TKey : notnull
         where TValue : notnull

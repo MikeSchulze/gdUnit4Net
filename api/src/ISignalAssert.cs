@@ -5,6 +5,15 @@ using System.Threading.Tasks;
 /// <summary> An Assertion Tool to verify Godot signals</summary>
 public interface ISignalAssert : IAssertBase<Godot.GodotObject>
 {
+
+    /// <summary>
+    /// Starts the monitoring of emitted signals during the test runtime.
+    /// It should be called first if you want to collect all emitted signals after the emitter has been created.
+    /// </summary>
+    /// <returns></returns>
+    public ISignalAssert StartMonitoring();
+
+
     /// <summary>
     /// Verifies that given signal is emitted until waiting time
     /// </summary>

@@ -7,10 +7,14 @@ using System.Threading.Tasks;
 using Exceptions;
 using Core.Signals;
 
-internal sealed partial class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
+internal sealed class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
 {
     public SignalAssert(Godot.GodotObject current) : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
+
+    // Is just a dummy method that is called to register the monitor on the emitter, which is done in the constructor
+    public ISignalAssert StartMonitoring()
+        => this;
 
     public async Task<ISignalAssert> IsEmitted(string signal, params Godot.Variant[] args)
     {
