@@ -1,5 +1,6 @@
 # Project-specific ignores
 .history
+.idea
 .godot
 obj/
 nupkg/*
