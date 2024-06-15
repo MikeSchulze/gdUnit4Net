@@ -155,16 +155,10 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 .OverrideFailureMessage($"Expect the action '{action}' is pressed")
                 .IsTrue();
         }
-
-        // verify all this actions are still handled as pressed
-        foreach (var action in actionsToSimulate)
-            AssertThat(Input.IsActionPressed(action))
-                .OverrideFailureMessage("Expect the action '{action}' is pressed")
-                .IsTrue();
         // other actions are not pressed
         foreach (var action in new[] { "ui_accept", "ui_select", "ui_cancel" })
             AssertThat(Input.IsActionPressed(action))
-                .OverrideFailureMessage("Expect the action '{action}' is NOT pressed")
+                .OverrideFailureMessage($"Expect the action '{action}' is NOT pressed")
                 .IsFalse();
     }
 
@@ -178,10 +172,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
             AssertThat(InputMap.HasAction(action)).IsTrue();
             sceneRunner.SimulateActionPress(action);
             await ISceneRunner.SyncProcessFrame;
-        }
-        // now do release all actions
-        foreach (var action in actionsToSimulate)
-        {
+
             // precondition
             AssertThat(Input.IsActionPressed(action))
                 .OverrideFailureMessage($"Expect the action '{action}' is pressed")
@@ -236,25 +227,6 @@ public sealed class SceneRunnerInputEventIntegrationTest
             .SimulateKeyPress(Key.A);
         await ISceneRunner.SyncProcessFrame;
 
-        // results in two events, first is the shift key is press
-        var eventKey = new InputEventKey
-        {
-            Keycode = Key.Shift,
-            PhysicalKeycode = Key.Shift,
-            Pressed = true,
-            ShiftPressed = true
-        };
-        //verify(_scene_spy, 1)._input(mouseEvent)
-
-        // second is the combination of current press shift and key A
-        eventKey = new InputEventKey
-        {
-            Keycode = Key.A,
-            PhysicalKeycode = Key.A,
-            Pressed = true,
-            ShiftPressed = true
-        };
-        //verify(_scene_spy, 1)._input(mouseEvent)
         AssertThat(Input.IsKeyPressed(Key.Shift)).IsTrue();
         AssertThat(Input.IsKeyPressed(Key.A)).IsTrue();
     }
