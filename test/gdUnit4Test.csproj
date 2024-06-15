@@ -5,7 +5,7 @@
     <Copyright>© 2024 Mike Schulze</Copyright>
     <Authors>Mike Schulze</Authors>
 
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
@@ -20,8 +20,6 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
     <NoWarn>NU1605</NoWarn>
-    <!-- Hide Godot.SourceGenerators.MustBeVariantAnalyzer warnings -->
-    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
