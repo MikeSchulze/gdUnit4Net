@@ -2,14 +2,15 @@ namespace GdUnit4.TestAdapter;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
-using GdUnit4.TestAdapter.Discovery;
-using GdUnit4.TestAdapter.Settings;
+using Discovery;
+using Settings;
 using static GdUnit4.TestAdapter.Utilities.Utils;
 
 [ExtensionUri(ExecutorUri)]
@@ -22,7 +23,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
 
     private Execution.TestExecutor? executor;
 
-    private IFrameworkHandle? frameworkHandle;
+    private IFrameworkHandle? fhHandle;
 
     // Test properties supported for filtering
     private readonly Dictionary<string, TestProperty> supportedProperties = new(StringComparer.OrdinalIgnoreCase)
@@ -36,15 +37,15 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     /// </summary>
     /// <param name="tests">Tests to be run.</param>
     /// <param name="runContext">Context to use when executing the tests.</param>
-    /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
+    /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'tests' is null, abort!");
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
-        _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
+        fhHandle = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+        //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
         var filterExpression = runContext.GetTestCaseFilter(supportedProperties.Keys, (propertyName) =>
         {
@@ -52,10 +53,8 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
             return testProperty;
         });
 
-        this.frameworkHandle = frameworkHandle;
-
         executor = new Execution.TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(frameworkHandle, runContext, tests);
+        executor.Run(frameworkHandle, runContext, tests.ToList());
     }
 
     /// <summary>
@@ -63,12 +62,12 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     /// </summary>
     /// <param name="tests">Path to test container files to look for tests in.</param>
     /// <param name="runContext">Context to use when executing the tests.</param>
-    /// <param param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
+    /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
     public void RunTests(IEnumerable<string>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'containers' is null, abort!");
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
-        _ = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
+        fhHandle = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
         if (!CheckGdUnit4ApiVersion(frameworkHandle, new Version("4.2.2")))
         {
@@ -81,19 +80,15 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
 
-        this.frameworkHandle = frameworkHandle;
         executor = new Execution.TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(frameworkHandle, runContext, discoverySink.TestCases);
+        executor.Run(frameworkHandle, runContext, discoverySink.TestCases.ToList());
     }
 
     /// <summary>
     /// Cancel the execution of the tests.
     /// </summary>
     public void Cancel()
-    {
-        frameworkHandle?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
-        executor?.Cancel();
-    }
+        => executor?.Cancel(fhHandle!);
 
     public void Dispose()
     {

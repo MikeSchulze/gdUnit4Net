@@ -5,21 +5,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Newtonsoft.Json;
 
-using GdUnit4.Api;
+using Api;
+using Extensions;
 using Godot;
-using GdUnit4.TestAdapter.Extensions;
 
 internal abstract class BaseTestExecutor
 {
 
-    protected string GodotBin { get; set; } = System.Environment.GetEnvironmentVariable("GODOT_BIN")
+    protected static string GodotBin { get; set; } = System.Environment.GetEnvironmentVariable("GODOT_BIN")
         ?? throw new ArgumentNullException("Godot runtime is not set! Set env 'GODOT_BIN' is missing!");
 
     protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => new((sender, e) =>
@@ -66,8 +66,43 @@ internal abstract class BaseTestExecutor
 
     protected static void AttachDebuggerIfNeed(IRunContext runContext, IFrameworkHandle frameworkHandle, Process process)
     {
-        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2)
+        if (!runContext.IsBeingDebugged)
+            return;
+        if (frameworkHandle is IFrameworkHandle2 fh2)
             fh2.AttachDebuggerToProcess(pid: process.Id);
+        else
+        {
+            if (frameworkHandle.ToString()!.Contains("JetBrains"))
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected JetBrains debugger run.");
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Attaching the debugger to the process... {process}");
+                // Attempt to attach the debugger to the process
+                try
+                {
+                    //Process.Start("rider", $"attach-to-process {process.Id} \"{FindSolutionFile()}\"");
+
+                }
+                catch (Exception ex)
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, $"Failed to attach the debugger: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private static string FindSolutionFile([CallerFilePath] string? callerFile = null)
+    {
+        var dir = Path.GetDirectoryName(callerFile) ?? throw new InvalidOperationException("could not resolve solution directory");
+        do
+        {
+            var slnFiles = Directory.GetFiles(dir, "*.sln", SearchOption.TopDirectoryOnly);
+            if (slnFiles.Length == 1)
+                return slnFiles[0];
+
+            dir = Path.GetDirectoryName(dir);
+        } while (dir != null);
+
+        throw new InvalidOperationException("Could not find solution");
     }
 
     protected static DataReceivedEventHandler TestEventProcessor(IFrameworkHandle frameworkHandle, IEnumerable<TestCase> tests) => new((sender, args) =>
@@ -127,8 +162,6 @@ internal abstract class BaseTestExecutor
                 case TestEvent.TYPE.INIT:
                     break;
                 case TestEvent.TYPE.STOP:
-                    break;
-                default:
                     break;
             }
             return;

@@ -12,7 +12,7 @@ internal interface ITestExecutor : IDisposable
 
     public const int DEFAULT_SESSION_TIMEOUT = 30000;
 
-    public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IEnumerable<TestCase> testCases);
+    public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, List<TestCase> testCases);
 
-    public void Cancel();
+    public void Cancel(IFrameworkHandle frameworkHandle);
 }
