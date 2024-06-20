@@ -80,34 +80,47 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             WorkingDirectory = @$"{workingDirectory}"
         };
 
-        using (pProcess = new() { StartInfo = processStartInfo })
+        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && frameworkHandle.GetType().ToString().Contains("JetBrains") && frameworkHandle.GetType().Assembly.GetName().Version>= new Version("2.16.1.14"))
         {
-            pProcess.EnableRaisingEvents = true;
-            pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
-            pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-            pProcess.Exited += ExitHandler(frameworkHandle);
-            pProcess.Start();
-            pProcess.BeginErrorReadLine();
-            pProcess.BeginOutputReadLine();
-            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+            var processId = fh2.LaunchProcessWithDebuggerAttached(processStartInfo.FileName, processStartInfo.WorkingDirectory, processStartInfo.Arguments, null);
+            pProcess = Process.GetProcessById(processId);
+
             while (!pProcess.WaitForExit(SessionTimeOut))
             {
                 Thread.Sleep(100);
             }
-            try
+        }
+        else
+        {
+            using (pProcess = new() { StartInfo = processStartInfo })
             {
-                pProcess.Kill(true);
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                pProcess.EnableRaisingEvents = true;
+                pProcess.OutputDataReceived += TestEventProcessor(frameworkHandle, testCases);
+                pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                pProcess.Exited += ExitHandler(frameworkHandle);
+                pProcess.Start();
+                pProcess.BeginErrorReadLine();
+                pProcess.BeginOutputReadLine();
+                AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+                while (!pProcess.WaitForExit(SessionTimeOut))
+                {
+                    Thread.Sleep(100);
+                }
+                try
+                {
+                    pProcess.Kill(true);
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                }
+                catch (Exception e)
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
+                }
+                finally
+                {
+                    File.Delete(configName);
+                }
             }
-            catch (Exception e)
-            {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
-            }
-            finally
-            {
-                File.Delete(configName);
-            }
-        };
+        }
     }
 
     private void InstallTestRunnerAndBuild(IFrameworkHandle frameworkHandle, string workingDirectory)
