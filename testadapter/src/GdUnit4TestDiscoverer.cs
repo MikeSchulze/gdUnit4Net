@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Discovery;
+
 using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.TestPlatform.AdapterUtilities.ManagedNameUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -15,13 +17,15 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
-using GdUnit4.TestAdapter.Discovery;
-using GdUnit4.TestAdapter.Settings;
+using Settings;
 
-using static GdUnit4.TestAdapter.Discovery.CodeNavigationDataProvider;
-using static GdUnit4.TestAdapter.Settings.GdUnit4Settings;
-using static GdUnit4.TestAdapter.Extensions.TestCaseExtensions;
-using static GdUnit4.TestAdapter.Utilities.Utils;
+using static Discovery.CodeNavigationDataProvider;
+
+using static Settings.GdUnit4Settings;
+
+using static Extensions.TestCaseExtensions;
+
+using static Utilities.Utils;
 
 [DefaultExecutorUri(GdUnit4TestExecutor.ExecutorUri)]
 [ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
@@ -29,23 +33,18 @@ using static GdUnit4.TestAdapter.Utilities.Utils;
 [FileExtension(".exe")]
 public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 {
-
-    internal static bool MatchReturnType(MethodInfo method, Type returnType)
-        => method == null
-            ? throw new ArgumentNullException(nameof(method))
-            : returnType == null ? throw new ArgumentNullException(nameof(returnType)) : method.ReturnType.Equals(returnType);
-
     public void DiscoverTests(
         IEnumerable<string> sources,
         IDiscoveryContext discoveryContext,
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        if (!CheckGdUnit4ApiVersion(logger, new Version("4.2.2")))
+        if (!CheckGdUnit4ApiMinimumRequiredVersion(logger, new Version("4.3.0")))
         {
-            logger.SendMessage(TestMessageLevel.Error, $"Abort the test discovery.");
+            logger.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
             return;
         }
+
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
         var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
         var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
@@ -76,7 +75,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                     {
                         var navData = codeNavigationProvider.GetNavigationData(className, mi);
                         if (!navData.IsValid)
-                            logger.SendMessage(TestMessageLevel.Informational, $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
+                            logger.SendMessage(TestMessageLevel.Informational,
+                                $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
 
                         ManagedNameHelper.GetManagedName(mi, out var managedType, out var managedMethod, out var hierarchyValues);
                         ManagedNameParser.ParseManagedMethodName(managedMethod, out var methodName, out var parameterCount, out var parameterTypes);
@@ -104,24 +104,31 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                                 Interlocked.Increment(ref testCasesDiscovered);
                                 discoverySink.SendTestCase(t);
                             });
-
                     });
                 logger.SendMessage(TestMessageLevel.Informational, $"Discover:  TestSuite {className} with {testCasesDiscovered} TestCases found.");
-            };
+            }
+
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests done, {testSuiteDiscovered} TestSuites and total {testsTotalDiscovered} Tests found.");
         }
     }
 
+    internal static bool MatchReturnType(MethodInfo method, Type returnType)
+        => method == null
+            ? throw new ArgumentNullException(nameof(method))
+            : returnType == null
+                ? throw new ArgumentNullException(nameof(returnType))
+                : method.ReturnType.Equals(returnType);
+
 
     private List<Trait> TestCasePropertiesAsTraits(MethodInfo mi)
         => mi.GetCustomAttributes(typeof(TestCaseAttribute))
-                                    .Cast<TestCaseAttribute>()
-                                    .Where(attr => attr.Arguments?.Length != 0)
-                                    .Select(attr => attr.Name == null
-                                            ? new Trait(string.Empty, attr.Arguments.Formatted())
-                                            : new Trait(attr.Name, attr.Arguments.Formatted())
-                                    )
-                                    .ToList();
+            .Cast<TestCaseAttribute>()
+            .Where(attr => attr.Arguments?.Length != 0)
+            .Select(attr => attr.Name == null
+                ? new Trait(string.Empty, attr.Arguments.Formatted())
+                : new Trait(attr.Name, attr.Arguments.Formatted())
+            )
+            .ToList();
 
     private TestCase BuildTestCase(TestCaseDescriptor descriptor, string assemblyPath, CodeNavigation navData)
     {
@@ -137,9 +144,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
         if (descriptor.HierarchyValues?.Count > 0)
-        {
             testCase.SetPropertyValue(HierarchyProperty, descriptor.HierarchyValues?.ToArray());
-        }
         return testCase;
     }
 
@@ -173,6 +178,5 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));
 
     private static bool IsTestSuite(Type type) =>
-        type.IsClass && !type.IsAbstract && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
-
+        type is { IsClass: true, IsAbstract: false } && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
 }
