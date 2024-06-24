@@ -1,3 +1,10 @@
+v4.2.5
+
+Bug Fixes:
+* GD-110: Allow a Node to be passed in to SceneRunner.Load as the root of the scene.
+* GD-121: Improve AssertSignal by adding a StartMonitoring method
+
+-------------------------------------------------------------------------------------------------------
 
 V4.2.4
 
