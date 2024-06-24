@@ -1,3 +1,9 @@
+
+v1.1.2
+Bug Fixes:
+- Fixes the test adapter gdUnit4.api version resolving
+- Fixing Debug tests gets stuck when using --verbose
+
 v1.1.1
 
 Bug Fixes:
