@@ -87,6 +87,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         using var eventServer = new TestEventReportServer();
         Task.Run(() => eventServer.Start(frameworkHandle, testCases));
 
+
         //var filteredTestCases = filterExpression != null
         //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
         //    {
@@ -108,6 +109,13 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             WindowStyle = ProcessWindowStyle.Hidden,
             WorkingDirectory = @$"{workingDirectory}"
         };
+
+        if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && fh2.GetType().ToString().Contains("JetBrains") &&
+            fh2.GetType().Assembly.GetName().Version >= new Version("2.16.1.14"))
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {fh2.GetType().Assembly.GetName().Version}");
+            pProcess = RunDebugRider(fh2, processStartInfo);
+        }
 
         using (pProcess = new Process { StartInfo = processStartInfo })
         {
@@ -133,6 +141,23 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             {
                 File.Delete(configName);
             }
+        }
+    }
+
+    private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
+    {
+        var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
+        pProcess = Process.GetProcessById(processId);
+        if (pProcess != null)
+        {
+            Console.WriteLine($"pProcess: {pProcess}");
+            var processHandle = pProcess.SafeHandle;
+            pProcess.WaitForExit(SessionTimeOut);
+            Console.WriteLine($"Run TestRunner ends with {pProcess.ExitCode}");
+
+            t.Wait();
+            fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+            processHandle.Dispose();
         }
     }
 
