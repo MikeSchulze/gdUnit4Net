@@ -1,18 +1,20 @@
 namespace GdUnit4.Api;
+
 using System;
 
-using GdUnit4.Core;
+using Core;
 
 internal class TestReporter : ITestEventListener
 {
-    public bool IsFailed { get; set; }
-
     private static readonly GdUnitConsole Console = new();
 
-    public TestReporter()
-    { }
+    public bool IsFailed { get; set; }
 
     public void PublishEvent(TestEvent testEvent) => PrintStatus(testEvent);
+
+    public void Dispose()
+    {
+    }
 
     private void PrintStatus(TestEvent testEvent)
     {
@@ -74,9 +76,6 @@ internal class TestReporter : ITestEventListener
 
     private static void WriteFailureReport(TestEvent testEvent)
     {
-        foreach (var report in testEvent.Reports)
-        {
-            Console.Println(report.ToString().RichTextNormalize().Indentation(2), ConsoleColor.DarkCyan);
-        }
+        foreach (var report in testEvent.Reports) Console.Println(report.ToString().RichTextNormalize().Indentation(2), ConsoleColor.DarkCyan);
     }
 }

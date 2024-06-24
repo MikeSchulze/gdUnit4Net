@@ -16,5 +16,5 @@ public class GdUnit4NetAPITest
 
     [TestCase]
     public void Version()
-        => AssertThat(GdUnit4NetAPI.Version()).StartsWith("4.2");
+        => AssertThat(GdUnit4NetAPI.Version()).StartsWith("4.3");
 }

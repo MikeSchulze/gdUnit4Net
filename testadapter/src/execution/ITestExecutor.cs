@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-
 internal interface ITestExecutor : IDisposable
 {
-
     public const int DEFAULT_SESSION_TIMEOUT = 30000;
 
-    public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IEnumerable<TestCase> testCases);
+    public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IReadOnlyList<TestCase> testCases);
 
     public void Cancel();
 }
