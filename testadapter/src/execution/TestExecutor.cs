@@ -147,16 +147,22 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
     {
         // EnableShutdownAfterTestRun is not working we need to use SafeHandle the get the process running until the ExitCode is getted
-        // fh2.EnableShutdownAfterTestRun = false;
+        fh2.EnableShutdownAfterTestRun = true;
+        Console.WriteLine($"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
         var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
         pProcess = Process.GetProcessById(processId);
         SafeProcessHandle? processHandle = null;
         try
         {
             processHandle = pProcess.SafeHandle;
-            pProcess.WaitForExit(SessionTimeOut);
-            fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
-            pProcess.Kill();
+            var isExited = pProcess.WaitForExit(SessionTimeOut);
+            // it never exits on macOS ?
+            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
+            // enforce kill the process has also no affect on macOS
+            pProcess.Kill(true);
+            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
+            // this line fails on macOS, maybe the SafeHandle works only on windows
+            //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
         }
         finally
         {
