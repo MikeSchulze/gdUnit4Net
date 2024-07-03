@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.Win32.SafeHandles;
 
 using Settings;
 
@@ -34,6 +35,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         this.gdUnit4Settings = gdUnit4Settings;
     }
 
+    private object CancelLock { get; } = new();
+    private object ProcessLock { get; } = new();
+
 #pragma warning disable IDE0052 // Remove unread private members
     private int ParallelTestCount { get; set; }
 #pragma warning restore IDE0052 // Remove unread private members
@@ -42,7 +46,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
     public void Cancel()
     {
-        lock (this)
+        lock (CancelLock)
         {
             Console.WriteLine("Cancel triggered");
             try
@@ -52,16 +56,13 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             }
             catch (Exception)
             {
-                //frameworkHandle.SendMessage(TestMessageLevel.Error, @$"TestRunner ends with: {e.Message}");
+                //fh.SendMessage(TestMessageLevel.Error, @$"TestRunner ends with: {e.Message}");
             }
         }
     }
 
     public void Dispose()
-    {
-        pProcess?.Dispose();
-        GC.SuppressFinalize(this);
-    }
+        => pProcess?.Dispose();
 
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IReadOnlyList<TestCase> testCases)
     {
@@ -85,7 +86,8 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
         using var eventServer = new TestEventReportServer();
-        Task.Run(() => eventServer.Start(frameworkHandle, testCases));
+        // ReSharper disable once AccessToDisposedClosure
+        var testEventServerTask = Task.Run(() => eventServer.Start(frameworkHandle, testCases));
 
         //var filteredTestCases = filterExpression != null
         //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
@@ -94,7 +96,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //        return t.GetPropertyValue(testProperty);
         //    }) == false)
         //    : testCases;
-        var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn"; //Path.Combine(workingDirectory, @$"{temp_test_runner_dir}/TestRunner.tscn");
+        var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
         var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
         frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
@@ -109,30 +111,62 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             WorkingDirectory = @$"{workingDirectory}"
         };
 
-        using (pProcess = new Process { StartInfo = processStartInfo })
-        {
-            pProcess.EnableRaisingEvents = true;
-            pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-            pProcess.Exited += ExitHandler(frameworkHandle);
-            pProcess.Start();
-            pProcess.BeginErrorReadLine();
-            pProcess.BeginOutputReadLine();
-            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
-            while (!pProcess.WaitForExit(SessionTimeOut))
-                Thread.Sleep(100);
-            try
+        lock (ProcessLock)
+            if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && fh2.GetType().ToString().Contains("JetBrains") &&
+                fh2.GetType().Assembly.GetName().Version >= new Version("2.16.1.14"))
             {
-                pProcess.Kill(true);
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
-            }
-            catch (Exception e)
-            {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
-            }
-            finally
-            {
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {fh2.GetType().Assembly.GetName().Version}");
+                RunDebugRider(fh2, processStartInfo);
                 File.Delete(configName);
             }
+            else
+                using (pProcess = new Process { StartInfo = processStartInfo })
+                    try
+                    {
+                        pProcess.EnableRaisingEvents = true;
+                        pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                        pProcess.Exited += ExitHandler(frameworkHandle);
+                        pProcess.Start();
+                        pProcess.BeginErrorReadLine();
+                        pProcess.BeginOutputReadLine();
+                        AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+                        pProcess.WaitForExit(SessionTimeOut);
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                        pProcess.Kill(true);
+                    }
+                    catch (Exception e)
+                    {
+                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
+                    }
+                    finally { File.Delete(configName); }
+
+        // wait until all event messages are processed or the client is disconnected
+        testEventServerTask.Wait(TimeSpan.FromSeconds(2));
+    }
+
+    private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
+    {
+        // EnableShutdownAfterTestRun is not working we need to use SafeHandle the get the process running until the ExitCode is getted
+        fh2.EnableShutdownAfterTestRun = true;
+        Console.WriteLine($"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
+        var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
+        pProcess = Process.GetProcessById(processId);
+        SafeProcessHandle? processHandle = null;
+        try
+        {
+            processHandle = pProcess.SafeHandle;
+            var isExited = pProcess.WaitForExit(SessionTimeOut);
+            // it never exits on macOS ?
+            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
+            // enforce kill the process has also no affect on macOS
+            pProcess.Kill(true);
+            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
+            // this line fails on macOS, maybe the SafeHandle works only on windows
+            //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+        }
+        finally
+        {
+            processHandle?.Dispose();
         }
     }
 
@@ -141,7 +175,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TempTestRunnerDir}");
         if (Directory.Exists(destinationFolderPath))
             return;
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, "Install GdUnit4 TestRunner");
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Installing GdUnit4 `TestRunner` at {destinationFolderPath}...");
         InstallTestRunnerClasses(destinationFolderPath);
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @"--path . --headless --build-solutions --quit-after 20")
         {
@@ -162,11 +196,11 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         try
         {
             process.Kill(true);
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestRunner installed: {process.ExitCode}");
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4 `TestRunner` successfully installed: {process.ExitCode}");
         }
         catch (Exception e)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"TestRunner ends with: {e.Message}");
+            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Install GdUnit4 `TestRunner` ends with: {e.Message}");
         }
     }
 
