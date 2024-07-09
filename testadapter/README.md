@@ -12,7 +12,7 @@ The GdUnit4.testadapter implements the Microsoft test adapter framework. [VSTest
 |---|---|---|---|---|---|---|---|
 |Visual Studio     |✅|✅|✅|✅|✅|🔜|❌|
 |Visual Studio Code|✅|✅|✅|✅|✅|🔜|❌|
-|JetBrains Rider   |✅|✅|[☑️](#test-debug-workaround-for-jetbrains-rider)|✅|✅|🔜|❌|
+|JetBrains Rider min version 2024.2 |✅|✅|✅|✅|✅|🔜|❌|
 
 > ✅ - supported<br>
 > ☑️ - supported by a workaround (link)<br>
