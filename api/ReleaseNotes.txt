@@ -1,3 +1,11 @@
+v4.3.0
+
+Improvements:
+* GD-127: Replace stdout based TestEventProcessor by IPC implementation
+* GD-124: Use LaunchProcessWithDebuggerAttached instead of AttachDebuggerIfNeed for Rider 2024.2
+
+-------------------------------------------------------------------------------------------------------
+
 v4.2.5
 
 Bug Fixes:
