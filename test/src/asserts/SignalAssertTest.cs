@@ -3,44 +3,27 @@ namespace GdUnit4.Tests.Asserts;
 
 using System.Threading.Tasks;
 
+using Exceptions;
+
 using GdUnit4.Asserts;
 using GdUnit4.Core.Signals;
+
+using Godot;
 
 using static Assertions;
 
 [TestSuite]
 public partial class SignalAssertTest
 {
-    private sealed partial class TestEmitter : Godot.Node
+    [AfterTest]
+    public void TearDown()
     {
-        [Godot.Signal]
-        public delegate void SignalAEventHandler();
-
-        [Godot.Signal]
-        public delegate void SignalBEventHandler(string value);
-
-        [Godot.Signal]
-        public delegate void SignalCEventHandler(string value, int count);
-
-        private int frame;
-
-        public override void _Process(double delta)
-        {
-            switch (frame)
-            {
-                case 5:
-                    EmitSignal(SignalName.SignalA);
-                    break;
-                case 10:
-                    EmitSignal(SignalName.SignalB, "abc");
-                    break;
-                case 15:
-                    EmitSignal(SignalName.SignalC, "abc", 100);
-                    break;
-            }
-            frame++;
-        }
+        var signalCollector = GodotSignalCollector.Instance;
+        AssertThat(signalCollector.collectedSignals.Keys)
+            .OverrideFailureMessage($"Found keys: {signalCollector.collectedSignals.Keys.Formatted()}")
+            .IsEmpty();
     }
+
 
     [TestCase]
     public async Task IsEmitted()
@@ -52,7 +35,7 @@ public partial class SignalAssertTest
 
         await AssertThrown(AssertSignal(node).IsEmitted("SignalC", "abc", 101).WithTimeout(200))
             .ContinueWith(result => result.Result?
-                .IsInstanceOf<Exceptions.TestFailedException>()
+                .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting do emitting signal:
                         "SignalC(["abc", 101])"
@@ -65,7 +48,7 @@ public partial class SignalAssertTest
     [TestCase]
     public async Task IsNoEmitted()
     {
-        var node = AddNode(new Godot.Node2D());
+        var node = AddNode(new Node2D());
         await AssertSignal(node).IsNotEmitted("visibility_changed", 10).WithTimeout(100);
         await AssertSignal(node).IsNotEmitted("visibility_changed", 20).WithTimeout(100);
         await AssertSignal(node).IsNotEmitted("script_changed").WithTimeout(100);
@@ -73,7 +56,7 @@ public partial class SignalAssertTest
         node.Visible = false;
         await AssertThrown(AssertSignal(node).IsNotEmitted("visibility_changed").WithTimeout(200))
             .ContinueWith(result => result.Result?
-                .IsInstanceOf<Exceptions.TestFailedException>()
+                .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting do NOT emitting signal:
                         "visibility_changed(<Empty>)"
@@ -86,7 +69,7 @@ public partial class SignalAssertTest
     [TestCase]
     public async Task NodeChangedEmittingSignals()
     {
-        var node = AddNode(new Godot.Node2D());
+        var node = AddNode(new Node2D());
 
         await AssertSignal(node).IsEmitted("draw").WithTimeout(200);
 
@@ -97,7 +80,7 @@ public partial class SignalAssertTest
         //node.Visible = false;
         await AssertThrown(AssertSignal(node).IsEmitted("visibility_changed").WithTimeout(200))
             .ContinueWith(result => result.Result?
-                .IsInstanceOf<Exceptions.TestFailedException>()
+                .IsInstanceOf<TestFailedException>()
                 .HasMessage("""
                     Expecting do emitting signal:
                         "visibility_changed(<Empty>)"
@@ -113,7 +96,7 @@ public partial class SignalAssertTest
     [TestCase]
     public void IsSignalExists()
     {
-        var node = AutoFree(new Godot.Node2D())!;
+        var node = AutoFree(new Node2D())!;
 
         AssertSignal(node).IsSignalExists("visibility_changed")
             .IsSignalExists("draw")
@@ -123,7 +106,7 @@ public partial class SignalAssertTest
             .IsSignalExists("tree_exited");
 
         AssertThrown(() => AssertSignal(node).IsSignalExists("not_existing_signal"))
-            .IsInstanceOf<Exceptions.TestFailedException>()
+            .IsInstanceOf<TestFailedException>()
             .HasMessage("""
                 Expecting signal exists:
                     "not_existing_signal()"
@@ -131,21 +114,6 @@ public partial class SignalAssertTest
                     $obj
                 """
                 .Replace("$obj", AssertFailures.AsObjectId(node)));
-    }
-
-    public sealed partial class MyEmitter : Godot.Node {
-
-        [Godot.Signal]
-        public delegate void SignalAEventHandler();
-
-        [Godot.Signal]
-        public delegate void SignalBEventHandler(string value);
-
-
-        public void DoEmitSignalA() => EmitSignal(SignalName.SignalA);
-
-
-        public void DoEmitSignalB() => EmitSignal(SignalName.SignalB, "foo");
     }
 
     [TestCase(Timeout = 1000)]
@@ -189,5 +157,82 @@ public partial class SignalAssertTest
         // now verify emitter b
         emitterB.DoEmitSignalA();
         await AssertSignal(emitterB).IsEmitted(MyEmitter.SignalName.SignalA).WithTimeout(50);
+    }
+
+    [TestCase(Timeout = 1000, Description = "See https://github.com/MikeSchulze/gdUnit4Net/issues/135")]
+    public async Task EmitSignalOnNoneNodeObjects()
+    {
+        var emitter = AutoFree(new NonNodeEmitter())!;
+
+        // verify initial the emitters are not monitored
+        AssertThat(GodotSignalCollector.Instance.IsSignalCollecting(emitter, NonNodeEmitter.SignalName.SignalA)).IsFalse();
+
+
+        // start monitoring on the emitter
+        AssertSignal(emitter).StartMonitoring();
+        // verify the emitters are now monitored
+        AssertThat(GodotSignalCollector.Instance.IsSignalCollecting(emitter, NonNodeEmitter.SignalName.SignalA)).IsTrue();
+
+        // verify the signals are not emitted initial
+        await AssertSignal(emitter).IsNotEmitted(NonNodeEmitter.SignalName.SignalA).WithTimeout(50);
+
+        // emit signal `signal_a` on emitter
+        emitter.DoEmitSignalA();
+        await AssertSignal(emitter).IsEmitted(NonNodeEmitter.SignalName.SignalA).WithTimeout(50);
+    }
+
+    private sealed partial class TestEmitter : Node
+    {
+        [Signal]
+        public delegate void SignalAEventHandler();
+
+        [Signal]
+        public delegate void SignalBEventHandler(string value);
+
+        [Signal]
+        public delegate void SignalCEventHandler(string value, int count);
+
+        private int frame;
+
+        public override void _Process(double delta)
+        {
+            switch (frame)
+            {
+                case 5:
+                    EmitSignal(SignalName.SignalA);
+                    break;
+                case 10:
+                    EmitSignal(SignalName.SignalB, "abc");
+                    break;
+                case 15:
+                    EmitSignal(SignalName.SignalC, "abc", 100);
+                    break;
+            }
+
+            frame++;
+        }
+    }
+
+    public sealed partial class MyEmitter : Node
+    {
+        [Signal]
+        public delegate void SignalAEventHandler();
+
+        [Signal]
+        public delegate void SignalBEventHandler(string value);
+
+
+        public void DoEmitSignalA() => EmitSignal(SignalName.SignalA);
+
+
+        public void DoEmitSignalB() => EmitSignal(SignalName.SignalB, "foo");
+    }
+
+    public sealed partial class NonNodeEmitter : RefCounted
+    {
+        [Signal]
+        public delegate void SignalAEventHandler();
+
+        public void DoEmitSignalA() => EmitSignal(SignalName.SignalA);
     }
 }
