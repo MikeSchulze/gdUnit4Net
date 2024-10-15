@@ -22,7 +22,6 @@ internal sealed class ExecutionContext : IDisposable
         Stopwatch = new Stopwatch();
         Stopwatch.Start();
 
-        FullyQualifiedName = testInstance.GetType().FullName!;
         ReportOrphanNodesEnabled = reportOrphanNodesEnabled;
         FailureReporting = true;
         TestSuite = testInstance;
@@ -30,6 +29,7 @@ internal sealed class ExecutionContext : IDisposable
         ReportCollector = new TestReportCollector();
         SubExecutionContexts = new List<ExecutionContext>();
         Disposables = new List<IDisposable>();
+        FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
     }
 
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)

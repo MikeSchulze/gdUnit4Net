@@ -79,9 +79,14 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                     var testCase = FindTestCase(tests, e);
                     if (testCase == null)
                     {
+                        // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
+                        if (FindParameterizedTestCase(tests, e))
+                            return;
                         frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
                         return;
                     }
+
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TESTCASE_BEFORE: find test case {e.FullyQualifiedName}");
 
                     frameworkHandle.RecordStart(testCase);
                     frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
@@ -92,6 +97,9 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                     var testCase = FindTestCase(tests, e);
                     if (testCase == null)
                     {
+                        // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
+                        if (FindParameterizedTestCase(tests, e))
+                            return;
                         frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
                         return;
                     }
@@ -113,6 +121,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 }
                 case TestEvent.TYPE.TESTSUITE_AFTER:
                     frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
+
                     break;
                 case TestEvent.TYPE.INIT:
                     break;
@@ -244,4 +253,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
     private static TestCase? FindTestCase(IEnumerable<TestCase> tests, TestEvent e)
         => tests.FirstOrDefault(t => e.FullyQualifiedName.Equals(t.FullyQualifiedName, StringComparison.Ordinal));
+
+    private static bool FindParameterizedTestCase(IEnumerable<TestCase> tests, TestEvent e)
+        => tests.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
 }
