@@ -9,6 +9,7 @@ public enum Ide
     Rider,
     VisualStudio,
     VisualStudioCode,
+    DotNet,
     Unknown
 }
 
@@ -33,6 +34,8 @@ public static class IdeDetector
         if (processes.Any(p => p.ProcessName.Contains("devenv", StringComparison.OrdinalIgnoreCase))) return Ide.VisualStudio;
 
         if (processes.Any(p => p.ProcessName.Contains("code", StringComparison.OrdinalIgnoreCase))) return Ide.VisualStudioCode;
+
+        if (processes.Any(p => p.ProcessName.Contains("dotnet", StringComparison.OrdinalIgnoreCase))) return Ide.DotNet;
 
         return Ide.Unknown;
     }

@@ -83,7 +83,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
         }
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected IDE: {IdeDetector.Detect()}");
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Parent Process: {IdeDetector.Detect()}");
 
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
         var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);

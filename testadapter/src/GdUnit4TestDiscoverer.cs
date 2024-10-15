@@ -50,6 +50,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
         var filteredAssembles = FilterWithoutTestAdapter(sources);
 
+        logger.SendMessage(TestMessageLevel.Informational, $"GdUnit4Settings: {gdUnitSettings.DisplayName}");
+
         foreach (var assemblyPath in filteredAssembles)
         {
             logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
@@ -91,7 +93,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                                 ManagedType = managedType,
                                 ManagedMethod = managedMethod,
                                 HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
-                                DisplayName = BuildDisplayName(mi.Name, index, attr, gdUnitSettings),
+                                DisplayName = BuildDisplayName(managedType, mi.Name, index, attr, gdUnitSettings),
                                 FullyQualifiedName = Executions.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
                                 Traits = TestCasePropertiesAsTraits(mi)
                             })
@@ -158,11 +160,11 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         return idProvider.GetId();
     }
 
-    private static string BuildDisplayName(string testName, long index, TestCaseAttribute attr, GdUnit4Settings gdUnitSettings)
+    private static string BuildDisplayName(string managedTypeName, string testName, long index, TestCaseAttribute attr, GdUnit4Settings gdUnitSettings)
         => gdUnitSettings.DisplayName switch
         {
             DisplayNameOptions.SimpleName => BuildSimpleDisplayName(testName, index, attr),
-            DisplayNameOptions.FullyQualifiedName => Executions.TestCase.BuildDisplayName(testName, attr),
+            DisplayNameOptions.FullyQualifiedName => Executions.TestCase.BuildFullyQualifiedName(managedTypeName, testName, attr),
             _ => testName
         };
 

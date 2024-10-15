@@ -86,8 +86,6 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                         return;
                     }
 
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TESTCASE_BEFORE: find test case {e.FullyQualifiedName}");
-
                     frameworkHandle.RecordStart(testCase);
                     frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
                     break;
@@ -114,7 +112,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
                     e.Reports.ForEach(report => AddTestReport(frameworkHandle, report, testResult));
 
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} {testResult.Outcome}\n");
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
                     frameworkHandle.RecordResult(testResult);
                     frameworkHandle.RecordEnd(testCase, testResult.Outcome);
                     break;
