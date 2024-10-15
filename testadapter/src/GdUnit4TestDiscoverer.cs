@@ -39,7 +39,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(logger, new Version("4.3.0")))
+        if (!CheckGdUnit4ApiMinimumRequiredVersion(logger, new Version("4.4.0")))
         {
             logger.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
             return;

@@ -19,10 +19,10 @@ internal class TestAdapterReporter : ITestEventListener
         if (!client.IsConnected)
             try
             {
-                Console.WriteLine("Try to connect to GdUnit4 test report server!");
+                Console.WriteLine("GdUnit4.TestAdapterReporter: Try to connect to GdUnit4 test report server!");
                 client.Connect(TimeSpan.FromSeconds(5));
                 writer = new StreamWriter(client) { AutoFlush = true };
-                writer.WriteLine("TestAdapterReporter: Successfully connected to GdUnit4 test report server!");
+                writer.WriteLine("GdUnit4.TestAdapterReporter: Successfully connected to GdUnit4 test report server!");
             }
             catch (TimeoutException e)
             {
@@ -33,8 +33,8 @@ internal class TestAdapterReporter : ITestEventListener
 
     public void Dispose()
     {
-        Console.WriteLine("TestAdapterReporter: Disconnecting from GdUnit4 test report server.");
-        writer?.WriteLine("TestAdapterReporter: Disconnecting from GdUnit4 test report server.");
+        Console.WriteLine("GdUnit4.TestAdapterReporter: Disconnecting from GdUnit4 test report server.");
+        writer?.WriteLine("GdUnit4.TestAdapterReporter: Disconnecting from GdUnit4 test report server.");
         writer?.Dispose();
         client.Dispose();
     }

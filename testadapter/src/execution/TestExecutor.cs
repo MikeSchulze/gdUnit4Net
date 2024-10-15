@@ -16,6 +16,8 @@ using Microsoft.Win32.SafeHandles;
 
 using Settings;
 
+using Utilities;
+
 internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 {
     private const string TempTestRunnerDir = "gdunit4_testadapter";
@@ -81,8 +83,10 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
         }
 
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected IDE: {IdeDetector.Detect()}");
+
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
-        var configName = WriteTestRunnerConfig(groupedTests);
+        var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
         var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
         using var eventServer = new TestEventReportServer();

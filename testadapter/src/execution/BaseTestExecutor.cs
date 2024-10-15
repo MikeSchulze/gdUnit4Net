@@ -16,6 +16,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using Newtonsoft.Json;
 
+using Settings;
+
 using Environment = System.Environment;
 
 internal abstract class BaseTestExecutor
@@ -39,13 +41,16 @@ internal abstract class BaseTestExecutor
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Error: {message}");
     };
 
-    protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites)
+    protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites, GdUnit4Settings gdUnit4Settings)
     {
         try
         {
             CleanupRunnerConfigurations();
         }
-        catch (Exception) { }
+        catch (Exception)
+        {
+            // ignored
+        }
 
         var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
@@ -55,7 +60,8 @@ internal abstract class BaseTestExecutor
             Included = groupedTestSuites.ToDictionary(
                 suite => suite.Key,
                 suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
-            )
+            ),
+            CaptureStdOut = gdUnit4Settings.CaptureStdOut
         };
 
         File.WriteAllText(filePath, JsonConvert.SerializeObject(testConfig, Formatting.Indented));
