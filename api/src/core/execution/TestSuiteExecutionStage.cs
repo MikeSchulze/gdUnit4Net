@@ -37,7 +37,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
     public async Task Execute(ExecutionContext testSuiteContext)
     {
-        using var stdoutHook = StdOutHookFactory.CreateStdOutHook();
+        using IStdOutHook stdoutHook = null; //StdOutHookFactory.CreateStdOutHook();
         await BeforeStage.Execute(testSuiteContext);
         foreach (var testCase in testSuiteContext.TestSuite.TestCases)
         {
