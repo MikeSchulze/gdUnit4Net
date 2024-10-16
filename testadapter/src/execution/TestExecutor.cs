@@ -85,67 +85,74 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Running IDE: {IdeDetector.Detect(frameworkHandle)}");
 
-        InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
-        var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
-        var debugArg = runContext.IsBeingDebugged ? "-d" : "";
-
-        using var eventServer = new TestEventReportServer();
-        // ReSharper disable once AccessToDisposedClosure
-        var testEventServerTask = Task.Run(() => eventServer.Start(frameworkHandle, testCases));
-
-        //var filteredTestCases = filterExpression != null
-        //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
-        //    {
-        //        SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
-        //        return t.GetPropertyValue(testProperty);
-        //    }) == false)
-        //    : testCases;
-        var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
-        var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
+        try
         {
-            StandardOutputEncoding = Encoding.Default,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
-            WorkingDirectory = @$"{workingDirectory}"
-        };
+            InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
+            var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
+            var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
-        lock (ProcessLock)
-            if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && fh2.GetType().ToString().Contains("JetBrains") &&
-                fh2.GetType().Assembly.GetName().Version >= new Version("2.16.1.14"))
+            using var eventServer = new TestEventReportServer();
+            // ReSharper disable once AccessToDisposedClosure
+            var testEventServerTask = Task.Run(() => eventServer.Start(frameworkHandle, testCases));
+
+            //var filteredTestCases = filterExpression != null
+            //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
+            //    {
+            //        SupportedProperties.TryGetValue(propertyName, out TestProperty? testProperty);
+            //        return t.GetPropertyValue(testProperty);
+            //    }) == false)
+            //    : testCases;
+            var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
+            var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
+            var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {fh2.GetType().Assembly.GetName().Version}");
-                RunDebugRider(fh2, processStartInfo);
-                File.Delete(configName);
-            }
-            else
-                using (pProcess = new Process { StartInfo = processStartInfo })
-                    try
-                    {
-                        pProcess.EnableRaisingEvents = true;
-                        pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-                        pProcess.Exited += ExitHandler(frameworkHandle);
-                        pProcess.Start();
-                        pProcess.BeginErrorReadLine();
-                        pProcess.BeginOutputReadLine();
-                        AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
-                        pProcess.WaitForExit(SessionTimeOut);
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
-                        pProcess.Kill(true);
-                    }
-                    catch (Exception e)
-                    {
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}");
-                    }
-                    finally { File.Delete(configName); }
+                StandardOutputEncoding = Encoding.Default,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = @$"{workingDirectory}"
+            };
 
-        // wait until all event messages are processed or the client is disconnected
-        testEventServerTask.Wait(TimeSpan.FromSeconds(2));
+            lock (ProcessLock)
+                if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && fh2.GetType().ToString().Contains("JetBrains") &&
+                    fh2.GetType().Assembly.GetName().Version >= new Version("2.16.1.14"))
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {fh2.GetType().Assembly.GetName().Version}");
+                    RunDebugRider(fh2, processStartInfo);
+                    File.Delete(configName);
+                }
+                else
+                    using (pProcess = new Process { StartInfo = processStartInfo })
+                        try
+                        {
+                            pProcess.EnableRaisingEvents = true;
+                            pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                            pProcess.Exited += ExitHandler(frameworkHandle);
+                            pProcess.Start();
+                            pProcess.BeginErrorReadLine();
+                            pProcess.BeginOutputReadLine();
+                            AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+                            pProcess.WaitForExit(SessionTimeOut);
+                            frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                            pProcess.Kill(true);
+                        }
+                        catch (Exception e)
+                        {
+                            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}");
+                        }
+                        finally { File.Delete(configName); }
+
+            // wait until all event messages are processed or the client is disconnected
+            testEventServerTask.Wait(TimeSpan.FromSeconds(5));
+        }
+        catch (Exception e)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Abnormal test run, failed: {e.Message}");
+        }
     }
 
     private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
