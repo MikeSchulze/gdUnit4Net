@@ -32,10 +32,12 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
     internal async Task Start(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests)
     {
+        var detailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeDetector.Detect(frameworkHandle));
         frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Wait for connecting GdUnit4 test report client.");
         await server.WaitForConnectionAsync();
 
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: Connected. {server.GetImpersonationUserName()}");
+
 
         using CancellationTokenSource tokenSource = new(TimeSpan.FromMinutes(10));
         using var reader = new StreamReader(server);
@@ -46,7 +48,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 if (string.IsNullOrEmpty(json))
                     continue;
 
-                ProcessTestEvent(frameworkHandle, tests, json);
+                ProcessTestEvent(frameworkHandle, tests, json, detailedOutput);
             }
             catch (IOException)
             {
@@ -62,7 +64,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
     }
 
 
-    private void ProcessTestEvent(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests, string json)
+    private void ProcessTestEvent(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests, string json, bool detailedOutput)
     {
         if (json.StartsWith("GdUnitTestEvent:"))
         {
@@ -72,7 +74,10 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             switch (e.Type)
             {
                 case TestEvent.TYPE.TESTSUITE_BEFORE:
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName} Processing...");
+                    if (detailedOutput)
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName} Processing...");
+
+
                     break;
                 case TestEvent.TYPE.TESTCASE_BEFORE:
                 {
@@ -87,7 +92,8 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                     }
 
                     frameworkHandle.RecordStart(testCase);
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
+                    if (detailedOutput)
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
                     break;
                 }
                 case TestEvent.TYPE.TESTCASE_AFTER:
@@ -112,13 +118,16 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
                     e.Reports.ForEach(report => AddTestReport(frameworkHandle, report, testResult));
 
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
+                    if (detailedOutput)
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
                     frameworkHandle.RecordResult(testResult);
                     frameworkHandle.RecordEnd(testCase, testResult.Outcome);
                     break;
                 }
                 case TestEvent.TYPE.TESTSUITE_AFTER:
-                    frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
+                    if (detailedOutput)
+                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
+
 
                     break;
                 case TestEvent.TYPE.INIT:
@@ -134,9 +143,9 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Local
-    private TestResult AddTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult) => IdeDetector.Detect() switch
+    private TestResult AddTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult) => IdeDetector.Detect(frameworkHandle) switch
     {
-        Ide.Rider => AddRiderTestReport(frameworkHandle, report, testResult),
+        Ide.JetBrainsRider => AddRiderTestReport(frameworkHandle, report, testResult),
         Ide.VisualStudio => AddVisualStudio2022TestReport(frameworkHandle, report, testResult),
         Ide.VisualStudioCode => AddVisualStudioCodeTestReport(frameworkHandle, report, testResult),
         Ide.Unknown => AddRiderTestReport(frameworkHandle, report, testResult),

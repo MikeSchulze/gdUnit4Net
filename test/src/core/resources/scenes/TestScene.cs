@@ -15,13 +15,13 @@ public partial class TestScene : Control
 
     private RefCounted? nullable;
     private bool player_jump_action;
-
 #pragma warning disable CS8618
 
-    private ColorRect box0 = new();
     public ColorRect Box1 { get; set; }
     private ColorRect Box2 { get; set; }
     private ColorRect Box3 { get; set; }
+
+#pragma warning enable CS8618
 
     public override void _Ready()
     {
@@ -61,6 +61,7 @@ public partial class TestScene : Control
             var timer = GetTree().CreateTimer(1);
             await ToSignal(timer, Timer.SignalName.Timeout);
         }
+
         EmitSignal(SignalName.PanelColorChange, box, Colors.Gray);
     }
 
@@ -119,10 +120,7 @@ public partial class TestScene : Control
     {
         if (InputMap.HasAction("player_jump"))
             player_jump_action = Input.IsActionJustReleased("player_jump", true);
-        if (@event.IsActionReleased("ui_accept"))
-        {
-            AddChild(CreateSpell());
-        }
+        if (@event.IsActionReleased("ui_accept")) AddChild(CreateSpell());
     }
 
     public int Add(int a, int b)

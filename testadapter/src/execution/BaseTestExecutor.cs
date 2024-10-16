@@ -38,7 +38,7 @@ internal abstract class BaseTestExecutor
         if (string.IsNullOrEmpty(message))
             return;
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Error: {message}");
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{message}");
     };
 
     protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites, GdUnit4Settings gdUnit4Settings)

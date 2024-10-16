@@ -83,7 +83,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
         }
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Parent Process: {IdeDetector.Detect()}");
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Running IDE: {IdeDetector.Detect(frameworkHandle)}");
 
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
         var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
@@ -140,7 +140,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                     }
                     catch (Exception e)
                     {
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
+                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}");
                     }
                     finally { File.Delete(configName); }
 
@@ -152,7 +152,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     {
         // EnableShutdownAfterTestRun is not working we need to use SafeHandle the get the process running until the ExitCode is getted
         fh2.EnableShutdownAfterTestRun = true;
-        Console.WriteLine($"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
+        fh2.SendMessage(TestMessageLevel.Informational, $"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
         var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
         pProcess = Process.GetProcessById(processId);
         SafeProcessHandle? processHandle = null;
@@ -161,10 +161,10 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             processHandle = pProcess.SafeHandle;
             var isExited = pProcess.WaitForExit(SessionTimeOut);
             // it never exits on macOS ?
-            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
+            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
             // enforce kill the process has also no affect on macOS
             pProcess.Kill(true);
-            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
+            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
             // this line fails on macOS, maybe the SafeHandle works only on windows
             //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
         }
