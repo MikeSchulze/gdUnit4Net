@@ -181,7 +181,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             return;
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Installing GdUnit4 `TestRunner` at {destinationFolderPath}...");
         InstallTestRunnerClasses(destinationFolderPath);
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @"--path . --headless --build-solutions --quit-after 20")
+        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @"--path . --headless --build-solutions --quit-after 1000")
         {
             RedirectStandardOutput = false,
             RedirectStandardError = false,
@@ -192,19 +192,20 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             WorkingDirectory = @$"{workingDirectory}"
         };
 
-        using Process process = new() { StartInfo = processStartInfo };
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, @"Rebuild ...");
-        process.Start();
-        while (!process.WaitForExit(5000))
-            Thread.Sleep(100);
         try
         {
+            using Process process = new();
+            process.StartInfo = processStartInfo;
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Rebuild ... {GodotBin} {processStartInfo.Arguments} at {workingDirectory}");
+            process.Start();
+            while (!process.WaitForExit(5000))
+                Thread.Sleep(500);
             process.Kill(true);
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4 `TestRunner` successfully installed: {process.ExitCode}");
         }
         catch (Exception e)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Install GdUnit4 `TestRunner` ends with: {e.Message}");
+            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Install GdUnit4 `TestRunner` fails with: {e.Message}");
         }
     }
 

@@ -15,13 +15,6 @@ public partial class TestScene : Control
 
     private RefCounted? nullable;
     private bool player_jump_action;
-#pragma warning disable CS8618
-
-    public ColorRect Box1 { get; set; }
-    private ColorRect Box2 { get; set; }
-    private ColorRect Box3 { get; set; }
-
-#pragma warning enable CS8618
 
     public override void _Ready()
     {
@@ -128,4 +121,11 @@ public partial class TestScene : Control
 
     private void OnPanelColorChanged(ColorRect box, Color color)
         => box.Color = color;
+#pragma warning disable CS8618
+
+    public ColorRect Box1 { get; set; }
+    private ColorRect Box2 { get; set; }
+    private ColorRect Box3 { get; set; }
+
+#pragma warning restore CS8618
 }
