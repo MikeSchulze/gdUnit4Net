@@ -69,7 +69,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             }
             catch (IOException)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Client disconnected.");
+                frameworkHandle.SendMessage(TestMessageLevel.Error, "GdUnit4.TestEventReportServer:: Client has disconnected.");
                 break;
             }
             catch (Exception ex)
@@ -78,9 +78,8 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 {
                     frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: {ex.Message}");
                     frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: StackTrace: {ex.StackTrace}");
+                    break;
                 }
-
-                break;
             }
 
         frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Disconnected.");

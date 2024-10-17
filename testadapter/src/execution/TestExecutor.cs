@@ -145,7 +145,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                     finally { File.Delete(configName); }
 
         // wait until all event messages are processed or the client is disconnected
-        testEventServerTask.WaitAsync(TimeSpan.FromSeconds(5));
+        testEventServerTask.Wait(TimeSpan.FromSeconds(5));
     }
 
     private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
