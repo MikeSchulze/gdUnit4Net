@@ -26,9 +26,19 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 {
     private readonly NamedPipeServerStream server = new(TestAdapterReporter.PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
-    public async ValueTask DisposeAsync() => await server.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        if (server.IsConnected)
+            server.Close();
+        await server.DisposeAsync();
+    }
 
-    public void Dispose() => server.Dispose();
+    public void Dispose()
+    {
+        if (server.IsConnected)
+            server.Close();
+        server.Dispose();
+    }
 
     internal async Task Start(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests)
     {
@@ -41,9 +51,16 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
         using CancellationTokenSource tokenSource = new(TimeSpan.FromMinutes(10));
         using var reader = new StreamReader(server);
+
         while (server.IsConnected)
             try
             {
+                if (tokenSource.Token.IsCancellationRequested)
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Warning, "GdUnit4.TestEventReportServer:: Operation timed out.");
+                    break;
+                }
+
                 var json = await reader.ReadLineAsync(tokenSource.Token);
                 if (string.IsNullOrEmpty(json))
                     continue;
@@ -57,7 +74,13 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             }
             catch (Exception ex)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: Error: {ex.Message}");
+                if (server.IsConnected)
+                {
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: {ex.Message}");
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: StackTrace: {ex.StackTrace}");
+                }
+
+                break;
             }
 
         frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Disconnected.");
