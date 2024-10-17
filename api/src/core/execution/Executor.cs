@@ -123,7 +123,7 @@ public sealed partial class Executor : RefCounted, IExecutor
                 { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
             };
 
-            if (testEvent.Reports.Any())
+            if (testEvent.Reports.Count > 0)
             {
                 var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
                 data.Add("reports", serializedReports);
