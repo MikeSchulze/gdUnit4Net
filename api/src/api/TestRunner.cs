@@ -36,7 +36,7 @@ public partial class TestRunner : Node
                 var exitCode = await (o.TestAdapter
                     ? RunTests(LoadTestSuites(o.ConfigFile), new TestAdapterReporter())
                     : RunTests(LoadTestSuites(new DirectoryInfo(o.Add)), new TestReporter()));
-                Console.WriteLine($"Testrun ends with exit code: {exitCode}, FailFast:{FailFast}");
+                Console.WriteLine($"Test run ends with exit code: {exitCode}, FailFast:{FailFast}");
                 GetTree().Quit(exitCode);
             });
     }

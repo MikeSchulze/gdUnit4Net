@@ -16,7 +16,7 @@
         <Loggers>
             <Logger friendlyName="console" enabled="True">
                 <Configuration>
-                    <Verbosity>detailed</Verbosity>
+                    <Verbosity>normal</Verbosity>
                 </Configuration>
             </Logger>
             <Logger friendlyName="html" enabled="True">
@@ -37,10 +37,18 @@
     </TestRunParameters>
 
     <GdUnit4>
-        <!-- Additional Godot runtime parameters-->
-        <Parameters>--verbose</Parameters>
-        <!-- Controls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
-             This likely determines how the test names are displayed in the test results.-->
+        <!-- Additional Godot runtime parameters. These are passed to the Godot executable when running tests.-->
+        <Parameters>"--verbose"</Parameters>
+
+        <!-- Controls the display name format of test cases in the test results.
+                 Allowed values:
+                 - SimpleName: Uses only the method name (e.g., "TestMethod")
+                 - FullyQualifiedName: Uses the full path including class and method name (e.g., "MyNamespace.MyClass.TestMethod")
+                 Default: SimpleName -->
         <DisplayName>FullyQualifiedName</DisplayName>
+
+        <!-- When set to true, standard output (stdout) from test cases is captured
+                 and included in the test result. This can be useful for debugging. -->
+        <CaptureStdOut>true</CaptureStdOut>
     </GdUnit4>
 </RunSettings>

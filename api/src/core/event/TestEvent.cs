@@ -7,36 +7,11 @@ using System.Linq;
 
 internal class TestEvent : IEquatable<TestEvent>
 {
-#pragma warning disable CA1707
-    public enum TYPE
-    {
-        INIT,
-        STOP,
-        TESTSUITE_BEFORE,
-        TESTSUITE_AFTER,
-        TESTCASE_BEFORE,
-        TESTCASE_AFTER,
-    }
-
-    public enum STATISTIC_KEY
-    {
-        WARNINGS,
-        FAILED,
-        ERRORS,
-        SKIPPED,
-        ELAPSED_TIME,
-        ORPHAN_NODES,
-        TOTAL_COUNT,
-        ERROR_COUNT,
-        FAILED_COUNT,
-        SKIPPED_COUNT
-    }
-#pragma warning restore CA1707
-
     // constructor needs to serialize/deserialize by JsonConvert
     private TestEvent() { }
 
-    private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null, IEnumerable<TestReport>? reports = null)
+    private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null,
+        IEnumerable<TestReport>? reports = null)
     {
         Type = type;
         ResourcePath = resourcePath;
@@ -56,8 +31,36 @@ internal class TestEvent : IEquatable<TestEvent>
     public static TestEvent BeforeTest(string resourcePath, string suiteName, string testName) =>
         new(TYPE.TESTCASE_BEFORE, resourcePath, suiteName, testName);
 
-    public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null, IEnumerable<TestReport>? reports = null) =>
+    public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
+        IEnumerable<TestReport>? reports = null) =>
         new(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
+
+    public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
+#pragma warning disable CA1707
+    public enum TYPE
+    {
+        INIT,
+        STOP,
+        TESTSUITE_BEFORE,
+        TESTSUITE_AFTER,
+        TESTCASE_BEFORE,
+        TESTCASE_AFTER
+    }
+
+    public enum STATISTIC_KEY
+    {
+        WARNINGS,
+        FAILED,
+        ERRORS,
+        SKIPPED,
+        ELAPSED_TIME,
+        ORPHAN_NODES,
+        TOTAL_COUNT,
+        ERROR_COUNT,
+        FAILED_COUNT,
+        SKIPPED_COUNT
+    }
+#pragma warning restore CA1707
 
 #nullable disable
 
@@ -72,16 +75,18 @@ internal class TestEvent : IEquatable<TestEvent>
         bool isFailure, int failureCount,
         bool isWarning,
         bool isSkipped, int skippedCount,
-        long elapsedSinceMs) => new Dictionary<STATISTIC_KEY, object>() {
-            { STATISTIC_KEY.ORPHAN_NODES, orphanCount},
-            { STATISTIC_KEY.ELAPSED_TIME, elapsedSinceMs},
-            { STATISTIC_KEY.WARNINGS, isWarning},
-            { STATISTIC_KEY.ERRORS, isError},
-            { STATISTIC_KEY.ERROR_COUNT, errorCount},
-            { STATISTIC_KEY.FAILED, isFailure},
-            { STATISTIC_KEY.FAILED_COUNT, failureCount},
-            { STATISTIC_KEY.SKIPPED, isSkipped},
-            { STATISTIC_KEY.SKIPPED_COUNT, skippedCount}};
+        long elapsedSinceMs) => new Dictionary<STATISTIC_KEY, object>
+    {
+        { STATISTIC_KEY.ORPHAN_NODES, orphanCount },
+        { STATISTIC_KEY.ELAPSED_TIME, elapsedSinceMs },
+        { STATISTIC_KEY.WARNINGS, isWarning },
+        { STATISTIC_KEY.ERRORS, isError },
+        { STATISTIC_KEY.ERROR_COUNT, errorCount },
+        { STATISTIC_KEY.FAILED, isFailure },
+        { STATISTIC_KEY.FAILED_COUNT, failureCount },
+        { STATISTIC_KEY.SKIPPED, isSkipped },
+        { STATISTIC_KEY.SKIPPED_COUNT, skippedCount }
+    };
 
     public TYPE Type { get; set; }
     public string SuiteName { get; set; }
@@ -89,7 +94,7 @@ internal class TestEvent : IEquatable<TestEvent>
     public string FullyQualifiedName { get; set; }
     public string ResourcePath { get; set; }
     public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
-    public IEnumerable<TestReport> Reports { get; set; } = new List<TestReport>();
+    public List<TestReport> Reports { get; set; } = new();
 
     public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
     public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
@@ -109,8 +114,6 @@ internal class TestEvent : IEquatable<TestEvent>
 #pragma warning restore CA1854
     public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
 
-#nullable enable
-    public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
 #nullable disable
 
     public static bool operator ==(TestEvent lhs, TestEvent rhs) => lhs.Equals(rhs);
@@ -119,13 +122,13 @@ internal class TestEvent : IEquatable<TestEvent>
 
     public bool Equals(TestEvent other) =>
         (Type,
-        ResourcePath,
-        SuiteName,
-        TestName,
-        TotalCount,
-        ErrorCount,
-        FailedCount,
-        OrphanCount)
+            ResourcePath,
+            SuiteName,
+            TestName,
+            TotalCount,
+            ErrorCount,
+            FailedCount,
+            OrphanCount)
         .Equals((
             other.Type,
             other.ResourcePath,

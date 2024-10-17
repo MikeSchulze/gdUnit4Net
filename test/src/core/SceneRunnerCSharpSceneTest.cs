@@ -1,9 +1,13 @@
 namespace GdUnit4.Tests.Core;
 
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
 using core.resources.scenes;
+
+using Executions;
 
 using Godot;
 
@@ -39,7 +43,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsInstanceOf<FileNotFoundException>()
             .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource does not exists.");
         AssertThrown(() => ISceneRunner.Load("res://src/core/resources/scenes/TestScene.gd", true))
-            .IsInstanceOf<System.ArgumentException>()
+            .IsInstanceOf<ArgumentException>()
             .HasMessage("GdUnitSceneRunner: The given resource: 'res://src/core/resources/scenes/TestScene.gd' is not a scene.");
     }
 
@@ -89,7 +93,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsInstanceOf<TestSceneWithInitialization>()
             .IsSame(currentScene);
 
-        var actualScene = ((TestSceneWithInitialization)runner.Scene());
+        var actualScene = (TestSceneWithInitialization)runner.Scene();
         AssertThat(actualScene.MethodCalls.Count).IsEqual(2);
         AssertThat(actualScene.MethodCalls[0]).IsEqual("Initialize");
         AssertThat(actualScene.MethodCalls[1]).IsEqual("_Ready");
@@ -98,13 +102,15 @@ public sealed class SceneRunnerCSharpSceneTest
     [TestCase]
     public void GetProperty()
     {
-        AssertObject(sceneRunner.GetProperty("box0")).IsInstanceOf<ColorRect>().IsNotNull();
+        // try access to a public property
         AssertObject(sceneRunner.GetProperty("Box1")).IsInstanceOf<ColorRect>().IsNotNull();
+        // try access to a private property
+        AssertObject(sceneRunner.GetProperty("Box2")).IsInstanceOf<ColorRect>().IsNotNull();
         AssertObject(sceneRunner.GetProperty<ColorRect>("Box1")).IsInstanceOf<ColorRect>().IsNotNull();
         AssertObject(sceneRunner.GetProperty("initial_color")).IsEqual(Colors.Red);
         AssertObject(sceneRunner.GetProperty("nullable")).IsNull();
         AssertThrown(() => sceneRunner.GetProperty("_invalid"))
-            .IsInstanceOf<System.MissingFieldException>()
+            .IsInstanceOf<MissingFieldException>()
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
@@ -114,7 +120,7 @@ public sealed class SceneRunnerCSharpSceneTest
         sceneRunner.SetProperty("initial_color", Colors.Red);
         AssertObject(sceneRunner.GetProperty("initial_color")).IsEqual(Colors.Red);
         AssertThrown(() => sceneRunner.SetProperty("_invalid", 42))
-            .IsInstanceOf<System.MissingFieldException>()
+            .IsInstanceOf<MissingFieldException>()
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
@@ -123,14 +129,14 @@ public sealed class SceneRunnerCSharpSceneTest
     {
         AssertString(sceneRunner.Invoke("Add", 10, 12).ToString()).IsEqual("22");
         AssertThrown(() => sceneRunner.Invoke("Sub", 12, 10))
-            .IsInstanceOf<System.MissingMethodException>()
+            .IsInstanceOf<MissingMethodException>()
             .HasMessage("The method 'Sub' not exist on this instance.");
     }
 
     [TestCase(Timeout = 1200)]
     public async Task AwaitForMilliseconds()
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        var stopwatch = new Stopwatch();
         stopwatch.Start();
         await sceneRunner.AwaitMillis(1000);
         stopwatch.Stop();
@@ -197,7 +203,7 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // AwaitOnSignal must fail after an maximum timeout of 500ms because no signal 'panel_color_change' with given args color=Yellow is emitted
         await AssertThrown(sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, Colors.Yellow).WithTimeout(700))
-            .ContinueWith(result => result.Result?.IsInstanceOf<Executions.ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 700ms."));
+            .ContinueWith(result => result.Result?.IsInstanceOf<ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 700ms."));
         // verify the box is still green
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }
@@ -242,7 +248,7 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // set mouse position to button one and simulate is pressed
         sceneRunner.SetMousePos(new Vector2(60, 20))
-                .SimulateMouseButtonPressed(MouseButton.Left);
+            .SimulateMouseButtonPressed(MouseButton.Left);
 
         // wait until next frame
         await sceneRunner.AwaitIdleFrame();
@@ -277,17 +283,17 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // wait until 'ColorCycle()' and expect be return `red` but should fail because it ends with `black`
         await AssertThrown(sceneRunner.AwaitMethod<string>("ColorCycle").IsEqual("red"))
-           .ContinueWith(result => result.Result?.HasMessage(
+            .ContinueWith(result => result.Result?.HasMessage(
                 """
                 Expecting be equal:
                     "red"
                  but is
                     "black"
                 """
-           ));
+            ));
         // wait again for returns 'red' but with using a custom timeout of 500ms and expect is interrupted after 500ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("ColorCycle").IsEqual("red").WithTimeout(500))
-           .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 500ms."));
+            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 500ms."));
     }
 
     [TestCase(Description = "Example to wait for a specific method result and used time factor of 10", Timeout = 1000)]
@@ -299,7 +305,7 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // wait for returns 'red' but will never happen and expect is interrupted after 150ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("ColorCycle").IsEqual("red").WithTimeout(150))
-           .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
+            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
     }
 
     [TestCase]

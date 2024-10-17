@@ -56,9 +56,9 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.3.0")))
+        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
         {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
+            fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
             return;
         }
 
@@ -87,9 +87,9 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.3.0")))
+        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
         {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
+            fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
             return;
         }
 

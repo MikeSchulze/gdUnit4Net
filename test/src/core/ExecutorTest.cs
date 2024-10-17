@@ -118,7 +118,10 @@ public class ExecutorTest : ITestEventListener
     {
         var extractedEvents = events.ConvertAll(e =>
         {
-            var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
+            var reports = new List<TestReport>(e.Reports)
+                // we exclude standard out reports
+                .FindAll(r => r.Type != STDOUT)
+                .ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
             return new
             {
                 e.TestName,
