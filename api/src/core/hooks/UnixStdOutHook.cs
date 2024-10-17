@@ -7,64 +7,82 @@ using System.Threading;
 
 public sealed class UnixStdOutHook : IStdOutHook
 {
+    private const int PIPE_READ = 0;
+    private const int PIPE_WRITE = 1;
+    private const int BUFFER_SIZE = 4096;
     private const int STDOUT_FILENO = 1;
+    private readonly int[] aStdoutPipe = new int[2];
     private readonly StringBuilder capturedOutput = new();
-
-    private readonly int[] pipefd = new int[2];
     private bool isCapturing;
     private IntPtr originalStdout;
+    private Thread? readThread;
+
 
     public void StartCapture()
     {
         capturedOutput.Clear();
-        var originalStdOutHandle = pipe(pipefd);
-        if (originalStdOutHandle == IntPtr.Zero)
-            throw new InvalidOperationException("Failed to get original stdout handle.");
-        originalStdout = dup(STDOUT_FILENO);
-        if (dup2(pipefd[1], STDOUT_FILENO) == IntPtr.Zero)
+        if (pipe(aStdoutPipe) < 0)
             throw new InvalidOperationException("Failed to create pipe.");
+        originalStdout = dup(STDOUT_FILENO);
+        if (originalStdout == IntPtr.Zero)
+            throw new InvalidOperationException("Failed to duplicate stdout.");
+        if (dup2(aStdoutPipe[PIPE_WRITE], STDOUT_FILENO) == -1)
+            throw new InvalidOperationException("Failed to redirect stdout to pipe.");
         isCapturing = true;
-
-        var captureThread = new Thread(CaptureThread);
-        captureThread.Start();
+        readThread = new Thread(ReadPipeOutput);
+        readThread.Start();
     }
 
     public void StopCapture()
     {
         isCapturing = false;
-        if (dup2(originalStdout.ToInt32(), STDOUT_FILENO) == IntPtr.Zero)
-            throw new InvalidOperationException("Failed to restore stdout pipe.");
+        readThread?.Interrupt();
+        readThread = null;
+
+        // Restore original stdout
+        if (dup2(originalStdout.ToInt32(), STDOUT_FILENO) == -1)
+            throw new InvalidOperationException("Failed to restore stdout.");
+
+#pragma warning disable CA1806 // Do ignore method results
+        close(aStdoutPipe[PIPE_READ]);
+        close(aStdoutPipe[PIPE_WRITE]);
+#pragma warning restore CA1806
     }
 
     public string GetCapturedOutput() => capturedOutput.ToString();
 
     public void Dispose() => StopCapture();
 
-    public void ClearCapturedOutput() => capturedOutput.Clear();
-
-    private void CaptureThread()
+    private void ReadPipeOutput()
     {
-#pragma warning disable CA1806 // Do not ignore method results
-        var buffer = malloc(4096);
+        var buffer = malloc(BUFFER_SIZE);
         while (isCapturing)
         {
-            var bytesRead = read(pipefd[0], buffer, 4096);
+            var bytesRead = read(aStdoutPipe[PIPE_READ], buffer, BUFFER_SIZE);
             if (bytesRead > 0)
             {
                 var managedBuffer = new byte[bytesRead];
                 Marshal.Copy(buffer, managedBuffer, 0, bytesRead);
                 var capturedText = Encoding.UTF8.GetString(managedBuffer);
                 capturedOutput.Append(capturedText);
-
-                // Write to original stdout
+#pragma warning disable CA1806 // Do ignore method results
                 write(originalStdout.ToInt32(), managedBuffer, bytesRead);
+#pragma warning restore CA1806
             }
         }
 
-        free(buffer);
-#pragma warning restore CA1806 // Do not ignore method results
+        FreeReadBuffer(buffer);
     }
 
+    private void FreeReadBuffer(IntPtr buffer)
+    {
+        if (buffer != IntPtr.Zero)
+        {
+#pragma warning disable CA1806 // Do ignore method results
+            free(buffer);
+#pragma warning restore CA1806
+        }
+    }
 #pragma warning disable SYSLIB1054
     [DllImport("libc", SetLastError = true)]
     private static extern IntPtr dup(int fd);
@@ -86,5 +104,8 @@ public sealed class UnixStdOutHook : IStdOutHook
 
     [DllImport("libc", SetLastError = true)]
     private static extern int write(int fd, byte[] buf, int count);
+
+    [DllImport("libc", SetLastError = true)]
+    private static extern int close(int fd);
 #pragma warning restore SYSLIB1054
 }
