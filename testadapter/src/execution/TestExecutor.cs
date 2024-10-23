@@ -168,6 +168,10 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             // this line fails on macOS, maybe the SafeHandle works only on windows
             //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
         }
+        catch (Exception e)
+        {
+            fh2.SendMessage(TestMessageLevel.Error, e.Message);
+        }
         finally
         {
             processHandle?.Dispose();
