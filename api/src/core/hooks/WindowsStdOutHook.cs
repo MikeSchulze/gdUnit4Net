@@ -11,7 +11,6 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 {
     private const int STD_OUTPUT_HANDLE = -11;
 
-    private readonly StringBuilder capturedOutput = new();
     private readonly IntPtr originalStdOutHandle;
     private readonly SafeFileHandle pipeReadHandle;
     private readonly SafeFileHandle pipeWriteHandle;
@@ -47,7 +46,6 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     public void StartCapture()
     {
-        capturedOutput.Clear();
         // Redirect stdout to the pipe
         if (!SetStdHandle(STD_OUTPUT_HANDLE, pipeWriteHandle.DangerousGetHandle()))
             throw new InvalidOperationException("Failed to redirect stdout to pipe.");
@@ -68,7 +66,6 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     public string GetCapturedOutput() => stdOutHook.GetCapturedOutput();
 
-    public void ClearCapturedOutput() => capturedOutput.Clear();
 
     private void ReadPipeOutput()
     {
@@ -95,14 +92,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     private void ProcessReadData(byte[] buffer, uint bytesRead)
     {
-        if (bytesRead > 0)
-        {
-            var text = Encoding.UTF8.GetString(buffer, 0, (int)bytesRead);
-            lock (capturedOutput) capturedOutput.Append(text);
-
-            // Write to the original stdout as well
-            Console.WriteLine(text.Replace("\n", ""));
-        }
+        if (bytesRead > 0) Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
     }
 
     [StructLayout(LayoutKind.Sequential)]

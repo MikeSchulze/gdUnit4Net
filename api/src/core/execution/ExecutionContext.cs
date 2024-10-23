@@ -40,7 +40,9 @@ internal sealed class ExecutionContext : IDisposable
         CurrentTestCase = context.CurrentTestCase;
         MethodArguments = methodArguments;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+            ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
+            : 0;
     }
 
     public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
@@ -49,12 +51,14 @@ internal sealed class ExecutionContext : IDisposable
         TestCaseName = TestCase.BuildDisplayName(testCase.Name);
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
         CurrentTestCase = testCase;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1 ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0 : 0;
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+            ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
+            : 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute) : this(context.TestSuite, context.EventListeners,
-        context.ReportOrphanNodesEnabled)
+    public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute)
+        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
     {
         context.SubExecutionContexts.Add(this);
         TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCaseAttribute);
@@ -63,6 +67,12 @@ internal sealed class ExecutionContext : IDisposable
         CurrentIteration = 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
+
+    public bool IsCaptureStdOut
+    {
+        get;
+        set;
+    } = true;
 
     public bool ReportOrphanNodesEnabled
     {

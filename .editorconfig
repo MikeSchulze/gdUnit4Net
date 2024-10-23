@@ -18,6 +18,14 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 180
+# Roslynator settings for line length
+roslynator_max_line_length = max_line_length
+resharper_wrap_lines = true
+resharper_hard_wrap_line_length = max_line_length
+
+# Code style rules for line breaks
+csharp_max_line_length = max_line_length
 
 ##########################################
 # File Extension Settings
