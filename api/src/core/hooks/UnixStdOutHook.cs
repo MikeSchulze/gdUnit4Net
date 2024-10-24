@@ -82,14 +82,15 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
     private void ReadPipeOutput()
     {
-        var buffer = new byte[4096];
-        var pollFd = new pollfd
-        {
-            fd = pipeHandles[PIPE_READ], events = 0x0001 // POLLIN
-        };
-
         try
         {
+            var buffer = new byte[4096];
+            var pollFd = new PollFd
+            {
+                fd = pipeHandles[PIPE_READ],
+                events = 0x0001 // POLLIN
+            };
+
             while (isCapturing)
             {
                 var ready = poll(ref pollFd, 1, 10); // 10ms timeout
@@ -115,7 +116,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct pollfd
+    private struct PollFd
     {
         public int fd;
         public short events;
@@ -142,6 +143,6 @@ internal sealed class UnixStdOutHook : IStdOutHook
     private static extern int fcntl(int fd, int cmd, int arg);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int poll(ref pollfd fds, uint nfds, int timeout);
+    private static extern int poll(ref PollFd fds, uint nfds, int timeout);
 #pragma warning restore SYSLIB1054
 }

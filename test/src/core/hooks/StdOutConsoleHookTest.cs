@@ -26,10 +26,7 @@ public class StdOutConsoleHookTest
 
         var capturedMessages = hook.GetCapturedOutput();
         AssertThat(capturedMessages)
-            .IsEqual("""
-                     Hello World A!
-                     Hello World B!
-
-                     """);
+            .IsEqual($"Hello World A!{Environment.NewLine}" +
+                     $"Hello World B!{Environment.NewLine}");
     }
 }

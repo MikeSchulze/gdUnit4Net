@@ -27,21 +27,20 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         if (!CreatePipe(out pipeReadHandle, out pipeWriteHandle, IntPtr.Zero, 0))
             throw new InvalidOperationException("Failed to create pipe.");
 
-
         readEvent = CreateEvent(IntPtr.Zero, true, false, "");
         if (readEvent == IntPtr.Zero)
-            throw new InvalidOperationException("Failed to create event for asynchronous reading.");
+            throw new InvalidOperationException("Failed to create read event for asynchronous reading.");
     }
 
     public void Dispose()
     {
         StopCapture();
+        stdOutHook.Dispose();
         pipeReadHandle.Dispose();
         pipeWriteHandle.Dispose();
         if (readEvent == IntPtr.Zero) return;
         CloseHandle(readEvent);
         readEvent = IntPtr.Zero;
-        stdOutHook.Dispose();
     }
 
     public void StartCapture()
@@ -72,22 +71,29 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         var buffer = new byte[4096];
         var overlapped = new Overlapped { hEvent = readEvent };
 
-        while (true)
-            if (ReadFile(pipeReadHandle, buffer, (uint)buffer.Length, out var bytesRead, ref overlapped))
-                ProcessReadData(buffer, bytesRead);
-            else
-            {
-                var error = Marshal.GetLastWin32Error();
-                if (error == 997) // ERROR_IO_PENDING
-                {
-                    if (WaitForSingleObject(readEvent, 100) == 0) // WAIT_OBJECT_0
-                        if (GetOverlappedResult(pipeReadHandle, ref overlapped, out bytesRead, false))
-                            ProcessReadData(buffer, bytesRead);
-                }
+        try
+        {
+            while (true)
+                if (ReadFile(pipeReadHandle, buffer, (uint)buffer.Length, out var bytesRead, ref overlapped))
+                    ProcessReadData(buffer, bytesRead);
                 else
-                    // Handle other errors
-                    break;
-            }
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    if (error == 997) // ERROR_IO_PENDING
+                    {
+                        if (WaitForSingleObject(readEvent, 100) == 0) // WAIT_OBJECT_0
+                            if (GetOverlappedResult(pipeReadHandle, ref overlapped, out bytesRead, false))
+                                ProcessReadData(buffer, bytesRead);
+                    }
+                    else
+                        // Handle other errors
+                        break;
+                }
+        }
+        catch (ThreadInterruptedException)
+        {
+            // Normal exit via StopCapture
+        }
     }
 
     private void ProcessReadData(byte[] buffer, uint bytesRead)
