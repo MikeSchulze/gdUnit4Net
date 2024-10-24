@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Api;
+
 using Core;
 
 using Godot;
@@ -39,7 +41,7 @@ public sealed partial class Executor : RefCounted, IExecutor
         try
         {
             var includedTests = LoadTestFilter(testSuite);
-            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests, true, true));
+            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests, true, true), new TestRunnerConfig());
             // use this call as workaround to hold the signal list, it is disposed for some unknown reason.
             // could be related to https://github.com/godotengine/godot/issues/84254
             GetSignalConnectionList("ExecutionCompleted");
@@ -81,7 +83,7 @@ public sealed partial class Executor : RefCounted, IExecutor
         return filteredTests?.Any() == true ? filteredTests : null;
     }
 
-    internal async Task ExecuteInternally(TestSuite testSuite)
+    internal async Task ExecuteInternally(TestSuite testSuite, TestRunnerConfig runnerConfig)
     {
         try
         {
@@ -89,6 +91,7 @@ public sealed partial class Executor : RefCounted, IExecutor
                 Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             await ISceneRunner.SyncProcessFrame;
             using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled);
+            context.IsCaptureStdOut = runnerConfig.CaptureStdOut;
             await new TestSuiteExecutionStage(testSuite).Execute(context);
         }
         // handle unexpected exceptions
@@ -123,7 +126,7 @@ public sealed partial class Executor : RefCounted, IExecutor
                 { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
             };
 
-            if (testEvent.Reports.Any())
+            if (testEvent.Reports.Count > 0)
             {
                 var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
                 data.Add("reports", serializedReports);

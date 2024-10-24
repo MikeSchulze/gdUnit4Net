@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using GdUnit4.Exceptions;
+using Exceptions;
 
 using Newtonsoft.Json;
 
@@ -19,7 +19,9 @@ public sealed class TestReport : IEquatable<TestReport>
         ORPHAN,
         TERMINATED,
         INTERRUPTED,
-        ABORT
+        ABORT,
+        SKIPPED,
+        STDOUT
     }
 
     [JsonConstructor]
@@ -39,11 +41,11 @@ public sealed class TestReport : IEquatable<TestReport>
         StackTrace = e.StackTrace;
     }
 
-    public ReportType Type { get; private set; }
+    public ReportType Type { get; }
 
     public int LineNumber { get; set; } = -1;
 
-    public string Message { get; private set; }
+    public string Message { get; }
 
     public string? StackTrace { get; set; }
 
@@ -55,14 +57,24 @@ public sealed class TestReport : IEquatable<TestReport>
 
     public bool IsWarning => Type == ReportType.WARN;
 
+    public bool Equals(TestReport? other)
+        => other is not null
+           && Type == other.Type
+           && LineNumber == other.LineNumber
+           && Message == other.Message
+           && IsError == other.IsError
+           && IsFailure == other.IsFailure
+           && IsWarning == other.IsWarning;
+
     public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
 
     public IDictionary<string, object> Serialize()
-        => new Dictionary<string, object>(){
-             {"type"        ,(int)Type},
-             {"line_number" ,LineNumber},
-             {"message"     ,Message}
-            };
+        => new Dictionary<string, object>
+        {
+            { "type", (int)Type },
+            { "line_number", LineNumber },
+            { "message", Message }
+        };
 
     public TestReport Deserialize(IDictionary<string, object> serialized)
     {
@@ -73,19 +85,11 @@ public sealed class TestReport : IEquatable<TestReport>
     }
 
     public override bool Equals(object? obj) => obj is TestReport other && Equals(other);
+
     public override int GetHashCode() =>
         HashCode.Combine(Type, LineNumber, Message, IsError, IsFailure, IsWarning);
 
     public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
 
     public static bool operator !=(TestReport lhs, TestReport rhs) => !(lhs == rhs);
-
-    public bool Equals(TestReport? other)
-        => other is not null
-        && Type == other.Type
-        && LineNumber == other.LineNumber
-        && Message == other.Message
-        && IsError == other.IsError
-        && IsFailure == other.IsFailure
-        && IsWarning == other.IsWarning;
 }

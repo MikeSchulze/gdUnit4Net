@@ -109,7 +109,8 @@ jobs:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
           $GODOT_BIN --path ./test --headless --build-solutions --quit-after 20
-          xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci
+          xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci --verbosity normal
+        # -verbosity:diag --blame
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}

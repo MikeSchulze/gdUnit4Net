@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Api;
+
 using Executions;
 
 using GdUnit4.Asserts;
@@ -86,7 +88,7 @@ public class ExecutorTest : ITestEventListener
 
         if (verbose)
             Console.WriteLine($"Execute {testSuiteName}.");
-        await executor.ExecuteInternally(testSuite);
+        await executor.ExecuteInternally(testSuite, new TestRunnerConfig());
         if (verbose)
             Console.WriteLine($"Execution {testSuiteName} done.");
         return events;
@@ -118,7 +120,10 @@ public class ExecutorTest : ITestEventListener
     {
         var extractedEvents = events.ConvertAll(e =>
         {
-            var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
+            var reports = new List<TestReport>(e.Reports)
+                // we exclude standard out reports
+                .FindAll(r => r.Type != STDOUT)
+                .ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
             return new
             {
                 e.TestName,

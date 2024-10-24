@@ -16,6 +16,8 @@ using Microsoft.Win32.SafeHandles;
 
 using Settings;
 
+using Utilities;
+
 internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 {
     private const string TempTestRunnerDir = "gdunit4_testadapter";
@@ -81,8 +83,10 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
         }
 
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Running IDE: {IdeDetector.Detect(frameworkHandle)}");
+
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
-        var configName = WriteTestRunnerConfig(groupedTests);
+        var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
         var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
         using var eventServer = new TestEventReportServer();
@@ -136,19 +140,19 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                     }
                     catch (Exception e)
                     {
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with: {e.Message}");
+                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}");
                     }
                     finally { File.Delete(configName); }
 
         // wait until all event messages are processed or the client is disconnected
-        testEventServerTask.Wait(TimeSpan.FromSeconds(2));
+        testEventServerTask.Wait(TimeSpan.FromSeconds(1));
     }
 
     private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
     {
         // EnableShutdownAfterTestRun is not working we need to use SafeHandle the get the process running until the ExitCode is getted
         fh2.EnableShutdownAfterTestRun = true;
-        Console.WriteLine($"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
+        fh2.SendMessage(TestMessageLevel.Informational, $"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
         var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
         pProcess = Process.GetProcessById(processId);
         SafeProcessHandle? processHandle = null;
@@ -157,12 +161,16 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             processHandle = pProcess.SafeHandle;
             var isExited = pProcess.WaitForExit(SessionTimeOut);
             // it never exits on macOS ?
-            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
+            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
             // enforce kill the process has also no affect on macOS
             pProcess.Kill(true);
-            Console.WriteLine($"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
+            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
             // this line fails on macOS, maybe the SafeHandle works only on windows
             //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+        }
+        catch (Exception e)
+        {
+            fh2.SendMessage(TestMessageLevel.Error, e.Message);
         }
         finally
         {
@@ -177,7 +185,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             return;
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Installing GdUnit4 `TestRunner` at {destinationFolderPath}...");
         InstallTestRunnerClasses(destinationFolderPath);
-        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @"--path . --headless --build-solutions --quit-after 20")
+        var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", @"--path . --headless --build-solutions --quit-after 1000")
         {
             RedirectStandardOutput = false,
             RedirectStandardError = false,
@@ -188,19 +196,20 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             WorkingDirectory = @$"{workingDirectory}"
         };
 
-        using Process process = new() { StartInfo = processStartInfo };
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, @"Rebuild ...");
-        process.Start();
-        while (!process.WaitForExit(5000))
-            Thread.Sleep(100);
         try
         {
+            using Process process = new();
+            process.StartInfo = processStartInfo;
+            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Rebuild ... {GodotBin} {processStartInfo.Arguments} at {workingDirectory}");
+            process.Start();
+            while (!process.WaitForExit(5000))
+                Thread.Sleep(500);
             process.Kill(true);
             frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4 `TestRunner` successfully installed: {process.ExitCode}");
         }
         catch (Exception e)
         {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Install GdUnit4 `TestRunner` ends with: {e.Message}");
+            frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Install GdUnit4 `TestRunner` fails with: {e.Message}");
         }
     }
 
