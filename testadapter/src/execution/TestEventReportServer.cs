@@ -67,9 +67,9 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
                 ProcessTestEvent(frameworkHandle, tests, json, detailedOutput);
             }
-            catch (IOException)
+            catch (IOException e)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, "GdUnit4.TestEventReportServer:: Client has disconnected.");
+                frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: Client has disconnected by '{e.Message}'");
                 break;
             }
             catch (Exception ex)

@@ -62,8 +62,6 @@ internal class TestEvent : IEquatable<TestEvent>
     }
 #pragma warning restore CA1707
 
-#nullable disable
-
     internal TestEvent WithFullyQualifiedName(string name)
     {
         FullyQualifiedName = name;
@@ -114,13 +112,12 @@ internal class TestEvent : IEquatable<TestEvent>
 #pragma warning restore CA1854
     public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
 
-#nullable disable
-
     public static bool operator ==(TestEvent lhs, TestEvent rhs) => lhs.Equals(rhs);
 
     public static bool operator !=(TestEvent lhs, TestEvent rhs) => !(lhs == rhs);
 
-    public bool Equals(TestEvent other) =>
+    public bool Equals(TestEvent? other) =>
+        other is not null &&
         (Type,
             ResourcePath,
             SuiteName,

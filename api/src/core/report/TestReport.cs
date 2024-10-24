@@ -20,6 +20,7 @@ public sealed class TestReport : IEquatable<TestReport>
         TERMINATED,
         INTERRUPTED,
         ABORT,
+        SKIPPED,
         STDOUT
     }
 
