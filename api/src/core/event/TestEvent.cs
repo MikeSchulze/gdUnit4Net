@@ -22,6 +22,41 @@ internal class TestEvent : IEquatable<TestEvent>
         Reports = reports?.ToList() ?? new List<TestReport>();
     }
 
+    public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
+    public List<TestReport> Reports { get; set; } = new();
+
+    public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
+    public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
+    public int FailedCount => GetByKeyOrDefault(STATISTIC_KEY.FAILED_COUNT, 0);
+    public int OrphanCount => GetByKeyOrDefault(STATISTIC_KEY.ORPHAN_NODES, 0);
+    public int SkippedCount => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED_COUNT, 0);
+    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
+    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
+    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
+    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
+    public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
+    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
+
+    public bool Equals(TestEvent? other) =>
+        other is not null &&
+        (Type,
+            ResourcePath,
+            SuiteName,
+            TestName,
+            TotalCount,
+            ErrorCount,
+            FailedCount,
+            OrphanCount)
+        .Equals((
+            other.Type,
+            other.ResourcePath,
+            other.SuiteName,
+            other.TestName,
+            other.TotalCount,
+            other.ErrorCount,
+            other.FailedCount,
+            other.OrphanCount));
+
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
         new(TYPE.TESTSUITE_BEFORE, resourcePath, suiteName, "Before", totalCount);
 
@@ -36,31 +71,6 @@ internal class TestEvent : IEquatable<TestEvent>
         new(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
 
     public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
-#pragma warning disable CA1707
-    public enum TYPE
-    {
-        INIT,
-        STOP,
-        TESTSUITE_BEFORE,
-        TESTSUITE_AFTER,
-        TESTCASE_BEFORE,
-        TESTCASE_AFTER
-    }
-
-    public enum STATISTIC_KEY
-    {
-        WARNINGS,
-        FAILED,
-        ERRORS,
-        SKIPPED,
-        ELAPSED_TIME,
-        ORPHAN_NODES,
-        TOTAL_COUNT,
-        ERROR_COUNT,
-        FAILED_COUNT,
-        SKIPPED_COUNT
-    }
-#pragma warning restore CA1707
 
     internal TestEvent WithFullyQualifiedName(string name)
     {
@@ -86,29 +96,9 @@ internal class TestEvent : IEquatable<TestEvent>
         { STATISTIC_KEY.SKIPPED_COUNT, skippedCount }
     };
 
-    public TYPE Type { get; set; }
-    public string SuiteName { get; set; }
-    public string TestName { get; set; }
-    public string FullyQualifiedName { get; set; }
-    public string ResourcePath { get; set; }
-    public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
-    public List<TestReport> Reports { get; set; } = new();
-
-    public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
-    public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
-    public int FailedCount => GetByKeyOrDefault(STATISTIC_KEY.FAILED_COUNT, 0);
-    public int OrphanCount => GetByKeyOrDefault(STATISTIC_KEY.ORPHAN_NODES, 0);
-    public int SkippedCount => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED_COUNT, 0);
-    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
-    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
-    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
-    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
-    public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
-    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
-
 #pragma warning disable CA1854
-    private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T default_value) =>
-        Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : default_value;
+    private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T defaultValue) =>
+        Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : defaultValue;
 #pragma warning restore CA1854
     public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
 
@@ -116,27 +106,8 @@ internal class TestEvent : IEquatable<TestEvent>
 
     public static bool operator !=(TestEvent lhs, TestEvent rhs) => !(lhs == rhs);
 
-    public bool Equals(TestEvent? other) =>
-        other is not null &&
-        (Type,
-            ResourcePath,
-            SuiteName,
-            TestName,
-            TotalCount,
-            ErrorCount,
-            FailedCount,
-            OrphanCount)
-        .Equals((
-            other.Type,
-            other.ResourcePath,
-            other.SuiteName,
-            other.TestName,
-            other.TotalCount,
-            other.ErrorCount,
-            other.FailedCount,
-            other.OrphanCount));
-
     public override int GetHashCode() =>
+        // ReSharper disable all NonReadonlyMemberInGetHashCode
         HashCode.Combine(Type,
             ResourcePath,
             SuiteName,
@@ -145,4 +116,40 @@ internal class TestEvent : IEquatable<TestEvent>
             ErrorCount,
             FailedCount,
             OrphanCount);
+    // ReSharper enable all NonReadonlyMemberInGetHashCode
+
+#pragma warning disable CA1707
+    // ReSharper disable all InconsistentNaming
+    public enum TYPE
+    {
+        INIT,
+        STOP,
+        TESTSUITE_BEFORE,
+        TESTSUITE_AFTER,
+        TESTCASE_BEFORE,
+        TESTCASE_AFTER
+    }
+
+    public enum STATISTIC_KEY
+    {
+        WARNINGS,
+        FAILED,
+        ERRORS,
+        SKIPPED,
+        ELAPSED_TIME,
+        ORPHAN_NODES,
+        TOTAL_COUNT,
+        ERROR_COUNT,
+        FAILED_COUNT,
+        SKIPPED_COUNT
+    }
+    // ReSharper enable all InconsistentNaming
+#pragma warning restore CA1707
+
+#nullable disable
+    public TYPE Type { get; set; }
+    public string SuiteName { get; set; }
+    public string TestName { get; set; }
+    public string FullyQualifiedName { get; set; }
+    public string ResourcePath { get; set; }
 }

@@ -53,7 +53,7 @@ public partial class TestRunner : Node
     {
         using (listener)
         {
-            if (!testSuites.Any())
+            if (testSuites.Count == 0)
             {
                 await Console.Error.WriteLineAsync("No test suite's are specified!, Abort!");
                 return -1;
