@@ -3,14 +3,20 @@ namespace GdUnit4;
 using System;
 using System.Reflection;
 
-using GdUnit4.Core;
+using Core;
+
+using Executions;
+
+using Godot;
+using Godot.Collections;
 
 /// <summary>
-/// The Godot Editor bridge to run C# tests inside the Godot Editor
+///     The Godot Editor bridge to run C# tests inside the Godot Editor
 /// </summary>
-public partial class GdUnit4NetAPI : Godot.RefCounted
+// ReSharper disable all MemberCanBePrivate.Global
+public partial class GdUnit4NetAPI : RefCounted
 {
-    public static Godot.Collections.Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
+    public static Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
     {
         var result = GdUnitTestSuiteBuilder.Build(NormalizedPath(sourcePath), lineNumber, NormalizedPath(testSuitePath));
         // we need to return the original resource name of the test suite on Godot site e.g. `res://foo/..` or `user://foo/..`
@@ -27,11 +33,11 @@ public partial class GdUnit4NetAPI : Godot.RefCounted
 
     public static CsNode? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalizedPath(classPath));
 
-    public static Godot.RefCounted Executor(Godot.Node listener) =>
-        (Godot.RefCounted)new Executions.Executor().AddGdTestEventListener(listener);
+    public static RefCounted Executor(Node listener) =>
+        (RefCounted)new Executor().AddGdTestEventListener(listener);
 
     private static string NormalizedPath(string path) =>
-         (path.StartsWith("res://") || path.StartsWith("user://")) ? Godot.ProjectSettings.GlobalizePath(path) : path;
+        path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
 
     public static string Version() => Assembly.GetAssembly(typeof(GdUnit4NetAPI))!.GetName()!.Version!.ToString();
 }
