@@ -1,11 +1,11 @@
 namespace GdUnit4.Asserts;
 
-public sealed class ObjectAssert : AssertBase<object>, IObjectAssert
+internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
 {
     public ObjectAssert(object? current) : base(current)
     {
         var type = current?.GetType();
-        if (type != null && type.IsPrimitive)
+        if (type is { IsPrimitive: true })
             ThrowTestFailureReport($"ObjectAssert initial error: current is primitive <{type}>", Current, null);
     }
 

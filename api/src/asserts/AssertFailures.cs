@@ -9,13 +9,13 @@ using System.Runtime.CompilerServices;
 using Godot;
 using Godot.Collections;
 
-internal sealed class AssertFailures
+internal static class AssertFailures
 {
-    public const string WARN_COLOR = "#EFF883";
-    public const string ERROR_COLOR = "#CD5C5C";
-    public const string VALUE_COLOR = "#1E90FF";
+    internal const string WARN_COLOR = "#EFF883";
+    internal const string ERROR_COLOR = "#CD5C5C";
+    internal const string VALUE_COLOR = "#1E90FF";
 
-    internal static bool HasOverriddenToString(object obj)
+    private static bool HasOverriddenToString(object obj)
     {
         var toStringMethod = obj.GetType().GetMethod("ToString");
         return toStringMethod?.DeclaringType != typeof(object);
@@ -25,19 +25,20 @@ internal sealed class AssertFailures
     {
         if (value == null)
             return "<Null>";
+
+        var unboxedValue = value;
         var type = value.GetType();
         if (value is Variant gv)
         {
-            value = gv.UnboxVariant()!;
-            if (value != null)
-                type = value.GetType();
-            else
+            unboxedValue = gv.UnboxVariant();
+            if (unboxedValue == null)
                 return "<Godot.Variant> (Null)";
+            type = unboxedValue.GetType();
         }
 
-        var instanceId = "";
-        var name = $"<{type.FullName?.Replace("[", "")?.Replace("]", "")!}>";
-        if (value is GodotObject go && GodotObject.IsInstanceValid(go))
+        string instanceId;
+        var name = $"<{type.FullName?.Replace("[", "").Replace("]", "") ?? "unknown"}>";
+        if (unboxedValue is GodotObject go && GodotObject.IsInstanceValid(go))
             instanceId = $"objId: {go.GetInstanceId()}";
         else
         {
@@ -84,15 +85,26 @@ internal sealed class AssertFailures
 
     private static string FormatEnumerable(IEnumerable enumerable, string color)
     {
-        var enumerator = enumerable.GetEnumerator();
-        if (enumerator.MoveNext() == false)
-            return $"[color={color}]<Empty>[/color]";
+        ArgumentNullException.ThrowIfNull(enumerable);
+        if (string.IsNullOrWhiteSpace(color))
+            throw new ArgumentException("Color cannot be empty", nameof(color));
 
-        var keyValues = new ArrayList();
-        do
-            keyValues.Add(enumerator.Current);
-        while (enumerator.MoveNext());
-        return $"[color={color}]{keyValues.Formatted()}[/color]";
+        var enumerator = enumerable.GetEnumerator();
+        try
+        {
+            if (!enumerator.MoveNext())
+                return $"[color={color}]<Empty>[/color]";
+
+            var keyValues = new List<object?>();
+            do
+                keyValues.Add(enumerator.Current);
+            while (enumerator.MoveNext());
+            return $"[color={color}]{keyValues.Formatted()}[/color]";
+        }
+        finally
+        {
+            (enumerator as IDisposable)?.Dispose();
+        }
     }
 
     public static string FormatValue(object? value, string color, bool quoted)
@@ -107,7 +119,7 @@ internal sealed class AssertFailures
             return $"[color={color}]<{value}>[/color]";
 
         if (value is Variant gv)
-            value = value.UnboxVariant();
+            value = gv.UnboxVariant();
 
         var type = value!.GetType();
         if (value is IDictionary dict)
@@ -364,14 +376,14 @@ internal sealed class AssertFailures
         if (notExpected.Count != 0 && notExpected.Count == notFound.Count)
         {
             var diff = notExpected.FindAll(e => !notFound.Any(e2 => Equals(e.UnboxVariant(), e2.UnboxVariant())));
-            if (diff?.Count == 0)
+            if (diff.Count == 0)
                 return $"""
                         {FormatFailure("Expecting contains exactly elements:")}
                         {FormatCurrent(current).Indentation(1)}
                          do contains (in same order)
                         {FormatExpected(expected).Indentation(1)}
                          but there has differences in order:
-                        {ListDifferences(notFound, notExpected)}
+                        {ListDifferences(notFound.ToList(), notExpected.ToList())}
                         """;
         }
 
@@ -539,7 +551,7 @@ internal sealed class AssertFailures
          {FormatCurrent(current).Indentation(1)}
          """;
 
-    private static string? ListDifferences<TValue>(IEnumerable<TValue> left, IEnumerable<TValue> right)
+    private static string ListDifferences<TValue>(List<TValue> left, List<TValue> right)
     {
         var output = new List<string>();
         foreach (var it in left.Select((value, i) => new

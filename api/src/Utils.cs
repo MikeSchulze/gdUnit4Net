@@ -53,9 +53,11 @@ public static class Utils
     ///     Maps Godot error number to a readable error message. See at ERROR
     ///     https://docs.godotengine.org/de/stable/classes/class_@globalscope.html#enum-globalscope-error
     /// </summary>
-    /// <param name="errorNumber"></param>
-    /// <returns></returns>
-    public static string ErrorAsString(Error errorNumber) => errorNumber.ToString();
+    /// <param name="error">The Godot error</param>
+    /// <returns>The error as string presentation if available</returns>
+    public static string ErrorAsString(Error error) => error.ToString();
 
-    public static string ErrorAsString(int errorNumber) => ErrorAsString((Error)Enum.ToObject(typeof(Error), errorNumber));
+    public static string ErrorAsString(int error) => !Enum.IsDefined(typeof(Error), Convert.ToInt64(error))
+        ? $"The error: {error} is not defined in Godot."
+        : ErrorAsString((Error)Enum.ToObject(typeof(Error), error));
 }

@@ -1,9 +1,12 @@
 namespace GdUnit4.Asserts;
 
+using System;
+
 internal sealed class StringAssert : AssertBase<string>, IStringAssert
 {
     public StringAssert(string? current) : base(current)
-    { }
+    {
+    }
 
     public IStringAssert Contains(string expected)
     {
@@ -14,7 +17,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert ContainsIgnoringCase(string expected)
     {
-        if (Current == null || !Current.ToLower().Contains(expected.ToLower(), System.StringComparison.OrdinalIgnoreCase))
+        if (Current == null || !Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.ContainsIgnoringCase(Current, expected), Current, expected);
         return this;
     }
@@ -55,9 +58,8 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
                 if (currentLength >= expectedLength)
                     failed = true;
                 break;
-            default:
-                break;
         }
+
         if (failed)
             ThrowTestFailureReport(AssertFailures.HasLength(currentLength, expectedLength, comparator), Current, expectedLength);
         return this;
@@ -80,7 +82,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert IsNotEmpty()
     {
-        if (Current != null && Current.Length == 0)
+        if (Current?.Length == 0)
             ThrowTestFailureReport(AssertFailures.IsNotEmpty(), Current, null);
         return this;
     }
@@ -102,7 +104,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert NotContainsIgnoringCase(string expected)
     {
-        if (Current != null && Current.ToLower().Contains(expected.ToLower(), System.StringComparison.OrdinalIgnoreCase))
+        if (Current != null && Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.NotContainsIgnoringCase(Current, expected), Current, expected);
         return this;
     }

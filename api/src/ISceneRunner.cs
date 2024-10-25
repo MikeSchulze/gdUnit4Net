@@ -117,7 +117,7 @@ public interface ISceneRunner : IDisposable
     ///     Simulates a mouse button pressed.
     /// </summary>
     /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
-    /// <param name="doubleClick">Indicates the button was double clicked.</param>
+    /// <param name="doubleClick">Indicates the button was double-clicked.</param>
     /// <returns>SceneRunner</returns>
     public ISceneRunner SimulateMouseButtonPressed(MouseButton button, bool doubleClick = false);
 

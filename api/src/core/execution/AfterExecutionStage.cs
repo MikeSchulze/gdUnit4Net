@@ -4,12 +4,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using GdUnit4.Asserts;
+using Asserts;
 
 internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
 {
     public AfterExecutionStage(TestSuite testSuite) : base("After", testSuite.Instance.GetType())
-    { }
+    {
+    }
 
     public override async Task Execute(ExecutionContext context)
     {
@@ -43,16 +44,14 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
 
         if (beforeAttribute != null && afterAttributes != null)
             return $"""
-                {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
-                    Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test suite setup stage!
-                    Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!
-                """;
+                    {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
+                        Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test suite setup stage!
+                        Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!
+                    """;
         return $"""
                 {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
                     Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test suite setup stage!
-                    Check [b]{(beforeAttribute != null ? (beforeAttribute.Name + ":" + beforeAttribute.Line) : (afterAttributes?.Name + ":" + afterAttributes?.Line))}[/b] for unfreed instances!
+                    Check [b]{(beforeAttribute != null ? beforeAttribute.Name + ":" + beforeAttribute.Line : afterAttributes?.Name + ":" + afterAttributes?.Line)}[/b] for unfreed instances!
                 """;
     }
 }
-
-
