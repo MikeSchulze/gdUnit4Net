@@ -109,7 +109,7 @@ We value your input and appreciate your contributions to make GdUnit4 even bette
 
 ## Sponsors
 
-[<img src="https://avatars.githubusercontent.com/u/4674635?v=4)" alt="Jeffrey" width="125"/>](https://github.com/jlb0170) Jeffrey
+[<img src="https://avatars.githubusercontent.com/u/4674635?v=4)" alt="Jeff" width="125"/>](https://github.com/jlb0170) Jeff
 
 ---
 
