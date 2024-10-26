@@ -1,11 +1,12 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Reporting;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Core.Execution.Exceptions;
-using Core.Extensions;
+using Execution.Exceptions;
+
+using Extensions;
 
 using Newtonsoft.Json;
 

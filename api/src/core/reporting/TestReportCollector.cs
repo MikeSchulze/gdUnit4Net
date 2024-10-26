@@ -3,12 +3,13 @@ namespace GdUnit4;
 using System.Collections.Generic;
 using System.Linq;
 
+using Core.Reporting;
+
 using Godot;
 
 internal sealed partial class TestReportCollector : RefCounted
 {
     private readonly List<TestReport> reports = new();
-
 
     public IEnumerable<TestReport> Reports => reports;
 

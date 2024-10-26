@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CommandLine;
 
 using Core;
+using Core.Events;
 using Core.Execution;
 
 using Godot;

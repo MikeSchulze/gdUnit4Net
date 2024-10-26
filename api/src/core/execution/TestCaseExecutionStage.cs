@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using Asserts;
 
+using Reporting;
+
 internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 {
     public TestCaseExecutionStage(string name, TestCase testCase, TestCaseAttribute stageAttribute) : base(name, testCase.MethodInfo, stageAttribute)

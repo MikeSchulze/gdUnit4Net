@@ -5,6 +5,8 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
 
+using Core.Events;
+
 using Newtonsoft.Json;
 
 internal class TestAdapterReporter : ITestEventListener

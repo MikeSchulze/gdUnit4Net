@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Asserts;
 
+using Reporting;
+
 using Signals;
 
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>

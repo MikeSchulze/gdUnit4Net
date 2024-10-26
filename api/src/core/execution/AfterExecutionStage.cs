@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Asserts;
 
+using Reporting;
+
 internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
 {
     public AfterExecutionStage(TestSuite testSuite) : base("After", testSuite.Instance.GetType())

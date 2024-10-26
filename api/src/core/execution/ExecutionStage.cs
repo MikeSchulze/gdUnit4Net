@@ -15,7 +15,9 @@ using Exceptions;
 
 using Extensions;
 
-using static TestReport;
+using Reporting;
+
+using static Reporting.TestReport;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {

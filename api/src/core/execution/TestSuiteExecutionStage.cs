@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using core.hooks;
 
+using Reporting;
+
 internal sealed class TestSuiteExecutionStage : IExecutionStage
 {
     public TestSuiteExecutionStage(TestSuite testSuite)
