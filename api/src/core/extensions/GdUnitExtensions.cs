@@ -1,21 +1,29 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Extensions;
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Threading.Tasks;
-using GdUnit4.Asserts;
-using System.Threading;
 using System.Diagnostics;
-using GdUnit4.Executions;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Asserts;
+
+using Execution.Exceptions;
+
+using Godot;
+using Godot.Collections;
+
+using Array = Godot.Collections.Array;
+using Tuple = Asserts.Tuple;
 
 /// <summary>
-/// A util extension to format Godot object into a string representation
+///     A util extension to format Godot object into a string representation
 /// </summary>
-public static partial class GdUnitExtensions
+internal static partial class GdUnitExtensions
 {
     internal static string ToSnakeCase(this string? input)
     {
@@ -25,9 +33,9 @@ public static partial class GdUnitExtensions
         return RegexToSnakeCase().Replace(input, "$1_$2").ToLower();
     }
 
-    internal static string FormatAsValueOrClass(object value)
+    private static string FormatAsValueOrClass(object value)
     {
-        // is class than we render the object with an identifier
+        // is it a class than we render the object with an identifier
         if ((value.GetType().IsClass && value is not string) || value is Type)
             return AssertFailures.AsObjectId(value);
         // fallback to default formatting
@@ -45,7 +53,7 @@ public static partial class GdUnitExtensions
 
     internal static string Formatted(this object? value)
     {
-        if (value is Godot.Variant v)
+        if (value is Variant v)
             value = v.UnboxVariant();
         if (value == null)
             return "<Null>";
@@ -54,27 +62,32 @@ public static partial class GdUnitExtensions
         return value switch
         {
             IEnumerable en => en.Formatted(),
-            Asserts.Tuple tuple => tuple.ToString(),
-            _ => FormatAsValueOrClass(value!),
+            Tuple tuple => tuple.ToString(),
+            _ => FormatAsValueOrClass(value)
         };
     }
 
-    internal static string Formatted(this Godot.Variant value)
+    internal static string Formatted(this Variant value)
         => Formatted(value as object);
-    internal static string Formatted(this Asserts.Tuple? value)
-        => value?.ToString() ?? "<Null>";
-    internal static string Formatted(this string? value)
-        => $"\"{value?.ToString()}\"" ?? "<Null>";
 
-    internal static string Formatted(this Godot.Collections.Array args, int indentation = 0)
+    internal static string Formatted(this Tuple? value)
+        => value?.ToString() ?? "<Null>";
+
+    private static string Formatted(this string? value)
+        => value is null ? "<Null>" : $"\"{value}\"";
+
+    internal static string Formatted(this Array args, int indentation = 0)
         => args.ToArray().Formatted(indentation);
-    internal static string Formatted<[Godot.MustBeVariant] TValue>(this Godot.Collections.Array<TValue> args, int indentation = 0)
+
+    internal static string Formatted<[MustBeVariant] TValue>(this Array<TValue> args, int indentation = 0)
         => args.ToArray().Formatted(indentation);
-    internal static string Formatted<TValue>(this TValue?[] args, int indentation = 0)
+
+    private static string Formatted<TValue>(this TValue?[] args, int indentation = 0)
         => args.Length == 0
             ? "<Empty>"
             : "[" + string.Join(", ", args.ToArray().Select(v => Formatted(v))).Indentation(indentation) + "]";
-    internal static string Formatted(this IEnumerable args, int indentation = 0)
+
+    private static string Formatted(this IEnumerable args, int indentation = 0)
         => Formatted(args.Cast<object?>().ToArray(), indentation);
 
     internal static string UnixFormat(this string value) => value.Replace("\r", string.Empty);
@@ -118,13 +131,10 @@ public static partial class GdUnitExtensions
         token.Cancel();
         if (completedTask == wrapperTask)
             return await task.ConfigureAwait(false);
-        else
-        {
-            var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-            if (data is CancellationTokenSource cancelToken)
-                cancelToken.Cancel();
-            return await task.ConfigureAwait(false);
-        }
+        var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
+        if (data is CancellationTokenSource cancelToken)
+            cancelToken.Cancel();
+        return await task.ConfigureAwait(false);
     }
 
     public static async Task<T> WithTimeout<T>(this Task<T> task, int timeoutMillis)

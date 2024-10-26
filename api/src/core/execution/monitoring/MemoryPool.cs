@@ -1,14 +1,16 @@
-namespace GdUnit4.Executions.Monitors;
+namespace GdUnit4.Core.Execution.Monitoring;
 
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 
-public class MemoryPool
+using Godot;
+
+internal class MemoryPool
 {
-    private readonly List<Godot.GodotObject> registeredObjects = new();
     private static readonly ThreadLocal<MemoryPool?> CurrentPool = new();
+    private readonly List<GodotObject> registeredObjects = new();
 
-    public string Name { get; private set; } = "Unknown";
+    public string Name { get; set; } = "Unknown";
 
     public void SetActive(string name)
     {
@@ -16,7 +18,7 @@ public class MemoryPool
         CurrentPool.Value = this;
     }
 
-    public static T? RegisterForAutoFree<T>(T? obj) where T : Godot.GodotObject
+    public static T? RegisterForAutoFree<T>(T? obj) where T : GodotObject
     {
         if (obj != null)
             CurrentPool.Value?.registeredObjects.Add(obj);
@@ -30,13 +32,13 @@ public class MemoryPool
         currentPool?.registeredObjects.Clear();
     }
 
-    private void FreeInstance(Godot.GodotObject obj)
+    private void FreeInstance(GodotObject obj)
     {
         // needs to manually exclude JavaClass see https://github.com/godotengine/godot/issues/44932
-        if (Godot.GodotObject.IsInstanceValid(obj) && obj is not Godot.JavaClass)
+        if (GodotObject.IsInstanceValid(obj) && obj is not JavaClass)
         {
-            if (obj is Godot.RefCounted)
-                obj.Notification((int)Godot.GodotObject.NotificationPredelete);
+            if (obj is RefCounted)
+                obj.Notification((int)GodotObject.NotificationPredelete);
             else
                 obj.Free();
         }

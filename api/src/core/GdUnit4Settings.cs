@@ -1,13 +1,16 @@
 namespace GdUnit4.Core;
 
+using Extensions;
+
 using Godot;
 
 /// <summary>
-/// Gets access to the GdUnit4 settings to be configured in the Godot editor.
+///     Gets access to the GdUnit4 settings to be configured in the Godot editor.
 /// </summary>
 internal sealed class GdUnit4Settings
 {
     internal const string MAIN_CATEGORY = "gdunit4";
+
     // Common Settings
     internal const string COMMON_SETTINGS = MAIN_CATEGORY + "/settings";
 
@@ -17,6 +20,7 @@ internal sealed class GdUnit4Settings
 
     internal const string GROUP_TEST = COMMON_SETTINGS + "/test";
     internal const string TEST_TIMEOUT = GROUP_TEST + "/test_timeout_seconds";
+
     internal const string TEST_LOOKUP_FOLDER = GROUP_TEST + "/test_lookup_folder";
     //internal const string TEST_SITE_NAMING_CONVENTION = GROUP_TEST + "/test_suite_naming_convention";
 
@@ -52,40 +56,43 @@ internal sealed class GdUnit4Settings
 
     // Shortcut Settings
     /**
-    internal const string SHORTCUT_SETTINGS = MAIN_CATEGORY + "/Shortcuts";
-    internal const string GROUP_SHORTCUT_INSPECTOR = SHORTCUT_SETTINGS + "/inspector";
-    internal const string SHORTCUT_INSPECTOR_RERUN_TEST = GROUP_SHORTCUT_INSPECTOR + "/rerun_test";
-    internal const string SHORTCUT_INSPECTOR_RERUN_TEST_DEBUG = GROUP_SHORTCUT_INSPECTOR + "/rerun_test_debug";
-    internal const string SHORTCUT_INSPECTOR_RUN_TEST_OVERALL = GROUP_SHORTCUT_INSPECTOR + "/run_test_overall";
-    internal const string SHORTCUT_INSPECTOR_RUN_TEST_STOP = GROUP_SHORTCUT_INSPECTOR + "/run_test_stop";
-
-    internal const string GROUP_SHORTCUT_EDITOR = SHORTCUT_SETTINGS + "/editor";
-    internal const string SHORTCUT_EDITOR_RUN_TEST = GROUP_SHORTCUT_EDITOR + "/run_test";
-    internal const string SHORTCUT_EDITOR_RUN_TEST_DEBUG = GROUP_SHORTCUT_EDITOR + "/run_test_debug";
-    internal const string SHORTCUT_EDITOR_CREATE_TEST = GROUP_SHORTCUT_EDITOR + "/create_test";
-
-    internal const string GROUP_SHORTCUT_FILESYSTEM = SHORTCUT_SETTINGS + "/filesystem";
-    internal const string SHORTCUT_FILESYSTEM_RUN_TEST = GROUP_SHORTCUT_FILESYSTEM + "/run_test";
-    internal const string SHORTCUT_FILESYSTEM_RUN_TEST_DEBUG = GROUP_SHORTCUT_FILESYSTEM + "/run_test_debug";
-    */
+     * internal const string SHORTCUT_SETTINGS = MAIN_CATEGORY + "/Shortcuts";
+     * internal const string GROUP_SHORTCUT_INSPECTOR = SHORTCUT_SETTINGS + "/inspector";
+     * internal const string SHORTCUT_INSPECTOR_RERUN_TEST = GROUP_SHORTCUT_INSPECTOR + "/rerun_test";
+     * internal const string SHORTCUT_INSPECTOR_RERUN_TEST_DEBUG = GROUP_SHORTCUT_INSPECTOR + "/rerun_test_debug";
+     * internal const string SHORTCUT_INSPECTOR_RUN_TEST_OVERALL = GROUP_SHORTCUT_INSPECTOR + "/run_test_overall";
+     * internal const string SHORTCUT_INSPECTOR_RUN_TEST_STOP = GROUP_SHORTCUT_INSPECTOR + "/run_test_stop";
+     *
+     * internal const string GROUP_SHORTCUT_EDITOR = SHORTCUT_SETTINGS + "/editor";
+     * internal const string SHORTCUT_EDITOR_RUN_TEST = GROUP_SHORTCUT_EDITOR + "/run_test";
+     * internal const string SHORTCUT_EDITOR_RUN_TEST_DEBUG = GROUP_SHORTCUT_EDITOR + "/run_test_debug";
+     * internal const string SHORTCUT_EDITOR_CREATE_TEST = GROUP_SHORTCUT_EDITOR + "/create_test";
+     *
+     * internal const string GROUP_SHORTCUT_FILESYSTEM = SHORTCUT_SETTINGS + "/filesystem";
+     * internal const string SHORTCUT_FILESYSTEM_RUN_TEST = GROUP_SHORTCUT_FILESYSTEM + "/run_test";
+     * internal const string SHORTCUT_FILESYSTEM_RUN_TEST_DEBUG = GROUP_SHORTCUT_FILESYSTEM + "/run_test_debug";
+     */
 
     // Toolbar Settings
     internal const string GROUP_UI_TOOLBAR = UI_SETTINGS + "/toolbar";
+
     internal const string INSPECTOR_TOOLBAR_BUTTON_RUN_OVERALL = GROUP_UI_TOOLBAR + "/run_overall";
 
     // defaults
     // server connection timeout in minutes
     internal const int DEFAULT_SERVER_TIMEOUT = 30;
+
     // test case runtime timeout in seconds
     internal const int DEFAULT_TEST_TIMEOUT = 60 * 5;
+
     // the folder to create new test-suites
     internal const string DEFAULT_TEST_LOOKUP_FOLDER = "test";
 
 
     public static T? GetSetting<T>(string name, T @default)
         => ProjectSettings.HasSetting(name)
-         ? ProjectSettings.GetSetting(name).UnboxVariant()
-         : @default;
+            ? ProjectSettings.GetSetting(name).UnboxVariant()
+            : @default;
 
     public static bool IsUpdateNotificationEnabled()
         => ProjectSettings.HasSetting(UPDATE_NOTIFICATION_ENABLED) && (bool)ProjectSettings.GetSetting(UPDATE_NOTIFICATION_ENABLED);

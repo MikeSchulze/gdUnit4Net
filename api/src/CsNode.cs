@@ -2,6 +2,8 @@ namespace GdUnit4;
 
 using System.Collections.Generic;
 
+using Core.Extensions;
+
 using Godot;
 using Godot.Collections;
 

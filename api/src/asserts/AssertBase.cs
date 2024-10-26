@@ -1,6 +1,7 @@
 namespace GdUnit4.Asserts;
 
-using Exceptions;
+using Core.Execution.Exceptions;
+using Core.Extensions;
 
 internal abstract class AssertBase<TValue> : IAssertBase<TValue>
 {

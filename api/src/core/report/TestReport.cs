@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Exceptions;
+using Core.Execution.Exceptions;
+using Core.Extensions;
 
 using Newtonsoft.Json;
 
-public sealed class TestReport : IEquatable<TestReport>
+internal sealed class TestReport : IEquatable<TestReport>
 {
     [Flags]
     public enum ReportType

@@ -1,12 +1,17 @@
-namespace GdUnit4.Executions.Monitors;
+namespace GdUnit4.Core.Execution.Monitoring;
 
 using static Godot.Performance;
 
-public class OrphanNodesMonitor
+internal class OrphanNodesMonitor
 {
-
     public OrphanNodesMonitor(bool reportOrphanNodesEnabled)
         => ReportOrphanNodesEnabled = reportOrphanNodesEnabled;
+
+    private bool ReportOrphanNodesEnabled { get; }
+
+    public int OrphanCount { get; private set; }
+
+    private int OrphanNodesStart { get; set; }
 
 
     public void Start(bool reset = false)
@@ -26,12 +31,6 @@ public class OrphanNodesMonitor
     }
 
     private int GetMonitoredOrphanCount() => (int)GetMonitor(Monitor.ObjectOrphanNodeCount);
-
-    private bool ReportOrphanNodesEnabled { get; set; }
-
-    public int OrphanCount { get; private set; }
-
-    private int OrphanNodesStart { get; set; }
 
     public void Reset() => OrphanCount = 0;
 }

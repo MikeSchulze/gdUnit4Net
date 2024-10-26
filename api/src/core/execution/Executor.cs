@@ -1,4 +1,4 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Collections.Generic;
@@ -8,24 +8,24 @@ using System.Threading.Tasks;
 
 using Api;
 
-using Core;
+using Extensions;
 
 using Godot;
 
 using Newtonsoft.Json;
 
-public sealed partial class Executor : RefCounted, IExecutor
+public partial class Executor : RefCounted, IExecutor
 {
     [Signal]
     public delegate void ExecutionCompletedEventHandler();
 
     private readonly List<ITestEventListener> eventListeners = new();
 
-    private bool ReportOrphanNodesEnabled => GdUnit4Settings.IsVerboseOrphans();
+    private static bool ReportOrphanNodesEnabled => GdUnit4Settings.IsVerboseOrphans();
 
     public IExecutor AddGdTestEventListener(GodotObject listener)
     {
-        // I want to using anonyms implementation to remove the extra delegator class
+        // I want to use anonymous implementation to remove the extra delegator class
         eventListeners.Add(new GdTestEventListenerDelegator(listener));
         return this;
     }
@@ -66,9 +66,9 @@ public sealed partial class Executor : RefCounted, IExecutor
     /// </summary>
     /// <param name="testSuite"></param>
     /// <returns></returns>
-    private IEnumerable<string>? LoadTestFilter(CsNode testSuite)
+    private static List<string>? LoadTestFilter(CsNode testSuite)
     {
-        // try to load runner config written by gdunit4 plugin
+        // try to load runner config written by GdUnit4 plugin
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), "addons/gdUnit4/GdUnitRunner.cfg");
         if (!File.Exists(configPath))
             return null;
@@ -79,8 +79,9 @@ public sealed partial class Executor : RefCounted, IExecutor
         // Filter by testSuitePath and add values from runnerConfig.Included to the list
         var filteredTests = runnerConfig?.Included
             .Where(entry => entry.Key.EndsWith(testSuitePath))
-            .SelectMany(entry => entry.Value);
-        return filteredTests?.Any() == true ? filteredTests : null;
+            .SelectMany(entry => entry.Value)
+            .ToList();
+        return filteredTests?.Count > 0 ? filteredTests : null;
     }
 
     internal async Task ExecuteInternally(TestSuite testSuite, TestRunnerConfig runnerConfig)
@@ -97,7 +98,7 @@ public sealed partial class Executor : RefCounted, IExecutor
         // handle unexpected exceptions
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
+            await Console.Error.WriteLineAsync($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
         }
         finally
         {
@@ -112,7 +113,11 @@ public sealed partial class Executor : RefCounted, IExecutor
         public GdTestEventListenerDelegator(GodotObject listener)
             => this.listener = listener;
 
-        public bool IsFailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool IsFailed
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
 
         public void PublishEvent(TestEvent testEvent)
         {
@@ -148,6 +153,6 @@ public sealed partial class Executor : RefCounted, IExecutor
 
     private class GdUnitRunnerConfig
     {
-        public Dictionary<string, IEnumerable<string>> Included { get; } = new();
+        [JsonProperty] public Dictionary<string, IEnumerable<string>> Included { get; private set; } = new();
     }
 }

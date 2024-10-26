@@ -5,7 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
 
-using Exceptions;
+using Core.Execution.Exceptions;
+using Core.Extensions;
 
 internal sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
 {

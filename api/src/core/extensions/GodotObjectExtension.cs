@@ -1,28 +1,24 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Extensions;
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Godot;
+using Godot.Collections;
+
+using Array = Godot.Collections.Array;
 
 /// <summary>
-/// A extension to compare C# Objects and Godot Objects by unboxing Variants.
+///     An extension to compare C# Objects and Godot Objects by unboxing Variants.
 /// </summary>
-public static class GodotObjectExtensions
+internal static class GodotObjectExtensions
 {
-
-    public enum MODE
-    {
-        CaseSensitive,
-        CaseInsensitive
-    }
-
-    public static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight, MODE compareMode = MODE.CaseSensitive)
+    internal static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight, Mode compareMode = Mode.CaseSensitive)
     {
         object? left = inLeft.UnboxVariant();
         object? right = inRight.UnboxVariant();
@@ -36,16 +32,17 @@ public static class GodotObjectExtensions
             return true;
 
         var type = left.GetType();
-        if (type.IsPrimitive || typeof(string).Equals(type) || left is IEquatable<T>)
+        if (type.IsPrimitive || typeof(string) == type || left is IEquatable<T>)
         {
-            if (compareMode == MODE.CaseInsensitive && left is string ls && right is string rs)
+            if (compareMode == Mode.CaseInsensitive && left is string ls && right is string rs)
                 return ls.ToLower().Equals(rs.ToLower(), StringComparison.Ordinal);
             return left.Equals(right);
         }
+
         return DeepEquals(left, right, compareMode);
     }
 
-    public static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, MODE compareMode)
+    private static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, Mode compareMode)
     {
         // Handle cases where both collections are null
         if (left is null && right is null)
@@ -58,64 +55,70 @@ public static class GodotObjectExtensions
         var itLeft = left.GetEnumerator();
         var itRight = right.GetEnumerator();
 
-        while (itLeft.MoveNext() && itRight.MoveNext())
+        try
         {
-            var keyEquals = itLeft.Current.VariantEquals(itRight.Current, compareMode);
-            if (!keyEquals)
-                return false;
+            while (itLeft.MoveNext() && itRight.MoveNext())
+            {
+                var keyEquals = itLeft.Current.VariantEquals(itRight.Current, compareMode);
+                if (!keyEquals)
+                    return false;
+            }
+
+            return !(itLeft.MoveNext() || itRight.MoveNext());
         }
-        return !(itLeft.MoveNext() || itRight.MoveNext());
+        finally
+        {
+            (itLeft as IDisposable)?.Dispose();
+            (itRight as IDisposable)?.Dispose();
+        }
     }
 
-    public static bool VariantEquals([NotNullWhen(true)] this IDictionary left, IDictionary right, MODE compareMode)
+    private static bool VariantEquals(this IDictionary left, IDictionary right, Mode compareMode)
     {
         if (left.Count != right.Count)
             return false;
 
         foreach (var key in left.Keys)
-        {
             if (!right.Contains(key) || !left[key]!.VariantEquals(right[key], compareMode))
-            {
                 return false;
-            }
-        }
+
         return true;
     }
 
-    private static bool DeepEquals<T>(T left, T right, MODE compareMode)
+    private static bool DeepEquals<T>(T left, T right, Mode compareMode)
     {
         if (left is GodotObject lo && right is GodotObject ro)
         {
-            var l = GodotObject2Dictionary(lo, new Dictionary<object, bool>());
-            var r = GodotObject2Dictionary(ro, new Dictionary<object, bool>());
+            var l = GodotObject2Dictionary(lo, new System.Collections.Generic.Dictionary<object, bool>());
+            var r = GodotObject2Dictionary(ro, new System.Collections.Generic.Dictionary<object, bool>());
             return l.VariantEquals(r, compareMode);
         }
+
         if (left is IDictionary ld && right is IDictionary rd)
             return ld.VariantEquals(rd, compareMode);
         if (left is IEnumerable le && right is IEnumerable re)
             return le.VariantEquals(re, compareMode);
         if (left is ValueType && right is ValueType)
-            return left!.Equals(right);
+            return left.Equals(right);
         return left!.Equals(right);
     }
 
-    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable elements) where TVariant : notnull
+    public static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable elements) where TVariant : notnull
         => new(elements.ToGodotArray());
 
-    public static Godot.Collections.Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args) where TVariant : notnull
+    public static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args) where TVariant : notnull
         => new(ToGodotArray((IEnumerable)args));
 
-    public static Godot.Collections.Array ToGodotArray(this object[] args)
+    public static Array ToGodotArray(this object[] args)
         => ToGodotArray((IEnumerable)args);
 
-    public static Godot.Collections.Array ToGodotArray(this IEnumerable<object> elements)
+    public static Array ToGodotArray(this IEnumerable<object> elements)
         => ToGodotArray((IEnumerable)elements);
 
-    public static Godot.Collections.Array ToGodotArray(this IEnumerable elements)
+    public static Array ToGodotArray(this IEnumerable elements)
     {
-        var converted = new Godot.Collections.Array();
+        var converted = new Array();
         foreach (var item in elements)
-        {
             try
             {
                 converted.Add(item.ToVariant());
@@ -125,7 +128,7 @@ public static class GodotObjectExtensions
                 Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
                 converted.Add(Variant.CreateFrom("n.a"));
             }
-        }
+
         return converted;
     }
 
@@ -139,29 +142,30 @@ public static class GodotObjectExtensions
         return converted;
     }
 
-    public static Godot.Collections.Dictionary ToGodotDictionary(this IDictionary dict)
+    public static Dictionary ToGodotDictionary(this IDictionary dict)
     {
-        var converted = new Godot.Collections.Dictionary();
+        var converted = new Dictionary();
         foreach (var key in dict.Keys)
             converted[key.ToVariant()] = dict[key].ToVariant();
         return converted;
     }
 
-    private static Dictionary<string, Dictionary<string, object?>> GodotObject2Dictionary(GodotObject? obj, Dictionary<object, bool> hashedObjects)
+    private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>> GodotObject2Dictionary(GodotObject? obj,
+        System.Collections.Generic.Dictionary<object, bool> hashedObjects)
     {
-        var r = new Dictionary<string, Dictionary<string, object?>>();
+        var r = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>>();
         if (obj == null)
             return r;
 
-        var dict = new Dictionary<string, object?>();
+        var dict = new System.Collections.Generic.Dictionary<string, object?>();
         var type = obj.GetType();
         dict["@path"] = type.AssemblyQualifiedName;
 
         // collect custom fields
         foreach (var propertyName in type
-            .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Select(e => e.Name)
-            .Where(name => !name.Equals("NativePtr", StringComparison.Ordinal)))
+                     .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                     .Select(e => e.Name)
+                     .Where(name => !name.Equals("NativePtr", StringComparison.Ordinal)))
         {
             var propertyValue = obj.Get(propertyName);
             if (propertyValue.VariantType == Variant.Type.Object)
@@ -172,13 +176,12 @@ public static class GodotObjectExtensions
                     dict[propertyName] = propertyValue.UnboxVariant();
                     continue;
                 }
+
                 hashedObjects[obj] = true;
                 dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
             }
             else
-            {
                 dict[propertyName] = propertyValue.UnboxVariant();
-            }
         }
 
         // collect other fields
@@ -206,15 +209,15 @@ public static class GodotObjectExtensions
                         dict[propertyName] = propertyValue.UnboxVariant();
                         continue;
                     }
+
                     hashedObjects[obj] = true;
                     dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
                 }
                 else
-                {
                     dict[propertyName] = propertyValue.UnboxVariant();
-                }
             }
         }
+
         r[type.FullName!] = dict;
         return r;
     }
@@ -232,33 +235,38 @@ public static class GodotObjectExtensions
                 var results = await goi.ToSignal(current.As<GodotObject>(), "completed");
                 return results[0].UnboxVariant();
             }
+
             return current;
         }
+
         // for C# implementations we use Invoke
         var mi = instance.GetType().GetMethod(methodName)
-             ?? throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
-        object?[]? parameters = args.Length == 0 ? Array.Empty<object>() : args.UnboxVariant()?.ToArray();
+                 ?? throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
+        object?[]? parameters = args.Length == 0 ? System.Array.Empty<object>() : args.UnboxVariant()?.ToArray();
         object? result;
         var parameterInfo = mi.GetParameters();
         if (mi.IsStatic == false)
-        {
             result = parameterInfo.Length == 0
                 ? mi.Invoke(instance, null)
                 : mi.Invoke(instance, parameters);
-        }
         else
-        {
             result = parameterInfo.Length == 0
                 ? mi.Invoke(null, null)
                 : mi.Invoke(null, parameters);
-        }
         if (result is Task task)
         {
             await task.ConfigureAwait(false);
             var resultProperty = task.GetType().GetProperty("Result")
-                ?? throw new InvalidOperationException("Task does not have a 'Result' property.");
+                                 ?? throw new InvalidOperationException("Task does not have a 'Result' property.");
             return resultProperty.GetValue(task);
         }
+
         return result;
+    }
+
+    internal enum Mode
+    {
+        CaseSensitive,
+        CaseInsensitive
     }
 }

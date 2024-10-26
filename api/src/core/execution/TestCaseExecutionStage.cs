@@ -1,13 +1,14 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
 
-using GdUnit4.Asserts;
+using Asserts;
 
 internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 {
     public TestCaseExecutionStage(string name, TestCase testCase, TestCaseAttribute stageAttribute) : base(name, testCase.MethodInfo, stageAttribute)
-    { }
+    {
+    }
 
     public override async Task Execute(ExecutionContext context)
     {
@@ -23,7 +24,7 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
     }
 
     private static string ReportOrphans(ExecutionContext context) => $"""
-        {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
-            Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!
-        """;
+                                                                      {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
+                                                                          Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!
+                                                                      """;
 }

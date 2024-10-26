@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 using core.resources.scenes;
 
-using Executions;
+using GdUnit4.Core.Execution.Exceptions;
+using GdUnit4.Core.Extensions;
 
 using Godot;
 

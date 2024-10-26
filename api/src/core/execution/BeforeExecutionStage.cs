@@ -1,11 +1,12 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
 
 internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
 {
     public BeforeExecutionStage(TestSuite testSuite) : base("Before", testSuite.Instance.GetType())
-    { }
+    {
+    }
 
     public override async Task Execute(ExecutionContext context)
     {
