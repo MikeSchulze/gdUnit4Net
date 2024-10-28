@@ -2,7 +2,7 @@ namespace GdUnit4.Tests.Core.Hooks;
 
 using System;
 
-using GdUnit4.core.hooks;
+using GdUnit4.Core.Hooks;
 
 using static Assertions;
 

@@ -3,7 +3,7 @@ namespace GdUnit4.Core.Execution;
 using System;
 using System.Threading.Tasks;
 
-using core.hooks;
+using Hooks;
 
 using Reporting;
 
