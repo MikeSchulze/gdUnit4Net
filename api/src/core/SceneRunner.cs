@@ -15,7 +15,7 @@ using Godot;
 using ExecutionContext = Execution.ExecutionContext;
 
 /// <summary>
-///     An helper to simulate an mouse moving form a source to final position
+///     A helper to simulate mouse moving form a source to final position
 /// </summary>
 internal partial class MouseMoveTask : Node, IDisposable
 {
@@ -56,6 +56,7 @@ internal partial class MouseMoveTask : Node, IDisposable
 internal sealed class SceneRunner : ISceneRunner
 {
     private readonly ICollection<string> actionOnPress = new HashSet<string>();
+    private readonly Node currentScene;
     private readonly ICollection<Key> keyOnPress = new HashSet<Key>();
     private readonly ICollection<MouseButton> mouseButtonOnPress = new HashSet<MouseButton>();
 
@@ -70,21 +71,20 @@ internal sealed class SceneRunner : ISceneRunner
         SceneAutoFree = autoFree;
         ExecutionContext.RegisterDisposable(this);
         SceneTree = (SceneTree)Engine.GetMainLoop();
-        CurrentScene = currentScene;
-        SceneTree.Root.AddChild(CurrentScene);
+        this.currentScene = currentScene;
+        SceneTree.Root.AddChild(this.currentScene);
         SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
         SetTimeFactor();
     }
 
     private SceneTree SceneTree { get; }
-    private Node CurrentScene { get; }
     private bool Verbose { get; }
     private bool SceneAutoFree { get; }
     private double TimeFactor { get; set; }
     private int SavedIterationsPerSecond { get; }
     private InputEvent? LastInputEvent { get; set; }
 
-    internal bool IsDisposed { get; set; }
+    private bool IsDisposed { get; set; }
 
     public ISceneRunner SimulateActionPress(string action)
     {
@@ -171,7 +171,7 @@ internal sealed class SceneRunner : ISceneRunner
     {
         if (LastInputEvent is InputEventMouse me)
             return me.Position;
-        return CurrentScene.GetViewport().GetMousePosition();
+        return currentScene.GetViewport().GetMousePosition();
     }
 
     public Vector2 GetGlobalMousePosition() =>
@@ -260,31 +260,32 @@ internal sealed class SceneRunner : ISceneRunner
             await ISceneRunner.SyncProcessFrame;
     }
 
-    public Node Scene() => CurrentScene;
+    public Node Scene() => currentScene;
 
     public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName) where TVariant : notnull
-        => new(CurrentScene, methodName);
+        => new(currentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
     {
-        using (var tokenSource = new CancellationTokenSource()) await Task.Delay(TimeSpan.FromMilliseconds(timeMillis), tokenSource.Token);
+        using var tokenSource = new CancellationTokenSource();
+        await Task.Delay(TimeSpan.FromMilliseconds(timeMillis), tokenSource.Token);
     }
 
     public async Task AwaitSignal(string signal, params Variant[] args) =>
-        await CurrentScene.AwaitSignal(signal, args);
+        await currentScene.AwaitSignal(signal, args);
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
 
 
     public Variant Invoke(string name, params Variant[] args)
-        => GodotObjectExtensions.Invoke(CurrentScene, name, args)
+        => GodotObjectExtensions.Invoke(currentScene, name, args)
             .GetAwaiter()
             .GetResult()
             .ToVariant();
 
     public async Task<Variant> InvokeAsync(string name, params Variant[] args)
     {
-        var result = await GodotObjectExtensions.Invoke(CurrentScene, name, args);
+        var result = await GodotObjectExtensions.Invoke(currentScene, name, args);
         return result.ToVariant();
     }
 
@@ -292,7 +293,7 @@ internal sealed class SceneRunner : ISceneRunner
     {
         if (!PropertyExists(name))
             throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
-        return CurrentScene.Get(name)!.UnboxVariant();
+        return currentScene.Get(name).UnboxVariant();
     }
 
     public T? GetProperty<T>(string name) => GetProperty(name);
@@ -301,11 +302,11 @@ internal sealed class SceneRunner : ISceneRunner
     {
         if (!PropertyExists(name))
             throw new MissingFieldException($"The property '{name}' not exist on loaded scene.");
-        CurrentScene.Set(name, value);
+        currentScene.Set(name, value);
     }
 
     public Node FindChild(string name, bool recursive = true, bool owned = false) =>
-        CurrentScene.FindChild(name, recursive, owned);
+        currentScene.FindChild(name, recursive, owned);
 
     public void MaximizeView()
     {
@@ -320,12 +321,9 @@ internal sealed class SceneRunner : ISceneRunner
         DeactivateTimeFactor();
         ResetInputToDefault();
         DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
-        if (CurrentScene != null)
-        {
-            SceneTree.Root.RemoveChild(CurrentScene);
-            if (SceneAutoFree)
-                CurrentScene.Free();
-        }
+        SceneTree.Root.RemoveChild(currentScene);
+        if (SceneAutoFree && GodotObject.IsInstanceValid(currentScene))
+            currentScene.Free();
 
         IsDisposed = true;
     }
@@ -342,7 +340,7 @@ internal sealed class SceneRunner : ISceneRunner
 
     private void ResetInputToDefault()
     {
-        // reset all mouse button to initial state if need
+        // reset all mouse button to initial state if is need
         foreach (var button in mouseButtonOnPress)
             if (Input.IsMouseButtonPressed(button))
                 SimulateMouseButtonRelease(button);
@@ -402,7 +400,7 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     copy over last mouse position if need
+    ///     copy over last mouse position if is need
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputMousePosition(InputEvent inputEvent)
@@ -425,14 +423,14 @@ internal sealed class SceneRunner : ISceneRunner
             HandleActionEvent(actionEvent);
         Input.FlushBufferedEvents();
 
-        if (GodotObject.IsInstanceValid(CurrentScene))
+        if (GodotObject.IsInstanceValid(currentScene))
         {
-            Print($"	process event {CurrentScene} ({SceneName()}) <- {inputEvent.AsText()}");
-            if (CurrentScene.HasMethod("_gui_input"))
-                CurrentScene.Call("_gui_input", inputEvent);
-            if (CurrentScene.HasMethod("_unhandled_input"))
-                CurrentScene.Call("_unhandled_input", inputEvent);
-            CurrentScene.GetViewport().SetInputAsHandled();
+            Print($"	process event {currentScene} ({SceneName()}) <- {inputEvent.AsText()}");
+            if (currentScene.HasMethod("_gui_input"))
+                currentScene.Call("_gui_input", inputEvent);
+            if (currentScene.HasMethod("_unhandled_input"))
+                currentScene.Call("_unhandled_input", inputEvent);
+            currentScene.GetViewport().SetInputAsHandled();
         }
 
         // save last input event needs to be merged with next InputEventMouseButton
@@ -440,6 +438,7 @@ internal sealed class SceneRunner : ISceneRunner
         return this;
     }
 
+    // ReSharper disable once UnusedMethodReturnValue.Local
     private static bool HandleActionEvent(InputEventAction actionEvent)
     {
         if (!InputMap.EventIsAction(actionEvent, actionEvent.Action, true))
@@ -477,7 +476,7 @@ internal sealed class SceneRunner : ISceneRunner
     {
         if (!Verbose)
             return;
-        var focusedNode = (CurrentScene as Control)?.Owner; //.GetFocusOwner();
+        var focusedNode = (currentScene as Control)?.Owner; //.GetFocusOwner();
 
         if (focusedNode != null)
             Console.WriteLine("	focus on {0}", focusedNode);
@@ -487,13 +486,13 @@ internal sealed class SceneRunner : ISceneRunner
 
     private string SceneName()
     {
-        if (CurrentScene.GetScript().Obj is not GDScript sceneScript)
-            return CurrentScene.Name.ToString();
+        if (currentScene.GetScript().Obj is not GDScript sceneScript)
+            return currentScene.Name.ToString();
         return sceneScript.ResourceName.GetBaseName();
     }
 
     private bool PropertyExists(string name)
-        => CurrentScene.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null
-           || CurrentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(field => field.Name.Equals(name, StringComparison.Ordinal))
-           || CurrentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+        => currentScene.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null
+           || currentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(field => field.Name.Equals(name, StringComparison.Ordinal))
+           || currentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
 }

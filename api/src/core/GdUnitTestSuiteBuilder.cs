@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-public class GdUnitTestSuiteBuilder
+public static class GdUnitTestSuiteBuilder
 {
     private const string DEFAULT_TEMP_TS_CS = """
                                                   // GdUnit generated TestSuite
@@ -57,7 +57,7 @@ public class GdUnitTestSuiteBuilder
                 return result;
             }
 
-            var methodToTest = FindMethod(sourcePath, lineNumber) ?? "";
+            var methodToTest = FindMethod(sourcePath, lineNumber);
             if (string.IsNullOrEmpty(methodToTest))
             {
                 result.Add("error", $"Can't parse method name from {sourcePath}:{lineNumber}.");
@@ -79,7 +79,7 @@ public class GdUnitTestSuiteBuilder
                 using (var streamWriter = File.CreateText(testSuitePath)) toWrite.WriteTo(streamWriter);
                 result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
             }
-            else if (methodToTest != null)
+            else
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(testSuitePath));
                 var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
@@ -156,7 +156,7 @@ public class GdUnitTestSuiteBuilder
             // Construct full class name with namespace
             var namespaceSyntax = classDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()
                                   ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
-            var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
+            var className = namespaceSyntax != null ? namespaceSyntax.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
             return FindTypeOnAssembly(className);
         }
 
@@ -227,10 +227,8 @@ public class GdUnitTestSuiteBuilder
 
     private static Type? FindTypeOnAssembly(string clazz)
     {
-#pragma warning disable CA1854
-        if (ClazzCache.ContainsKey(clazz))
-            return ClazzCache[clazz];
-#pragma warning restore CA1854
+        if (ClazzCache.TryGetValue(clazz, out var onAssembly))
+            return onAssembly;
         var type = Type.GetType(clazz);
         if (type != null)
             return type;
@@ -264,7 +262,7 @@ public class GdUnitTestSuiteBuilder
             .Replace(TAG_SOURCE_CLASS_NAME, classDefinition.Name)
             .Replace(TAG_SOURCE_CLASS_VARNAME, classDefinition.Name);
 
-    internal static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
+    private static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
     {
         var namespaceSyntax = ParseNameSpaceSyntax(root);
         return namespaceSyntax == null
@@ -278,21 +276,21 @@ public class GdUnitTestSuiteBuilder
         // lookup on test cases
         var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
             .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
-        if (method != null && method.Body != null)
+        if (method?.Body != null)
             return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
-        // If method has no body, return the line of the method declaration
+        // If method has not a body, return the line of the method declaration
         return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
     }
 
-    internal static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>
+    private static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>
         ClassDeclaration(root).Members.OfType<MethodDeclarationSyntax>()
             .Any(method => method.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
 
-    internal static CompilationUnitSyntax AddTestCase(SyntaxTree syntaxTree, string testCaseName)
+    private static CompilationUnitSyntax AddTestCase(SyntaxTree syntaxTree, string testCaseName)
     {
         var root = syntaxTree.GetCompilationUnitRoot();
         var programClassSyntax = ClassDeclaration(root);
-        var insertAt = programClassSyntax.ChildNodes().Last()!;
+        var insertAt = programClassSyntax.ChildNodes().Last();
 
         var testCaseAttribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("TestCase"));
         var attributes = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(testCaseAttribute));
@@ -319,12 +317,6 @@ public class GdUnitTestSuiteBuilder
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath));
         var programClassSyntax = ClassDeclaration(syntaxTree.GetCompilationUnitRoot());
-        if (programClassSyntax == null)
-        {
-            Console.Error.WriteLine($"Can't parse method name from {sourcePath}:{lineNumber}. Error: no class declaration found.");
-            return null;
-        }
-
         var spanToFind = syntaxTree.GetText().Lines[lineNumber - 1].Span;
         // lookup on properties
         foreach (var m in programClassSyntax.Members.OfType<PropertyDeclarationSyntax>())

@@ -1,3 +1,5 @@
+// ReSharper disable once CheckNamespace
+
 namespace GdUnit4;
 
 using System;
