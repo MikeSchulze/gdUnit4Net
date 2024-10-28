@@ -244,6 +244,27 @@ public interface ISceneRunner : IDisposable
     /// <returns>Task to wait</returns>
     public Task AwaitMillis(uint timeMillis);
 
+
+    /// <summary>
+    ///     Waits for all input events to be processed by flushing any buffered input events and then awaiting a full cycle of both the process and physics frames.
+    ///     This is typically used to ensure that any simulated or queued inputs are fully processed before proceeding with the next steps in the scene.
+    ///     It's essential for reliable input simulation or when synchronizing logic based on inputs.
+    ///     <example>
+    ///         <code>
+    ///     runner.SetMousePos(new Vector2(60, 20))
+    ///         .SimulateMouseButtonPressed(MouseButton.Left);
+    ///     await runner.AwaitInputProcessed()  // Ensure all inputs are processed before continuing
+    ///     </code>
+    ///     </example>
+    /// </summary>
+    public async Task AwaitInputProcessed()
+    {
+        if (Scene().ProcessMode != Node.ProcessModeEnum.Disabled) Input.FlushBufferedEvents();
+
+        await SyncProcessFrame;
+        await SyncPhysicsFrame;
+    }
+
     /// <summary>
     ///     Access to current running scene
     /// </summary>
