@@ -1,9 +1,10 @@
 
-v4.4.0-rc1
+v4.4.0-rc*
 
 Improvements:
-* GD-138: Add capture test case execution stdout to the test report if `CaptureStdOut` is enabled
+* GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
 * GD-140: Code cleanup and fix formatting, fix warnings
+* GD-144: Added AwaitInputProcessed to SceneRunner
 
 -------------------------------------------------------------------------------------------------------
 

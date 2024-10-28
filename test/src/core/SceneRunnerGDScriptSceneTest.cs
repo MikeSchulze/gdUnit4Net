@@ -157,7 +157,7 @@ public class SceneRunnerGDScriptSceneTest
         // fire spell be pressing enter key
         sceneRunner.SimulateKeyPressed(Key.Enter);
         // wait until next frame
-        await sceneRunner.AwaitIdleFrame();
+        await sceneRunner.AwaitInputProcessed();
 
         // verify a spell is created
         AssertObject(sceneRunner.FindChild("Spell")).IsNotNull();
@@ -175,7 +175,7 @@ public class SceneRunnerGDScriptSceneTest
     public async Task RunSceneSimulateMouseEvents()
     {
         sceneRunner.MaximizeView();
-        await sceneRunner.AwaitIdleFrame();
+        await sceneRunner.AwaitInputProcessed();
 
         var box1 = sceneRunner.GetProperty<ColorRect>("_box1")!;
         var box2 = sceneRunner.GetProperty<ColorRect>("_box2")!;
@@ -191,7 +191,7 @@ public class SceneRunnerGDScriptSceneTest
             .SimulateMouseButtonPressed(MouseButton.Left);
 
         // wait until next frame
-        await sceneRunner.AwaitIdleFrame();
+        await sceneRunner.AwaitInputProcessed();
 
         // verify box one is changed to Gray
         AssertObject(box1.Color).IsEqual(Colors.Gray);
