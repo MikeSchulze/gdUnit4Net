@@ -171,13 +171,12 @@ internal static class GodotObjectExtensions
             if (propertyValue.VariantType == Variant.Type.Object)
             {
                 // prevent recursion
-                if (hashedObjects.ContainsKey(obj))
+                if (!hashedObjects.TryAdd(obj, true))
                 {
                     dict[propertyName] = propertyValue.UnboxVariant();
                     continue;
                 }
 
-                hashedObjects[obj] = true;
                 dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
             }
             else
@@ -204,13 +203,12 @@ internal static class GodotObjectExtensions
                 if (propertyType.VariantType == Variant.Type.Object)
                 {
                     // prevent recursion
-                    if (hashedObjects.ContainsKey(obj))
+                    if (!hashedObjects.TryAdd(obj, true))
                     {
                         dict[propertyName] = propertyValue.UnboxVariant();
                         continue;
                     }
 
-                    hashedObjects[obj] = true;
                     dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
                 }
                 else

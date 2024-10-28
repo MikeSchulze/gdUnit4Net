@@ -32,5 +32,5 @@ internal class OrphanNodesMonitor
 
     private int GetMonitoredOrphanCount() => (int)GetMonitor(Monitor.ObjectOrphanNodeCount);
 
-    public void Reset() => OrphanCount = 0;
+    private void Reset() => OrphanCount = 0;
 }

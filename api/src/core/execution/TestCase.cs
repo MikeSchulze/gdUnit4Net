@@ -71,7 +71,7 @@ internal sealed class TestCase
         var name = attribute.TestName ?? testName;
         if (attribute.Arguments.Length > 0)
         {
-            var parameters = string.Join(", ", attribute!.Arguments.Select(GdUnitExtensions.Formatted));
+            var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
             return $"{name}({parameters})";
         }
 
