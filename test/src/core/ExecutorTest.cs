@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 using Api;
 
-using Executions;
-
 using GdUnit4.Asserts;
 using GdUnit4.Core;
+using GdUnit4.Core.Events;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Extensions;
+using GdUnit4.Core.Reporting;
 
 using Godot;
 
 using static Assertions;
 
-using static TestEvent.TYPE;
-
-using static TestReport.ReportType;
+using static GdUnit4.Core.Events.TestEvent.TYPE;
+using static GdUnit4.Core.Reporting.TestReport.ReportType;
 
 [TestSuite]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable

@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Core.Extensions;
+
 using Discovery;
 
 using Microsoft.TestPlatform.AdapterUtilities;
@@ -94,7 +96,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                                 ManagedMethod = managedMethod,
                                 HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
                                 DisplayName = BuildDisplayName(managedType, mi.Name, index, attr, gdUnitSettings),
-                                FullyQualifiedName = Executions.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
+                                FullyQualifiedName = Core.Execution.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
                                 Traits = TestCasePropertiesAsTraits(mi)
                             })
                             .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData))
@@ -125,7 +127,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     private List<Trait> TestCasePropertiesAsTraits(MethodInfo mi)
         => mi.GetCustomAttributes(typeof(TestCaseAttribute))
             .Cast<TestCaseAttribute>()
-            .Where(attr => attr.Arguments?.Length != 0)
+            .Where(attr => attr.Arguments.Length != 0)
             .Select(attr => attr.Name == null
                 ? new Trait(string.Empty, attr.Arguments.Formatted())
                 : new Trait(attr.Name, attr.Arguments.Formatted())
@@ -164,7 +166,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         => gdUnitSettings.DisplayName switch
         {
             DisplayNameOptions.SimpleName => BuildSimpleDisplayName(testName, index, attr),
-            DisplayNameOptions.FullyQualifiedName => Executions.TestCase.BuildFullyQualifiedName(managedTypeName, testName, attr),
+            DisplayNameOptions.FullyQualifiedName => Core.Execution.TestCase.BuildFullyQualifiedName(managedTypeName, testName, attr),
             _ => testName
         };
 

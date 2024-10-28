@@ -4,7 +4,9 @@ using System;
 using System.Linq;
 using System.Text;
 
-public static class StringExtensions
+using Core.Reporting;
+
+internal static class StringExtensions
 {
     public static string Indent(this string str, int count = 1, string indentWith = "\t")
     {

@@ -1,11 +1,15 @@
 namespace GdUnit4.Tests.Core;
 
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
+using GdUnit4.Core.Execution.Exceptions;
+using GdUnit4.Core.Extensions;
+
 using Godot;
 
-using Executions;
 using static Assertions;
 
 [TestSuite]
@@ -46,7 +50,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertObject(sceneRunner.GetProperty("_initial_color")).IsEqual(Colors.Red);
         AssertObject(sceneRunner.GetProperty("_nullable")).IsNull();
         AssertThrown(() => sceneRunner.GetProperty("_invalid"))
-            .IsInstanceOf<System.MissingFieldException>()
+            .IsInstanceOf<MissingFieldException>()
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
@@ -56,7 +60,7 @@ public class SceneRunnerGDScriptSceneTest
         sceneRunner.SetProperty("_initial_color", Colors.Red);
         AssertObject(sceneRunner.GetProperty("_initial_color")).IsEqual(Colors.Red);
         AssertThrown(() => sceneRunner.SetProperty("_invalid", 42))
-            .IsInstanceOf<System.MissingFieldException>()
+            .IsInstanceOf<MissingFieldException>()
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
@@ -65,14 +69,14 @@ public class SceneRunnerGDScriptSceneTest
     {
         AssertString(sceneRunner.Invoke("add", 10, 12).ToString()).IsEqual("22");
         AssertThrown(() => sceneRunner.Invoke("sub", 12, 10))
-            .IsInstanceOf<System.MissingMethodException>()
+            .IsInstanceOf<MissingMethodException>()
             .HasMessage("The method 'sub' not exist on this instance.");
     }
 
     [TestCase(Timeout = 1200)]
     public async Task AwaitForMilliseconds()
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
+        var stopwatch = new Stopwatch();
         stopwatch.Start();
         await sceneRunner.AwaitMillis(1000);
         stopwatch.Stop();
@@ -184,7 +188,7 @@ public class SceneRunnerGDScriptSceneTest
 
         // set mouse position to button one and simulate is pressed
         sceneRunner.SetMousePos(new Vector2(60, 20))
-                .SimulateMouseButtonPressed(MouseButton.Left);
+            .SimulateMouseButtonPressed(MouseButton.Left);
 
         // wait until next frame
         await sceneRunner.AwaitIdleFrame();
@@ -219,17 +223,17 @@ public class SceneRunnerGDScriptSceneTest
 
         // wait until 'color_cycle()' and expect be return `red` but should fail because it ends with `black`
         await AssertThrown(sceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red"))
-           .ContinueWith(result => result.Result?.HasMessage(
+            .ContinueWith(result => result.Result?.HasMessage(
                 """
                 Expecting be equal:
                     "red"
                  but is
                     "black"
                 """
-           ));
+            ));
         // wait again for returns 'red' but with using a custom timeout of 500ms and expect is interrupted after 500ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(500))
-           .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 500ms."));
+            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 500ms."));
     }
 
     [TestCase(Description = "Example to wait for a specific method result and used time factor of 10", Timeout = 1000)]
@@ -241,7 +245,7 @@ public class SceneRunnerGDScriptSceneTest
 
         // wait for returns 'red' but will never happen and expect is interrupted after 150ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(150))
-           .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
+            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
     }
 
     [TestCase]

@@ -1,4 +1,4 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Collections.Generic;
@@ -6,9 +6,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
+using Events;
+
 using Godot;
 
-using Monitors;
+using Monitoring;
+
+using Reporting;
 
 internal sealed class ExecutionContext : IDisposable
 {
@@ -74,7 +78,7 @@ internal sealed class ExecutionContext : IDisposable
         set;
     } = true;
 
-    public bool ReportOrphanNodesEnabled
+    private bool ReportOrphanNodesEnabled
     {
         get;
     }
@@ -97,7 +101,7 @@ internal sealed class ExecutionContext : IDisposable
         set;
     }
 
-    public Stopwatch Stopwatch
+    private Stopwatch Stopwatch
     {
         get;
     }
@@ -155,14 +159,14 @@ internal sealed class ExecutionContext : IDisposable
 
     public bool IsError => ReportCollector.Errors.Any() || SubExecutionContexts.Any(context => context.IsError);
 
-    public bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Any(context => context.IsWarning);
+    private bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Any(context => context.IsWarning);
 
     public bool IsSkipped
     {
         get;
     }
 
-    public IEnumerable<TestReport> CollectReports => ReportCollector.Reports;
+    private IEnumerable<TestReport> CollectReports => ReportCollector.Reports;
 
     private int SkippedCount => SubExecutionContexts.Count(context => context.IsSkipped);
 
@@ -170,7 +174,7 @@ internal sealed class ExecutionContext : IDisposable
 
     private int ErrorCount => ReportCollector.Errors.Count();
 
-    public string FullyQualifiedName { get; } = "";
+    private string FullyQualifiedName { get; }
 
     public void Dispose()
     {
@@ -185,7 +189,7 @@ internal sealed class ExecutionContext : IDisposable
         Stopwatch.Stop();
     }
 
-    public int OrphanCount(bool recursive)
+    private int OrphanCount(bool recursive)
     {
         var orphanCount = OrphanMonitor.OrphanCount;
         if (recursive)
@@ -193,7 +197,7 @@ internal sealed class ExecutionContext : IDisposable
         return orphanCount;
     }
 
-    public IDictionary<TestEvent.STATISTIC_KEY, object> BuildStatistics(int orphanCount)
+    private IDictionary<TestEvent.STATISTIC_KEY, object> BuildStatistics(int orphanCount)
         => TestEvent.BuildStatistics(
             orphanCount,
             IsError, ErrorCount,
@@ -202,7 +206,7 @@ internal sealed class ExecutionContext : IDisposable
             IsSkipped, SkippedCount,
             Duration);
 
-    public void FireTestEvent(TestEvent e) =>
+    private void FireTestEvent(TestEvent e) =>
         EventListeners.ToList().ForEach(l => l.PublishEvent(e));
 
     public void FireBeforeEvent() =>

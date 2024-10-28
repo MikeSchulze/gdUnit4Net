@@ -1,9 +1,11 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Threading.Tasks;
 
-using core.hooks;
+using Hooks;
+
+using Reporting;
 
 internal sealed class TestSuiteExecutionStage : IExecutionStage
 {

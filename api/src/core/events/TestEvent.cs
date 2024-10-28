@@ -1,9 +1,11 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Events;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
+using Reporting;
 
 internal class TestEvent : IEquatable<TestEvent>
 {

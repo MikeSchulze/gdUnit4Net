@@ -1,15 +1,19 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Reporting;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-using Exceptions;
+using Execution.Exceptions;
+
+using Extensions;
 
 using Newtonsoft.Json;
 
-public sealed class TestReport : IEquatable<TestReport>
+internal sealed class TestReport : IEquatable<TestReport>
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     [Flags]
     public enum ReportType
     {
@@ -43,7 +47,7 @@ public sealed class TestReport : IEquatable<TestReport>
 
     public ReportType Type { get; }
 
-    public int LineNumber { get; set; } = -1;
+    public int LineNumber { get; }
 
     public string Message { get; }
 

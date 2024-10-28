@@ -1,22 +1,21 @@
-
 namespace GdUnit4.Core;
 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-public sealed class GdUnitConsole
+internal sealed class GdUnitConsole
 {
-    public const int BOLD = 0x1;
-    public const int ITALIC = 0x2;
-    public const int UNDERLINE = 0x4;
+    private const int BOLD = 0x1;
+    private const int ITALIC = 0x2;
+    private const int UNDERLINE = 0x4;
     private const string CSI_BOLD = "\u001b[1m";
     private const string CSI_ITALIC = "\u001b[3m";
     private const string CSI_UNDERLINE = "\u001b[4m";
     private static readonly object LockObj = new();
     private readonly Dictionary<string, (int Left, int Top)> savedCursorsByName = new();
 
-    public GdUnitConsole NewLine()
+    private GdUnitConsole NewLine()
     {
         Console.WriteLine();
         return this;
@@ -25,38 +24,32 @@ public sealed class GdUnitConsole
     public GdUnitConsole PrintError(string message)
     {
         lock (LockObj)
-        {
             return BeginColor(ConsoleColor.DarkRed)
                 .WriteLine(message)
                 .EndColor()
                 .NewLine();
-        }
     }
 
     public GdUnitConsole Print(string message, ConsoleColor color = ConsoleColor.White, int flags = 0)
     {
         lock (LockObj)
-        {
             return BeginColor(color)
                 .Bold((flags & BOLD) == BOLD)
                 .Italic((flags & ITALIC) == ITALIC)
                 .Underline((flags & UNDERLINE) == UNDERLINE)
                 .Write(message)
                 .EndColor();
-        }
     }
 
     public GdUnitConsole Println(string message, ConsoleColor color = ConsoleColor.White, int flags = 0)
     {
         lock (LockObj)
-        {
             return BeginColor(color)
                 .Bold((flags & BOLD) == BOLD)
                 .Italic((flags & ITALIC) == ITALIC)
                 .Underline((flags & UNDERLINE) == UNDERLINE)
                 .WriteLine(message)
                 .EndColor();
-        }
     }
 
     private GdUnitConsole BeginColor(ConsoleColor color)

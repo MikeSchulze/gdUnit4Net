@@ -1,5 +1,7 @@
 namespace GdUnit4.TestAdapter.Extensions;
 
+using Core.Events;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 internal static class TestEventExtensions

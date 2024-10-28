@@ -2,7 +2,10 @@ namespace GdUnit4.Tests;
 
 using System.IO;
 
+using Godot;
+
 using static Utils;
+
 using static Assertions;
 
 [TestSuite]
@@ -48,8 +51,8 @@ public class UtilsTest
     [TestCase]
     public void GodotErrorAsString()
     {
-        AssertThat(ErrorAsString(Godot.Error.Bug)).IsEqual("Bug error.");
-        AssertThat(ErrorAsString(47)).IsEqual("Bug error.");
+        AssertThat(ErrorAsString(Error.Bug)).IsEqual("Bug");
+        AssertThat(ErrorAsString(47)).IsEqual("Bug");
 
         // with not existing error number
         AssertThat(ErrorAsString(100)).IsEqual("The error: 100 is not defined in Godot.");

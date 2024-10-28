@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.core.hooks;
+﻿namespace GdUnit4.Core.Hooks;
 
 using System;
 

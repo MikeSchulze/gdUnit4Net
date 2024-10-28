@@ -1,4 +1,4 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Extensions;
 
 using System;
 using System.Collections;
@@ -6,16 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Godot;
+using Godot.Collections;
+
+using Array = Godot.Collections.Array;
 
 /// <summary>
-/// A extension box/unbox Godot Variants
+///     A extension box/unbox Godot Variants
 /// </summary>
 public static class GodotVariantExtensions
 {
+    //private static readonly bool IsGodot43OrHigher = (int)Engine.GetVersionInfo()["hex"] >= 0x040300;
 
-    public static bool IsGenericGodotDictionary(this Type type) => type.GetInterfaces()
-                .Where(interfaceType => interfaceType.FullName == "Godot.Collections.IGenericGodotDictionary")
-                .Any();
+    public static bool IsGenericGodotDictionary(this Type type) => type
+        .GetInterfaces()
+        .Any(interfaceType => interfaceType.FullName == "Godot.Collections.IGenericGodotDictionary");
 
     public static dynamic? UnboxVariant<T>(this T? value)
     {
@@ -25,9 +29,9 @@ public static class GodotVariantExtensions
             return v.UnboxVariant();
         if (value is StringName sn)
             return sn.ToString();
-        if (value is Godot.Collections.Dictionary gd)
+        if (value is Dictionary gd)
             return gd.UnboxVariant();
-        if (value is Godot.Collections.Array ga)
+        if (value is Array ga)
             return ga.UnboxVariant();
         if (value.GetType().IsGenericGodotDictionary() && value is IEnumerable godotDict)
             return godotDict.UnboxGenericGodotDictionary();
@@ -38,9 +42,9 @@ public static class GodotVariantExtensions
 
     private static IDictionary UnboxGenericGodotDictionary(this IEnumerable value)
     {
-        var type = value.GetType()!;
+        var type = value.GetType();
         if (!type.IsGenericGodotDictionary())
-            throw new InvalidOperationException($"The given value {value} is not Godot.Collections.IGenericGodotDictionary!");
+            throw new InvalidOperationException($"The given value {nameof(value)} is not Godot.Collections.IGenericGodotDictionary!");
         try
         {
             var dictionaryTypeArgs = type.GetGenericArguments();
@@ -48,37 +52,36 @@ public static class GodotVariantExtensions
             var valueType = dictionaryTypeArgs[1];
 
             // Get the key and value properties of KeyValuePair<,> using reflection
-            var typedDictionary = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(keyType, valueType))!;
+            var typedDictionary = (IDictionary)Activator.CreateInstance(typeof(System.Collections.Generic.Dictionary<,>).MakeGenericType(keyType, valueType))!;
             var keyValuePairType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
             var keyProperty = keyValuePairType.GetProperty("Key")!;
             var valueProperty = keyValuePairType.GetProperty("Value")!;
 
             foreach (var entryObj in value)
-            {
                 if (entryObj.GetType() == keyValuePairType)
                 {
                     var k = keyProperty.GetValue(entryObj);
                     var v = valueProperty.GetValue(entryObj);
                     typedDictionary.Add(k!, v);
                 }
-            }
+
             return typedDictionary;
         }
         catch (Exception e)
         {
-            throw new InvalidOperationException($"The given value {value} can't be unboxed to IDictionary!", e);
+            throw new InvalidOperationException($"The given value {nameof(value)} can't be unboxed to IDictionary!", e);
         }
     }
 
-    private static Dictionary<object, object?> UnboxVariant(this Godot.Collections.Dictionary dict)
+    private static System.Collections.Generic.Dictionary<object, object?> UnboxVariant(this Dictionary dict)
     {
-        var unboxed = new Dictionary<object, object?>();
+        var unboxed = new System.Collections.Generic.Dictionary<object, object?>();
         foreach (var kvp in dict)
             unboxed.Add(kvp.Key.UnboxVariant()!, kvp.Value.UnboxVariant());
         return unboxed;
     }
 
-    private static List<object?> UnboxVariant(this Godot.Collections.Array values)
+    private static List<object?> UnboxVariant(this Array values)
     {
         var unboxed = new List<object?>();
         foreach (var value in values)
@@ -101,27 +104,27 @@ public static class GodotVariantExtensions
     {
         if (obj == null)
             return new Variant();
-        return Type.GetTypeCode(obj?.GetType()) switch
+        return Type.GetTypeCode(obj.GetType()) switch
         {
             TypeCode.Empty => new Variant(),
-            TypeCode.String => Variant.CreateFrom((string)obj!),
-            TypeCode.Boolean => Variant.CreateFrom((bool)obj!),
-            TypeCode.Char => Variant.CreateFrom(0 + (char)obj!),
-            TypeCode.SByte => Variant.CreateFrom((sbyte)obj!),
-            TypeCode.Byte => Variant.CreateFrom((byte)obj!),
-            TypeCode.Int16 => Variant.CreateFrom((short)obj!),
-            TypeCode.UInt16 => Variant.CreateFrom((ushort)obj!),
-            TypeCode.Int32 => Variant.CreateFrom((int)obj!),
-            TypeCode.UInt32 => Variant.CreateFrom((uint)obj!),
-            TypeCode.Int64 => Variant.CreateFrom((long)obj!),
-            TypeCode.UInt64 => Variant.CreateFrom((ulong)obj!),
-            TypeCode.Single => Variant.CreateFrom((float)obj!),
-            TypeCode.Double => Variant.CreateFrom((double)obj!),
-            TypeCode.Decimal => Variant.CreateFrom((ulong)obj!),
-            TypeCode.Object => ToVariantByType(obj!),
-            TypeCode.DBNull => ToVariantByType(obj!),
-            TypeCode.DateTime => ToVariantByType(obj!),
-            _ => ToVariantByType(obj!)
+            TypeCode.String => Variant.CreateFrom((string)obj),
+            TypeCode.Boolean => Variant.CreateFrom((bool)obj),
+            TypeCode.Char => Variant.CreateFrom(0 + (char)obj),
+            TypeCode.SByte => Variant.CreateFrom((sbyte)obj),
+            TypeCode.Byte => Variant.CreateFrom((byte)obj),
+            TypeCode.Int16 => Variant.CreateFrom((short)obj),
+            TypeCode.UInt16 => Variant.CreateFrom((ushort)obj),
+            TypeCode.Int32 => Variant.CreateFrom((int)obj),
+            TypeCode.UInt32 => Variant.CreateFrom((uint)obj),
+            TypeCode.Int64 => Variant.CreateFrom((long)obj),
+            TypeCode.UInt64 => Variant.CreateFrom((ulong)obj),
+            TypeCode.Single => Variant.CreateFrom((float)obj),
+            TypeCode.Double => Variant.CreateFrom((double)obj),
+            TypeCode.Decimal => Variant.CreateFrom((ulong)obj),
+            TypeCode.Object => ToVariantByType(obj),
+            TypeCode.DBNull => ToVariantByType(obj),
+            TypeCode.DateTime => ToVariantByType(obj),
+            _ => ToVariantByType(obj)
         };
     }
 
@@ -141,7 +144,7 @@ public static class GodotVariantExtensions
         }
         catch (Exception)
         {
-            throw new InvalidOperationException($"Cannot convert '{obj?.GetType()}' to Variant!");
+            throw new InvalidOperationException($"Cannot convert '{obj.GetType()}' to Variant!");
         }
     }
 
@@ -184,8 +187,9 @@ public static class GodotVariantExtensions
         Variant.Type.PackedStringArray => v.AsStringArray(),
         Variant.Type.PackedVector2Array => v.AsVector2Array(),
         Variant.Type.PackedVector3Array => v.AsVector3Array(),
+        //Variant.Type.PackedVector4Array when IsGodot43OrHigher => v.AsVector4Array(),
         Variant.Type.PackedColorArray => v.AsColorArray(),
         Variant.Type.Max => throw new NotImplementedException(),
-        _ => throw new ArgumentOutOfRangeException(nameof(v))
+        _ => throw new NotImplementedException($"The UnboxVariant for {nameof(v)} is not implemented!")
     };
 }

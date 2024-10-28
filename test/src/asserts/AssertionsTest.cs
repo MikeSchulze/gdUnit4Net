@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-using Executions;
-
 using GdUnit4.Asserts;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Extensions;
 
 using Godot;
 using Godot.Collections;

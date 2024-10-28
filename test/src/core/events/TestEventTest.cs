@@ -3,6 +3,9 @@ namespace GdUnit4.Tests.Core.Events;
 using System;
 using System.Collections.Generic;
 
+using GdUnit4.Core.Events;
+using GdUnit4.Core.Reporting;
+
 using Newtonsoft.Json;
 
 using static Assertions;
@@ -37,21 +40,20 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeAfter()
     {
-        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
-            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
-            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2},
-            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3},
-            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4},
-            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0},
-            { TestEvent.STATISTIC_KEY.FAILED, true},
-            { TestEvent.STATISTIC_KEY.ERRORS, false},
-            { TestEvent.STATISTIC_KEY.WARNINGS, false},
-            { TestEvent.STATISTIC_KEY.SKIPPED, true},
+        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        {
+            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
+            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
+            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
+            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
+            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
+            { TestEvent.STATISTIC_KEY.FAILED, true },
+            { TestEvent.STATISTIC_KEY.ERRORS, false },
+            { TestEvent.STATISTIC_KEY.WARNINGS, false },
+            { TestEvent.STATISTIC_KEY.SKIPPED, true }
         };
 
-        List<TestReport> reports = new() {
-            new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
-        };
+        List<TestReport> reports = new() { new TestReport(TestReport.ReportType.FAILURE, 42, "test failed") };
 
         var testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
@@ -75,21 +77,20 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeAfterTest()
     {
-        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new() {
-            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124},
-            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2},
-            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3},
-            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4},
-            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0},
-            { TestEvent.STATISTIC_KEY.FAILED, true},
-            { TestEvent.STATISTIC_KEY.ERRORS, false},
-            { TestEvent.STATISTIC_KEY.WARNINGS, false},
-            { TestEvent.STATISTIC_KEY.SKIPPED, true},
+        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        {
+            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
+            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
+            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
+            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
+            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
+            { TestEvent.STATISTIC_KEY.FAILED, true },
+            { TestEvent.STATISTIC_KEY.ERRORS, false },
+            { TestEvent.STATISTIC_KEY.WARNINGS, false },
+            { TestEvent.STATISTIC_KEY.SKIPPED, true }
         };
 
-        List<TestReport> reports = new() {
-            new TestReport(TestReport.ReportType.FAILURE, 42, "test failed")
-        };
+        List<TestReport> reports = new() { new TestReport(TestReport.ReportType.FAILURE, 42, "test failed") };
 
         var testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);

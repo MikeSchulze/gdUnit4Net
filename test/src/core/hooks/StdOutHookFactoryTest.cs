@@ -3,9 +3,8 @@ namespace GdUnit4.Tests.Core.Hooks;
 using System;
 using System.Threading.Tasks;
 
-using Executions;
-
-using GdUnit4.core.hooks;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Hooks;
 
 using Godot;
 

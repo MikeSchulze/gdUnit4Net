@@ -1,10 +1,10 @@
-namespace GdUnit4;
-
 using System;
+
+namespace GdUnit4.Core.Events;
 
 internal interface ITestEventListener : IDisposable
 {
     bool IsFailed { get; protected set; }
 
-    void PublishEvent(TestEvent testEvent);
+    internal void PublishEvent(TestEvent testEvent);
 }

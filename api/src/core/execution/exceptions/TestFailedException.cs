@@ -1,20 +1,12 @@
-namespace GdUnit4.Exceptions;
+namespace GdUnit4.Core.Execution.Exceptions;
 
 using System;
 using System.Diagnostics;
 using System.Reflection;
 
 [Serializable]
-public class TestFailedException : Exception
+internal class TestFailedException : Exception
 {
-    public int LineNumber
-    { get; private set; } = -1;
-
-    public string? FileName
-    { get; private set; }
-
-    public new string? StackTrace { get; private set; }
-
     public TestFailedException(string message, int lineNumber = -1) : base(message)
     {
         LineNumber = lineNumber == -1 ? GetRootCauseLineNumber() : lineNumber;
@@ -30,7 +22,7 @@ public class TestFailedException : Exception
             var mb = frame.GetMethod();
             // we only collect test-suite related stack frames
 
-            // skip gdunit4 api frames and skip system api frames do only collect test relates frames
+            // skip GdUnit4 api frames and skip system api frames do only collect test relates frames
             if (mb is MethodInfo mi
                 && mi.Module.Assembly != typeof(TestFailedException).Assembly)
             {
@@ -40,6 +32,7 @@ public class TestFailedException : Exception
                     FileName ??= frame.GetFileName();
                     StackTrace += new StackTrace(frame).ToString();
                 }
+
                 // end collect frames at test case attribute
                 if (mi.IsDefined(typeof(TestCaseAttribute)))
                     break;
@@ -47,16 +40,31 @@ public class TestFailedException : Exception
         }
     }
 
+    public int LineNumber
+    {
+        get;
+        private set;
+    } = -1;
+
+    public string? FileName
+    {
+        get;
+        private set;
+    }
+
+    public new string? StackTrace { get; private set; }
+
     private static int GetRootCauseLineNumber()
     {
         // Navigate the stack frames to find the root cause
         for (var i = 0; i <= 15; i++)
         {
             var frame = new StackFrame(i, true);
-            // Check if the frame a external assembly
+            // Check is the frame an external assembly
             if (frame.GetFileName() != null && frame.GetMethod()?.Module.Assembly != typeof(TestFailedException).Assembly)
                 return frame.GetFileLineNumber();
         }
+
         return -1;
     }
 }

@@ -1,4 +1,4 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System.Linq;
 using System.Reflection;
@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 using Asserts;
 
-using Core.Signals;
+using Reporting;
+
+using Signals;
 
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
 {

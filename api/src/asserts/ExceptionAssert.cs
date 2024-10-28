@@ -1,21 +1,21 @@
 namespace GdUnit4.Asserts;
+
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
 
-using Exceptions;
+using Core.Execution.Exceptions;
+using Core.Extensions;
 
-internal sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
+public sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
 {
-    private TException? Current { get; set; }
-
-    private string? CustomFailureMessage { get; set; }
-
     public ExceptionAssert(Action action)
     {
         try
-        { action.Invoke(); }
+        {
+            action.Invoke();
+        }
         catch (Exception e)
         {
             var capturedException = ExceptionDispatchInfo.Capture(e.InnerException ?? e);
@@ -24,6 +24,9 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
     }
 
     public ExceptionAssert(TException e) => Current = e;
+    private TException? Current { get; }
+
+    private string? CustomFailureMessage { get; set; }
 
     public IExceptionAssert IsInstanceOf<TExpectedType>()
     {
@@ -32,12 +35,12 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
         return this;
     }
 
-    public IExceptionAssert HasMessage(string message)
+    public IExceptionAssert HasMessage(string expected)
     {
-        message = message.UnixFormat();
+        expected = expected.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? "";
-        if (!current.Equals(message, StringComparison.Ordinal))
-            ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
+        if (!current.Equals(expected, StringComparison.Ordinal))
+            ThrowTestFailureReport(AssertFailures.IsEqual(current, expected));
         return this;
     }
 
@@ -45,14 +48,13 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
     {
         int currentLine;
         if (Current is TestFailedException e)
-        {
             currentLine = e.LineNumber;
-        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
             currentLine = stackFrame?.GetFileLineNumber() ?? -1;
         }
+
         if (currentLine != lineNumber)
             ThrowTestFailureReport(AssertFailures.IsEqual(currentLine, lineNumber));
         return this;
@@ -61,18 +63,17 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
     public IExceptionAssert HasFileName(string fileName)
     {
         var fullPath = Path.GetFullPath(fileName);
-        string? currentFileName;
+        string currentFileName;
         if (Current is TestFailedException e)
-        {
             currentFileName = e.FileName ?? "";
-        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
             currentFileName = stackFrame?.GetFileName() ?? "";
         }
+
         if (!currentFileName.Equals(fullPath, StringComparison.Ordinal))
-            ThrowTestFailureReport(AssertFailures.IsEqual(currentFileName ?? "", fullPath));
+            ThrowTestFailureReport(AssertFailures.IsEqual(currentFileName, fullPath));
         return this;
     }
 
@@ -90,12 +91,12 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
         return this;
     }
 
-    public IExceptionAssert StartsWithMessage(string message)
+    public IExceptionAssert StartsWithMessage(string value)
     {
-        message = message.UnixFormat();
+        value = value.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? "";
-        if (!current.StartsWith(message, StringComparison.InvariantCulture))
-            ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
+        if (!current.StartsWith(value, StringComparison.InvariantCulture))
+            ThrowTestFailureReport(AssertFailures.IsEqual(current, value));
         return this;
     }
 
