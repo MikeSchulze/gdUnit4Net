@@ -1,13 +1,9 @@
-namespace GdUnit4;
+namespace GdUnit4.Core.Reporting;
 
 using System.Collections.Generic;
 using System.Linq;
 
-using Core.Reporting;
-
-using Godot;
-
-internal sealed partial class TestReportCollector : RefCounted
+internal sealed class TestReportCollector
 {
     private readonly List<TestReport> reports = new();
 

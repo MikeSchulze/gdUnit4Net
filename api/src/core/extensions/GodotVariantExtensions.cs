@@ -15,7 +15,7 @@ using Array = Godot.Collections.Array;
 /// </summary>
 public static class GodotVariantExtensions
 {
-    private static readonly bool IsGodot43OrHigher = (int)Engine.GetVersionInfo()["hex"] >= 0x040300;
+    //private static readonly bool IsGodot43OrHigher = (int)Engine.GetVersionInfo()["hex"] >= 0x040300;
 
     public static bool IsGenericGodotDictionary(this Type type) => type
         .GetInterfaces()
