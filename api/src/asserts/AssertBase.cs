@@ -3,7 +3,7 @@ namespace GdUnit4.Asserts;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal abstract class AssertBase<TValue> : IAssertBase<TValue>
+public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected AssertBase(TValue? current) => Current = current;
     protected TValue? Current { get; }

@@ -3,7 +3,7 @@ namespace GdUnit4.Asserts;
 using System;
 using System.Numerics;
 
-internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
+public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
     where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {

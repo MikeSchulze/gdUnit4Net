@@ -5,7 +5,7 @@ using System.Globalization;
 
 using Godot;
 
-internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : IEquatable<TValue>
+public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : IEquatable<TValue>
 {
     public VectorAssert(TValue current) : base(current)
     {
@@ -54,10 +54,10 @@ internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> 
         return this;
     }
 
-    public IVectorAssert<TValue> IsNotBetween(TValue from, TValue to)
+    public IVectorAssert<TValue> IsNotBetween(TValue min, TValue max)
     {
-        if (CompareTo(Current, from) >= 0 && CompareTo(Current, to) <= 0)
-            ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, from, to), Current, from);
+        if (CompareTo(Current, min) >= 0 && CompareTo(Current, max) <= 0)
+            ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, min, max), Current, min);
         return this;
     }
 

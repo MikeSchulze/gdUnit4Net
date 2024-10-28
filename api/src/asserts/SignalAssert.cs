@@ -9,7 +9,7 @@ using Core.Signals;
 
 using Godot;
 
-internal sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
+public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 {
     public SignalAssert(GodotObject current) : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);

@@ -4,7 +4,7 @@ using System;
 
 using Core.Extensions;
 
-internal sealed class StringAssert : AssertBase<string>, IStringAssert
+public sealed class StringAssert : AssertBase<string>, IStringAssert
 {
     public StringAssert(string? current) : base(current)
     {
@@ -31,39 +31,39 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert HasLength(int expectedLength, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
+    public IStringAssert HasLength(int length, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
     {
         if (Current == null)
-            ThrowTestFailureReport(AssertFailures.HasLength(-1, expectedLength, comparator), Current, expectedLength);
+            ThrowTestFailureReport(AssertFailures.HasLength(-1, length, comparator), Current, length);
 
         var currentLength = Current?.Length ?? -1;
         var failed = false;
         switch (comparator)
         {
             case IStringAssert.Compare.EQUAL:
-                if (currentLength != expectedLength)
+                if (currentLength != length)
                     failed = true;
                 break;
             case IStringAssert.Compare.GREATER_EQUAL:
-                if (currentLength < expectedLength)
+                if (currentLength < length)
                     failed = true;
                 break;
             case IStringAssert.Compare.GREATER_THAN:
-                if (currentLength <= expectedLength)
+                if (currentLength <= length)
                     failed = true;
                 break;
             case IStringAssert.Compare.LESS_EQUAL:
-                if (currentLength > expectedLength)
+                if (currentLength > length)
                     failed = true;
                 break;
             case IStringAssert.Compare.LESS_THAN:
-                if (currentLength >= expectedLength)
+                if (currentLength >= length)
                     failed = true;
                 break;
         }
 
         if (failed)
-            ThrowTestFailureReport(AssertFailures.HasLength(currentLength, expectedLength, comparator), Current, expectedLength);
+            ThrowTestFailureReport(AssertFailures.HasLength(currentLength, length, comparator), Current, length);
         return this;
     }
 

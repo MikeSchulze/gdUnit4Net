@@ -17,7 +17,7 @@ using ExecutionContext = Execution.ExecutionContext;
 /// <summary>
 ///     A helper to simulate mouse moving form a source to final position
 /// </summary>
-internal partial class MouseMoveTask : Node, IDisposable
+public partial class MouseMoveTask : Node, IDisposable
 {
     public MouseMoveTask(Vector2 currentPosition, Vector2 finalPosition)
     {

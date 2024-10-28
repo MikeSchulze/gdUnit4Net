@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
+public sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
 {
     public ExceptionAssert(Action action)
     {
@@ -35,12 +35,12 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
         return this;
     }
 
-    public IExceptionAssert HasMessage(string message)
+    public IExceptionAssert HasMessage(string expected)
     {
-        message = message.UnixFormat();
+        expected = expected.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? "";
-        if (!current.Equals(message, StringComparison.Ordinal))
-            ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
+        if (!current.Equals(expected, StringComparison.Ordinal))
+            ThrowTestFailureReport(AssertFailures.IsEqual(current, expected));
         return this;
     }
 
@@ -91,12 +91,12 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert where TExce
         return this;
     }
 
-    public IExceptionAssert StartsWithMessage(string message)
+    public IExceptionAssert StartsWithMessage(string value)
     {
-        message = message.UnixFormat();
+        value = value.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? "";
-        if (!current.StartsWith(message, StringComparison.InvariantCulture))
-            ThrowTestFailureReport(AssertFailures.IsEqual(current, message));
+        if (!current.StartsWith(value, StringComparison.InvariantCulture))
+            ThrowTestFailureReport(AssertFailures.IsEqual(current, value));
         return this;
     }
 

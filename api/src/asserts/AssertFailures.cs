@@ -11,7 +11,7 @@ using Core.Extensions;
 using Godot;
 using Godot.Collections;
 
-internal static class AssertFailures
+public static class AssertFailures
 {
     internal const string WARN_COLOR = "#EFF883";
     internal const string ERROR_COLOR = "#CD5C5C";

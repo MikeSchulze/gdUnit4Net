@@ -6,7 +6,7 @@ using System.Linq;
 
 using CommandLine;
 
-internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
+public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
 {
     public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
     {

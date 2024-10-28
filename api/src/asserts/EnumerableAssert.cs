@@ -11,7 +11,7 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
 {
     public EnumerableAssert(IEnumerable? current) : base(current?.Cast<TValue?>())
     {
@@ -171,8 +171,8 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return CheckNotContains(expected_!, true);
     }
 
-    public IEnumerableAssert<object?> Extract(string funcName, params object[] args)
-        => ExtractV(new ValueExtractor(funcName, args));
+    public IEnumerableAssert<object?> Extract(string methodName, params object[] args)
+        => ExtractV(new ValueExtractor(methodName, args));
 
     public IEnumerableAssert<object?> ExtractV(params IValueExtractor[] extractors)
         => new EnumerableAssert<object?>(Current?.Select(v =>
