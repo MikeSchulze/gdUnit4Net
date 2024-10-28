@@ -1,3 +1,5 @@
+// ReSharper disable once CheckNamespace
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -9,13 +11,19 @@ using Core.Extensions;
 /// A tuple implementation to hold two or many values
 internal sealed class Tuple : ITuple
 {
-    public Tuple(params object?[] args) => Values = args.ToList() ?? new List<object?>();
+    private readonly IEnumerable<object?> values;
 
-    public IEnumerable<object?> Values { get; set; }
+    public Tuple(params object?[] args) => values = args.ToList();
+
+    public IEnumerable<object?> Values
+    {
+        get => values;
+        set => throw new NotImplementedException();
+    }
 
     public override bool Equals(object? obj) => obj is Tuple tuple && Values.VariantEquals(tuple.Values);
 
-    public override int GetHashCode() => HashCode.Combine(Values);
+    public override int GetHashCode() => HashCode.Combine(values);
 
     public override string ToString() => $"tuple({string.Join(", ", Values.Select(GdUnitExtensions.Formatted)).Indentation(0)})";
 

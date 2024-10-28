@@ -7,6 +7,8 @@ using System.Linq;
 
 using Core.Extensions;
 
+using Extractors;
+
 using Array = Godot.Collections.Array;
 
 internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>

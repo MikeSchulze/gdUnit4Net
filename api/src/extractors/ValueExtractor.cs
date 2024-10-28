@@ -1,15 +1,17 @@
-namespace GdUnit4.Asserts;
+namespace GdUnit4.Extractors;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using Asserts;
+
 using Core.Extensions;
 
 using Godot;
 
-public sealed class ValueExtractor : IValueExtractor
+internal sealed class ValueExtractor : IValueExtractor
 {
     private readonly IEnumerable<object> args;
     private readonly IEnumerable<string> methodNames;
