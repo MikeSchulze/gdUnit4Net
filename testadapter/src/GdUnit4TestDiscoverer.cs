@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Core.Extensions;
 
@@ -17,7 +15,6 @@ using Microsoft.TestPlatform.AdapterUtilities.ManagedNameUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using Settings;
 
@@ -47,94 +44,111 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             return;
         }
 
-        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
-        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
-        var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
+        var gdUnitSettings = GdUnit4Settings(discoveryContext);
         var filteredAssembles = FilterWithoutTestAdapter(sources);
 
         logger.SendMessage(TestMessageLevel.Informational, $"GdUnit4Settings: {gdUnitSettings.DisplayName}");
 
         foreach (var assemblyPath in filteredAssembles)
-        {
-            logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
-
-            using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath, logger);
-            if (codeNavigationProvider.GetAssembly() == null)
-                continue;
-            var assembly = codeNavigationProvider.GetAssembly()!;
-
-            var testsTotalDiscovered = 0;
-            var testSuiteDiscovered = 0;
-            // discover GdUnit4 testsuites
-            foreach (var type in assembly.GetTypes().Where(IsTestSuite))
+            try
             {
-                // discover test cases
-                var testCasesDiscovered = 0;
-                testSuiteDiscovered++;
-                var className = type.FullName!;
-                type.GetMethods()
-                    .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-                    .AsParallel()
-                    .ForAll(mi =>
-                    {
-                        var navData = codeNavigationProvider.GetNavigationData(className, mi);
-                        if (!navData.IsValid)
-                            logger.SendMessage(TestMessageLevel.Informational,
-                                $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
-
-                        ManagedNameHelper.GetManagedName(mi, out var managedType, out var managedMethod, out var hierarchyValues);
-                        ManagedNameParser.ParseManagedMethodName(managedMethod, out var methodName, out var parameterCount, out var parameterTypes);
-                        hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
-                        hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = methodName;
-                        var isAsync = MatchReturnType(mi, typeof(Task));
-                        // Collect test cases or build a single test
-                        mi.GetCustomAttributes(typeof(TestCaseAttribute))
-                            .Cast<TestCaseAttribute>()
-                            .Select((attr, index) => new TestCaseDescriptor
-                            {
-                                ManagedType = managedType,
-                                ManagedMethod = managedMethod,
-                                HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
-                                DisplayName = BuildDisplayName(managedType, mi.Name, index, attr, gdUnitSettings),
-                                FullyQualifiedName = Core.Execution.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
-                                Traits = TestCasePropertiesAsTraits(mi)
-                            })
-                            .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData))
-                            .OrderBy(t => t.DisplayName)
-                            .ToList()
-                            .ForEach(t =>
-                            {
-                                Interlocked.Increment(ref testsTotalDiscovered);
-                                Interlocked.Increment(ref testCasesDiscovered);
-                                discoverySink.SendTestCase(t);
-                            });
-                    });
-                logger.SendMessage(TestMessageLevel.Informational, $"Discover:  TestSuite {className} with {testCasesDiscovered} TestCases found.");
+                DiscoverTestSuitesFromAssembly(logger, discoverySink, assemblyPath, gdUnitSettings);
             }
-
-            logger.SendMessage(TestMessageLevel.Informational, $"Discover tests done, {testSuiteDiscovered} TestSuites and total {testsTotalDiscovered} Tests found.");
-        }
+            catch (Exception e)
+            {
+                logger.SendMessage(TestMessageLevel.Error, $"Error discovering tests in {assemblyPath}: {e}");
+            }
     }
 
-    internal static bool MatchReturnType(MethodInfo method, Type returnType)
+    private void DiscoverTestSuitesFromAssembly(IMessageLogger logger, ITestCaseDiscoverySink discoverySink, string assemblyPath, GdUnit4Settings gdUnitSettings)
+    {
+        logger.SendMessage(TestMessageLevel.Informational, $"Discover tests for assembly: {assemblyPath}");
+
+        using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath, logger);
+        if (codeNavigationProvider.GetAssembly() == null)
+            return;
+        var assembly = codeNavigationProvider.GetAssembly()!;
+
+        // discover GdUnit4 test suites
+        var testSuites = assembly.GetTypes().Where(IsTestSuite).ToList();
+        var testsTotalDiscovered = 0;
+        testSuites.ForEach(type =>
+        {
+            var className = type.FullName!;
+            var testCases = type.GetMethods()
+                .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+                .ToList()
+                .AsParallel()
+                // ReSharper disable once AccessToDisposedClosure
+                .SelectMany(mi => DiscoverTestCasesFromMethod(logger, assemblyPath, gdUnitSettings, codeNavigationProvider, className, mi))
+                .OrderBy(t => t.DisplayName)
+                .ToList();
+
+            testCases.ForEach(t =>
+            {
+                testsTotalDiscovered++;
+                discoverySink.SendTestCase(t);
+            });
+
+            logger.SendMessage(TestMessageLevel.Informational, $"Discover:  TestSuite {className} with {testCases.Count} TestCases found.");
+        });
+
+        logger.SendMessage(TestMessageLevel.Informational, $"Discover tests done, {testSuites.Count} TestSuites and total {testsTotalDiscovered} Tests found.");
+    }
+
+    private List<TestCase> DiscoverTestCasesFromMethod(IMessageLogger logger, string assemblyPath, GdUnit4Settings gdUnitSettings,
+        CodeNavigationDataProvider codeNavigationProvider, string className, MethodInfo mi)
+    {
+        var navData = codeNavigationProvider.GetNavigationData(className, mi);
+        if (!navData.IsValid)
+            logger.SendMessage(TestMessageLevel.Informational,
+                $"Can't collect code navigation data for {className}:{mi.Name}    GetNavigationData -> {navData.Source}:{navData.Line}");
+
+        ManagedNameHelper.GetManagedName(mi, out var managedType, out var managedMethod, out var hierarchyValues);
+        ManagedNameParser.ParseManagedMethodName(managedMethod, out var methodName, out _, out _);
+        hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
+        hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = methodName;
+        //var isAsync = MatchReturnType(mi, typeof(Task));
+        // Collect test cases or build a single test
+        return mi.GetCustomAttributes(typeof(TestCaseAttribute))
+            .Cast<TestCaseAttribute>()
+            .Select((attr, index) => new TestCaseDescriptor
+            {
+                ManagedType = managedType,
+                ManagedMethod = managedMethod,
+                HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
+                DisplayName = BuildDisplayName(managedType, mi.Name, index, attr, gdUnitSettings),
+                FullyQualifiedName = Core.Execution.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr)
+            })
+            .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData))
+            .OrderBy(t => t.DisplayName)
+            .ToList();
+    }
+
+    private static GdUnit4Settings GdUnit4Settings(IDiscoveryContext discoveryContext)
+    {
+        //var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
+        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
+        return gdUnitSettings;
+    }
+
+    /*
+    private static bool MatchReturnType(MethodInfo method, Type returnType)
         => method == null
             ? throw new ArgumentNullException(nameof(method))
             : returnType == null
                 ? throw new ArgumentNullException(nameof(returnType))
-                : method.ReturnType.Equals(returnType);
+                : method.ReturnType == returnType;
+    */
 
-
-    private List<Trait> TestCasePropertiesAsTraits(MethodInfo mi)
-        => mi.GetCustomAttributes(typeof(TestCaseAttribute))
-            .Cast<TestCaseAttribute>()
-            .Where(attr => attr.Arguments.Length != 0)
-            .Select(attr => attr.Name == null
-                ? new Trait(string.Empty, attr.Arguments.Formatted())
-                : new Trait(attr.Name, attr.Arguments.Formatted())
+    private static List<Trait> TestCasePropertiesAsTraits(TestCaseAttribute attr)
+        => attr.Arguments
+            .Select(arg => new Trait(attr.Name, arg.Formatted())
             )
             .ToList();
 
-    private TestCase BuildTestCase(TestCaseDescriptor descriptor, string assemblyPath, CodeNavigation navData)
+    private static TestCase BuildTestCase(TestCaseDescriptor descriptor, string assemblyPath, CodeNavigation navData)
     {
         TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), assemblyPath)
         {
@@ -179,8 +193,14 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     }
 
     private static IEnumerable<string> FilterWithoutTestAdapter(IEnumerable<string> assemblyPaths) =>
-        assemblyPaths.Where(assembly => !assembly.Contains(".TestAdapter."));
+        assemblyPaths.Where(assembly =>
+            !assembly.Contains(".TestAdapter.")
+            && !assembly.Contains("Microsoft.VisualStudio.TestPlatform")
+            && !assembly.Contains("MSTest.TestAdapter"));
 
     private static bool IsTestSuite(Type type) =>
-        type is { IsClass: true, IsAbstract: false } && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
+        type is { IsClass: true, IsAbstract: false }
+        && Attribute.IsDefined(type, typeof(TestSuiteAttribute))
+        && type.FullName != null
+        && !type.FullName.StartsWith("Microsoft.VisualStudio.TestTools");
 }

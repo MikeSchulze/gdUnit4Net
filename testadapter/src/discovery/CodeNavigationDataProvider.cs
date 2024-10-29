@@ -9,14 +9,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 public class CodeNavigationDataProvider : IDisposable
 {
-
-    public struct CodeNavigation
-    {
-        public int Line { get; set; }
-        public string? Source { get; set; }
-        public readonly bool IsValid => Source != null;
-    }
-
     private readonly Assembly? assembly;
     private readonly DiaSession diaSession;
 
@@ -30,7 +22,14 @@ public class CodeNavigationDataProvider : IDisposable
         {
             logger.SendMessage(TestMessageLevel.Error, e.Message);
         }
-        diaSession = new(assemblyPath);
+
+        diaSession = new DiaSession(assemblyPath);
+    }
+
+    public void Dispose()
+    {
+        diaSession.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     public Assembly? GetAssembly() => assembly;
@@ -38,8 +37,8 @@ public class CodeNavigationDataProvider : IDisposable
     public CodeNavigation GetNavigationData(string className, MethodInfo methodInfo)
     {
         var navigationData = TryGetNavigationDataForMethod(className, methodInfo)
-            ?? TryGetNavigationDataForAsyncMethod(methodInfo);
-        return new CodeNavigation()
+                             ?? TryGetNavigationDataForAsyncMethod(methodInfo);
+        return new CodeNavigation
         {
             Line = navigationData?.MinLineNumber ?? -1,
             Source = navigationData?.FileName
@@ -63,18 +62,19 @@ public class CodeNavigationDataProvider : IDisposable
     }
 
     private static Attribute? GetStateMachineAttribute(MethodInfo method) =>
-            method.GetCustomAttributes(false)
-                .Cast<Attribute>()
-                .FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
+        method.GetCustomAttributes(false)
+            .Cast<Attribute>()
+            .FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
 
     private static Type? GetStateMachineType(Attribute stateMachineAttribute) =>
         stateMachineAttribute.GetType()
             .GetProperty("StateMachineType")?
             .GetValue(stateMachineAttribute) as Type ?? null;
 
-    public void Dispose()
+    public readonly struct CodeNavigation
     {
-        diaSession?.Dispose();
-        GC.SuppressFinalize(this);
+        public int Line { get; init; }
+        public string? Source { get; init; }
+        public readonly bool IsValid => Source != null;
     }
 }

@@ -16,6 +16,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
     <PackageReference Include="gdUnit4.api" Version="4.4.0-rc2"/>
-    <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0-rc1"/>
+    <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0-rc2"/>
   </ItemGroup>
 </Project>
