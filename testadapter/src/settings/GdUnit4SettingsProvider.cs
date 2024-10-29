@@ -8,17 +8,18 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 [SettingsName(GdUnit4Settings.RunSettingsXmlNode)]
+// ReSharper disable once ClassNeverInstantiated.Global
 public class GdUnit4SettingsProvider : ISettingsProvider
 {
-    private XmlSerializer Serializer { get; set; } = new XmlSerializer(typeof(GdUnit4Settings));
+    private XmlSerializer Serializer { get; } = new(typeof(GdUnit4Settings));
 
-    public GdUnit4Settings Settings { get; private set; } = new GdUnit4Settings();
+    public GdUnit4Settings Settings { get; private set; } = new();
 
     public void Load(XmlReader reader)
     {
         try
         {
-            if (reader?.Read() == true && reader.Name == GdUnit4Settings.RunSettingsXmlNode)
+            if (reader.Read() && reader.Name == GdUnit4Settings.RunSettingsXmlNode)
             {
                 var settings = Serializer.Deserialize(reader) as GdUnit4Settings;
                 Settings = settings ?? new GdUnit4Settings();

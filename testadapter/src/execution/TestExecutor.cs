@@ -20,7 +20,7 @@ using Utilities;
 
 internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 {
-    private const string TempTestRunnerDir = "gdunit4_testadapter";
+    private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
     private readonly GdUnit4Settings gdUnit4Settings;
 
     private Process? pProcess;
@@ -31,7 +31,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             ? 1
             : configuration.MaxCpuCount;
         SessionTimeOut = (int)(configuration.TestSessionTimeout == 0
-            ? ITestExecutor.DEFAULT_SESSION_TIMEOUT
+            ? ITestExecutor.DefaultSessionTimeout
             : configuration.TestSessionTimeout);
 
         this.gdUnit4Settings = gdUnit4Settings;
@@ -180,7 +180,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
     private void InstallTestRunnerAndBuild(IFrameworkHandle frameworkHandle, string workingDirectory)
     {
-        var destinationFolderPath = Path.Combine(workingDirectory, @$"{TempTestRunnerDir}");
+        var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (Directory.Exists(destinationFolderPath))
             return;
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Installing GdUnit4 `TestRunner` at {destinationFolderPath}...");

@@ -118,8 +118,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 ManagedMethod = managedMethod,
                 HierarchyValues = new ReadOnlyCollection<string?>(hierarchyValues),
                 DisplayName = BuildDisplayName(managedType, mi.Name, index, attr, gdUnitSettings),
-                FullyQualifiedName = Core.Execution.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr),
-                Traits = TestCasePropertiesAsTraits(attr)
+                FullyQualifiedName = Core.Execution.TestCase.BuildFullyQualifiedName(managedType, mi.Name, attr)
             })
             .Select(testDescriptor => BuildTestCase(testDescriptor, assemblyPath, navData))
             .OrderBy(t => t.DisplayName)

@@ -22,17 +22,28 @@ using Environment = System.Environment;
 
 internal abstract class BaseTestExecutor
 {
-    protected string GodotBin { get; set; } = Environment.GetEnvironmentVariable("GODOT_BIN")
-                                              ?? throw new ArgumentNullException("Godot runtime is not set! Set env 'GODOT_BIN' is missing!");
+    protected static string GodotBin
+    {
+        get
+        {
+            var godotPath = Environment.GetEnvironmentVariable("GODOT_BIN");
+            if (string.IsNullOrEmpty(godotPath))
+                throw new InvalidOperationException(
+                    "Godot runtime is not configured. The environment variable 'GODOT_BIN' is not set or empty. Please set it to the Godot executable path.");
+            if (!File.Exists(godotPath))
+                throw new InvalidOperationException($"The Godot executable was not found at path: {godotPath}");
+            return godotPath;
+        }
+    }
 
-    protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => (sender, e) =>
+    protected static EventHandler ExitHandler(IFrameworkHandle? frameworkHandle) => (sender, _) =>
     {
         Console.Out.Flush();
         if (sender is Process p)
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
+            frameworkHandle?.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
     };
 
-    protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => (sender, args) =>
+    protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => (_, args) =>
     {
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
@@ -59,7 +70,8 @@ internal abstract class BaseTestExecutor
         {
             Included = groupedTestSuites.ToDictionary(
                 suite => suite.Key,
-                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
+                suite => suite.Value.Select(t =>
+                    new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
             ),
             CaptureStdOut = gdUnit4Settings.CaptureStdOut
         };
@@ -67,6 +79,7 @@ internal abstract class BaseTestExecutor
         File.WriteAllText(filePath, JsonConvert.SerializeObject(testConfig, Formatting.Indented));
         return filePath;
     }
+
 
     private static void CleanupRunnerConfigurations()
         => Directory.GetFiles(Directory.GetCurrentDirectory(), "GdUnitRunner_*.cfg")

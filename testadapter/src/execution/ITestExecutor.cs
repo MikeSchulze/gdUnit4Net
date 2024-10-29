@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 internal interface ITestExecutor : IDisposable
 {
-    public const int DEFAULT_SESSION_TIMEOUT = 30000;
+    public const int DefaultSessionTimeout = 30000;
 
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IReadOnlyList<TestCase> testCases);
 
