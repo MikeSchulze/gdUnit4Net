@@ -20,6 +20,7 @@ using static Utilities.Utils;
 using ITestExecutor = Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor;
 
 [ExtensionUri(ExecutorUri)]
+// ReSharper disable once ClassNeverInstantiated.Global
 public class GdUnit4TestExecutor : ITestExecutor, IDisposable
 {
     /// <summary>
@@ -63,8 +64,9 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         }
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+        //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        // ReSharper disable once UnusedVariable
         var filterExpression = runContext.GetTestCaseFilter(supportedProperties.Keys, propertyName =>
         {
             supportedProperties.TryGetValue(propertyName, out var testProperty);
