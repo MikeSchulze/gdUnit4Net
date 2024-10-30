@@ -33,6 +33,10 @@ internal sealed class TestCase
 
     internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
+    internal bool HasDataPoint => DataPoint != null;
+
+    internal DataPointAttribute? DataPoint => MethodInfo.GetCustomAttribute<DataPointAttribute>();
+
     public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
     private IEnumerable<object> Parameters

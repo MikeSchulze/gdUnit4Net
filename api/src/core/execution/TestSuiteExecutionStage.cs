@@ -1,7 +1,13 @@
 namespace GdUnit4.Core.Execution;
 
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+
+using Data;
+
+using Extensions;
 
 using Hooks;
 
@@ -44,11 +50,12 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
                 using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
-                if (testCase.IsParameterized)
+                if (testCase.HasDataPoint)
+                    await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase);
+                else if (testCase.IsParameterized)
                     await RunParameterizedTest(stdoutHook, testCaseContext, testCase);
                 else
-                    await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute,
-                        testCase.Arguments);
+                    await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
 
 
                 if (testCaseContext.IsFailed || testCaseContext.IsError)
@@ -60,21 +67,69 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         await AfterStage.Execute(testSuiteContext);
     }
 
-    private async Task RunParameterizedTest(IStdOutHook? stdOutHook, ExecutionContext executionContext,
-        TestCase testCase)
+    private async Task RunTestCaseWithDataPoint(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase)
     {
         executionContext.FireBeforeTestEvent();
-        foreach (var testAttribute in testCase.TestCaseAttributes)
+
+        try
         {
-            using ExecutionContext testCaseContext = new(executionContext, testCase, testAttribute);
-            await RunTestCase(stdOutHook, testCaseContext, testCase, testAttribute, testAttribute.Arguments);
+            var testAttribute = testCase.TestCaseAttributes.First();
+            if (DataPointValueProvider.IsAsyncDataPoint(testCase))
+            {
+                // Create a cancellation token that will timeout after the specified duration
+                var timeout = executionContext.GetExecutionTimeout(testAttribute);
+                using var cts = new CancellationTokenSource(timeout);
+
+                try
+                {
+                    await foreach (var dataPointValues in DataPointValueProvider.GetDataAsync(testCase, cts.Token).ConfigureAwait(false))
+                    {
+                        using ExecutionContext testCaseContext = new(executionContext, testCase, testCase.TestCaseAttributes);
+                        await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues);
+                    }
+                }
+                catch (AsyncDataPointCanceledException e)
+                {
+                    executionContext.ReportCollector.Consume(
+                        new TestReport(
+                            TestReport.ReportType.INTERRUPTED,
+                            executionContext.CurrentTestCase?.Line ?? -1,
+                            $"The execution has timed out after {timeout.Humanize()}.",
+                            e.StackTrace));
+                }
+            }
+            else
+            {
+                var dataPoints = DataPointValueProvider.GetData(testCase);
+                foreach (var dataPointValues in dataPoints)
+                {
+                    using ExecutionContext testCaseContext = new(executionContext, testCase, testCase.TestCaseAttributes);
+                    await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues);
+                }
+            }
+        }
+
+        catch (Exception e)
+        {
+            executionContext.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
         }
 
         executionContext.FireAfterTestEvent();
     }
 
-    private async Task RunTestCase(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase,
-        TestCaseAttribute stageAttribute,
+    private async Task RunParameterizedTest(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase)
+    {
+        executionContext.FireBeforeTestEvent();
+        foreach (var testAttribute in testCase.TestCaseAttributes)
+        {
+            using ExecutionContext testCaseContext = new(executionContext, testCase, testAttribute);
+            await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, testAttribute.Arguments);
+        }
+
+        executionContext.FireAfterTestEvent();
+    }
+
+    private async Task RunTestCase(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase, TestCaseAttribute stageAttribute,
         params object?[] methodArguments)
     {
         // start capturing stdout if enabled

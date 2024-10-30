@@ -72,6 +72,8 @@ internal sealed class ExecutionContext : IDisposable
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 
+    public TimeSpan ExecutionTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
     public bool IsCaptureStdOut
     {
         get;
@@ -234,4 +236,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public void PrintDebug(string name = "")
         => GD.PrintS(name, "test context", TestSuite.Name, TestCaseName, "error:" + IsError, "failed:" + IsFailed, "skipped:" + IsSkipped);
+
+    public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
+        testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);
 }
