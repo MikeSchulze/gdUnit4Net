@@ -136,82 +136,65 @@ internal static class DataPointValueProvider
 
     private static async IAsyncEnumerable<object?[]> StreamAsyncData(object asyncSource, Type returnType, TimeSpan timeout)
     {
-        using var cancellationToken = new CancellationTokenSource(timeout);
         var elementType = returnType.GetGenericArguments()[0];
+        var isArrayValue = elementType == typeof(object?[]) || elementType == typeof(object[]);
+        var enumerableInterface = typeof(IAsyncEnumerable<>).MakeGenericType(elementType);
+        var enumeratorInterface = typeof(IAsyncEnumerator<>).MakeGenericType(elementType);
 
-        // Handle IAsyncEnumerable<object?[]>
-        if (elementType == typeof(object[]) || elementType == typeof(object?[]))
+        using var cancellationToken = new CancellationTokenSource(timeout);
+        // Get the GetAsyncEnumerator method
+        var getEnumeratorMethod = enumerableInterface.GetMethod("GetAsyncEnumerator")
+                                  ?? throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on {enumerableInterface.FullName}");
+        var enumerator = getEnumeratorMethod.Invoke(asyncSource, new object[] { cancellationToken.Token })
+                         ?? throw new InvalidOperationException("GetAsyncEnumerator returned null");
+        var moveNextMethod = enumeratorInterface.GetMethod("MoveNextAsync")
+                             ?? throw new InvalidOperationException("Could not find MoveNextAsync method");
+        var currentProperty = enumeratorInterface.GetProperty("Current")
+                              ?? throw new InvalidOperationException("Could not find Current property");
+
+        try
         {
-            // Direct cast for object arrays
-            var enumerable = (IAsyncEnumerable<object?[]>)asyncSource;
-            var enumerator = enumerable.GetAsyncEnumerator(cancellationToken.Token);
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    try
-                    {
-                        // We use Task.WaitAsync to enforce timeout
-                        var hasNext = await enumerator.MoveNextAsync()
-                            .AsTask()
-                            .WaitAsync(cancellationToken.Token)
-                            .ConfigureAwait(false);
-
-                        if (!hasNext)
-                            break;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw new AsyncDataPointCanceledException($"The execution has timed out after {timeout.Humanize()}.", BuildStackTrace(asyncSource));
-                    }
-
-                    yield return enumerator.Current;
-                }
-            }
-            finally
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    if (enumerator is IAsyncDisposable disposable) await disposable.DisposeAsync();
+                    var moveNextTask = (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null)!;
+                    var hasNext = await moveNextTask
+                        .AsTask()
+                        .WaitAsync(cancellationToken.Token)
+                        .ConfigureAwait(false);
+
+                    if (!hasNext)
+                        break;
                 }
-                catch (Exception e) when (e is NotImplementedException or NotSupportedException)
+                catch (OperationCanceledException)
                 {
-                    // ignore it
+                    throw new AsyncDataPointCanceledException(
+                        $"The execution has timed out after {timeout.Humanize()}.",
+                        BuildStackTrace(asyncSource));
                 }
+
+                var current = currentProperty.GetValue(enumerator);
+                if (isArrayValue)
+                {
+                    if (current == null)
+                        continue;
+                    yield return (object?[])current;
+                }
+                else
+                    yield return new[] { current };
             }
         }
-        // Handle IAsyncEnumerable<T> for simple types
-        else
+        finally
         {
-            var enumerableInterface = typeof(IAsyncEnumerable<>).MakeGenericType(elementType);
-            var enumeratorInterface = typeof(IAsyncEnumerator<>).MakeGenericType(elementType);
-
-            // Get the GetAsyncEnumerator method from the interface
-            var getEnumeratorMethod = enumerableInterface.GetMethod("GetAsyncEnumerator");
-            if (getEnumeratorMethod == null)
-                throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on {enumerableInterface.FullName}");
-
-            var enumerator = getEnumeratorMethod.Invoke(asyncSource, new object[] { cancellationToken.Token });
-            if (enumerator == null)
-                throw new InvalidOperationException("GetAsyncEnumerator returned null");
-
-            var moveNextMethod = enumeratorInterface.GetMethod("MoveNextAsync");
-            var currentProperty = enumeratorInterface.GetProperty("Current");
-
-            if (moveNextMethod == null || currentProperty == null)
-                throw new InvalidOperationException("Could not find required members on enumerator interface");
-
             try
             {
-                while (await (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null)!)
-                {
-                    var current = currentProperty.GetValue(enumerator);
-                    yield return new[] { current };
-                }
+                if (enumerator is IAsyncDisposable disposable)
+                    await disposable.DisposeAsync();
             }
-            finally
+            catch (Exception e) when (e is NotImplementedException or NotSupportedException)
             {
-                if (enumerator is IAsyncDisposable disposable) await disposable.DisposeAsync();
+                // ignore disposal exceptions
             }
         }
     }
