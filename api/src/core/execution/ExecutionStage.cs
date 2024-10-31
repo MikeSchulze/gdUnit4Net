@@ -67,7 +67,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         }
         catch (ExecutionTimeoutException e)
         {
-            if (context.IsExpectingFailByException(e))
+            if (context.IsExpectingToFailWithException(e))
                 return;
             if (context.FailureReporting)
                 context.ReportCollector.Consume(new TestReport(ReportType.INTERRUPTED, e.LineNumber, e.Message));
@@ -97,7 +97,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
     {
-        if (context.IsExpectingFailByException(e))
+        if (context.IsExpectingToFailWithException(e))
             return;
         if (context.FailureReporting)
             context.ReportCollector.Consume(new TestReport(e));
@@ -108,7 +108,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         if (exception is TargetInvocationException)
         {
             var ei = ExceptionDispatchInfo.Capture(exception.InnerException ?? exception);
-            if (context.IsExpectingFailByException(ei.SourceException))
+            if (context.IsExpectingToFailWithException(ei.SourceException))
                 return;
             ReportUnexpectedException(context, ei.SourceException);
         }
