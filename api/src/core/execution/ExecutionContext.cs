@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 using Events;
@@ -71,6 +72,8 @@ internal sealed class ExecutionContext : IDisposable
         CurrentIteration = 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
+
+    private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 
     public bool IsCaptureStdOut
     {
@@ -189,6 +192,15 @@ internal sealed class ExecutionContext : IDisposable
         Stopwatch.Stop();
     }
 
+    public bool IsExpectingToFailWithException(Exception exception)
+    {
+        var attribute = CurrentTestCase?.MethodInfo.GetCustomAttribute<ThrowsExceptionAttribute>();
+        if (attribute == null)
+            return false;
+
+        return attribute.Verify(exception);
+    }
+
     private int OrphanCount(bool recursive)
     {
         var orphanCount = OrphanMonitor.OrphanCount;
@@ -234,4 +246,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public void PrintDebug(string name = "")
         => GD.PrintS(name, "test context", TestSuite.Name, TestCaseName, "error:" + IsError, "failed:" + IsFailed, "skipped:" + IsSkipped);
+
+    public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
+        testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);
 }
