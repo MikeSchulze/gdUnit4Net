@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 using Events;
@@ -72,7 +73,7 @@ internal sealed class ExecutionContext : IDisposable
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 
-    public TimeSpan ExecutionTimeout { get; set; } = TimeSpan.FromSeconds(30);
+    private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 
     public bool IsCaptureStdOut
     {
@@ -189,6 +190,15 @@ internal sealed class ExecutionContext : IDisposable
             catch (ObjectDisposedException e) { _ = e; }
         });
         Stopwatch.Stop();
+    }
+
+    public bool IsExpectingFailByException(Exception exception)
+    {
+        var expectFailByExceptionAttribute = CurrentTestCase?.MethodInfo.GetCustomAttribute<ThrowsExceptionAttribute>();
+        if (expectFailByExceptionAttribute == null)
+            return false;
+
+        return expectFailByExceptionAttribute.Verify(exception);
     }
 
     private int OrphanCount(bool recursive)

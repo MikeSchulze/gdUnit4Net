@@ -2,10 +2,9 @@
 
 using System;
 
-internal sealed class AsyncDataPointCanceledException : OperationCanceledException
+internal sealed class AsyncDataPointCanceledException : Exception
 {
-    public AsyncDataPointCanceledException(OperationCanceledException baseException, string stackTrace) : base(baseException.Message, baseException.CancellationToken)
-        => StackTrace = stackTrace;
+    public AsyncDataPointCanceledException(string message, string stackTrace) : base(message) => StackTrace = stackTrace;
 
     public override string StackTrace { get; }
 }

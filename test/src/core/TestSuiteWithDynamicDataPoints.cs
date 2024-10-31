@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using GdUnit4.Core.Data;
+
 using static Assertions;
 
 /// <summary>
@@ -120,9 +122,9 @@ public class TestSuiteWithDynamicDataPoints
     [DataPoint(nameof(AsyncSingleDataPoint))]
     public void OnAsyncSingleDataPoint(int a) => AssertThat(a).IsBetween(1, 3);
 
-
     [TestCase(Timeout = 100)]
     [DataPoint(nameof(AsyncArrayDataPointBlocked))]
+    [ThrowsException(typeof(AsyncDataPointCanceledException), "The execution has timed out after 100ms.")]
     public void OnAsyncArrayDataPointFailByTimeout(int a, int b, int expected) => AssertThat(a + b).IsEqual(expected);
 
     #endregion

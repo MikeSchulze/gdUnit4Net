@@ -80,13 +80,13 @@ using System;
 /// </code>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-public class DataPointAttribute : TestStageAttribute
+public class DataPointAttribute : Attribute
 {
     /// <summary>
     ///     Initializes a new instance of the DataPointAttribute class with a data source.
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
-    public DataPointAttribute(string dataPointSource) : base("", -1)
+    public DataPointAttribute(string dataPointSource)
     {
         DataPointSource = dataPointSource;
         DataPointParameters = null;
@@ -97,7 +97,7 @@ public class DataPointAttribute : TestStageAttribute
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
     /// <param name="dataPointDeclaringType">The type that contains the data source.</param>
-    public DataPointAttribute(string dataPointSource, Type dataPointDeclaringType) : base("", -1)
+    public DataPointAttribute(string dataPointSource, Type dataPointDeclaringType)
     {
         DataPointDeclaringType = dataPointDeclaringType;
         DataPointSource = dataPointSource;
@@ -109,7 +109,7 @@ public class DataPointAttribute : TestStageAttribute
     /// </summary>
     /// <param name="dataPointSource">The name of the method that provides the test data.</param>
     /// <param name="arguments">Arguments to pass to the data source method.</param>
-    public DataPointAttribute(string dataPointSource, params object?[] arguments) : base("", -1)
+    public DataPointAttribute(string dataPointSource, params object?[] arguments)
     {
         DataPointSource = dataPointSource;
         DataPointParameters = arguments;

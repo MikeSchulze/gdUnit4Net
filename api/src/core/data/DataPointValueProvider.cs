@@ -32,11 +32,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Execution;
+
+using Extensions;
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,7 +45,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// <summary>
 ///     Provides functionality to retrieve and process test data from data point sources for data-driven tests.
 ///     This class handles both synchronous and asynchronous data sources, supporting various data formats
-///     including arrays, enumerables, and single values.
+///     including arrays, enumerable, and single values.
 /// </summary>
 /// <remarks>
 ///     The DataPointValueProvider supports the following data source patterns:
@@ -114,7 +115,7 @@ internal static class DataPointValueProvider
         return data;
     }
 
-    internal static async IAsyncEnumerable<object?[]> GetDataAsync(TestCase testCase, [EnumeratorCancellation] CancellationToken cancellationToken)
+    internal static async IAsyncEnumerable<object?[]> GetDataAsync(TestCase testCase, TimeSpan timeout)
     {
         var dataPoint = testCase.DataPoint ??
                         throw new ArgumentNullException($"No data point specified at {testCase.DataPoint}.");
@@ -130,11 +131,12 @@ internal static class DataPointValueProvider
         if (!IsAsyncEnumerableType(returnType!))
             throw new ArgumentException($"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IAsyncEnumerable<T>");
 
-        await foreach (var item in StreamAsyncData(dataSource, returnType!, cancellationToken)) yield return item;
+        await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout)) yield return item;
     }
 
-    private static async IAsyncEnumerable<object?[]> StreamAsyncData(object asyncSource, Type returnType, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    private static async IAsyncEnumerable<object?[]> StreamAsyncData(object asyncSource, Type returnType, TimeSpan timeout)
     {
+        using var cancellationToken = new CancellationTokenSource(timeout);
         var elementType = returnType.GetGenericArguments()[0];
 
         // Handle IAsyncEnumerable<object?[]>
@@ -142,7 +144,7 @@ internal static class DataPointValueProvider
         {
             // Direct cast for object arrays
             var enumerable = (IAsyncEnumerable<object?[]>)asyncSource;
-            var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
+            var enumerator = enumerable.GetAsyncEnumerator(cancellationToken.Token);
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
@@ -152,16 +154,15 @@ internal static class DataPointValueProvider
                         // We use Task.WaitAsync to enforce timeout
                         var hasNext = await enumerator.MoveNextAsync()
                             .AsTask()
-                            .WaitAsync(cancellationToken)
+                            .WaitAsync(cancellationToken.Token)
                             .ConfigureAwait(false);
 
                         if (!hasNext)
                             break;
                     }
-                    catch (OperationCanceledException e)
+                    catch (OperationCanceledException)
                     {
-                        var stacktrace = BuildStackTrace(asyncSource);
-                        throw new AsyncDataPointCanceledException(e, stacktrace);
+                        throw new AsyncDataPointCanceledException($"The execution has timed out after {timeout.Humanize()}.", BuildStackTrace(asyncSource));
                     }
 
                     yield return enumerator.Current;
@@ -190,7 +191,7 @@ internal static class DataPointValueProvider
             if (getEnumeratorMethod == null)
                 throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on {enumerableInterface.FullName}");
 
-            var enumerator = getEnumeratorMethod.Invoke(asyncSource, new object[] { cancellationToken });
+            var enumerator = getEnumeratorMethod.Invoke(asyncSource, new object[] { cancellationToken.Token });
             if (enumerator == null)
                 throw new InvalidOperationException("GetAsyncEnumerator returned null");
 
@@ -249,7 +250,7 @@ internal static class DataPointValueProvider
 
             var methodName = sourceType.Name.Split('<', '>')[1];
             var sourceFile = LookupClassPath(originalType);
-            if (sourceFile == null) return $"at {originalType.FullName}.{methodName}";
+            if (sourceFile == null) return $"at {originalType.FullName}.{methodName}()";
 
             // If we found the source file, parse it to find the method line
             var sourceText = File.ReadAllText(sourceFile);
@@ -265,11 +266,11 @@ internal static class DataPointValueProvider
             {
                 var lineSpan = tree.GetLineSpan(methodDeclaration.Span);
                 var lineNumber = lineSpan.StartLinePosition.Line + 1;
-                return $"at {originalType.FullName}.{methodName} in {sourceFile}:line {lineNumber}";
+                return $"at {originalType.FullName}.{methodName}() in {sourceFile}:line {lineNumber}";
             }
 
             // For now, return basic information while we examine the debug output
-            return $"at {originalType.FullName}.{methodName}";
+            return $"at {originalType.FullName}.{methodName}()";
         }
         catch (Exception e)
         {
