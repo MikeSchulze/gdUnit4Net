@@ -30,6 +30,8 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 {
     private readonly NamedPipeServerStream server = new(TestAdapterReporter.PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
+    internal int CompletedTests { get; set; }
+
     public async ValueTask DisposeAsync()
     {
         if (server.IsConnected)
@@ -136,10 +138,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
 
                     var testResult = new TestResult(testCase)
                     {
-                        DisplayName = testCase.DisplayName,
-                        Outcome = e.AsTestOutcome(),
-                        EndTime = DateTimeOffset.Now,
-                        Duration = e.ElapsedInMs
+                        DisplayName = testCase.DisplayName, Outcome = e.AsTestOutcome(), EndTime = DateTimeOffset.Now, Duration = e.ElapsedInMs
                     };
 
                     e.Reports.ForEach(report => AddTestReport(frameworkHandle, report, testResult));
@@ -148,6 +147,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
                     frameworkHandle.RecordResult(testResult);
                     frameworkHandle.RecordEnd(testCase, testResult.Outcome);
+                    CompletedTests += 1;
                     break;
                 }
                 case TestEvent.TYPE.TESTSUITE_AFTER:

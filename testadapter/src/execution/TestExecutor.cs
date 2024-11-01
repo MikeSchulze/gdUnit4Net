@@ -9,10 +9,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Core.Extensions;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using Microsoft.Win32.SafeHandles;
 
 using Settings;
 
@@ -41,6 +42,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     private object ProcessLock { get; } = new();
 
 #pragma warning disable IDE0052 // Remove unread private members
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     private int ParallelTestCount { get; set; }
 #pragma warning restore IDE0052 // Remove unread private members
 
@@ -49,18 +51,17 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     public void Cancel()
     {
         lock (CancelLock)
-        {
-            Console.WriteLine("Cancel triggered");
             try
             {
-                pProcess?.Kill(true);
-                pProcess?.WaitForExit();
+                Console.WriteLine("Cancel triggered");
+                if (pProcess != null && !pProcess.WaitForExit(0))
+                    pProcess?.Kill(true);
             }
             catch (Exception)
             {
+                Console.Error.WriteLine("Cancel triggered");
                 //fh.SendMessage(TestMessageLevel.Error, @$"TestRunner ends with: {e.Message}");
             }
-        }
     }
 
     public void Dispose()
@@ -101,6 +102,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    }) == false)
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
+        //  --log-file godot.log
         var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
         frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
@@ -116,66 +118,83 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         };
 
         lock (ProcessLock)
-            if (runContext.IsBeingDebugged && frameworkHandle is IFrameworkHandle2 fh2 && fh2.GetType().ToString().Contains("JetBrains") &&
-                fh2.GetType().Assembly.GetName().Version >= new Version("2.16.1.14"))
+            try
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {fh2.GetType().Assembly.GetName().Version}");
-                RunDebugRider(fh2, processStartInfo);
-                File.Delete(configName);
-            }
-            else
-                using (pProcess = new Process { StartInfo = processStartInfo })
-                    try
-                    {
-                        pProcess.EnableRaisingEvents = true;
-                        pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
-                        pProcess.Exited += ExitHandler(frameworkHandle);
-                        pProcess.Start();
-                        pProcess.BeginErrorReadLine();
-                        pProcess.BeginOutputReadLine();
-                        AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
-                        pProcess.WaitForExit(SessionTimeOut);
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
-                        pProcess.Kill(true);
-                    }
-                    catch (Exception e)
-                    {
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}");
-                    }
-                    finally { File.Delete(configName); }
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
 
-        // wait until all event messages are processed or the client is disconnected
-        testEventServerTask.Wait(TimeSpan.FromSeconds(1));
+                // if we run on JetBrains Rider in debug mode we need to setup the debugging in a custom way
+                if (runContext.IsBeingDebugged && IsJetBrainsRider(frameworkHandle))
+                    pProcess = RunDebugRider(frameworkHandle, processStartInfo);
+                else
+                {
+                    // spawn a new child process to run Godot to execute the tests
+                    pProcess = new Process { StartInfo = processStartInfo };
+                    pProcess.EnableRaisingEvents = true;
+                    pProcess.ErrorDataReceived += StdErrorProcessor(frameworkHandle);
+                    pProcess.Exited += ExitHandler(frameworkHandle);
+                    pProcess.Start();
+                    pProcess.BeginErrorReadLine();
+                    pProcess.BeginOutputReadLine();
+                    AttachDebuggerIfNeed(runContext, frameworkHandle, pProcess);
+                }
+
+                if (pProcess != null && pProcess.WaitForExit(SessionTimeOut))
+                    frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
+                else
+                {
+                    stopwatch.Stop();
+                    var message = $"""
+
+                                   ╔═══════════════════════ TEST SESSION TIMEOUT ═══════════════════════════════════════╗
+
+                                     Test execution exceeded maximum allowed time:
+                                       • Timeout: {TimeSpan.FromMilliseconds(SessionTimeOut).Humanize()}
+                                       • Total tests: {testCases.Count}
+                                       • Completed tests: {eventServer.CompletedTests}
+                                       • Time elapsed: {stopwatch.Elapsed.Humanize()}
+
+                                     ACTION REQUIRED: Please increase 'TestSessionTimeout' in your '.runsettings' file
+
+                                   ╚════════════════════════════════════════════════════════════════════════════════════╝
+                                   """;
+                    frameworkHandle.SendMessage(TestMessageLevel.Error, message);
+                    pProcess?.Kill(true);
+                }
+            }
+            catch (Exception e)
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Error, @$"Run TestRunner ends with an Exception: {e.Message}\n {e.StackTrace}");
+            }
+            finally
+            {
+                if (pProcess is IDisposable disposable)
+                    disposable.Dispose();
+                File.Delete(configName);
+                // wait until all event messages are processed or the client is disconnected
+                testEventServerTask.Wait(TimeSpan.FromSeconds(1));
+            }
     }
 
-    private void RunDebugRider(IFrameworkHandle2 fh2, ProcessStartInfo psi)
+    private static bool IsJetBrainsRider(IFrameworkHandle frameworkHandle)
+    {
+        var version = frameworkHandle.GetType().Assembly.GetName().Version;
+        if (frameworkHandle is not IFrameworkHandle2
+            || !frameworkHandle.GetType().ToString().Contains("JetBrains")
+            || version < new Version("2.16.1.14"))
+            return false;
+
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {version}");
+        return true;
+    }
+
+    private static Process RunDebugRider(IFrameworkHandle frameworkHandle, ProcessStartInfo psi)
     {
         // EnableShutdownAfterTestRun is not working we need to use SafeHandle the get the process running until the ExitCode is getted
-        fh2.EnableShutdownAfterTestRun = true;
-        fh2.SendMessage(TestMessageLevel.Informational, $"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
-        var processId = fh2.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
-        pProcess = Process.GetProcessById(processId);
-        SafeProcessHandle? processHandle = null;
-        try
-        {
-            processHandle = pProcess.SafeHandle;
-            var isExited = pProcess.WaitForExit(SessionTimeOut);
-            // it never exits on macOS ?
-            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {isExited} {processHandle}");
-            // enforce kill the process has also no affect on macOS
-            pProcess.Kill(true);
-            //fh2.SendMessage(TestMessageLevel.Informational, $"Process exited: HasExited: {pProcess.HasExited} {processHandle.IsClosed}");
-            // this line fails on macOS, maybe the SafeHandle works only on windows
-            //fh2.SendMessage(TestMessageLevel.Informational, @$"Run TestRunner ends with {pProcess.ExitCode}");
-        }
-        catch (Exception e)
-        {
-            fh2.SendMessage(TestMessageLevel.Error, e.Message);
-        }
-        finally
-        {
-            processHandle?.Dispose();
-        }
+        frameworkHandle.EnableShutdownAfterTestRun = true;
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Debug process started {psi.FileName} {psi.WorkingDirectory} {psi.Arguments}");
+        var processId = frameworkHandle.LaunchProcessWithDebuggerAttached(psi.FileName, psi.WorkingDirectory, psi.Arguments, psi.Environment);
+        return Process.GetProcessById(processId);
     }
 
     private void InstallTestRunnerAndBuild(IFrameworkHandle frameworkHandle, string workingDirectory)

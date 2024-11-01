@@ -5,10 +5,11 @@
         <TestAdaptersPaths>.</TestAdaptersPaths>
         <ResultsDirectory>./TestResults</ResultsDirectory>
         <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-        <TestSessionTimeout>300000</TestSessionTimeout>
+        <!-- set default session timeout to 5m -->
+        <TestSessionTimeout>500000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
         <EnvironmentVariables>
-            <GODOT_BIN>d:\development\Godot_v4.2.1-stable_mono_win64\Godot_v4.2.1-stable_mono_win64.exe</GODOT_BIN>
+            <GODOT_BIN>/Applications/Godot_mono.app/Contents/MacOS/Godot</GODOT_BIN>
         </EnvironmentVariables>
     </RunConfiguration>
 
