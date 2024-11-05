@@ -57,7 +57,9 @@ public class TestSuiteWithDynamicDataPoints
 
     #region public_data_points
 
-    [TestCase]
+    [TestCase(TestName = "Foo1")]
+    // [TestCase(TestName = "Foo2")]
+    // [TestCase(TestName = "Foo3")]
     [DataPoint(nameof(ArrayDataPointProperty))]
     public void OnPublicArrayDataPointProperty(int a, int b, int expected) => AssertThat(a + b).IsEqual(expected);
 

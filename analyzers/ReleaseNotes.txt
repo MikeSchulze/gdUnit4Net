@@ -1,0 +1,22 @@
+﻿v1.0.0-rc1
+This is the Initial release of the analyzers.
+
+Features:
+- Compile-time validation of GdUnit4 attribute combinations
+ - GDU0001: Detects and prevents multiple TestCase attributes when used with DataPoint attribute
+ - Provides clear error messages with method name identification
+ - Integrates seamlessly with Visual Studio and other IDEs
+
+Integration:
+- Automatically included with gdUnit4.api package
+- No additional configuration required
+- Built for .NET Standard 2.0 compatibility
+
+Technical Details:
+- Implementation based on Roslyn analyzer framework
+- IDE support for real-time error detection
+- Includes help link to documentation
+
+Known Limitations:
+- Currently only validates TestCase and DataPoint attribute combinations
+- Additional attribute validations planned for future releases

@@ -1,0 +1,76 @@
+﻿<!-- gdUnit4Analyzers.csproj -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../PackageVersions.props"/>
+
+  <PropertyGroup>
+    <Title>gdUnit4Analyzers</Title>
+    <Version>$(GdUnit4AnalyzersVersion)</Version>
+    <Description>
+      GdUnit4 Analyzers is a collection of Roslyn-based analyzers that provide compile-time validation for GdUnit4 test attributes.
+      It helps developers catch configuration errors early by enforcing correct attribute usage and combinations.
+    </Description>
+    <Copyright>© 2024 Mike Schulze</Copyright>
+    <Authors>Mike Schulze</Authors>
+  </PropertyGroup>
+
+  <!-- Build configuration -->
+  <PropertyGroup>
+    <RootNamespace>GdUnit4.Analyzers</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <OutputType>Library</OutputType>
+    <OutputPath>./nupkg</OutputPath>
+
+    <!-- Analyzer specific settings -->
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <DevelopmentDependency>true</DevelopmentDependency>
+
+    <!-- Fix for RS2008 warning -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalyzerLanguage>cs</AnalyzerLanguage>
+  </PropertyGroup>
+
+  <!-- Packaging -->
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net/analyzers</PackageProjectUrl>
+    <PackageId>gdUnit4.analyzers</PackageId>
+    <PackageVersion>$(GdUnit4AnalyzersVersion)</PackageVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <!-- Add version properties to enable analyzer version tracking -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="RootNamespace"/>
+    <CompilerVisibleProperty Include="ProjectDir"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <Content Include="../LICENSE"/>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
+    <None Include="../LICENSE" Pack="true" PackagePath="/"/>
+    <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
+    <None Include="../icon.png" Pack="true" PackagePath="/"/>
+  </ItemGroup>
+</Project>

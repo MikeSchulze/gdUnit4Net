@@ -6,6 +6,7 @@ Improvements:
 * GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
 * GD-140: Code cleanup and fix formatting, fix warnings
 * GD-144: Added AwaitInputProcessed to SceneRunner
+* GD-153: Add Roslyn Analyzer to validate TestCase and DataPoint attribute combinations
 
 -------------------------------------------------------------------------------------------------------
 

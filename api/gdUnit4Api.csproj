@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../PackageVersions.props" />
+  <Import Project="../PackageVersions.props"/>
 
   <PropertyGroup>
     <Title>gdUnit4Api</Title>
@@ -44,18 +44,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
-    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" />
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
+    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>
+
+    <PackageReference Include="gdUnit4.analyzers" Version="$(GdUnit4AnalyzersVersion)">
+      <PrivateAssets>none</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <PackageReference Include="Moq" Version="$(MoqVersion)"/>
     <!-- Content Include=".gitignore" -->
-    <Content Include="LICENSE" />
-    <None Include="README.md" Pack="true" PackagePath="/" />
-    <None Include="CONTRIBUTING.md" Pack="true" PackagePath="/" />
-    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/" />
-    <None Include="LICENSE" Pack="true" PackagePath="/" />
-    <None Include="icon.png" Pack="true" PackagePath="/" />
+    <Content Include="../LICENSE"/>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
+    <None Include="../LICENSE" Pack="true" PackagePath="/"/>
+    <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
+    <None Include="../icon.png" Pack="true" PackagePath="/"/>
   </ItemGroup>
 </Project>
