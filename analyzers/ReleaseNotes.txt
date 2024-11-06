@@ -7,8 +7,6 @@ Features:
 - Integrates seamlessly with Visual Studio and other IDEs
 
 Integration:
-- Automatically included with gdUnit4.api package
-- No additional configuration required
 - Built for .NET Standard 2.0 compatibility
 
 Technical Details:

@@ -7,9 +7,16 @@ test attributes and helps developers catch configuration errors early in the dev
 
 ## Features
 
-The analyzer is automatically included when referencing the gdUnit4.api package - no additional configuration required:
+The analyzer must be included by referencing the gdUnit4.analyzer package:
 
-`<PackageReference Include="gdUnit4.api" Version="4.4.0-rc3" />`
+```xml
+    <PackageReference Include="gdUnit4.api" Version="4.4.0"/>
+    <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0"/>
+    <PackageReference Include="gdUnit4.analyzers" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+```
 
 * Attribute Validation
 
