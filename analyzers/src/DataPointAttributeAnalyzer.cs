@@ -6,25 +6,12 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
+using static DiagnosticRules;
+
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class TestCaseAnalyzer : DiagnosticAnalyzer
+public class DataPointAttributeAnalyzer : DiagnosticAnalyzer
 {
-    private const string DiagnosticId = "GDU0001";
-    private const string Category = "GdUnit4";
-    private const string HelpLinkUri = "https://github.com/MikeSchulze/gdUnit4Net/wiki/Analyzers";
-
-    private static readonly DiagnosticDescriptor Rule = new(
-        DiagnosticId,
-        "Invalid TestCase attribute usage",
-        "Method '{0}' cannot have multiple TestCase attributes when DataPoint attribute is present",
-        Category,
-        DiagnosticSeverity.Error,
-        true,
-        "Methods decorated with DataPoint attribute can only have one TestCase attribute.",
-        HelpLinkUri,
-        WellKnownDiagnosticTags.Compiler);
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DataPoint.MultipleTestCaseAttributes);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -61,7 +48,7 @@ public class TestCaseAnalyzer : DiagnosticAnalyzer
                 if (attributeLocation != null)
                 {
                     var diagnostic = Diagnostic.Create(
-                        Rule,
+                        DataPoint.MultipleTestCaseAttributes,
                         attributeLocation,
                         methodSymbol.Name);
                     context.ReportDiagnostic(diagnostic);

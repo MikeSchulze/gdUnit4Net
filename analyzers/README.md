@@ -11,26 +11,26 @@ The analyzer is automatically included when referencing the gdUnit4.api package 
 
 `<PackageReference Include="gdUnit4.api" Version="4.4.0-rc3" />`
 
-### Attribute Validation
+* Attribute Validation
 
-The analyzer enforces correct usage of GdUnit4 test attributes:
+  The analyzer enforces correct usage of GdUnit4 test attributes:
 
-#### DataPoint and TestCase Combination Validation
+  #### Example: DataPoint and TestCase Combination Validation
 
-Validates proper combination of DataPoint and TestCase attributes:
+  Validates proper combination of DataPoint and TestCase attributes:
 
-```csharp
-// ✅ Valid: Single TestCase with DataPoint
-[TestCase]
-[DataPoint(nameof(TestData))]
-public void ValidTest(int a, int b) { }
-
-// ❌ Invalid: Multiple TestCase with DataPoint
-[TestCase]
-[TestCase]                         // Compile Error: GDU0001
-[DataPoint(nameof(TestData))]
-public void InvalidTest(int a, int b) { }
-```
+    ```csharp
+    // ✅ Valid: Single TestCase with DataPoint
+    [TestCase]
+    [DataPoint(nameof(TestData))]
+    public void ValidTest(int a, int b) { }
+    
+    // ❌ Invalid: Multiple TestCase with DataPoint
+    [TestCase]
+    [TestCase]                         // GdUnit0201 error: Method 'InvalidTest' cannot have multiple TestCase attributes when DataPoint attribute is present
+    [DataPoint(nameof(TestData))]
+    public void InvalidTest(int a, int b) { }
+    ```
 
 ## Technical Details
 

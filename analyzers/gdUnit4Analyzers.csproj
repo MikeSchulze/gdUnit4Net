@@ -29,6 +29,10 @@
     <!-- Fix for RS2008 warning -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalyzerLanguage>cs</AnalyzerLanguage>
+    <!-- Fix for RS2007 warning
+    https://github.com/dotnet/roslyn-analyzers/issues/7465
+    -->
+    <NoWarn>RS2007</NoWarn>
   </PropertyGroup>
 
   <!-- Packaging -->
@@ -62,6 +66,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
   </ItemGroup>
 
   <ItemGroup>

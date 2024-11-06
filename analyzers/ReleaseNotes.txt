@@ -3,9 +3,8 @@ This is the Initial release of the analyzers.
 
 Features:
 - Compile-time validation of GdUnit4 attribute combinations
- - GDU0001: Detects and prevents multiple TestCase attributes when used with DataPoint attribute
- - Provides clear error messages with method name identification
- - Integrates seamlessly with Visual Studio and other IDEs
+- Provides clear error messages with method name identification
+- Integrates seamlessly with Visual Studio and other IDEs
 
 Integration:
 - Automatically included with gdUnit4.api package
