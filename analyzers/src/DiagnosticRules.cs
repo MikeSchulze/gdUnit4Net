@@ -2,12 +2,12 @@
 
 using Microsoft.CodeAnalysis;
 
-public static class DiagnosticRules
+internal static class DiagnosticRules
 {
     private const string HELP_LINK = "https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/documentation";
 
     // Rule identifiers - makes it easier to track and maintain rule IDs
-    private static class RuleIds
+    internal static class RuleIds
     {
         // Rule IDs (GdUnit01xx)
         // public const string TestCaseName = "GdUnit0101";
@@ -22,9 +22,9 @@ public static class DiagnosticRules
         public const string AttributeUsage = "Attribute Usage";
     }
 
-    public static class DataPoint
+    internal static class DataPoint
     {
-        internal static readonly DiagnosticDescriptor MultipleTestCaseAttributes = new(
+        public static readonly DiagnosticDescriptor MultipleTestCaseAttributes = new(
             RuleIds.DataPointWithMultipleTestCase,
             "Multiple TestCase attributes not allowed with DataPoint",
             "Method '{0}' cannot have multiple TestCase attributes when DataPoint attribute is present",
