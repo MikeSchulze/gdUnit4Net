@@ -4,8 +4,12 @@ using System.Globalization;
 
 using Gu.Roslyn.Asserts;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using static TestSourceBuilder;
 
 [TestClass]
 public class DataPointAttributeAnalyzerTests
@@ -13,20 +17,16 @@ public class DataPointAttributeAnalyzerTests
     private readonly DiagnosticAnalyzer analyzer = new DataPointAttributeAnalyzer();
 
     [TestMethod]
-    public void SingleTestCaseWithDataPointNoError()
+    public void SingleTestCaseWithDataPoint()
     {
-        var source = TestCaseLoader.InstrumentTestCases(
+        var source = Instrument(
             """
-            [TestSuite]
-            public class TestClass
-            {
-              public static object[] TestData => new object[] { new object[] { 1, 2, 3 } };
+            public static object[] TestData => new object[] { new object[] { 1, 2, 3 } };
 
-              [TestCase]
-              [DataPoint(nameof(TestData))]
-              public void TestMethod(int a, int b, int expected)
-              {
-              }
+            [TestCase]
+            [DataPoint(nameof(TestData))]
+            public void TestMethod(int a, int b, int expected)
+            {
             }
             """);
 
@@ -34,49 +34,43 @@ public class DataPointAttributeAnalyzerTests
     }
 
     [TestMethod]
-    public void MultipleTestCaseWithDataPointReportsError()
+    public void MultipleTestCaseWithoutDataPoint()
     {
-        var source = TestCaseLoader.InstrumentTestCases(
+        var source = Instrument(
             """
-            [TestSuite]
-            public class TestClass
+            [TestCase]
+            [TestCase]
+            public void TestMethod(int a, int b)
             {
-                public static object[] TestData => new object[] { new object[] { 1, 2, 3 } };
-
-                [TestCase]
-                [TestCase]
-                [DataPoint(nameof(TestData))]
-                public void TestMethod(int a, int b, int expected)
-                {
-                }
-            }
-            """);
-
-        var expectedDiagnostic = ExpectedDiagnostic.Create(
-            DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
-            string.Format(CultureInfo.InvariantCulture,
-                DiagnosticRules.DataPoint.MultipleTestCaseAttributes.MessageFormat.ToString(),
-                "TestMethod"));
-
-        RoslynAssert.Diagnostics(analyzer, expectedDiagnostic, source);
-    }
-
-    [TestMethod]
-    public void NoDataPointMultipleTestCaseNoError()
-    {
-        var source = TestCaseLoader.InstrumentTestCases(
-            """
-            [TestSuite]
-            public class TestClass
-            {
-                [TestCase]
-                [TestCase]
-                public void TestMethod(int a, int b)
-                {
-                }
             }
             """);
 
         RoslynAssert.Valid(analyzer, source);
+    }
+
+    [TestMethod]
+    public void MultipleTestCaseWithDataPoint()
+    {
+        var source = Instrument(
+            """
+            public static object[] TestData => new object[] { new object[] { 1, 2, 3 } };
+
+            [TestCase]
+            [TestCase] // should fail
+            [DataPoint(nameof(TestData))]
+            public void TestMethod(int a, int b, int expected)
+            {
+            }
+            """);
+
+        var errorLine = new LinePosition(12, 1);
+        var expected = ExpectedDiagnostic
+            .Create(DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
+                string.Format(CultureInfo.InvariantCulture,
+                    DiagnosticRules.DataPoint.MultipleTestCaseAttributes.MessageFormat.ToString(), "TestMethod")
+            )
+            .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
+
+        RoslynAssert.Diagnostics(analyzer, expected, source);
     }
 }

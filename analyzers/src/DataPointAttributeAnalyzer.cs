@@ -35,25 +35,22 @@ public class DataPointAttributeAnalyzer : DiagnosticAnalyzer
         var hasDataPoint = methodSymbol.GetAttributes()
             .Any(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, dataPointAttr));
 
-        if (hasDataPoint)
-        {
-            // Get all TestCase attributes with their ApplicationSyntaxReference
-            var testCaseAttributes = methodSymbol.GetAttributes()
-                .Where(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, testCaseAttr))
-                .ToList();
-            // Report on all TestCase attributes after the first one
-            for (var i = 1; i < testCaseAttributes.Count; i++)
+        if (!hasDataPoint) return;
+
+        // Get all TestCase attributes with their ApplicationSyntaxReference
+        var testCaseAttributes = methodSymbol.GetAttributes()
+            .Where(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, testCaseAttr))
+            .Skip(1); // Skip the first TestCase attribute, one test case attribute is required
+
+        // Report on all TestCase attributes after the first one
+        foreach (var testCaseAttribute in testCaseAttributes)
+            if (testCaseAttribute.ApplicationSyntaxReference?.GetSyntax() is { } syntaxNode)
             {
-                var attributeLocation = testCaseAttributes[i].ApplicationSyntaxReference?.GetSyntax().GetLocation();
-                if (attributeLocation != null)
-                {
-                    var diagnostic = Diagnostic.Create(
-                        DataPoint.MultipleTestCaseAttributes,
-                        attributeLocation,
-                        methodSymbol.Name);
-                    context.ReportDiagnostic(diagnostic);
-                }
+                var diagnostic = Diagnostic.Create(
+                    DataPoint.MultipleTestCaseAttributes,
+                    syntaxNode.GetLocation(),
+                    methodSymbol.Name);
+                context.ReportDiagnostic(diagnostic);
             }
-        }
     }
 }
