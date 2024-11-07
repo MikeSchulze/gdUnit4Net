@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 internal static class DiagnosticRules
 {
-    private const string HELP_LINK = "https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/documentation";
+    public const string HELP_LINK = "https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/documentation";
 
     // Rule identifiers - makes it easier to track and maintain rule IDs
     internal static class RuleIds
