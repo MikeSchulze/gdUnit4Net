@@ -3,6 +3,7 @@
 .idea
 .godot
 obj/
+bin/
 nupkg/*
 .generated/
 *.*.import
