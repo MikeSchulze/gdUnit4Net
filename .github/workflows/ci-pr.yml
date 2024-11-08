@@ -34,12 +34,12 @@ jobs:
         run: |
           dotnet build ./api/gdUnit4Api.csproj
           dotnet build ./analyzers/gdUnit4Analyzers.csproj
-          dotnet build ./analyzers/test/gdUnit4Analyzers.Tests.csproj
+          dotnet build ./analyzers.test/gdUnit4Analyzers.Tests.csproj
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         run: |
-          cd analyzers/test
+          cd analyzers.test
           dotnet test gdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
@@ -49,8 +49,8 @@ jobs:
           retention-days: 10
           name: artifact_analyzer
           path: |
-            ./analyzers/test/TestResults/test-result.trx
-            ./analyzers/test/TestResults/test-result.html
+            ./analyzers.test/TestResults/test-result.trx
+            ./analyzers.test/TestResults/test-result.html
 
 
   unit-tests:

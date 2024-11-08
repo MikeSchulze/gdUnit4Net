@@ -13,7 +13,7 @@ public class DiagnosticsDocumentationTest
 {
     private static readonly string ProjectRoot = Directory.GetCurrentDirectory()
         .Split(Path.DirectorySeparatorChar)
-        .TakeWhile(dir => dir != "analyzers")
+        .TakeWhile(dir => dir != "analyzers.test")
         .Concat(new[] { "analyzers" })
         .Aggregate(Path.Combine);
 

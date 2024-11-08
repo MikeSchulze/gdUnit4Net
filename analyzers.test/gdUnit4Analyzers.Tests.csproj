@@ -1,16 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../PackageVersions.props"/>
+  <Import Project="../PackageVersions.props"/>
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <IsPackable>false</IsPackable>
     <RootNamespace>GdUnit4.Analyzers.Test</RootNamespace>
-
-    <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
-    <IsGodotToolsProject>true</IsGodotToolsProject>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
@@ -22,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../gdUnit4Analyzers.csproj"/>
-    <ProjectReference Include="../../api/gdUnit4Api.csproj"/>
+    <ProjectReference Include="../analyzers/gdUnit4Analyzers.csproj"/>
+    <ProjectReference Include="../api/gdUnit4Api.csproj"/>
   </ItemGroup>
 </Project>

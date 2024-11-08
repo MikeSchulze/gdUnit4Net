@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example", ".\example\exampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers", "analyzers\gdUnit4Analyzers.csproj", "{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", "analyzers\test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", "analyzers.test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

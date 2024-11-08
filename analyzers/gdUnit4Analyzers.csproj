@@ -46,7 +46,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
+    <PackageTags>GdUnit4Net;Test;Testing;UnitTest;GdUnit4;Analyzer</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -69,13 +69,7 @@
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
   </ItemGroup>
-
-  <!-- Exclude test files from build and package -->
-  <ItemGroup>
-    <Compile Remove="test/**/*.cs"/>
-    <None Include="test/**/*.cs"/>
-  </ItemGroup>
-
+  
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     <Content Include="../LICENSE"/>

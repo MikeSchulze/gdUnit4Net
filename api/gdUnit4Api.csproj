@@ -48,7 +48,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
     <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
-    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="CommandLineParser" Version="2.9.1"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
     <PackageReference Include="Moq" Version="$(MoqVersion)"/>
