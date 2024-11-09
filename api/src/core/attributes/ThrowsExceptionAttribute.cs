@@ -3,6 +3,7 @@
 namespace GdUnit4;
 
 using System;
+using System.Diagnostics;
 
 using Core.Execution.Exceptions;
 using Core.Extensions;
@@ -37,6 +38,8 @@ using Core.Extensions;
 internal class ThrowsExceptionAttribute : Attribute
 {
     private readonly Type expectedExceptionType;
+    private readonly string? expectedFileName;
+    private readonly int? expectedLineNumber;
     private readonly string? expectedMessage;
 
     /// <summary>
@@ -44,6 +47,7 @@ internal class ThrowsExceptionAttribute : Attribute
     /// </summary>
     /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
     internal ThrowsExceptionAttribute(Type expectedExceptionType) => this.expectedExceptionType = expectedExceptionType;
+
 
     /// <summary>
     ///     Initializes a new instance of the ThrowsExceptionAttribute with the specified exception type
@@ -55,6 +59,36 @@ internal class ThrowsExceptionAttribute : Attribute
     {
         this.expectedExceptionType = expectedExceptionType;
         this.expectedMessage = expectedMessage;
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the ThrowsExceptionAttribute with the specified exception type
+    ///     and expected exception message.
+    /// </summary>
+    /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
+    /// <param name="expectedMessage">The expected message of the thrown exception</param>
+    /// <param name="expectedLineNumber">The expected line of exception is thrown</param>
+    internal ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, int expectedLineNumber)
+    {
+        this.expectedExceptionType = expectedExceptionType;
+        this.expectedMessage = expectedMessage;
+        this.expectedLineNumber = expectedLineNumber;
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the ThrowsExceptionAttribute with the specified exception type
+    ///     and expected exception message.
+    /// </summary>
+    /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
+    /// <param name="expectedMessage">The expected message of the thrown exception</param>
+    /// <param name="expectedFileName">The expected file of exception is thrown</param>
+    /// <param name="expectedLineNumber">The expected line of exception is thrown</param>
+    internal ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, string expectedFileName, int expectedLineNumber)
+    {
+        this.expectedExceptionType = expectedExceptionType;
+        this.expectedMessage = expectedMessage;
+        this.expectedFileName = expectedFileName;
+        this.expectedLineNumber = expectedLineNumber;
     }
 
     /// <summary>
@@ -75,6 +109,57 @@ internal class ThrowsExceptionAttribute : Attribute
         if (expectedMessage != null && exceptionMessage != expectedMessage)
             throw new TestFailedException($"Expecting exception message\n\t\"{expectedMessage}\"\n but is\n\t\"{exceptionMessage}\"");
 
+        // Early return if we don't need to check file/line info
+        if (expectedLineNumber == null && expectedFileName == null)
+            return true;
+
+        // scan the stacktrace for actual line number
+        var stackTrace = new StackTrace(exception, true);
+        var frameInfo = FindRelevantStackFrame(stackTrace);
+
+        if (expectedFileName != null)
+        {
+            var normalizedExpectedPath = expectedFileName.Replace('\\', '/');
+            var normalizedActualPath = frameInfo.fileName?.Replace('\\', '/') ?? string.Empty;
+
+            // Check if actual path contains expected path (to handle relative paths)
+            if (!normalizedActualPath.Contains(normalizedExpectedPath, StringComparison.OrdinalIgnoreCase))
+                throw new TestFailedException($"Expecting exception at file\n\t{expectedFileName}\n but was at\n\t{frameInfo.fileName}");
+        }
+
+        if (expectedLineNumber != null && frameInfo.lineNumber != expectedLineNumber)
+            throw new TestFailedException($"Expecting exception at line\n\t{expectedLineNumber}\n but was at\n\t{frameInfo.lineNumber}");
         return true;
+    }
+
+    private (string? fileName, int lineNumber) FindRelevantStackFrame(StackTrace stackTrace)
+    {
+        foreach (var frame in stackTrace.GetFrames() ?? Array.Empty<StackFrame>())
+        {
+            var fileName = frame.GetFileName();
+            if (string.IsNullOrEmpty(fileName))
+                continue;
+
+            // Skip framework methods
+            var method = frame.GetMethod();
+            if (method?.DeclaringType?.Namespace?.StartsWith("System") == true ||
+                method.DeclaringType?.Namespace?.StartsWith("Microsoft") == true)
+                continue;
+
+            return (fileName, frame.GetFileLineNumber());
+        }
+
+        return (null, -1);
+    }
+
+    public void ThrowExpectingExceptionExpected()
+    {
+        var message = $"Expecting exception is thrown:\n\t{expectedExceptionType}\n\tmessage: '{expectedMessage}'\n\tin";
+        if (expectedFileName != null)
+            message += $" {expectedFileName}";
+        if (expectedLineNumber != null)
+            message += $":line {expectedLineNumber}";
+
+        throw new TestFailedException(message);
     }
 }

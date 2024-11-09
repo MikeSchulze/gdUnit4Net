@@ -31,11 +31,11 @@ public class TestSuiteWithExpectedExceptions
         throw new ArgumentException("The argument 'message' is invalid");
 
     [TestCase]
-    [ThrowsException(typeof(ArgumentNullException))]
+    [ThrowsException(typeof(NullReferenceException))]
     public void ExpectNullException()
     {
         string? value = null;
         // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-        value!.Contains(""); // This will throw ArgumentNullException
+        value!.Contains(""); // This will throw NullReferenceException
     }
 }

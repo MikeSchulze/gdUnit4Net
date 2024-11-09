@@ -192,13 +192,16 @@ internal sealed class ExecutionContext : IDisposable
         Stopwatch.Stop();
     }
 
-    public bool IsExpectingToFailWithException(Exception exception)
+    public bool IsExpectingToFailWithException(Exception? exception)
     {
         var attribute = CurrentTestCase?.MethodInfo.GetCustomAttribute<ThrowsExceptionAttribute>();
         if (attribute == null)
             return false;
 
-        return attribute.Verify(exception);
+        if (exception == null)
+            attribute.ThrowExpectingExceptionExpected();
+
+        return attribute.Verify(exception!);
     }
 
     private int OrphanCount(bool recursive)
