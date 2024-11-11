@@ -15,6 +15,8 @@ using Exceptions;
 
 using Extensions;
 
+using Hooks;
+
 using Reporting;
 
 using static Reporting.TestReport;
@@ -63,11 +65,26 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
+            // subscribe on Godot caught exceptions
+            Exception? caughtException = null;
+            using var subscribe = GodotExceptionHook.Subscribe(ex => caughtException ??= ex);
+
             await ExecuteStage(context);
+            // For async tests, wait for one more frame to catch any pending exceptions
+            if (IsAsync)
+            {
+                await ISceneRunner.SyncProcessFrame;
+                await ISceneRunner.SyncPhysicsFrame;
+            }
+
+            // If we caught an exception during execution, throw it now
+            if (caughtException != null) ExceptionDispatchInfo.Capture(caughtException).Throw();
+
+            ValidateForExpectedException(context);
         }
         catch (ExecutionTimeoutException e)
         {
-            if (context.IsExpectingToFailWithException(e))
+            if (ValidateForExpectedException(context, e))
                 return;
             if (context.FailureReporting)
                 context.ReportCollector.Consume(new TestReport(ReportType.INTERRUPTED, e.LineNumber, e.Message));
@@ -95,10 +112,27 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
     }
 
+
+    private static bool ValidateForExpectedException(ExecutionContext context, Exception? e = null)
+    {
+        try
+        {
+            if (context.IsExpectingToFailWithException(e))
+                return true;
+        }
+        catch (TestFailedException e2)
+        {
+            context.ReportCollector.Consume(new TestReport(e2));
+            return true;
+        }
+
+        return false;
+    }
+
     private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
     {
-        if (context.IsExpectingToFailWithException(e))
-            return;
+        if (ValidateForExpectedException(context, e)) return;
+
         if (context.FailureReporting)
             context.ReportCollector.Consume(new TestReport(e));
     }
@@ -108,12 +142,12 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         if (exception is TargetInvocationException)
         {
             var ei = ExceptionDispatchInfo.Capture(exception.InnerException ?? exception);
-            if (context.IsExpectingToFailWithException(ei.SourceException))
-                return;
             ReportUnexpectedException(context, ei.SourceException);
         }
         else
         {
+            if (ValidateForExpectedException(context, exception))
+                return;
             var stack = new StackTrace(exception, true);
             var lineNumber = ScanFailureLineNumber(stack);
             context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));

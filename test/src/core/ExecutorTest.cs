@@ -804,7 +804,7 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
             Tuple(TESTCASE_AFTER, "ExceptionIsThrownOnSceneInvoke", new List<TestReport>
             {
-                new(FAILURE, 12, """
+                new(FAILURE, 14, """
                                  Test Exception
                                  """)
             }),

@@ -47,6 +47,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpVersion)"/>
+    <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions-->
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
     <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
     <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)">
       <PrivateAssets>all</PrivateAssets>
