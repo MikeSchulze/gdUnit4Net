@@ -134,16 +134,15 @@ internal class ThrowsExceptionAttribute : Attribute
 
     private (string? fileName, int lineNumber) FindRelevantStackFrame(StackTrace stackTrace)
     {
-        foreach (var frame in stackTrace.GetFrames() ?? Array.Empty<StackFrame>())
+        foreach (var frame in stackTrace.GetFrames())
         {
             var fileName = frame.GetFileName();
             if (string.IsNullOrEmpty(fileName))
                 continue;
 
             // Skip framework methods
-            var method = frame.GetMethod();
-            if (method?.DeclaringType?.Namespace?.StartsWith("System") == true ||
-                method.DeclaringType?.Namespace?.StartsWith("Microsoft") == true)
+            var nameSpace = frame.GetMethod()?.DeclaringType?.Namespace;
+            if (nameSpace?.StartsWith("System") == true || nameSpace?.StartsWith("Microsoft") == true)
                 continue;
 
             return (fileName, frame.GetFileLineNumber());

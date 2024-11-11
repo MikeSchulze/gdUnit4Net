@@ -110,8 +110,7 @@ public sealed class GodotExceptionHook : IDisposable
         return new DisposableScope(() =>
         {
             lock (ExceptionHandlers)
-                if (ExceptionHandlers.Contains(handler))
-                    ExceptionHandlers.Remove(handler);
+                ExceptionHandlers.Remove(handler);
         });
     }
 
