@@ -7,6 +7,7 @@ Improvements:
 * GD-140: Code cleanup and fix formatting, fix warnings
 * GD-144: Added AwaitInputProcessed to SceneRunner
 * GD-153: Add Roslyn Analyzer to validate TestCase and DataPoint attribute combinations
+* GD-156: Add an exception hook to report exceptions as test errors that are normally caught and hidden by Godot
 
 -------------------------------------------------------------------------------------------------------
 
