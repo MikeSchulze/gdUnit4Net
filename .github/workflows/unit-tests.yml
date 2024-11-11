@@ -145,8 +145,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           echo "prebuild the nuget packages"
-          dotnet build ./api/gdUnit4Api.csproj
-          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
+          cd ./example
           dotnet restore
           dotnet build
 
