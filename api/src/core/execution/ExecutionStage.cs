@@ -55,9 +55,6 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             return;
         }
 
-        // subscribe on Godot caught exceptions
-        Exception? caughtException = null;
-        var subscribe = GodotExceptionHook.Subscribe(ex => caughtException ??= ex);
         try
         {
             // if the method is defined asynchronously, the return type must be a Task
@@ -68,7 +65,10 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
-            Console.WriteLine("Run test execution:");
+            // subscribe on Godot caught exceptions
+            Exception? caughtException = null;
+            using var subscribe = GodotExceptionHook.Subscribe(ex => caughtException ??= ex);
+
             await ExecuteStage(context);
             // For async tests, wait for one more frame to catch any pending exceptions
             if (IsAsync)
@@ -100,11 +100,6 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             else
                 // handle unexpected exceptions
                 ReportUnexpectedException(context, e);
-        }
-        finally
-        {
-            // if a subscriber registered we need to finally dispose to avoid memory leaks
-            subscribe?.Dispose();
         }
     }
 
