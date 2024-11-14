@@ -103,7 +103,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
         //  --log-file godot.log
-        var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
+        var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters} --log-file godot.log";
         frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
         {

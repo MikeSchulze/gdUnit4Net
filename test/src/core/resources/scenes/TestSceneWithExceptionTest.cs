@@ -19,6 +19,16 @@ public partial class TestSceneWithExceptionTest : Control
         // we throw an example exception
         if (frameCount == 10)
             throw new InvalidProgramException("Exception during scene processing");
+        try
+        {
+            if (frameCount == 5)
+                throw new InvalidProgramException("Exception during scene processing inside a catch block");
+        }
+        catch (InvalidProgramException)
+        {
+            // ignore
+        }
+
         frameCount++;
     }
 }

@@ -15,7 +15,7 @@ using Exceptions;
 
 using Extensions;
 
-using Hooks;
+using Monitoring;
 
 using Reporting;
 
@@ -23,6 +23,8 @@ using static Reporting.TestReport;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
+    private readonly GodotExceptionMonitor godotExceptionMonitor = new("godot.log");
+
     protected ExecutionStage(string name, Type type)
     {
         var method = type
@@ -65,20 +67,9 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
-            // subscribe on Godot caught exceptions
-            Exception? caughtException = null;
-            using var subscribe = GodotExceptionHook.Subscribe(ex => caughtException ??= ex);
-
+            godotExceptionMonitor.Start();
             await ExecuteStage(context);
-            // For async tests, wait for one more frame to catch any pending exceptions
-            if (IsAsync)
-            {
-                await ISceneRunner.SyncProcessFrame;
-                await ISceneRunner.SyncPhysicsFrame;
-            }
-
-            // If we caught an exception during execution, throw it now
-            if (caughtException != null) ExceptionDispatchInfo.Capture(caughtException).Throw();
+            await godotExceptionMonitor.Stop();
 
             ValidateForExpectedException(context);
         }

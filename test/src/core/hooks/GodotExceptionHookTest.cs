@@ -37,6 +37,9 @@ public partial class GodotExceptionHookTest
         runner.Invoke("SomeMethodThatThrowsException");
     }
 
+    [TestCase]
+    public void PrintGodotVersion() => Console.WriteLine(Engine.GetVersionInfo()["string"]);
+
     // Test class to verify the interceptor
     public partial class TestNode : Node
     {
