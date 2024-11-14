@@ -19,7 +19,7 @@ concurrency:
 jobs:
 
   analyzer-test:
-    name: "GdUnit4Net Analyzer Tests"
+    name: "🐧 GdUnit4Net Analyzer Tests"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
 
@@ -53,6 +53,41 @@ jobs:
             ./analyzers.test/TestResults/test-result.html
 
 
+  test-adapter-test:
+    name: "🐧 GdUnit4Net TestAdapter Tests"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "Build"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
+          dotnet build ./testadapter.test/gdUnit4TestAdapter.Tests.csproj
+
+      - name: "Run Unit Tests"
+        if: ${{ !cancelled() }}
+        run: |
+          cd testadapter.test
+          dotnet test gdUnit4TestAdapter.Tests.csproj --settings .runsettings --no-build --verbosity normal
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 10
+          name: artifact_analyzer
+          path: |
+            ./testadapter.test/TestResults/test-result.trx
+            ./testadapter.test/TestResults/test-result.html
+
+
   unit-tests:
     strategy:
       fail-fast: false
@@ -76,7 +111,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [analyzer-test, unit-tests]
+    needs: [analyzer-test, test-adapter-test, unit-tests]
     steps:
       - run: exit 1
         if: >-

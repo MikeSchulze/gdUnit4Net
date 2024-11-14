@@ -3,6 +3,7 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 
 using Discovery;
 
@@ -73,6 +74,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
             return testProperty;
         });
 
+        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         executor.Run(fh, runContext, tests.ToList());
     }
@@ -100,6 +102,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
 
+        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         executor.Run(fh, runContext, discoverySink.TestCases);
     }
@@ -111,5 +114,18 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     {
         fh?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
         executor?.Cancel();
+    }
+
+    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
+    {
+        try
+        {
+            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+        }
+        catch (XmlException ex)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
+        }
     }
 }
