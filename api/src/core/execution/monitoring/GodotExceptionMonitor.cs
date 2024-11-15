@@ -32,11 +32,19 @@ public class GodotExceptionMonitor
     private readonly string godotLogFile;
     private long eof;
 
-    public GodotExceptionMonitor(string godotLogFile) => this.godotLogFile = godotLogFile;
+    public GodotExceptionMonitor()
+    {
+        godotLogFile = ProjectSettings.GlobalizePath((string)ProjectSettings.GetSetting("debug/file_logging/log_path"));
+        if (!(IsLogFileAvailable = File.Exists(godotLogFile))) Console.WriteLine($"The Godot logfile is not available: {godotLogFile}");
+    }
+
+    private bool IsLogFileAvailable { get; }
 
     public void Start()
     {
         AppDomain.CurrentDomain.FirstChanceException += OnFirstChanceException;
+        if (!IsLogFileAvailable)
+            return;
 
         try
         {
@@ -51,15 +59,19 @@ public class GodotExceptionMonitor
         }
     }
 
-    public async Task Stop()
+    public async Task Stop(bool isAsync)
     {
-        var tree = Engine.GetMainLoop() as SceneTree;
-        await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
-        await tree.ToSignal(tree, SceneTree.SignalName.PhysicsFrame);
+        if (isAsync)
+        {
+            // we need to wait the curren Godot main tread has processed all nodes
+            var tree = Engine.GetMainLoop() as SceneTree;
+            await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+            await tree.ToSignal(tree, SceneTree.SignalName.PhysicsFrame);
+        }
 
         AppDomain.CurrentDomain.FirstChanceException -= OnFirstChanceException;
 
-        if (CaughtExceptions.Count == 0)
+        if (!IsLogFileAvailable)
             return;
 
         try
@@ -73,12 +85,9 @@ public class GodotExceptionMonitor
                             ExceptionDispatchInfo.Capture(exception).Throw();
                         break;
                     case ErrorLogEntry.ErrorType.PushError:
-                        throw new TestFailedException(logEntry.Message);
-                        break;
+                        throw TestFailedException.FromPushError(logEntry.Message, logEntry.Details);
                     case ErrorLogEntry.ErrorType.PushWarning:
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
         }
         finally

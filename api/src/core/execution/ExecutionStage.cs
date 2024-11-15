@@ -21,9 +21,11 @@ using Reporting;
 
 using static Reporting.TestReport;
 
+using Environment = System.Environment;
+
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
-    private readonly GodotExceptionMonitor godotExceptionMonitor = new("godot.log");
+    private readonly GodotExceptionMonitor godotExceptionMonitor = new();
 
     protected ExecutionStage(string name, Type type)
     {
@@ -69,7 +71,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
             godotExceptionMonitor.Start();
             await ExecuteStage(context);
-            await godotExceptionMonitor.Stop();
+            await godotExceptionMonitor.Stop(IsAsync);
 
             ValidateForExpectedException(context);
         }

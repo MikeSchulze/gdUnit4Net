@@ -9,7 +9,9 @@
         <TestSessionTimeout>500000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
         <EnvironmentVariables>
-            <GODOT_BIN>/Applications/Godot_mono.app/Contents/MacOS/Godot</GODOT_BIN>
+            <GODOT_BIN>D:\development\Godot_v4.4-dev3_mono_win64\Godot_v4.4-dev3_mono_win64.exe</GODOT_BIN>
+            <!-- <GODOT_BIN>D:\development\Godot_v4.3-stable_mono_win64\Godot_v4.3-stable_mono_win64.exe</GODOT_BIN> -->
+            <!-- <GODOT_BIN>D:\development\Godot_v4.2.1-stable_mono_win64\Godot_v4.2.1-stable_mono_win64.exe</GODOT_BIN> -->
         </EnvironmentVariables>
     </RunConfiguration>
 

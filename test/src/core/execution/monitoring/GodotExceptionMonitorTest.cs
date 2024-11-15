@@ -1,16 +1,18 @@
-﻿namespace GdUnit4.Tests.Core.Hooks;
+﻿namespace GdUnit4.Tests.Core.Execution.Monitoring;
 
 using System;
 using System.Threading.Tasks;
 
+using GdUnit4.Core.Execution.Exceptions;
+
 using Godot;
 
 [TestSuite]
-public partial class GodotExceptionHookTest
+public partial class GodotExceptionMonitorTest
 {
     [TestCase]
-    [ThrowsException(typeof(InvalidOperationException), "This is a internal test exception.",
-        "/src/core/hooks/GodotExceptionHookTest.cs", 45)]
+    [ThrowsException(typeof(InvalidOperationException), "TestNode '_Ready' failed.",
+        "/src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 52)]
     public void CatchExceptionOnAddingNodeToSceneTree()
     {
         var sceneTree = (SceneTree)Engine.GetMainLoop();
@@ -38,13 +40,15 @@ public partial class GodotExceptionHookTest
     }
 
     [TestCase]
-    public void PrintGodotVersion() => Console.WriteLine(Engine.GetVersionInfo()["string"]);
+    [ThrowsException(typeof(TestFailedException), "Testing Godot PushError",
+        "src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 45)]
+    public void PushErrorAsTestFailure() => GD.PushError("Testing Godot PushError");
 
     // Test class to verify the interceptor
     public partial class TestNode : Node
     {
         public override void _Ready() =>
             // Trigger a test exception
-            throw new InvalidOperationException("This is a internal test exception.");
+            throw new InvalidOperationException("TestNode '_Ready' failed.");
     }
 }

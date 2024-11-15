@@ -113,10 +113,7 @@ internal class ThrowsExceptionAttribute : Attribute
         if (expectedLineNumber == null && expectedFileName == null)
             return true;
 
-        // scan the stacktrace for actual line number
-        var stackTrace = new StackTrace(exception, true);
-        var frameInfo = FindRelevantStackFrame(stackTrace);
-
+        var frameInfo = ExtractFileLineInfo(exception);
         if (expectedFileName != null)
         {
             var normalizedExpectedPath = expectedFileName.Replace('\\', '/');
@@ -132,8 +129,11 @@ internal class ThrowsExceptionAttribute : Attribute
         return true;
     }
 
-    private (string? fileName, int lineNumber) FindRelevantStackFrame(StackTrace stackTrace)
+    private (string? fileName, int lineNumber) ExtractFileLineInfo(Exception exception)
     {
+        if (exception is TestFailedException testFailedException) return (testFailedException.FileName, testFailedException.LineNumber);
+
+        var stackTrace = new StackTrace(exception, true);
         foreach (var frame in stackTrace.GetFrames())
         {
             var fileName = frame.GetFileName();
