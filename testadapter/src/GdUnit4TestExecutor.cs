@@ -3,6 +3,7 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 
 using Discovery;
 
@@ -57,6 +58,10 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
+        var testCases = tests.ToList();
+        if (testCases.Count == 0)
+            return;
+
         if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
         {
             fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
@@ -73,33 +78,31 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
             return testProperty;
         });
 
+        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, tests.ToList());
+        executor.Run(fh, runContext, testCases);
     }
 
     /// <summary>
     ///     Runs 'all' the tests present in the specified 'containers'.
     /// </summary>
-    /// <param name="tests">Path to test container files to look for tests in.</param>
+    /// <param name="sources">Path to test container files to look for tests in.</param>
     /// <param name="runContext">Context to use when executing the tests.</param>
     /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
-    public void RunTests(IEnumerable<string>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
+    public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'containers' is null, abort!");
+        _ = sources ?? throw new ArgumentNullException(nameof(sources), "Argument 'containers' is null, abort!");
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
-        {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
-            return;
-        }
-
         TestCaseDiscoverySink discoverySink = new();
-        new GdUnit4TestDiscoverer().DiscoverTests(tests, runContext, fh, discoverySink);
+        new GdUnit4TestDiscoverer().DiscoverTests(sources, runContext, fh, discoverySink);
+        if (discoverySink.TestCases.Count == 0) return;
+
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
 
+        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         executor.Run(fh, runContext, discoverySink.TestCases);
     }
@@ -111,5 +114,18 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     {
         fh?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
         executor?.Cancel();
+    }
+
+    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
+    {
+        try
+        {
+            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+        }
+        catch (XmlException ex)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
+        }
     }
 }

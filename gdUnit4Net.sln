@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers", "analyze
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", "analyzers.test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4TestAdapter.Tests", "testadapter.test\gdUnit4TestAdapter.Tests.csproj", "{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{F967E151-003F-4390-8B5E-62EC86C33528}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F967E151-003F-4390-8B5E-62EC86C33528}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F967E151-003F-4390-8B5E-62EC86C33528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
