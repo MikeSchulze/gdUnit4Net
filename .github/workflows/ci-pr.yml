@@ -19,7 +19,7 @@ concurrency:
 jobs:
 
   analyzer-test:
-    name: "🐧 GdUnit4Net Analyzer Tests"
+    name: "🐧 Analyzer Tests"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
 
@@ -54,7 +54,7 @@ jobs:
 
 
   test-adapter-test:
-    name: "🐧 GdUnit4Net TestAdapter Tests"
+    name: "🐧 TestAdapter Tests"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
 
@@ -100,7 +100,7 @@ jobs:
             godot-status: 'dev3'
 
 
-    name: "🐧 GdUnit4Net Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    name: "🐧 Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
