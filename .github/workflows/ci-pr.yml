@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           retention-days: 10
-          name: artifact_analyzer
+          name: artifact_adapter_tests
           path: |
             ./testadapter.test/TestResults/test-result.trx
             ./testadapter.test/TestResults/test-result.html

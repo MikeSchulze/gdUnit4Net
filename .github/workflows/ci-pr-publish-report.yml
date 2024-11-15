@@ -43,6 +43,17 @@ jobs:
           repository: MikeSchulze/gdUnit4Net
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
+
+      # publish TestAdapter Tests results
+      - name: Download TestAdapter tests artifacts
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: artifact_adapter_tests
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: MikeSchulze/gdUnit4Net
+          run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
+
+
       - name: Publish API Test Results
         uses: dorny/test-reporter@v1.9.1
         with:
@@ -54,6 +65,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: 'false'
           fail-on-empty: 'false'
+
 
       # publish Run gdUnit4-action results
       - name: Download action tests artifacts
