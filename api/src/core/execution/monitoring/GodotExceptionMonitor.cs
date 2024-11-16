@@ -59,7 +59,7 @@ public class GodotExceptionMonitor
         }
     }
 
-    public async Task Stop(bool isAsync)
+    public async Task StopThrow(bool isAsync)
     {
         if (isAsync)
         {

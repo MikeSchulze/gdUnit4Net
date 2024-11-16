@@ -21,8 +21,6 @@ using Reporting;
 
 using static Reporting.TestReport;
 
-using Environment = System.Environment;
-
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
     private readonly GodotExceptionMonitor godotExceptionMonitor = new();
@@ -50,6 +48,8 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private TestStageAttribute? StageAttribute { get; set; }
 
+    private bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
+
     public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
@@ -69,9 +69,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
-            godotExceptionMonitor.Start();
+            if (IsMonitoringOnGodotExceptionsEnabled)
+                godotExceptionMonitor.Start();
             await ExecuteStage(context);
-            await godotExceptionMonitor.Stop(IsAsync);
+            if (IsMonitoringOnGodotExceptionsEnabled)
+                await godotExceptionMonitor.StopThrow(IsAsync);
 
             ValidateForExpectedException(context);
         }
@@ -103,6 +105,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         StageAttribute = stageAttribute;
         IsAsync = method?.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
+        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttribute<GodotExceptionMonitorAttribute>() != null;
     }
 
 
