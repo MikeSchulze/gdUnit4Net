@@ -139,16 +139,13 @@ internal class GodotProjectSettings
 
     internal static string GlobalizeGodotPath(string path, string projectName)
     {
-        // Handle user specific paths
-        if (path.StartsWith("user://"))
-        {
-            var userPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            return path.Replace("user:/", Path.Combine(userPath, "Godot", "app_userdata", projectName)).Replace("/", Path.DirectorySeparatorChar.ToString());
-        }
+        if (!path.StartsWith("user://") && !path.StartsWith("res://"))
+            return path;
 
-        return path.StartsWith("res://")
-            ? path.Replace("res:/", Utils.GetProjectRoot()).Replace("/", Path.DirectorySeparatorChar.ToString())
-            : path;
+        return path
+            .Replace("user:/", Path.Combine(Utils.GetUserDataDirectory, "app_userdata", projectName))
+            .Replace("res:/", Utils.GetProjectDirectory)
+            .Replace("/", Path.DirectorySeparatorChar.ToString());
     }
 
 

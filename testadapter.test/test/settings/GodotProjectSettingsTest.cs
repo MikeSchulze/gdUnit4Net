@@ -1,6 +1,5 @@
 ﻿namespace GdUnit4.TestAdapter.Test.Settings;
 
-using System;
 using System.IO;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,7 +8,7 @@ using TestAdapter.Settings;
 
 using static TestUtils;
 
-using static Utilities.Utils;
+using static TestAdapter.Utilities.Utils;
 
 [TestClass]
 public class GodotProjectSettingsTest
@@ -19,11 +18,11 @@ public class GodotProjectSettingsTest
     {
         // user specific path
         Assert.AreEqual(
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Godot", "app_userdata", "gdUnit4Test", "logs", "godot.log"),
+            Path.Combine(GetUserDataDirectory, "app_userdata", "gdUnit4Test", "logs", "godot.log"),
             GodotProjectSettings.GlobalizeGodotPath("user://logs/godot.log", "gdUnit4Test"));
         // project specific path
         Assert.AreEqual(
-            Path.Combine(GetProjectRoot(), "logs", "godot.log"),
+            Path.Combine(GetProjectDirectory, "logs", "godot.log"),
             GodotProjectSettings.GlobalizeGodotPath("res://logs/godot.log", "gdUnit4Test"));
     }
 
@@ -59,7 +58,7 @@ public class GodotProjectSettingsTest
 
         // validate the log file path points to project root
         Assert.IsNotNull(settings.Debug);
-        var expectedLogFilePath = Path.Combine(GetProjectRoot(), "godot_session.log");
+        var expectedLogFilePath = Path.Combine(GetProjectDirectory, "godot_session.log");
         Assert.AreEqual(expectedLogFilePath, settings.Debug.FileLogging.LogPath);
     }
 }
