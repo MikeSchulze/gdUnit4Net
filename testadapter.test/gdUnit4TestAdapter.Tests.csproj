@@ -6,7 +6,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <IsPackable>false</IsPackable>
-    <RootNamespace>GdUnit4.TestAdapter.Test</RootNamespace>
+    <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
 
     <AssemblyName>gdUnit4.TestAdapter.Test</AssemblyName>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->

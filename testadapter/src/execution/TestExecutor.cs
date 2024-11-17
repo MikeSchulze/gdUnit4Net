@@ -34,10 +34,12 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         SessionTimeOut = (int)(configuration.TestSessionTimeout == 0
             ? ITestExecutor.DefaultSessionTimeout
             : configuration.TestSessionTimeout);
+        ResultsDirectory = configuration.ResultsDirectory;
 
         this.gdUnit4Settings = gdUnit4Settings;
     }
 
+    private string ResultsDirectory { get; }
     private object CancelLock { get; } = new();
     private object ProcessLock { get; } = new();
 
@@ -173,6 +175,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                 File.Delete(configName);
                 // wait until all event messages are processed or the client is disconnected
                 testEventServerTask.Wait(TimeSpan.FromSeconds(1));
+                CollectGodotLogFile(frameworkHandle);
             }
     }
 
@@ -260,5 +263,35 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
                                  """;
         File.WriteAllText(Path.Combine(destinationFolderPath, "TestAdapterRunner.tscn"), srcTestRunnerScene);
+    }
+
+    private void CollectGodotLogFile(IFrameworkHandle frameworkHandle)
+    {
+        var godotProjectFile = Path.Combine(Directory.GetCurrentDirectory(), "project.godot");
+        if (!File.Exists(godotProjectFile))
+            return;
+
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, "Append Godot logfile to the Results.");
+        try
+        {
+            var projectSettings = GodotProjectSettings.LoadFromFile(godotProjectFile);
+            var godotLogFile = projectSettings.Debug.FileLogging.LogPath;
+            if (!File.Exists(godotLogFile))
+            {
+                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Can't copy the Godot logfile, it is not found at: {godotLogFile}");
+                return;
+            }
+
+            var resultDir = Path.Combine(Directory.GetCurrentDirectory(), ResultsDirectory);
+            if (!Directory.Exists(resultDir))
+                Directory.CreateDirectory(resultDir);
+
+            var godotLogFileCopy = Path.Combine(Directory.GetCurrentDirectory(), ResultsDirectory, "godot.log");
+            File.Copy(godotLogFile, godotLogFileCopy);
+        }
+        catch (Exception e)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, $"Can't copy the Godot logfile: {e.Message}");
+        }
     }
 }
