@@ -112,13 +112,6 @@ jobs:
           xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci --verbosity normal
         # -verbosity:diag --blame
 
-      - name: "debug"
-        shell: bash
-        run: |
-          echo "list content"
-          tree
-          find /home -name godot.log
-
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
         uses: ./.github/actions/upload-test-report
