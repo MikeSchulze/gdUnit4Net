@@ -1,10 +1,10 @@
-﻿namespace GdUnit4.TestAdapter.Test.settings;
+﻿namespace GdUnit4.TestAdapter.Test.Settings;
 
 using System.Collections.Generic;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Settings;
+using TestAdapter.Settings;
 
 [TestClass]
 public class RunSettingsProviderTest

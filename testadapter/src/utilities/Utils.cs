@@ -1,6 +1,8 @@
 namespace GdUnit4.TestAdapter.Utilities;
 
 using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -19,5 +21,17 @@ internal static class Utils
         }
 
         return true;
+    }
+
+    internal static string GetProjectRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory != null &&
+               !directory.EnumerateFiles("*.sln").Any() &&
+               !directory.EnumerateFiles("*.csproj").Any())
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new FileNotFoundException($"Could not find project root directory {directory}");
     }
 }
