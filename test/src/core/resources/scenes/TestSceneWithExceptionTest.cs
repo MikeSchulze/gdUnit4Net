@@ -16,6 +16,7 @@ public partial class TestSceneWithExceptionTest : Control
 
     public override void _Process(double delta)
     {
+        frameCount++;
         // we throw an example exception
         if (frameCount == 10)
             throw new InvalidProgramException("Exception during scene processing");
@@ -28,7 +29,5 @@ public partial class TestSceneWithExceptionTest : Control
         {
             // ignore
         }
-
-        frameCount++;
     }
 }

@@ -73,7 +73,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 godotExceptionMonitor.Start();
             await ExecuteStage(context);
             if (IsMonitoringOnGodotExceptionsEnabled)
-                await godotExceptionMonitor.StopThrow(IsAsync);
+                await godotExceptionMonitor.StopThrow();
 
             ValidateForExpectedException(context);
         }

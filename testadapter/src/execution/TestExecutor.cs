@@ -288,7 +288,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                 Directory.CreateDirectory(resultDir);
 
             var godotLogFileCopy = Path.Combine(Directory.GetCurrentDirectory(), ResultsDirectory, "godot.log");
-            File.Copy(godotLogFile, godotLogFileCopy);
+            File.Copy(godotLogFile, godotLogFileCopy, true);
         }
         catch (Exception e)
         {

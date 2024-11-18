@@ -21,7 +21,7 @@ public partial class GodotExceptionMonitorTest
 
     [TestCase]
     [ThrowsException(typeof(InvalidProgramException), "Exception during scene processing",
-        "src/core/resources/scenes/TestSceneWithExceptionTest.cs", 21)]
+        "src/core/resources/scenes/TestSceneWithExceptionTest.cs", 22)]
     public async Task CatchExceptionOnSceneTreeProcessing()
     {
         var sceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithExceptionTest.tscn", true);

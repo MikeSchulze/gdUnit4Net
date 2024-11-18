@@ -59,20 +59,16 @@ public class GodotExceptionMonitor
         }
     }
 
-    public async Task StopThrow(bool isAsync)
+    public async Task StopThrow()
     {
-        if (isAsync)
-        {
-            // we need to wait the curren Godot main tread has processed all nodes
-            var tree = Engine.GetMainLoop() as SceneTree;
-            await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
-            await tree.ToSignal(tree, SceneTree.SignalName.PhysicsFrame);
-        }
-
         AppDomain.CurrentDomain.FirstChanceException -= OnFirstChanceException;
 
         if (!IsLogFileAvailable)
             return;
+
+        // we need to wait the curren Godot main tread has processed all nodes
+        var tree = Engine.GetMainLoop() as SceneTree;
+        await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
 
         try
         {
