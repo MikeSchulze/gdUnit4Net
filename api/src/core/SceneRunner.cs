@@ -249,15 +249,14 @@ internal sealed class SceneRunner : ISceneRunner
 
     public async Task SimulateFrames(uint frames, uint deltaPeerFrame)
     {
-        for (var frame = 0; frame < frames; frame++)
+        for (var frame = 0; frame <= frames; frame++)
             await AwaitMillis(deltaPeerFrame);
     }
 
     public async Task SimulateFrames(uint frames)
     {
         var timeShiftFrames = Math.Max(1, frames / TimeFactor);
-        for (var frame = 0; frame < timeShiftFrames; frame++)
-            await ISceneRunner.SyncProcessFrame;
+        for (var frame = 0; frame <= timeShiftFrames; frame++) await ISceneRunner.SyncProcessFrame;
     }
 
     public Node Scene() => currentScene;
@@ -320,7 +319,7 @@ internal sealed class SceneRunner : ISceneRunner
             return;
         DeactivateTimeFactor();
         ResetInputToDefault();
-        DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
+        //DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
         SceneTree.Root.RemoveChild(currentScene);
         if (SceneAutoFree && GodotObject.IsInstanceValid(currentScene))
             currentScene.Free();

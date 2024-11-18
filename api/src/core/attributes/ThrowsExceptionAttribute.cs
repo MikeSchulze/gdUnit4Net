@@ -9,33 +9,73 @@ using Core.Execution.Exceptions;
 using Core.Extensions;
 
 /// <summary>
-///     Specifies that a test method is expected to throw an exception to the given type.
-///     The test will only pass if the expected exception is thrown and optionally matches
-///     the specified exception message.
+///     Specifies that a test method is expected to throw an exception of the given type. The test will pass only if:
+///     <list type="bullet">
+///         <li>The expected exception type is thrown</li>
+///         <li>The exception message matches (if specified)</li>
+///         <li>The exception occurs at the expected file and line (if specified)</li>
+///     </list>
 /// </summary>
 /// <remarks>
-///     This attribute can be used to verify that a test method correctly throws
-///     expected exceptions under specific conditions.
-///     Example usage:
+///     This attribute can be used in several ways:
+///     <list type="bullet">
+///         <li>Basic exception type verification</li>
+///         <li>Exception type and message verification</li>
+///         <li>Full exception verification including source location</li>
+///     </list>
+///     Multiple attributes can be applied to handle different possible exceptions:
 ///     <code>
 /// [TestCase]
 /// [ThrowsException(typeof(ArgumentNullException))]
-/// public void TestExpectedNullException()
+/// [ThrowsException(typeof(InvalidOperationException))]
+/// public void TestMethodCanThrowMultipleExceptions()
 /// {
-///     string? value = null;
-///     value.Length; // This will throw ArgumentNullException
+///     // Test logic that might throw either exception
 /// }
-///
+/// </code>
+///     The attribute supports Godot-specific exceptions when used with <see cref="GodotExceptionMonitorAttribute" />:
+///     <code>
 /// [TestCase]
-/// [ThrowsException(typeof(ArgumentException), "Invalid argument")]
-/// public void TestExpectedExceptionWithMessage()
+/// [GodotExceptionMonitor]
+/// [ThrowsException(typeof(InvalidOperationException), "Node not found", "/scenes/test_scene.cs", 25)]
+/// public void TestGodotException()
 /// {
-///     throw new ArgumentException("Invalid argument");
+///     // Test Godot code that throws during scene processing
+/// }
+/// </code>
+///     Basic usage example:
+///     <code>
+/// [TestCase]
+/// [ThrowsException(typeof(ArgumentNullException))]
+/// public void TestNullArgument()
+/// {
+///     string? text = null;
+///     text.Length; // Will throw ArgumentNullException
+/// }
+/// </code>
+///     Message verification example:
+///     <code>
+/// [TestCase]
+/// [ThrowsException(typeof(ArgumentException), "Value cannot be zero")]
+/// public void TestSpecificError()
+/// {
+///     throw new ArgumentException("Value cannot be zero");
+/// }
+/// </code>
+///     Location verification example:
+///     <code>
+/// [TestCase]
+/// [ThrowsException(typeof(InvalidOperationException), "Operation failed", "TestClass.cs", 42)]
+/// public void TestExceptionLocation()
+/// {
+///     throw new InvalidOperationException("Operation failed");
 /// }
 /// </code>
 /// </remarks>
-[AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal class ThrowsExceptionAttribute : Attribute
+/// <seealso cref="GodotExceptionMonitorAttribute" />
+/// <seealso cref="TestCaseAttribute" />
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+public class ThrowsExceptionAttribute : GodotExceptionMonitorAttribute
 {
     private readonly Type expectedExceptionType;
     private readonly string? expectedFileName;
@@ -46,7 +86,7 @@ internal class ThrowsExceptionAttribute : Attribute
     ///     Initializes a new instance of the ThrowsExceptionAttribute with the specified exception type.
     /// </summary>
     /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
-    internal ThrowsExceptionAttribute(Type expectedExceptionType) => this.expectedExceptionType = expectedExceptionType;
+    public ThrowsExceptionAttribute(Type expectedExceptionType) => this.expectedExceptionType = expectedExceptionType;
 
 
     /// <summary>
@@ -55,7 +95,7 @@ internal class ThrowsExceptionAttribute : Attribute
     /// </summary>
     /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
     /// <param name="expectedMessage">The expected message of the thrown exception</param>
-    internal ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage)
+    public ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage)
     {
         this.expectedExceptionType = expectedExceptionType;
         this.expectedMessage = expectedMessage;
@@ -68,7 +108,7 @@ internal class ThrowsExceptionAttribute : Attribute
     /// <param name="expectedExceptionType">The Type of exception that is expected to be thrown</param>
     /// <param name="expectedMessage">The expected message of the thrown exception</param>
     /// <param name="expectedLineNumber">The expected line of exception is thrown</param>
-    internal ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, int expectedLineNumber)
+    public ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, int expectedLineNumber)
     {
         this.expectedExceptionType = expectedExceptionType;
         this.expectedMessage = expectedMessage;
@@ -83,7 +123,7 @@ internal class ThrowsExceptionAttribute : Attribute
     /// <param name="expectedMessage">The expected message of the thrown exception</param>
     /// <param name="expectedFileName">The expected file of exception is thrown</param>
     /// <param name="expectedLineNumber">The expected line of exception is thrown</param>
-    internal ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, string expectedFileName, int expectedLineNumber)
+    public ThrowsExceptionAttribute(Type expectedExceptionType, string expectedMessage, string expectedFileName, int expectedLineNumber)
     {
         this.expectedExceptionType = expectedExceptionType;
         this.expectedMessage = expectedMessage;
@@ -101,7 +141,7 @@ internal class ThrowsExceptionAttribute : Attribute
     ///     - The exception type does not match the expected type
     ///     - The exception message does not match the expected message (if a message was specified)
     /// </exception>
-    public bool Verify(Exception exception)
+    internal bool Verify(Exception exception)
     {
         if (exception.GetType() != expectedExceptionType)
             throw new TestFailedException($"Expecting exception type\n\t{expectedExceptionType}\n but is\n\t{exception.GetType()}.");
@@ -113,10 +153,7 @@ internal class ThrowsExceptionAttribute : Attribute
         if (expectedLineNumber == null && expectedFileName == null)
             return true;
 
-        // scan the stacktrace for actual line number
-        var stackTrace = new StackTrace(exception, true);
-        var frameInfo = FindRelevantStackFrame(stackTrace);
-
+        var frameInfo = ExtractFileLineInfo(exception);
         if (expectedFileName != null)
         {
             var normalizedExpectedPath = expectedFileName.Replace('\\', '/');
@@ -132,8 +169,11 @@ internal class ThrowsExceptionAttribute : Attribute
         return true;
     }
 
-    private (string? fileName, int lineNumber) FindRelevantStackFrame(StackTrace stackTrace)
+    private (string? fileName, int lineNumber) ExtractFileLineInfo(Exception exception)
     {
+        if (exception is TestFailedException testFailedException) return (testFailedException.FileName, testFailedException.LineNumber);
+
+        var stackTrace = new StackTrace(exception, true);
         foreach (var frame in stackTrace.GetFrames())
         {
             var fileName = frame.GetFileName();
@@ -151,7 +191,7 @@ internal class ThrowsExceptionAttribute : Attribute
         return (null, -1);
     }
 
-    public void ThrowExpectingExceptionExpected()
+    internal void ThrowExpectingExceptionExpected()
     {
         var message = $"Expecting exception is thrown:\n\t{expectedExceptionType}\n\tmessage: '{expectedMessage}'\n\tin";
         if (expectedFileName != null)

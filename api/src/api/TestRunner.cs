@@ -11,7 +11,6 @@ using CommandLine;
 using Core;
 using Core.Events;
 using Core.Execution;
-using Core.Hooks;
 
 using Godot;
 
@@ -60,8 +59,6 @@ public partial class TestRunner : Node
                 return -1;
             }
 
-            // install exception hook to catch exceptions that swallowed by the Godot exception handler
-            using var exceptionHook = GodotExceptionHook.Instance;
             using Executor executor = new();
             executor.AddTestEventListener(listener);
 

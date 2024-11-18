@@ -15,7 +15,7 @@ using Exceptions;
 
 using Extensions;
 
-using Hooks;
+using Monitoring;
 
 using Reporting;
 
@@ -23,6 +23,8 @@ using static Reporting.TestReport;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
+    private readonly GodotExceptionMonitor godotExceptionMonitor = new();
+
     protected ExecutionStage(string name, Type type)
     {
         var method = type
@@ -46,6 +48,8 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private TestStageAttribute? StageAttribute { get; set; }
 
+    private bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
+
     public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
@@ -65,20 +69,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
-            // subscribe on Godot caught exceptions
-            Exception? caughtException = null;
-            using var subscribe = GodotExceptionHook.Subscribe(ex => caughtException ??= ex);
-
+            if (IsMonitoringOnGodotExceptionsEnabled)
+                godotExceptionMonitor.Start();
             await ExecuteStage(context);
-            // For async tests, wait for one more frame to catch any pending exceptions
-            if (IsAsync)
-            {
-                await ISceneRunner.SyncProcessFrame;
-                await ISceneRunner.SyncPhysicsFrame;
-            }
-
-            // If we caught an exception during execution, throw it now
-            if (caughtException != null) ExceptionDispatchInfo.Capture(caughtException).Throw();
+            if (IsMonitoringOnGodotExceptionsEnabled)
+                await godotExceptionMonitor.StopThrow();
 
             ValidateForExpectedException(context);
         }
@@ -110,6 +105,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         StageAttribute = stageAttribute;
         IsAsync = method?.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
+        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttribute<GodotExceptionMonitorAttribute>() != null;
     }
 
 

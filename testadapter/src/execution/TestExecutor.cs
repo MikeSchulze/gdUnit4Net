@@ -105,6 +105,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         //    : testCases;
         var testRunnerScene = "res://gdunit4_testadapter/TestAdapterRunner.tscn";
         //  --log-file godot.log
+
         var arguments = $"{debugArg} --path . {testRunnerScene} --testadapter --configfile=\"{configName}\" {gdUnit4Settings.Parameters}";
         frameworkHandle.SendMessage(TestMessageLevel.Informational, @$"Run with args {arguments}");
         var processStartInfo = new ProcessStartInfo(@$"{GodotBin}", arguments)
@@ -287,7 +288,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                 Directory.CreateDirectory(resultDir);
 
             var godotLogFileCopy = Path.Combine(Directory.GetCurrentDirectory(), ResultsDirectory, "godot.log");
-            File.Copy(godotLogFile, godotLogFileCopy);
+            File.Copy(godotLogFile, godotLogFileCopy, true);
         }
         catch (Exception e)
         {
