@@ -54,7 +54,6 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 else
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
 
-
                 if (testCaseContext.IsFailed || testCaseContext.IsError)
                 {
                     //break;

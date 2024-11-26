@@ -50,7 +50,7 @@ public static class GdUnitAwaiter
         private async Task CallAndWaitIsFinished(Predicate comparator) => await Task.Run(async () =>
         {
             // sync to main thread
-            await ISceneRunner.SyncProcessFrame;
+            await GodotObjectExtensions.SyncProcessFrame;
             var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args);
             comparator(value);
         });
