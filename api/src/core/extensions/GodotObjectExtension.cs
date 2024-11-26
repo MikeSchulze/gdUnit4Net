@@ -18,6 +18,22 @@ using Array = Godot.Collections.Array;
 /// </summary>
 internal static class GodotObjectExtensions
 {
+    private static SceneTree Instance =>
+        Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("SceneTree is not initialized");
+
+    /// <summary>
+    ///     A utility to synchronize the current thread with the Godot physics thread.
+    ///     This can be used to await the completion of a single physics frame in Godot.
+    /// </summary>
+    internal static SignalAwaiter SyncProcessFrame =>
+        Instance.ToSignal(Instance, SceneTree.SignalName.ProcessFrame);
+
+    /// <summary>
+    ///     A util to synchronize the current thread with the Godot physics thread
+    /// </summary>
+    internal static SignalAwaiter SyncPhysicsFrame =>
+        Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
+
     internal static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight, Mode compareMode = Mode.CaseSensitive)
     {
         object? left = inLeft.UnboxVariant();
@@ -261,6 +277,7 @@ internal static class GodotObjectExtensions
 
         return result;
     }
+
 
     internal enum Mode
     {

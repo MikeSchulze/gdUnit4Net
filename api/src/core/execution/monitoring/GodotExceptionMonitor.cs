@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 using Exceptions;
 
+using Extensions;
+
 using Godot;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -66,9 +68,8 @@ public class GodotExceptionMonitor
         if (!IsLogFileAvailable)
             return;
 
-        // we need to wait the curren Godot main tread has processed all nodes
-        var tree = Engine.GetMainLoop() as SceneTree;
-        await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+        // we need to wait the current Godot main tread has processed all nodes
+        await GodotObjectExtensions.SyncProcessFrame;
 
         try
         {

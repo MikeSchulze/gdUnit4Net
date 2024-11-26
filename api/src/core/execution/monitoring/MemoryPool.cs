@@ -2,6 +2,9 @@ namespace GdUnit4.Core.Execution.Monitoring;
 
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+
+using Extensions;
 
 using Godot;
 
@@ -10,12 +13,22 @@ internal class MemoryPool
     private static readonly ThreadLocal<MemoryPool?> CurrentPool = new();
     private readonly List<GodotObject> registeredObjects = new();
 
+    public MemoryPool(bool reportOrphanNodesEnabled) => OrphanMonitor = reportOrphanNodesEnabled ? new OrphanNodesMonitor() : null;
+
+    private OrphanNodesMonitor? OrphanMonitor
+    {
+        get;
+    }
+
+    public int OrphanCount => OrphanMonitor?.OrphanCount ?? 0;
+
     public string Name { get; set; } = "Unknown";
 
-    public void SetActive(string name)
+    public void SetActive(string name, bool reset = false)
     {
         Name = name;
         CurrentPool.Value = this;
+        OrphanMonitor?.Start(reset);
     }
 
     public static T? RegisterForAutoFree<T>(T? obj) where T : GodotObject
@@ -25,11 +38,14 @@ internal class MemoryPool
         return obj;
     }
 
-    public void ReleaseRegisteredObjects()
+    public async Task Gc()
     {
         var currentPool = CurrentPool.Value;
         currentPool?.registeredObjects.ForEach(FreeInstance);
         currentPool?.registeredObjects.Clear();
+        StopMonitoring();
+        if (OrphanMonitor != null)
+            await GodotObjectExtensions.SyncProcessFrame;
     }
 
     private void FreeInstance(GodotObject obj)
@@ -43,4 +59,6 @@ internal class MemoryPool
                 obj.Free();
         }
     }
+
+    public void StopMonitoring() => OrphanMonitor?.Stop();
 }

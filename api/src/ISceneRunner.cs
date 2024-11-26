@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 
 using Core;
+using Core.Extensions;
 
 using Godot;
 
@@ -12,21 +13,16 @@ using Godot;
 /// </summary>
 public interface ISceneRunner : IDisposable
 {
-    internal static SceneTree Instance =>
-        Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("SceneTree is not initialized");
-
     /// <summary>
     ///     A utility to synchronize the current thread with the Godot physics thread.
     ///     This can be used to await the completion of a single physics frame in Godot.
     /// </summary>
-    public static SignalAwaiter SyncProcessFrame =>
-        Instance.ToSignal(Instance, SceneTree.SignalName.ProcessFrame);
+    public static SignalAwaiter SyncProcessFrame => GodotObjectExtensions.SyncProcessFrame;
 
     /// <summary>
     ///     A util to synchronize the current thread with the Godot physics thread
     /// </summary>
-    public static SignalAwaiter SyncPhysicsFrame =>
-        Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
+    public static SignalAwaiter SyncPhysicsFrame => GodotObjectExtensions.SyncPhysicsFrame;
 
     /// <summary>
     ///     Loads a scene into the SceneRunner to be simulated.

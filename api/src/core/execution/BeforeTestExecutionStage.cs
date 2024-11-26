@@ -13,10 +13,9 @@ internal class BeforeTestExecutionStage : ExecutionStage<BeforeTestAttribute>
         context.FireBeforeTestEvent();
         if (!context.IsSkipped)
         {
-            context.MemoryPool.SetActive(StageName);
-            context.OrphanMonitor.Start(true);
+            context.MemoryPool.SetActive(StageName, true);
             await base.Execute(context);
-            context.OrphanMonitor.Stop();
+            context.MemoryPool.StopMonitoring();
         }
     }
 }

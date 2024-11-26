@@ -9,8 +9,6 @@ using System.Threading;
 
 using Events;
 
-using Godot;
-
 using Monitoring;
 
 using Reporting;
@@ -22,8 +20,7 @@ internal sealed class ExecutionContext : IDisposable
     public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
-        MemoryPool = new MemoryPool();
-        OrphanMonitor = new OrphanNodesMonitor(reportOrphanNodesEnabled);
+        MemoryPool = new MemoryPool(reportOrphanNodesEnabled);
         Stopwatch = new Stopwatch();
         Stopwatch.Start();
 
@@ -92,16 +89,10 @@ internal sealed class ExecutionContext : IDisposable
         set;
     }
 
-    public OrphanNodesMonitor OrphanMonitor
-    {
-        get;
-        set;
-    }
 
     public MemoryPool MemoryPool
     {
         get;
-        set;
     }
 
     private Stopwatch Stopwatch
@@ -206,9 +197,9 @@ internal sealed class ExecutionContext : IDisposable
 
     private int OrphanCount(bool recursive)
     {
-        var orphanCount = OrphanMonitor.OrphanCount;
+        var orphanCount = MemoryPool.OrphanCount;
         if (recursive)
-            orphanCount += SubExecutionContexts.Select(context => context.OrphanMonitor.OrphanCount).Sum();
+            orphanCount += SubExecutionContexts.Select(context => context.MemoryPool.OrphanCount).Sum();
         return orphanCount;
     }
 
@@ -248,7 +239,7 @@ internal sealed class ExecutionContext : IDisposable
         Current?.Disposables.Add(disposable);
 
     public void PrintDebug(string name = "")
-        => GD.PrintS(name, "test context", TestSuite.Name, TestCaseName, "error:" + IsError, "failed:" + IsFailed, "skipped:" + IsSkipped);
+        => Console.WriteLine($"{name} test context {TestSuite.Name} {TestCaseName} error: {IsError} failed: {IsFailed} skipped: {IsSkipped}");
 
     public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
         testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);

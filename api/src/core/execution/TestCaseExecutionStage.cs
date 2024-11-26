@@ -14,22 +14,18 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 
     public override async Task Execute(ExecutionContext context)
     {
-        context.MemoryPool.SetActive(StageName);
-        context.OrphanMonitor.Start(true);
+        context.MemoryPool.SetActive(StageName, true);
 
         await base.Execute(context);
 
-        await ISceneRunner.SyncProcessFrame;
-        context.MemoryPool.ReleaseRegisteredObjects();
-        context.OrphanMonitor.Stop();
-
-        if (context.OrphanMonitor.OrphanCount > 0)
+        await context.MemoryPool.Gc();
+        if (context.MemoryPool.OrphanCount > 0)
             context.ReportCollector.PushFront(new TestReport(TestReport.ReportType.WARN, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
     }
 
     private static string ReportOrphans(ExecutionContext context) =>
         $"""
          {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
-             Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test execution!
+             Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test execution!
          """;
 }
