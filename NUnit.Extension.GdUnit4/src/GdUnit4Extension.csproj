@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <OutputType>Library</OutputType>
+    <OutputPath>./nupkg</OutputPath>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <RootNamespace>NUnit.Extension.GdUnit4</RootNamespace>
+    <AssemblyName>nunit.extension.gdunit4</AssemblyName>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugType>portable</DebugType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
+    <PackageId>NUnit.Extension.GdUnit4</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>Godot;Test;Testing;UnitTest;NUnit;GdUnit4;Utility;Utilities</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="nupkg\.gitignore"/>
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.12.0"/>
+    <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.12.0"/>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.CrossPlatEngine">
+      <HintPath>$(UserProfile)\.nuget\packages\microsoft.testplatform.crossplatengine\17.12.0\lib\net8.0\Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.dll</HintPath>
+    </Reference>
+    <PackageReference Include="GodotSharp" Version="4.3"/>
+    <PackageReference Include="NUnit" Version="4.2.2"/>
+    <PackageReference Include="nunit.engine.api" Version="3.18.3"/>
+    <PackageReference Include="nunit.engine.netstandard" Version="3.11.1"/>
+
+
+    <!-- Content Include=".gitignore" -->
+    <Content Include="../../LICENSE"/>
+    <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
+    <None Include="../../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
+    <None Include="../../icon.png" Pack="true" PackagePath="/"/>
+    <None Update="README.md">
+      <Pack>true</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
