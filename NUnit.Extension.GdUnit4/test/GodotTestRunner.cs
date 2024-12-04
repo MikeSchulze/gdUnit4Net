@@ -3,6 +3,7 @@
 namespace NUnit.Extension.GdUnit4;
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,9 +43,7 @@ public partial class GodotTestRunner : SceneTree
                 throw new ArgumentException("Missing required test parameters");
 
             var testCaseRunner = new TestCaseRunner(testSuite, testCase);
-            GD.Print("Running test:");
             Root.AddChild(testCaseRunner);
-            GD.Print("Running test finished:");
         }
         catch (Exception e)
         {
@@ -76,6 +75,14 @@ public partial class GodotTestRunner : SceneTree
         {
             try
             {
+                var iteration = 0;
+                while (!Debugger.IsAttached && iteration++ < 50)
+                {
+                    await Godot.Engine.GetMainLoop().ToSignal(Godot.Engine.GetMainLoop(), SceneTree.SignalName.ProcessFrame);
+                    Thread.Sleep(100);
+                    GD.PrintS($"Godot Debugger: {Debugger.IsAttached}");
+                }
+
                 GD.PrintS("Test Started:", testCase);
                 Type? type = null;
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())

@@ -36,6 +36,9 @@
     <Content Include="nupkg\.gitignore"/>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.12.0"/>
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.12.0"/>
+    <PackageReference Include="NUnitTestAdapter.WithFramework" Version="2.0.0"/>
+    <PackageReference Include="System.Management" Version="9.0.0"/>
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="Microsoft.VisualStudio.TestPlatform.CrossPlatEngine">
       <HintPath>$(UserProfile)\.nuget\packages\microsoft.testplatform.crossplatengine\17.12.0\lib\net8.0\Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.dll</HintPath>
     </Reference>
