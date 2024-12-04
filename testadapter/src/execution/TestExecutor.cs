@@ -8,8 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 using Core.Extensions;
+
+using core.runners;
+
+using Extensions;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -25,6 +30,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     private readonly GdUnit4Settings gdUnit4Settings;
 
     private Process? pProcess;
+    private GodotProcessTestRunner? testRunner;
 
     public TestExecutor(RunConfiguration configuration, GdUnit4Settings gdUnit4Settings)
     {
@@ -56,6 +62,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             try
             {
                 Console.WriteLine("Cancel triggered");
+
+                testRunner?.Cancel();
+
                 if (pProcess != null && !pProcess.WaitForExit(0))
                     pProcess?.Kill(true);
             }
@@ -67,34 +76,43 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     }
 
     public void Dispose()
-        => pProcess?.Dispose();
+    {
+        testRunner?.Dispose();
+        testRunner = null;
+        pProcess?.Dispose();
+    }
 
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IReadOnlyList<TestCase> testCases)
     {
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Start executing tests, {testCases.Count} TestCases total.");
+        SetupRunnerEnvironment(runContext, frameworkHandle);
+
         // TODO split into multiple threads by using 'ParallelTestCount'
         var groupedTests = testCases
             .GroupBy(t => t.CodeFilePath!)
             .ToDictionary(group => group.Key, group => group.ToList());
 
         var workingDirectory = LookupGodotProjectPath(groupedTests.First().Key);
-        _ = workingDirectory ?? throw new InvalidOperationException("Cannot determine the godot.project! The workingDirectory is not set");
-
-        if (Directory.Exists(workingDirectory))
-        {
-            Directory.SetCurrentDirectory(workingDirectory);
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, "Current directory set to: " + Directory.GetCurrentDirectory());
-        }
-
+        Directory.SetCurrentDirectory(workingDirectory);
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Current directory set to: {Directory.GetCurrentDirectory()}");
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Running IDE: {IdeDetector.Detect(frameworkHandle)}");
+
+        using var testEventListener = new TestEventReportServer(frameworkHandle, testCases);
+
+        var engineTests = testCases
+            .Select(t => new GdUnitTestCase(t.CodeFilePath!, t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName)))
+            // TODO filter by GodotTestCase
+            .ToList();
+        testRunner = new GodotProcessTestRunner(new TestFrameworkLogger(frameworkHandle));
+        testRunner.RunAndWait(testEventListener, engineTests);
+
 
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
         var configName = WriteTestRunnerConfig(groupedTests, gdUnit4Settings);
         var debugArg = runContext.IsBeingDebugged ? "-d" : "";
 
-        using var eventServer = new TestEventReportServer();
         // ReSharper disable once AccessToDisposedClosure
-        var testEventServerTask = Task.Run(() => eventServer.Start(frameworkHandle, testCases));
+        var testEventServerTask = Task.Run(() => testEventListener.Start());
 
         //var filteredTestCases = filterExpression != null
         //    ? testCases.FindAll(t => filterExpression.MatchTestCase(t, (propertyName) =>
@@ -154,7 +172,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                                      Test execution exceeded maximum allowed time:
                                        • Timeout: {TimeSpan.FromMilliseconds(SessionTimeOut).Humanize()}
                                        • Total tests: {testCases.Count}
-                                       • Completed tests: {eventServer.CompletedTests}
+                                       • Completed tests: {testEventListener.CompletedTests}
                                        • Time elapsed: {stopwatch.Elapsed.Humanize()}
 
                                      ACTION REQUIRED: Please increase 'TestSessionTimeout' in your '.runsettings' file
@@ -171,8 +189,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             }
             finally
             {
-                if (pProcess is IDisposable disposable)
-                    disposable.Dispose();
+                Dispose();
                 File.Delete(configName);
                 // wait until all event messages are processed or the client is disconnected
                 testEventServerTask.Wait(TimeSpan.FromSeconds(1));
@@ -293,6 +310,19 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         catch (Exception e)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Error, $"Can't copy the Godot logfile: {e.Message}");
+        }
+    }
+
+    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
+    {
+        try
+        {
+            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+        }
+        catch (XmlException ex)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
         }
     }
 }

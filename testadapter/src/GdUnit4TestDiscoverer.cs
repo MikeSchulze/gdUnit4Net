@@ -3,6 +3,7 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
@@ -30,6 +31,7 @@ using static Utilities.Utils;
 [ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
 [FileExtension(".dll")]
 [FileExtension(".exe")]
+[Category("managed")]
 public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 {
     public void DiscoverTests(

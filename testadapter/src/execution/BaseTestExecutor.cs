@@ -92,8 +92,7 @@ internal abstract class BaseTestExecutor
             fh2.AttachDebuggerToProcess(process.Id);
     }
 
-
-    protected static string? LookupGodotProjectPath(string classPath)
+    protected static string LookupGodotProjectPath(string classPath)
     {
         var currentDir = new DirectoryInfo(classPath).Parent;
         while (currentDir != null)
@@ -103,6 +102,6 @@ internal abstract class BaseTestExecutor
             currentDir = currentDir.Parent;
         }
 
-        return null;
+        throw new FileNotFoundException("Godot project file '\"project.godot' does not exist");
     }
 }

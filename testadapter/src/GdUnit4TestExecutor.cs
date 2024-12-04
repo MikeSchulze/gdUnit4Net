@@ -3,7 +3,6 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 
 using Discovery;
 
@@ -18,11 +17,9 @@ using Settings;
 
 using static Utilities.Utils;
 
-using ITestExecutor = Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor;
-
 [ExtensionUri(ExecutorUri)]
 // ReSharper disable once ClassNeverInstantiated.Global
-public class GdUnit4TestExecutor : ITestExecutor, IDisposable
+public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 {
     /// <summary>
     ///     The Uri used to identify the GdUnit4 Executor
@@ -78,7 +75,6 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
             return testProperty;
         });
 
-        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         executor.Run(fh, runContext, testCases);
     }
@@ -98,13 +94,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         TestCaseDiscoverySink discoverySink = new();
         new GdUnit4TestDiscoverer().DiscoverTests(sources, runContext, fh, discoverySink);
         if (discoverySink.TestCases.Count == 0) return;
-
-        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
-
-        SetupRunnerEnvironment(runContext, frameworkHandle);
-        executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, discoverySink.TestCases);
+        RunTests(discoverySink.TestCases, runContext, frameworkHandle);
     }
 
     /// <summary>
@@ -116,16 +106,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         executor?.Cancel();
     }
 
-    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
-    {
-        try
-        {
-            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
-                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
-        }
-        catch (XmlException ex)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
-        }
-    }
+    public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
+
+    public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
 }

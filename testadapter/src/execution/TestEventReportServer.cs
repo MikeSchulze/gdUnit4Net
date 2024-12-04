@@ -26,11 +26,21 @@ using Newtonsoft.Json;
 
 using Utilities;
 
-internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
+internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListener
 {
     private readonly NamedPipeServerStream server = new(TestAdapterReporter.PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
-    internal int CompletedTests { get; set; }
+    public TestEventReportServer(IFrameworkHandle framework, IReadOnlyList<TestCase> testCases)
+    {
+        Framework = framework;
+        TestCases = testCases;
+        DetailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeDetector.Detect(Framework));
+    }
+
+    private IFrameworkHandle Framework { get; }
+    private IReadOnlyList<TestCase> TestCases { get; }
+    internal int CompletedTests { get; private set; }
+    private bool DetailedOutput { get; }
 
     public async ValueTask DisposeAsync()
     {
@@ -39,6 +49,8 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
         await server.DisposeAsync();
     }
 
+    public bool IsFailed { get; set; }
+
     public void Dispose()
     {
         if (server.IsConnected)
@@ -46,13 +58,82 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
         server.Dispose();
     }
 
-    internal async Task Start(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests)
+    public void PublishEvent(TestEvent e)
     {
-        var detailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeDetector.Detect(frameworkHandle));
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Wait for connecting GdUnit4 test report client.");
+        switch (e.Type)
+        {
+            case TestEvent.TYPE.TESTSUITE_BEFORE:
+                if (DetailedOutput)
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName} Processing...");
+                break;
+
+            case TestEvent.TYPE.TESTCASE_BEFORE:
+            {
+                var testCase = FindTestCase(e);
+                if (testCase == null)
+                {
+                    // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
+                    if (FindParameterizedTestCase(e))
+                        return;
+                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
+                    return;
+                }
+
+                Framework.RecordStart(testCase);
+                if (DetailedOutput)
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
+                break;
+            }
+
+            case TestEvent.TYPE.TESTCASE_AFTER:
+            {
+                var testCase = FindTestCase(e);
+                if (testCase == null)
+                {
+                    // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
+                    if (FindParameterizedTestCase(e))
+                        return;
+                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
+                    return;
+                }
+
+                var testResult = new TestResult(testCase)
+                {
+                    DisplayName = testCase.DisplayName,
+                    Outcome = e.AsTestOutcome(),
+                    EndTime = DateTimeOffset.Now,
+                    Duration = e.ElapsedInMs
+                };
+
+                e.Reports.ForEach(report => AddTestReport(report, testResult));
+
+                if (DetailedOutput)
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
+                Framework.RecordResult(testResult);
+                Framework.RecordEnd(testCase, testResult.Outcome);
+                CompletedTests += 1;
+                break;
+            }
+
+            case TestEvent.TYPE.TESTSUITE_AFTER:
+                if (DetailedOutput)
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
+                break;
+
+            case TestEvent.TYPE.INIT:
+                break;
+            case TestEvent.TYPE.STOP:
+                break;
+        }
+    }
+
+
+    internal async Task Start()
+    {
+        Framework.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Wait for connecting GdUnit4 test report client.");
         await server.WaitForConnectionAsync();
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: Connected. {server.GetImpersonationUserName()}");
+        Framework.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: Connected. {server.GetImpersonationUserName()}");
 
 
         using CancellationTokenSource tokenSource = new(TimeSpan.FromMinutes(10));
@@ -63,7 +144,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             {
                 if (tokenSource.Token.IsCancellationRequested)
                 {
-                    frameworkHandle.SendMessage(TestMessageLevel.Warning, "GdUnit4.TestEventReportServer:: Operation timed out.");
+                    Framework.SendMessage(TestMessageLevel.Warning, "GdUnit4.TestEventReportServer:: Operation timed out.");
                     break;
                 }
 
@@ -71,121 +152,57 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 if (string.IsNullOrEmpty(json))
                     continue;
 
-                ProcessTestEvent(frameworkHandle, tests, json, detailedOutput);
+                ProcessTestEvent(json);
             }
             catch (IOException e)
             {
-                frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: Client has disconnected by '{e.Message}'");
+                Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: Client has disconnected by '{e.Message}'");
                 break;
             }
             catch (Exception ex)
             {
                 if (server.IsConnected)
                 {
-                    frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: {ex.Message}");
-                    frameworkHandle.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: StackTrace: {ex.StackTrace}");
+                    Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: {ex.Message}");
+                    Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: StackTrace: {ex.StackTrace}");
                     break;
                 }
             }
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Disconnected.");
+        Framework.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Disconnected.");
     }
 
-
-    private void ProcessTestEvent(IFrameworkHandle frameworkHandle, IReadOnlyList<TestCase> tests, string json, bool detailedOutput)
+    private void ProcessTestEvent(string json)
     {
-        if (json.StartsWith("GdUnitTestEvent:"))
+        if (!json.StartsWith("GdUnitTestEvent:"))
         {
-            json = json.TrimPrefix("GdUnitTestEvent:");
-            var e = JsonConvert.DeserializeObject<TestEvent>(json)!;
-
-            switch (e.Type)
-            {
-                case TestEvent.TYPE.TESTSUITE_BEFORE:
-                    if (detailedOutput)
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName} Processing...");
-
-
-                    break;
-                case TestEvent.TYPE.TESTCASE_BEFORE:
-                {
-                    var testCase = FindTestCase(tests, e);
-                    if (testCase == null)
-                    {
-                        // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
-                        if (FindParameterizedTestCase(tests, e))
-                            return;
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
-                        return;
-                    }
-
-                    frameworkHandle.RecordStart(testCase);
-                    if (detailedOutput)
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
-                    break;
-                }
-                case TestEvent.TYPE.TESTCASE_AFTER:
-                {
-                    var testCase = FindTestCase(tests, e);
-                    if (testCase == null)
-                    {
-                        // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
-                        if (FindParameterizedTestCase(tests, e))
-                            return;
-                        frameworkHandle.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
-                        return;
-                    }
-
-                    var testResult = new TestResult(testCase)
-                    {
-                        DisplayName = testCase.DisplayName, Outcome = e.AsTestOutcome(), EndTime = DateTimeOffset.Now, Duration = e.ElapsedInMs
-                    };
-
-                    e.Reports.ForEach(report => AddTestReport(frameworkHandle, report, testResult));
-
-                    if (detailedOutput)
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
-                    frameworkHandle.RecordResult(testResult);
-                    frameworkHandle.RecordEnd(testCase, testResult.Outcome);
-                    CompletedTests += 1;
-                    break;
-                }
-                case TestEvent.TYPE.TESTSUITE_AFTER:
-                    if (detailedOutput)
-                        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
-
-
-                    break;
-                case TestEvent.TYPE.INIT:
-                    break;
-                case TestEvent.TYPE.STOP:
-                    break;
-            }
-
+            Framework.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: {json}");
             return;
         }
 
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: {json}");
+        json = json.TrimPrefix("GdUnitTestEvent:");
+        var e = JsonConvert.DeserializeObject<TestEvent>(json)!;
+        PublishEvent(e);
     }
 
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    private TestResult AddTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult) => IdeDetector.Detect(frameworkHandle) switch
+// ReSharper disable once UnusedMethodReturnValue.Local
+    private TestResult AddTestReport(TestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch
     {
-        Ide.JetBrainsRider => AddRiderTestReport(frameworkHandle, report, testResult),
-        Ide.VisualStudio => AddVisualStudio2022TestReport(frameworkHandle, report, testResult),
-        Ide.VisualStudioCode => AddVisualStudioCodeTestReport(frameworkHandle, report, testResult),
-        Ide.Unknown => AddDefaultTestReport(frameworkHandle, report, testResult),
-        _ => AddDefaultTestReport(frameworkHandle, report, testResult)
+        Ide.JetBrainsRider => AddRiderTestReport(report, testResult),
+        Ide.VisualStudio => AddVisualStudio2022TestReport(report, testResult),
+        Ide.VisualStudioCode => AddVisualStudioCodeTestReport(report, testResult),
+        Ide.Unknown => AddDefaultTestReport(report, testResult),
+        _ => AddDefaultTestReport(report, testResult)
     };
 
-    private TestResult AddRiderTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult)
+    private TestResult AddRiderTestReport(TestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
         switch (report.Type)
         {
             case TestReport.ReportType.STDOUT:
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 break;
 
@@ -194,7 +211,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 normalizedMessage = normalizedMessage.Replace("WARNING:\n", "");
                 testResult.ErrorMessage = "Warning Detected!";
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.AdditionalInfoCategory, normalizedMessage.FormatMessageColored(report.Type)));
-                frameworkHandle.SendMessage(TestMessageLevel.Warning, $"Warning:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Warning, $"Warning:\n{normalizedMessage.Indent()}");
                 break;
             case TestReport.ReportType.SUCCESS:
                 break;
@@ -205,14 +222,14 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
-                frameworkHandle.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
                 break;
         }
 
         return testResult;
     }
 
-    private TestResult AddVisualStudio2022TestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult)
+    private TestResult AddVisualStudio2022TestReport(TestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
@@ -220,7 +237,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
         {
             case TestReport.ReportType.STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
             case TestReport.ReportType.WARN:
@@ -229,7 +246,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 normalizedMessage = normalizedMessage.Replace("WARNING:", "Warning:");
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Warning, normalizedMessage);
+                Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
 
             case TestReport.ReportType.SUCCESS:
@@ -241,14 +258,14 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
-                frameworkHandle.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
                 break;
         }
 
         return testResult;
     }
 
-    private TestResult AddVisualStudioCodeTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult)
+    private TestResult AddVisualStudioCodeTestReport(TestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
@@ -256,7 +273,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
         {
             case TestReport.ReportType.STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
             case TestReport.ReportType.WARN:
@@ -265,7 +282,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:")}");
+                Framework.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:")}");
                 break;
             case TestReport.ReportType.SUCCESS:
                 break;
@@ -276,14 +293,14 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
-                frameworkHandle.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
+                Framework.SendMessage(TestMessageLevel.Error, $"Error:\n{normalizedMessage.Indent()}");
                 break;
         }
 
         return testResult;
     }
 
-    private TestResult AddDefaultTestReport(IFrameworkHandle frameworkHandle, TestReport report, TestResult testResult)
+    private TestResult AddDefaultTestReport(TestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd().Replace("WARNING:", "Warning:");
 
@@ -291,8 +308,8 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
         {
             case TestReport.ReportType.STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Informational, "Standard Output:");
-                foreach (var message in normalizedMessage.Split("\n")) frameworkHandle.SendMessage(TestMessageLevel.Informational, $"stdout:    {message}");
+                Framework.SendMessage(TestMessageLevel.Informational, "Standard Output:");
+                foreach (var message in normalizedMessage.Split("\n")) Framework.SendMessage(TestMessageLevel.Informational, $"stdout:    {message}");
                 break;
 
             case TestReport.ReportType.WARN:
@@ -301,7 +318,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
-                frameworkHandle.SendMessage(TestMessageLevel.Warning, normalizedMessage);
+                Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
             case TestReport.ReportType.SUCCESS:
                 break;
@@ -312,7 +329,7 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
-                frameworkHandle.SendMessage(TestMessageLevel.Error, normalizedMessage);
+                Framework.SendMessage(TestMessageLevel.Error, normalizedMessage);
                 break;
         }
 
@@ -320,9 +337,9 @@ internal sealed class TestEventReportServer : IDisposable, IAsyncDisposable
     }
 
 
-    private static TestCase? FindTestCase(IEnumerable<TestCase> tests, TestEvent e)
-        => tests.FirstOrDefault(t => e.FullyQualifiedName.Equals(t.FullyQualifiedName, StringComparison.Ordinal));
+    private TestCase? FindTestCase(TestEvent e)
+        => TestCases.FirstOrDefault(t => e.FullyQualifiedName.Equals(t.FullyQualifiedName, StringComparison.Ordinal));
 
-    private static bool FindParameterizedTestCase(IEnumerable<TestCase> tests, TestEvent e)
-        => tests.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
+    private bool FindParameterizedTestCase(TestEvent e)
+        => TestCases.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
 }
