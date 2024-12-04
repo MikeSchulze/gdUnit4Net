@@ -1,0 +1,45 @@
+﻿<Project Sdk="Godot.NET.Sdk">
+  <Import Project="../../PackageVersions.props"/>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <OutputType>Library</OutputType>
+    <Configurations>Debug;Release</Configurations>
+
+    <RootNamespace>NUnit.Extension.GdUnit4</RootNamespace>
+    <AssemblyName>nunit.extension.gdunit4.test</AssemblyName>
+
+
+    <Nullable>enable</Nullable>
+
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
+    <PackageReference Include="NUnit" Version="4.2.2"/>
+    <!-- <PackageReference Include="NUnit.Extension.GdUnit4" Version="1.0.0"/> -->
+
+    <ProjectReference Include="../src/GdUnit4Extension.csproj"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Include="project.godot"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="nuget.config"/>
+  </ItemGroup>
+
+
+</Project>

@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", "a
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4TestAdapter.Tests", "testadapter.test\gdUnit4TestAdapter.Tests.csproj", "{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nunit.extension.gdunit4", "NUnit.Extension.GdUnit4\src\GdUnit4Extension.csproj", "{C10DD9B6-2AB7-4860-A16F-2EF4999EE344}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdUnit4Extension.Test", "NUnit.Extension.GdUnit4\test\GdUnit4Extension.Test.csproj", "{2C708B0F-98A4-444B-AAD9-FB237441175B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +58,13 @@ Global
 		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C10DD9B6-2AB7-4860-A16F-2EF4999EE344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C10DD9B6-2AB7-4860-A16F-2EF4999EE344}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C10DD9B6-2AB7-4860-A16F-2EF4999EE344}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C10DD9B6-2AB7-4860-A16F-2EF4999EE344}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C708B0F-98A4-444B-AAD9-FB237441175B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C708B0F-98A4-444B-AAD9-FB237441175B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C708B0F-98A4-444B-AAD9-FB237441175B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C708B0F-98A4-444B-AAD9-FB237441175B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
