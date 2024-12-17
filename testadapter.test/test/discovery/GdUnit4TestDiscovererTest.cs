@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -113,6 +114,8 @@ public class GdUnit4TestDiscovererTest
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
 
         var assemblyPath = AssemblyPaths.LibraryPath;
+        Console.WriteLine($"AssemblyPaths.LibraryPath: '{AssemblyPaths.LibraryPath}'");
+        Assert.IsTrue(File.Exists(AssemblyPaths.LibraryPath), $"Can find the test assembly: '{AssemblyPaths.LibraryPath}'");
         var discoverer = new GdUnit4TestDiscoverer();
         discoverer.DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 

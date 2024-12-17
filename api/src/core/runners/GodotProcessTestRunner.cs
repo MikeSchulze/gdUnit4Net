@@ -11,10 +11,10 @@ internal class GodotProcessTestRunner : ITestRunner
 
     public GodotProcessTestRunner(ITestEngineLogger logger) => this.logger = logger;
 
-    public void Dispose() => logger.LogError("Not implemented, GodotProcessTestRunner.Dispose");
+    public void Dispose() => logger.LogWarning("Not implemented, GodotProcessTestRunner.Dispose");
 
     public void RunAndWait(ITestEventListener eventListener, IList<GdUnitTestCase> tests)
-        => logger.LogError("Not implemented, GodotProcessTestRunner.RunAndWait");
+        => logger.LogWarning("Not implemented, GodotProcessTestRunner.RunAndWait");
 
-    public void Cancel() => logger.LogError("Not implemented, GodotProcessTestRunner.Cancel");
+    public void Cancel() => logger.LogWarning("Not implemented, GodotProcessTestRunner.Cancel");
 }
