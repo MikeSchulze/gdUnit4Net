@@ -162,7 +162,9 @@ public class GdUnit4TestDiscovererTest
         Assert.AreEqual(displayName, test.DisplayName);
         Assert.AreEqual(new Uri(GdUnit4TestExecutor.ExecutorUri), test.ExecutorUri);
         Assert.AreEqual(source, test.Source);
-        StringAssert.EndsWith(test.CodeFilePath, codeFilePath);
+        var expectedPath = codeFilePath.Replace('\\', Path.DirectorySeparatorChar);
+        var actualPath = test.CodeFilePath?.Replace('\\', Path.DirectorySeparatorChar);
+        StringAssert.EndsWith(actualPath, expectedPath);
         Assert.AreEqual(lineNumber, test.LineNumber);
     }
 }
