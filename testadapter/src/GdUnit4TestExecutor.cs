@@ -3,7 +3,6 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 
 using Discovery;
 
@@ -11,18 +10,15 @@ using Execution;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using Settings;
 
-using static Utilities.Utils;
-
-using ITestExecutor = Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor;
+using Utilities;
 
 [ExtensionUri(ExecutorUri)]
 // ReSharper disable once ClassNeverInstantiated.Global
-public class GdUnit4TestExecutor : ITestExecutor, IDisposable
+public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 {
     /// <summary>
     ///     The Uri used to identify the GdUnit4 Executor
@@ -39,6 +35,10 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     private TestExecutor? executor;
 
     private IFrameworkHandle? fh;
+
+#pragma warning disable CA1859
+    private ITestEngineLogger? Log { get; set; }
+#pragma warning restore CA1859
 
     public void Dispose()
     {
@@ -62,9 +62,13 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         if (testCases.Count == 0)
             return;
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
+
+        Log = new Logger(frameworkHandle);
+        if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
         {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
+            Log.LogError(
+                $"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
+            Log.LogError("Abort the test discovery.");
             return;
         }
 
@@ -78,7 +82,6 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
             return testProperty;
         });
 
-        SetupRunnerEnvironment(runContext, frameworkHandle);
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
         executor.Run(fh, runContext, testCases);
     }
@@ -98,13 +101,7 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         TestCaseDiscoverySink discoverySink = new();
         new GdUnit4TestDiscoverer().DiscoverTests(sources, runContext, fh, discoverySink);
         if (discoverySink.TestCases.Count == 0) return;
-
-        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
-
-        SetupRunnerEnvironment(runContext, frameworkHandle);
-        executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, discoverySink.TestCases);
+        RunTests(discoverySink.TestCases, runContext, frameworkHandle);
     }
 
     /// <summary>
@@ -112,20 +109,11 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     /// </summary>
     public void Cancel()
     {
-        fh?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
+        Log?.LogInfo("Cancel pressed  -----");
         executor?.Cancel();
     }
 
-    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
-    {
-        try
-        {
-            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
-                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
-        }
-        catch (XmlException ex)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
-        }
-    }
+    public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
+
+    public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
 }
