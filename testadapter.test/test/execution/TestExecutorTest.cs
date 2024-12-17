@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Execution;
+﻿namespace GdUnit4.TestAdapter.Test.Execution;
 
 using System;
 
@@ -6,6 +6,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Moq;
+
+using TestAdapter.Execution;
 
 [TestClass]
 public class TestExecutorTest

@@ -103,7 +103,9 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
             .Select(t => new GdUnitTestCase(t.CodeFilePath!, t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName)))
             // TODO filter by GodotTestCase
             .ToList();
-        testRunner = new GodotProcessTestRunner(new TestFrameworkLogger(frameworkHandle));
+
+        var testLogger = new Logger(frameworkHandle);
+        testRunner = new GodotProcessTestRunner(testLogger);
         testRunner.RunAndWait(testEventListener, engineTests);
 
 
@@ -168,13 +170,13 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                     var message = $"""
 
                                    ╔═══════════════════════ TEST SESSION TIMEOUT ═══════════════════════════════════════╗
-
+                                   
                                      Test execution exceeded maximum allowed time:
                                        • Timeout: {TimeSpan.FromMilliseconds(SessionTimeOut).Humanize()}
                                        • Total tests: {testCases.Count}
                                        • Completed tests: {testEventListener.CompletedTests}
                                        • Time elapsed: {stopwatch.Elapsed.Humanize()}
-
+                                   
                                      ACTION REQUIRED: Please increase 'TestSessionTimeout' in your '.runsettings' file
 
                                    ╚════════════════════════════════════════════════════════════════════════════════════╝

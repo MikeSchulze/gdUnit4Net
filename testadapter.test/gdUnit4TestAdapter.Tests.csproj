@@ -26,4 +26,37 @@
     <ProjectReference Include="../testadapter/gdUnit4TestAdapter.csproj"/>
   </ItemGroup>
 
+
+  <Target Name="GenerateAssemblyPathConstants" BeforeTargets="CoreCompile">
+    <MSBuild Projects="../example/exampleProject.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" PropertyName="LibraryOutputPath"/>
+    </MSBuild>
+
+    <!-- Generate C# file with constant -->
+    <PropertyGroup>
+      <ConstantsFile>$(IntermediateOutputPath)AssemblyPaths.cs</ConstantsFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="$(ConstantsFile)"/>
+    </ItemGroup>
+
+    <WriteLinesToFile
+      File="$(ConstantsFile)"
+      Lines="
+// This is a generated file
+// Do not modify or commit this file
+namespace GdUnit4.TestAdapter.Test
+{
+    public static class AssemblyPaths
+    {
+        public const string LibraryPath = @&quot;$(LibraryOutputPath)&quot;%3B
+        public const int x = 1%3B
+    }
+}
+"
+      Overwrite="true"/>
+  </Target>
 </Project>

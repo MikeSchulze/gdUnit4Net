@@ -7,14 +7,14 @@ using Core.Events;
 
 internal class GodotProcessTestRunner : ITestRunner
 {
-    private readonly IGdUnitLogger logger;
+    private readonly ITestEngineLogger logger;
 
-    public GodotProcessTestRunner(IGdUnitLogger logger) => this.logger = logger;
+    public GodotProcessTestRunner(ITestEngineLogger logger) => this.logger = logger;
 
-    public void Dispose() => logger.SendMessage(IGdUnitLogger.Level.Warning, "Not implemented, GodotProcessTestRunner.Dispose");
+    public void Dispose() => logger.LogError("Not implemented, GodotProcessTestRunner.Dispose");
 
     public void RunAndWait(ITestEventListener eventListener, IList<GdUnitTestCase> tests)
-        => logger.SendMessage(IGdUnitLogger.Level.Warning, "Not implemented, GodotProcessTestRunner.RunAndWait");
+        => logger.LogError("Not implemented, GodotProcessTestRunner.RunAndWait");
 
-    public void Cancel() => logger.SendMessage(IGdUnitLogger.Level.Warning, "Not implemented, GodotProcessTestRunner.Cancel");
+    public void Cancel() => logger.LogError("Not implemented, GodotProcessTestRunner.Cancel");
 }

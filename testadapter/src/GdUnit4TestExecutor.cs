@@ -10,12 +10,11 @@ using Execution;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using Settings;
 
-using static Utilities.Utils;
+using Utilities;
 
 [ExtensionUri(ExecutorUri)]
 // ReSharper disable once ClassNeverInstantiated.Global
@@ -36,6 +35,10 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     private TestExecutor? executor;
 
     private IFrameworkHandle? fh;
+
+#pragma warning disable CA1859
+    private ITestEngineLogger? Log { get; set; }
+#pragma warning restore CA1859
 
     public void Dispose()
     {
@@ -59,9 +62,13 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         if (testCases.Count == 0)
             return;
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.4.0")))
+
+        Log = new Logger(frameworkHandle);
+        if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
         {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test execution.");
+            Log.LogError(
+                $"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
+            Log.LogError("Abort the test discovery.");
             return;
         }
 
@@ -102,7 +109,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     /// </summary>
     public void Cancel()
     {
-        fh?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
+        Log?.LogInfo("Cancel pressed  -----");
         executor?.Cancel();
     }
 
