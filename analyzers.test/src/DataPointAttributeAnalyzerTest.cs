@@ -63,7 +63,7 @@ public class DataPointAttributeAnalyzerTests
             }
             """);
 
-        var errorLine = new LinePosition(12, 1);
+        var errorLine = new LinePosition(13, 1);
         var expected = ExpectedDiagnostic
             .Create(DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
                 string.Format(CultureInfo.InvariantCulture,

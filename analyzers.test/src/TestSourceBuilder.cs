@@ -7,6 +7,7 @@ public static class TestSourceBuilder
           using System;
           using System.Collections.Generic;
           using GdUnit4;
+          using Godot;
 
           namespace GdUnit4.Analyzers.Test.Example
           {

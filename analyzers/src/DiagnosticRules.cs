@@ -14,6 +14,9 @@ internal static class DiagnosticRules
 
         // Datapoint rules starting at 0200
         public const string DataPointWithMultipleTestCase = "GdUnit0201";
+
+        // Godot runtime detection rules at 500
+        public const string GodotEngineDiagnosticId = "GdUnit0501";
     }
 
 
@@ -36,5 +39,20 @@ internal static class DiagnosticRules
             WellKnownDiagnosticTags.Compiler);
 
         // Future TestCase rules can be added here
+    }
+
+    internal static class GodotEngine
+    {
+        public static readonly DiagnosticDescriptor GodotNativeCallNotAllowed = new(
+            RuleIds.GodotEngineDiagnosticId,
+            "Godot Engine Required for Test",
+            "Test method '{0}' uses Godot native types or calls but is marked with [TestCase]. Use [GodotTestCase] instead when testing Godot functionality.",
+            Categories.AttributeUsage,
+            DiagnosticSeverity.Error,
+            true,
+            "Test methods that interact with Godot types (such as Node, Scene, or other Godot-derived classes) require a running Godot engine. " +
+            "These tests must be marked with the [GodotTestCase] attribute to ensure proper test execution in the Godot environment.",
+            $"{HELP_LINK}/{RuleIds.GodotEngineDiagnosticId}.md",
+            WellKnownDiagnosticTags.Compiler);
     }
 }
