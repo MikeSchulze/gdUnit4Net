@@ -35,7 +35,7 @@ public class TestSuiteFailAndOrphansDetected : IDisposable
     public void TearDownTest()
         => AssertString("Suite AfterTest()").IsEqual("Suite AfterTest()");
 
-    [TestCase]
+    [GodotTestCase]
     public void TestCase1()
     {
         orphans.Add(new Godot.Node());
@@ -44,7 +44,7 @@ public class TestSuiteFailAndOrphansDetected : IDisposable
         AssertString("TestCase1").IsEqual("TestCase1");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void TestCase2()
     {
         orphans.Add(new Godot.Node());

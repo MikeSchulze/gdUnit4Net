@@ -48,7 +48,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("GdUnitSceneRunner: The given resource: 'res://src/core/resources/scenes/TestScene.gd' is not a scene.");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void LoadSceneByUid()
     {
         using var runner = ISceneRunner.Load("uid://cn8ucy2rheu0f", true);
@@ -60,7 +60,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'uid://invalid_uid'. The resource does not exists.");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void LoadSceneTSCNFormat()
     {
         using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.tscn", true);
@@ -69,7 +69,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsNotNull();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void LoadSceneBinaryFormat()
     {
         using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.scn", true);
@@ -79,7 +79,7 @@ public sealed class SceneRunnerCSharpSceneTest
     }
 
 
-    [TestCase]
+    [GodotTestCase]
     public void InitializeSceneBeforeAddingToSceneTree()
     {
         var currentScene = ((PackedScene)ResourceLoader.Load("res://src/core/resources/scenes/TestSceneWithInitialization.tscn")).Instantiate<TestSceneWithInitialization>();
@@ -100,7 +100,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertThat(actualScene.MethodCalls[1]).IsEqual("_Ready");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void GetProperty()
     {
         // try access to a public property
@@ -115,7 +115,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void SetProperty()
     {
         sceneRunner.SetProperty("initial_color", Colors.Red);
@@ -125,7 +125,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void InvokeSceneMethod()
     {
         AssertString(sceneRunner.Invoke("Add", 10, 12).ToString()).IsEqual("22");
@@ -145,7 +145,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertInt((int)stopwatch.ElapsedMilliseconds).IsBetween(900, 1100);
     }
 
-    [TestCase(Timeout = 2000)]
+    [GodotTestCase(Timeout = 2000)]
     public async Task SimulateFrames()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -166,7 +166,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertObject(box1.Color).IsNotEqual(Colors.White);
     }
 
-    [TestCase(Timeout = 1000)]
+    [GodotTestCase(Timeout = 1000)]
     public async Task SimulateFramesWithDelay()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -182,7 +182,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertObject(box1.Color).IsEqual(Colors.Red);
     }
 
-    [TestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
+    [GodotTestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
     public async Task RunSceneColorCycle()
     {
         sceneRunner.MaximizeView();
@@ -209,7 +209,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }
 
-    [TestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
+    [GodotTestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
     public async Task RunSceneSimulateKeyPressed()
     {
         // initial no spell is fired
@@ -232,7 +232,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertObject(sceneRunner.FindChild("Spell")).IsNull();
     }
 
-    [TestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 20000)]
+    [GodotTestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 20000)]
     public async Task RunSceneSimulateMouseEvents()
     {
         sceneRunner.MaximizeView();
@@ -309,7 +309,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task AwaitSignal()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -322,7 +322,7 @@ public sealed class SceneRunnerCSharpSceneTest
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, new Color(0, 1, 0)); // Green
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task DisposeSceneRunner()
     {
         var sceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);

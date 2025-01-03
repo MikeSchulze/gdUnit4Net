@@ -1,11 +1,14 @@
 namespace GdUnit4.Tests.Core;
 
 using System;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+
+using GdUnit4.Core;
+
+using Godot;
 
 using Moq;
-using Godot;
 
 using static Assertions;
 
@@ -34,11 +37,9 @@ public sealed class SceneRunnerInputEventIntegrationTest
     private void AssertInitialMouseState()
     {
         foreach (MouseButton button in Enum.GetValues(typeof(MouseButton)))
-        {
             AssertThat(Input.IsMouseButtonPressed(button))
                 .OverrideFailureMessage($"Expect MouseButton {button} is not 'IsMouseButtonPressed'")
                 .IsFalse();
-        }
         AssertThat((long)Input.GetMouseButtonMask()).IsEqual(0L);
     }
 
@@ -61,7 +62,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
     public void TestSpy()
     {
         var scene = ResourceLoader.Load<PackedScene>("res://src/core/resources/scenes/TestSceneCSharp.tscn").Instantiate();
-        var sceneMock = new Mock<TestScene>() { CallBase = true };
+        var sceneMock = new Mock<TestScene> { CallBase = true };
         //var sceneSpy = sceneMock.Object;
 
         var sceneTree = (SceneTree)Engine.GetMainLoop();
@@ -72,21 +73,21 @@ public sealed class SceneRunnerInputEventIntegrationTest
         scene.Free();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void ToMouseButtonMask()
     {
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Left)).IsEqual(MouseButtonMask.Left);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Middle)).IsEqual(MouseButtonMask.Middle);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Right)).IsEqual(MouseButtonMask.Right);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelUp)).IsEqual((MouseButtonMask)8L);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelDown)).IsEqual((MouseButtonMask)16L);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelLeft)).IsEqual((MouseButtonMask)32L);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.WheelRight)).IsEqual((MouseButtonMask)64L);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Xbutton1)).IsEqual(MouseButtonMask.MbXbutton1);
-        AssertThat(GdUnit4.Core.SceneRunner.ToMouseButtonMask(MouseButton.Xbutton2)).IsEqual(MouseButtonMask.MbXbutton2);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.Left)).IsEqual(MouseButtonMask.Left);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.Middle)).IsEqual(MouseButtonMask.Middle);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.Right)).IsEqual(MouseButtonMask.Right);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.WheelUp)).IsEqual((MouseButtonMask)8L);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.WheelDown)).IsEqual((MouseButtonMask)16L);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.WheelLeft)).IsEqual((MouseButtonMask)32L);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.WheelRight)).IsEqual((MouseButtonMask)64L);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.Xbutton1)).IsEqual(MouseButtonMask.MbXbutton1);
+        AssertThat(SceneRunner.ToMouseButtonMask(MouseButton.Xbutton2)).IsEqual(MouseButtonMask.MbXbutton2);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task ResetToInitialStateOnRelease()
     {
         // move mouse out of button range to avoid scene button interactions
@@ -123,13 +124,10 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsActionPressed("ui_up")).IsFalse();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void SimulateKeyPressAsAction()
     {
-        var @event = new InputEventKey
-        {
-            Keycode = Key.Space
-        };
+        var @event = new InputEventKey { Keycode = Key.Space };
         InputMap.AddAction("player_jump");
         InputMap.ActionAddEvent("player_jump", @event);
 
@@ -140,11 +138,11 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(sceneRunner.GetProperty("player_jump_action")).IsTrue();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateActionPress()
     {
         // iterate over some example actions
-        var actionsToSimulate = new string[] { "ui_up", "ui_down", "ui_left", "ui_right" };
+        var actionsToSimulate = new[] { "ui_up", "ui_down", "ui_left", "ui_right" };
         foreach (var action in actionsToSimulate)
         {
             AssertThat(InputMap.HasAction(action)).IsTrue();
@@ -155,6 +153,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 .OverrideFailureMessage($"Expect the action '{action}' is pressed")
                 .IsTrue();
         }
+
         // other actions are not pressed
         foreach (var action in new[] { "ui_accept", "ui_select", "ui_cancel" })
             AssertThat(Input.IsActionPressed(action))
@@ -162,11 +161,11 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 .IsFalse();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateActionRelease()
     {
         // setup do run actions as press
-        var actionsToSimulate = new string[] { "ui_up", "ui_down", "ui_left", "ui_right" };
+        var actionsToSimulate = new[] { "ui_up", "ui_down", "ui_left", "ui_right" };
         foreach (var action in actionsToSimulate)
         {
             AssertThat(InputMap.HasAction(action)).IsTrue();
@@ -187,7 +186,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateKeyPress()
     {
         Key[] keys = { Key.A, Key.D, Key.X, Key.Key0 };
@@ -218,7 +217,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsKeyPressed(Key.Key1)).IsFalse();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateKeyPressWithModifiers()
     {
         // press shift key + A
@@ -231,7 +230,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsKeyPressed(Key.A)).IsTrue();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateManyKeysPress()
     {
         //press and hold keys W and Z
@@ -255,7 +254,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.IsPhysicalKeyPressed(Key.Z)).IsTrue();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateSetMousePos()
     {
         // save current global mouse pos
@@ -302,7 +301,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         //verify(_scene_spy, 1)._input(mouseEvent)
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateSetMousePosWithModifiers()
     {
         var isAlt = false;
@@ -337,7 +336,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
                     ShiftPressed = isShift,
                     Pressed = true,
                     ButtonIndex = mouse_button,
-                    ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button)
+                    ButtonMask = SceneRunner.ToMouseButtonMask(mouse_button)
                 };
                 //verify(_scene_spy, 1)._input(mouseEvent)
                 AssertThat(ActualMousePos()).IsEqual(Vector2.Zero);
@@ -353,7 +352,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseMove()
     {
         var gmp = sceneRunner.GetGlobalMousePosition();
@@ -385,7 +384,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         //verify(_scene_spy, 1)._input(mouseEvent)
     }
 
-    [TestCase(Timeout = 2000)]
+    [GodotTestCase(Timeout = 2000)]
     public async Task SimulateMouseMoveRelative()
     {
         var sourcePosition = new Vector2(10, 10);
@@ -404,7 +403,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(ActualMousePos()).IsEqual(sourcePosition);
     }
 
-    [TestCase(Timeout = 2000)]
+    [GodotTestCase(Timeout = 2000)]
     public async Task SimulateMouseMoveAbsolute()
     {
         var sourcePosition = new Vector2(10, 10);
@@ -423,7 +422,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(ActualMousePos()).IsEqual(sourcePosition);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressLeft()
     {
         // simulate mouse button press and hold
@@ -445,7 +444,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressLeftDoubleClick()
     {
         // simulate mouse button press double_click
@@ -467,7 +466,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressRight()
     {
         // simulate mouse button press and hold
@@ -489,7 +488,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Right);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressRightDoubleClick()
     {
         // simulate mouse button press double_click
@@ -511,7 +510,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Right);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressLeftAndRight()
     {
         // simulate mouse button press left+right
@@ -547,7 +546,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual(MouseButtonMask.Left | MouseButtonMask.Right);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressLeftAndRightAndRelease()
     {
         // simulate mouse button press left+right
@@ -619,7 +618,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         AssertThat(Input.GetMouseButtonMask()).IsEqual((MouseButtonMask)0L);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressed()
     {
         MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
@@ -637,7 +636,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 GlobalPosition = gmp,
                 Pressed = true,
                 ButtonIndex = mouse_button,
-                ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button)
+                ButtonMask = SceneRunner.ToMouseButtonMask(mouse_button)
             };
             //verify(_scene_spy, 1)._input(mouseEvent)
 
@@ -658,7 +657,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressedDoubleClick()
     {
         MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
@@ -677,7 +676,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 Pressed = true,
                 DoubleClick = true,
                 ButtonIndex = mouse_button,
-                ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button)
+                ButtonMask = SceneRunner.ToMouseButtonMask(mouse_button)
             };
             //verify(_scene_spy, 1)._input(mouseEvent)
 
@@ -699,7 +698,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task SimulateMouseButtonPressAndRelease()
     {
         MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
@@ -716,7 +715,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
                 GlobalPosition = gmp,
                 Pressed = true,
                 ButtonIndex = mouse_button,
-                ButtonMask = GdUnit4.Core.SceneRunner.ToMouseButtonMask(mouse_button)
+                ButtonMask = SceneRunner.ToMouseButtonMask(mouse_button)
             };
             //verify(_scene_spy, 1)._input(mouseEvent)
             AssertThat(Input.IsMouseButtonPressed(mouse_button)).IsTrue();
@@ -741,7 +740,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task MouseDragAndDrop()
     {
         var dragAndDropSceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/DragAndDrop/DragAndDropTestScene.tscn", true);
@@ -778,6 +777,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
             dragAndDropSceneRunner.SimulateMouseMove(mouse_pos + new Vector2(i * .5f * i, 0));
             await dragAndDropSceneRunner.AwaitMillis(40);
         }
+
         dragAndDropSceneRunner.SimulateMouseButtonRelease(MouseButton.Left);
         await ISceneRunner.SyncProcessFrame;
 

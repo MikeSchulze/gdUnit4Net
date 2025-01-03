@@ -1,6 +1,5 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
-using System;
 using System.Globalization;
 
 using Gu.Roslyn.Asserts;
@@ -17,7 +16,7 @@ public class GodotNativeCallAnalyzerTest
     private readonly GodotNativeCallAnalyzer analyzer = new();
 
     [TestMethod]
-    public void ShowErrorOnMethodUsingGodotReference()
+    public void DetectErrorOnMethodExpressionUsingGodotReference()
     {
         var source = Instrument(
             """
@@ -29,7 +28,27 @@ public class GodotNativeCallAnalyzerTest
             }
             """);
 
-        Console.WriteLine(source);
+        var errorLine = new LinePosition(12, 12);
+        var expected = ExpectedDiagnostic
+            .Create(DiagnosticRules.RuleIds.GodotEngineDiagnosticId,
+                string.Format(CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.GodotNativeCallNotAllowed.MessageFormat.ToString(), "TestMethod")
+            )
+            .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
+
+        RoslynAssert.Diagnostics(analyzer, expected, source);
+    }
+
+
+    [TestMethod]
+    public void DetectErrorOnMethodExpressionBodyUsingGodotReference()
+    {
+        var source = Instrument(
+            """
+
+            [TestCase]
+            public void TestMethod() => new RefCounted();
+            """);
 
         var errorLine = new LinePosition(12, 12);
         var expected = ExpectedDiagnostic
@@ -43,7 +62,7 @@ public class GodotNativeCallAnalyzerTest
     }
 
     [TestMethod]
-    public void OnGodotTestCaseAttribute()
+    public void OnMethodExpressionWithGodotTestCaseAttribute()
     {
         var source = Instrument(
             """
@@ -53,6 +72,19 @@ public class GodotNativeCallAnalyzerTest
             {
                 var x = new RefCounted();
             }
+            """);
+
+        RoslynAssert.Valid(analyzer, source);
+    }
+
+    [TestMethod]
+    public void OnMethodExpressionBodyWithGodotTestCaseAttribute()
+    {
+        var source = Instrument(
+            """
+
+            [GodotTestCase]
+            public void TestMethod() => new RefCounted();
             """);
 
         RoslynAssert.Valid(analyzer, source);

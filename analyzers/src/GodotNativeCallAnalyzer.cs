@@ -84,7 +84,7 @@ public class GodotNativeCallAnalyzer : DiagnosticAnalyzer
 
         // Get the method body syntax
         var methodSyntax = syntaxRef.GetSyntax() as MethodDeclarationSyntax;
-        if (methodSyntax?.Body == null)
+        if (methodSyntax?.Body == null && methodSyntax?.ExpressionBody == null)
             return false;
 
         // Analyze method body using semantic model

@@ -32,7 +32,7 @@ internal sealed partial class CustomClassB : CustomClass
 [TestSuite]
 public class ObjectAssertTest
 {
-    [TestCase]
+    [GodotTestCase]
     public void IsEqual()
     {
         var obj = new object();
@@ -64,7 +64,7 @@ public class ObjectAssertTest
                 .Replace("$obj", AssertFailures.AsObjectId(obj)));
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotEqual()
     {
         var obj = new object();
@@ -92,7 +92,7 @@ public class ObjectAssertTest
                 .Replace("$obj", AssertFailures.AsObjectId(obj)));
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsInstanceOf()
     {
         // engine class test
@@ -127,7 +127,7 @@ public class ObjectAssertTest
                         + "    <GdUnit4.Tests.Asserts.CustomClassB> but is <GdUnit4.Tests.Asserts.CustomClass>");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotInstanceOf()
     {
         AssertObject(null).IsNotInstanceOf<Node>();
@@ -152,7 +152,7 @@ public class ObjectAssertTest
                         + "    <GdUnit4.Tests.Asserts.CustomClass>");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNull()
     {
         AssertObject(null).IsNull();
@@ -171,7 +171,7 @@ public class ObjectAssertTest
                                + "    <System.Object>");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotNull()
     {
         AssertObject(AutoFree(new Node())).IsNotNull();
@@ -183,7 +183,7 @@ public class ObjectAssertTest
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsSame()
     {
         var obj1 = AutoFree(new Node())!;
@@ -243,7 +243,7 @@ public class ObjectAssertTest
                 .Replace("$obj3", AssertFailures.AsObjectId(obj3)));
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotSame()
     {
         var obj1 = AutoFree(new Node())!;
@@ -291,7 +291,7 @@ public class ObjectAssertTest
             .HasMessage("ObjectAssert initial error: current is primitive <System.Boolean>");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void OverrideFailureMessage()
         => AssertThrown(() => AssertObject(AutoFree(new Node()))
                 .OverrideFailureMessage("Custom failure message")

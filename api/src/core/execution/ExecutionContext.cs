@@ -15,8 +15,6 @@ using Reporting;
 
 internal sealed class ExecutionContext : IDisposable
 {
-    // TODO handle engine mode
-    public bool IsEngineMode = false;
     private int iteration;
 
     public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode = false)
@@ -47,6 +45,7 @@ internal sealed class ExecutionContext : IDisposable
         CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
+        IsEngineMode = context.IsEngineMode;
     }
 
     public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
@@ -59,6 +58,7 @@ internal sealed class ExecutionContext : IDisposable
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
+        IsEngineMode = context.IsEngineMode;
     }
 
     public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute)
@@ -70,7 +70,10 @@ internal sealed class ExecutionContext : IDisposable
         CurrentTestCase = testCase;
         CurrentIteration = 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
+        IsEngineMode = context.IsEngineMode;
     }
+
+    public bool IsEngineMode { get; set; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 

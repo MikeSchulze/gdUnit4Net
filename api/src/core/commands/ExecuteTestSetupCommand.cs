@@ -34,6 +34,7 @@ public class ExecuteTestSetupCommand : BaseCommand
             var attribute = testCase.TestCaseAttributes.ElementAt(Test.AttributeIndex);
 
             ExecutionContext testCaseContext = new(executionContext, testCase, attribute);
+            testCaseContext.IsEngineMode = Test.RequireRunningGodotEngine;
             ExecutionContextStore.SetContext(Test.Id, testCaseContext);
 
 

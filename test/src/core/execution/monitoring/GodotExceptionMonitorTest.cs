@@ -10,7 +10,7 @@ using Godot;
 [TestSuite]
 public partial class GodotExceptionMonitorTest
 {
-    [TestCase]
+    [GodotTestCase]
     [ThrowsException(typeof(InvalidOperationException), "TestNode '_Ready' failed.",
         "/src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 62)]
     public void CatchExceptionOnAddingNodeToSceneTree()
@@ -38,7 +38,7 @@ public partial class GodotExceptionMonitorTest
         await sceneRunner.SimulateFrames(6);
     }
 
-    [TestCase]
+    [GodotTestCase]
     [ThrowsException(typeof(InvalidOperationException), "Test Exception",
         "src/core/resources/scenes/TestSceneWithExceptionTest.cs", 14)]
     public void CatchExceptionIsThrownOnSceneInvoke()

@@ -216,7 +216,7 @@ public class GdUnitTestSuiteBuilderTest
 			""".Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r", string.Empty);
 
 
-    [TestCase]
+    [GodotTestCase]
     public void LoadTestSuite()
     {
         var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("src/core/ExampleTestSuite.cs"));
