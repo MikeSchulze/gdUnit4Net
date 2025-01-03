@@ -19,7 +19,8 @@ internal static class TestCaseDiscoverer
         var testCases = testSuites.SelectMany(type =>
             {
                 var testCases = type.GetMethods()
-                    .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+                    .Where(m => m.GetCustomAttributes()
+                        .Any(attr => typeof(TestCaseAttribute).IsAssignableFrom(attr.GetType())))
                     .ToList()
                     .AsParallel()
                     .SelectMany(mi => DiscoverTestCasesFromMethod(mi, testAssembly, type.FullName!))
@@ -41,7 +42,8 @@ internal static class TestCaseDiscoverer
         MethodInfo mi,
         string assemblyPath,
         string className) =>
-        mi.GetCustomAttributes(typeof(TestCaseAttribute))
+        mi.GetCustomAttributes()
+            .Where(attr => typeof(TestCaseAttribute).IsAssignableFrom(attr.GetType()))
             .Cast<TestCaseAttribute>()
             .Select((attr, index) => new TestCaseDescriptor
             {
@@ -50,7 +52,10 @@ internal static class TestCaseDiscoverer
                 ManagedType = className,
                 ManagedMethod = mi.Name,
                 FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, attr),
-                SimpleName = BuildSimpleDisplayName(mi.Name, index, attr)
+                SimpleName = BuildSimpleDisplayName(mi.Name, index, attr),
+                AttributeIndex = index,
+                LineNumber = 0,
+                RequireRunningGodotEngine = attr is GodotTestCaseAttribute
             })
             .OrderBy(test => test.ManagedMethod)
             .ToList();

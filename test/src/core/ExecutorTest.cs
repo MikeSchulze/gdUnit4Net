@@ -20,6 +20,8 @@ using static Assertions;
 using static GdUnit4.Core.Events.TestEvent.TYPE;
 using static GdUnit4.Core.Reporting.TestReport.ReportType;
 
+using TestCase = GdUnit4.Core.Execution.TestCase;
+
 [TestSuite]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
 public class ExecutorTest : ITestEventListener

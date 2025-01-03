@@ -15,12 +15,14 @@ using Reporting;
 
 internal sealed class ExecutionContext : IDisposable
 {
+    // TODO handle engine mode
+    public bool IsEngineMode = false;
     private int iteration;
 
-    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled)
+    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode = false)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
-        MemoryPool = new MemoryPool(reportOrphanNodesEnabled);
+        MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
         Stopwatch = new Stopwatch();
         Stopwatch.Start();
 
@@ -234,6 +236,11 @@ internal sealed class ExecutionContext : IDisposable
         FireTestEvent(TestEvent
             .AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
             .WithFullyQualifiedName(FullyQualifiedName));
+
+
+    public TestEvent TearDownTestEvent(Guid id) =>
+        TestEvent.TearDownTest(id, BuildStatistics(OrphanCount(true)), CollectReports.ToList());
+
 
     public static void RegisterDisposable(IDisposable disposable) =>
         Current?.Disposables.Add(disposable);

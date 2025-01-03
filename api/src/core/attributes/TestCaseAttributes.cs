@@ -24,7 +24,7 @@ public class TestCaseAttribute : TestStageAttribute
     /// <summary>
     ///     Holds the test case argument when is specified
     /// </summary>
-    internal object?[] Arguments { get; private set; }
+    internal object?[] Arguments { get; init; }
 
     /// <summary>
     ///     Optional test case name to override the original test case name

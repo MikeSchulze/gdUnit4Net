@@ -24,6 +24,15 @@ internal class TestEvent : IEquatable<TestEvent>
         Reports = reports?.ToList() ?? new List<TestReport>();
     }
 
+    private TestEvent(TYPE type, Guid id)
+    {
+        Type = type;
+        Id = id;
+        Statistics = new Dictionary<STATISTIC_KEY, object>();
+        Statistics[STATISTIC_KEY.TOTAL_COUNT] = 0;
+        Reports = new List<TestReport>();
+    }
+
     public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
     public List<TestReport> Reports { get; set; } = new();
 
@@ -71,6 +80,18 @@ internal class TestEvent : IEquatable<TestEvent>
     public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
         IEnumerable<TestReport>? reports = null) =>
         new(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
+
+
+    public static TestEvent SetupTest(Guid id) =>
+        new(TYPE.TESTCASE_BEFORE, id);
+
+    public static TestEvent TearDownTest(Guid id, IDictionary<STATISTIC_KEY, object> statistics, List<TestReport> reports) =>
+        new(TYPE.TESTCASE_AFTER, id)
+        {
+            Statistics = statistics,
+            Reports = reports
+        };
+
 
     public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
 
@@ -154,4 +175,6 @@ internal class TestEvent : IEquatable<TestEvent>
     public string TestName { get; set; }
     public string FullyQualifiedName { get; set; }
     public string ResourcePath { get; set; }
+
+    public Guid Id { get; set; }
 }

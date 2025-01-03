@@ -20,7 +20,8 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
     {
         if (!context.IsSkipped)
         {
-            GodotSignalCollector.Instance.Clean();
+            if (context.IsEngineMode)
+                GodotSignalCollector.Instance.Clean();
             context.MemoryPool.SetActive(StageName);
             await base.Execute(context);
             await context.MemoryPool.Gc();

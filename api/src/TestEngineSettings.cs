@@ -18,4 +18,6 @@ public sealed class TestEngineSettings
     ///     Default: false
     /// </summary>
     public bool CaptureStdOut { get; init; }
+
+    public int MaxCpuCount { get; set; }
 }

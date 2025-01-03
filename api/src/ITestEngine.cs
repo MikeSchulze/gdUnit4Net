@@ -2,16 +2,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+
+using Api;
 
 using Core;
 using Core.Discovery;
+using Core.Events;
 
 /// <summary>
 ///     Interface for the GdUnit4 test engine responsible for discovering and executing tests.
 ///     Provides core functionality for test discovery, execution, and version information.
 /// </summary>
-public interface ITestEngine
+public interface ITestEngine : IDisposable
 {
     /// <summary>
     ///     Creates a new instance of the test engine with specified settings and logger.
@@ -31,9 +33,10 @@ public interface ITestEngine
     /// <summary>
     ///     Executes the specified test cases asynchronously.
     /// </summary>
-    /// <param name="testCases">List of test cases to execute</param>
+    /// <param name="testAssemblyNodes">List of test assemblies to execute</param>
+    /// <param name="eventListener">The listener to receive all test execution events</param>
     /// <returns>Task representing the execution result count</returns>
-    public Task<int> Execute(List<ITestCase> testCases);
+    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener);
 
     /// <summary>
     ///     Gets the version of the GdUnit4 test engine.
@@ -45,4 +48,6 @@ public interface ITestEngine
         var assembly = typeof(GdUnit4TestEngine).Assembly ?? throw new InvalidOperationException("No 'gdUnit4Api' is installed!");
         return assembly.GetName().Version;
     }
+
+    void Cancel();
 }

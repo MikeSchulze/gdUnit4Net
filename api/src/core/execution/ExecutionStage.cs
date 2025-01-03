@@ -23,14 +23,16 @@ using static Reporting.TestReport;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
-    private readonly GodotExceptionMonitor godotExceptionMonitor = new();
+    private readonly GodotExceptionMonitor? godotExceptionMonitor;
 
-    protected ExecutionStage(string name, Type type)
+    protected ExecutionStage(string name, Type type, bool isEngineMode = false)
     {
         var method = type
             .GetMethods()
             .FirstOrDefault(m => m.IsDefined(typeof(T)));
         InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>()!);
+        if (isEngineMode)
+            godotExceptionMonitor = new GodotExceptionMonitor();
     }
 
     protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute)
@@ -49,6 +51,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
     private TestStageAttribute? StageAttribute { get; set; }
 
     private bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
+
 
     public virtual async Task Execute(ExecutionContext context)
     {
@@ -70,10 +73,10 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             }
 
             if (IsMonitoringOnGodotExceptionsEnabled)
-                godotExceptionMonitor.Start();
+                godotExceptionMonitor?.Start();
             await ExecuteStage(context);
             if (IsMonitoringOnGodotExceptionsEnabled)
-                await godotExceptionMonitor.StopThrow();
+                await godotExceptionMonitor?.StopThrow()!;
 
             ValidateForExpectedException(context);
         }

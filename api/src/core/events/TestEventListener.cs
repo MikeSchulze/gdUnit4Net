@@ -1,8 +1,8 @@
-using System;
-
 namespace GdUnit4.Core.Events;
 
-internal interface ITestEventListener : IDisposable
+using System;
+
+public interface ITestEventListener : IDisposable
 {
     bool IsFailed { get; protected set; }
 

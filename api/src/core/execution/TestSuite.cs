@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using Api;
+
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,6 +15,18 @@ internal sealed class TestSuite : IDisposable
 {
     private readonly Lazy<IEnumerable<TestCase>> testCases;
 
+    public TestSuite(Type type, List<TestCaseNode> tests)
+    {
+        Instance = Activator.CreateInstance(type)
+                   ?? throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
+
+        Name = type.Name;
+        ResourcePath = "Invalid";
+        // we do lazy loading to only load test case one times
+        testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, tests));
+    }
+
+    [Obsolete("This constructor is deprecated.")]
     public TestSuite(string classPath, IEnumerable<string>? includedTests = null, bool checkIfTestSuite = true, bool primitiveFilter = false)
     {
         var type = GdUnitTestSuiteBuilder.ParseType(classPath, checkIfTestSuite)
@@ -47,6 +61,7 @@ internal sealed class TestSuite : IDisposable
             disposable.Dispose();
     }
 
+    [Obsolete("This method is deprecated. Use LoadTestCases(<Type>,  List<ITestCase>) instead.")]
     private List<TestCase> LoadTestCases(Type type, CompilationUnitSyntax? syntaxTree, IEnumerable<string>? includedTests = null, bool primitiveFilter = false)
         => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
@@ -57,6 +72,17 @@ internal sealed class TestSuite : IDisposable
                 return new TestCase(mi, lineNumber);
             })
             .ToList();
+
+
+    private List<TestCase> LoadTestCases(Type type, List<TestCaseNode> includedTests)
+        => type.GetMethods()
+            .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+            .Join(includedTests,
+                m => m.Name,
+                test => test.ManagedMethod,
+                (mi, test) => new TestCase(mi, test.LineNumber))
+            .ToList();
+
 
     /// <summary>
     ///     filters test by given list, if primitiveFilter is set we do simply filter by test name ignoring the arguments
