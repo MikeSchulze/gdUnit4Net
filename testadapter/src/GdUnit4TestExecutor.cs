@@ -3,13 +3,19 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+
+using Api;
 
 using Discovery;
 
 using Execution;
 
+using Extensions;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using Settings;
@@ -32,19 +38,14 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         ["Name"] = TestCaseProperties.DisplayName
     };
 
-    private TestExecutor? executor;
-
     private IFrameworkHandle? fh;
+    private ITestEngine? testEngine;
 
 #pragma warning disable CA1859
     private ITestEngineLogger? Log { get; set; }
 #pragma warning restore CA1859
 
-    public void Dispose()
-    {
-        executor?.Dispose();
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => GC.SuppressFinalize(this);
 
     /// <summary>
     ///     Runs only the tests specified by parameter 'tests'.
@@ -62,7 +63,6 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         if (testCases.Count == 0)
             return;
 
-
         Log = new Logger(frameworkHandle);
         if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
         {
@@ -73,8 +73,17 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         }
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
+        var settings = GdUnit4SettingsProvider.LoadSettings(runContext);
+        var engineSettings = new TestEngineSettings
+        {
+            CaptureStdOut = settings.CaptureStdOut,
+            Parameters = settings.Parameters,
+            MaxCpuCount = Math.Max(1, runConfiguration.MaxCpuCount)
+        };
+        testEngine = ITestEngine.GetInstance(engineSettings, Log);
+        Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
+
         //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
-        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
         // ReSharper disable once UnusedVariable
         var filterExpression = runContext.GetTestCaseFilter(supportedProperties.Keys, propertyName =>
         {
@@ -82,8 +91,30 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             return testProperty;
         });
 
-        executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, testCases);
+        try
+        {
+            SetupRunnerEnvironment(runContext, frameworkHandle);
+            using var testEventListener = new TestEventReportServer(frameworkHandle, testCases);
+            var testsByAssembly = ToGdUnitTestNodes(testCases);
+            Log.LogInfo("Test execution stopped successfully.");
+            testEngine.Execute(testsByAssembly, testEventListener);
+
+            // enable just to verify all allocated objects are freed
+            /*
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            */
+
+
+            Log.LogInfo("Test execution stopped successfully.");
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Test execution failed: {ex.Message}");
+            Log.LogError(ex.StackTrace ?? "No stack trace available");
+            throw;
+        }
     }
 
     /// <summary>
@@ -110,10 +141,74 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     public void Cancel()
     {
         Log?.LogInfo("Cancel pressed  -----");
-        executor?.Cancel();
+        testEngine?.Cancel();
     }
 
     public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
 
     public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
+
+    private static List<TestAssemblyNode> ToGdUnitTestNodes(IEnumerable<TestCase> testCases) =>
+        // Group test cases by assembly path
+        testCases
+            .GroupBy(tc => tc.Source)
+            .Select(assemblyGroup =>
+            {
+                // Create the assembly node
+                var assembly = new TestAssemblyNode
+                {
+                    Id = Guid.NewGuid(),
+                    ParentId = Guid.Empty,
+                    AssemblyPath = assemblyGroup.Key,
+                    Suites = new List<TestSuiteNode>()
+                };
+
+                // Group test cases by managed type (suites)
+                var suites = assemblyGroup
+                    .GroupBy(t => t.CodeFilePath)
+                    .Select(tests =>
+                    {
+                        var t = tests.First();
+
+                        var ManagedType = t.GetPropertyValue<string>(TestCaseExtensions.ManagedTypeProperty, "");
+                        var suite = new TestSuiteNode
+                        {
+                            Id = Guid.NewGuid(),
+                            ParentId = assembly.Id,
+                            ManagedType = ManagedType,
+                            AssemblyPath = assembly.AssemblyPath,
+                            Tests = new List<TestCaseNode>()
+                        };
+
+                        suite.Tests.AddRange(tests
+                            .Select(test => new TestCaseNode
+                            {
+                                Id = test.Id,
+                                ParentId = suite.Id,
+                                ManagedMethod = test.GetPropertyValue<string>(TestCaseExtensions.ManagedMethodProperty, ""),
+                                AttributeIndex = test.GetPropertyValue(TestCaseExtensions.ManagedMethodAttributeIndexProperty, 0),
+                                LineNumber = test.LineNumber,
+                                RequireRunningGodotEngine = test.GetPropertyValue(TestCaseExtensions.RequireRunningGodotEngineProperty, false)
+                            }).ToList());
+
+                        return suite;
+                    });
+
+                assembly.Suites.AddRange(suites);
+                return assembly;
+            })
+            .ToList();
+
+    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
+    {
+        try
+        {
+            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+        }
+        catch (XmlException ex)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
+        }
+    }
 }

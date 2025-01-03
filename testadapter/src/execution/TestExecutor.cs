@@ -8,13 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 
 using Core.Extensions;
-
-using core.runners;
-
-using Extensions;
+using Core.Runners;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -77,7 +73,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
 
     public void Dispose()
     {
-        testRunner?.Dispose();
+        testRunner?.DisposeAsync();
         testRunner = null;
         pProcess?.Dispose();
     }
@@ -85,7 +81,7 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
     public void Run(IFrameworkHandle frameworkHandle, IRunContext runContext, IReadOnlyList<TestCase> testCases)
     {
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Start executing tests, {testCases.Count} TestCases total.");
-        SetupRunnerEnvironment(runContext, frameworkHandle);
+
 
         // TODO split into multiple threads by using 'ParallelTestCount'
         var groupedTests = testCases
@@ -98,15 +94,6 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Detected Running IDE: {IdeDetector.Detect(frameworkHandle)}");
 
         using var testEventListener = new TestEventReportServer(frameworkHandle, testCases);
-
-        var engineTests = testCases
-            .Select(t => new GdUnitTestCase(t.CodeFilePath!, t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName)))
-            // TODO filter by GodotTestCase
-            .ToList();
-
-        var testLogger = new Logger(frameworkHandle);
-        testRunner = new GodotProcessTestRunner(testLogger);
-        testRunner.RunAndWait(testEventListener, engineTests);
 
 
         InstallTestRunnerAndBuild(frameworkHandle, workingDirectory);
@@ -170,13 +157,13 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
                     var message = $"""
 
                                    ╔═══════════════════════ TEST SESSION TIMEOUT ═══════════════════════════════════════╗
-                                   
+
                                      Test execution exceeded maximum allowed time:
                                        • Timeout: {TimeSpan.FromMilliseconds(SessionTimeOut).Humanize()}
                                        • Total tests: {testCases.Count}
                                        • Completed tests: {testEventListener.CompletedTests}
                                        • Time elapsed: {stopwatch.Elapsed.Humanize()}
-                                   
+
                                      ACTION REQUIRED: Please increase 'TestSessionTimeout' in your '.runsettings' file
 
                                    ╚════════════════════════════════════════════════════════════════════════════════════╝
@@ -312,19 +299,6 @@ internal sealed class TestExecutor : BaseTestExecutor, ITestExecutor
         catch (Exception e)
         {
             frameworkHandle.SendMessage(TestMessageLevel.Error, $"Can't copy the Godot logfile: {e.Message}");
-        }
-    }
-
-    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
-    {
-        try
-        {
-            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
-                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
-        }
-        catch (XmlException ex)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
         }
     }
 }

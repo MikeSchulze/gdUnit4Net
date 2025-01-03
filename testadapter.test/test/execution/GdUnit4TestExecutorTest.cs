@@ -7,10 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Moq;
 
-using TestAdapter.Execution;
-
 [TestClass]
-public class TestExecutorTest
+public class GdUnit4TestExecutorTest
 {
     private static readonly string XmlSettings =
         """
@@ -54,7 +52,7 @@ public class TestExecutorTest
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
 
         // run
-        TestExecutor.SetupRunnerEnvironment(mockRunContext.Object, frameworkHandle);
+        GdUnit4TestExecutor.SetupRunnerEnvironment(mockRunContext.Object, frameworkHandle);
 
         // verify the TestEnvironmentA=23 and TestEnvironmentB is overwritten by 42
         Assert.AreEqual(Environment.GetEnvironmentVariable("TestEnvironmentA"), "23");

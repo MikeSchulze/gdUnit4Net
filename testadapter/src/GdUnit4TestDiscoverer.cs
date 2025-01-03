@@ -52,7 +52,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 return;
             }
 
-            var settings = GetGdUnit4Settings(discoveryContext);
+            var settings = GdUnit4SettingsProvider.LoadSettings(discoveryContext);
             var engineSettings = new TestEngineSettings
             {
                 CaptureStdOut = settings.CaptureStdOut,
@@ -102,6 +102,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         testCase.SetPropertyValue(TestCaseNameProperty, descriptor.FullyQualifiedName);
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
+        testCase.SetPropertyValue(ManagedMethodAttributeIndexProperty, descriptor.AttributeIndex);
+        testCase.SetPropertyValue(RequireRunningGodotEngineProperty, descriptor.RequireRunningGodotEngine);
 
         ManagedNameHelper.GetManagedName(navData.Method, out _, out _, out var hierarchyValues);
         ManagedNameParser.ParseManagedMethodName(descriptor.ManagedMethod, out var methodName, out _, out _);
@@ -113,14 +115,6 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
 
         return testCase;
-    }
-
-    private static GdUnit4Settings GetGdUnit4Settings(IDiscoveryContext discoveryContext)
-    {
-        //var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
-        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
-        var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
-        return gdUnitSettings;
     }
 
     private static string GetDisplayName(TestCaseDescriptor input, GdUnit4Settings gdUnitSettings)

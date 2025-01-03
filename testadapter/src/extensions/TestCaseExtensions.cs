@@ -1,7 +1,5 @@
 namespace GdUnit4.TestAdapter.Extensions;
 
-using System.Collections.ObjectModel;
-
 using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -10,6 +8,11 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 /// </summary>
 internal static class TestCaseExtensions
 {
+    public const string ManagedMethodAttributeIndexLabel = "ManagedAttributeIndexLabel";
+
+    public const string ManagedMethodAttributeIndexId = $"TestCase.{ManagedMethodAttributeIndexLabel}";
+
+
     internal static readonly TestProperty TestCaseNameProperty = TestProperty.Register(
         "TestCase.Name",
         "Name",
@@ -24,7 +27,7 @@ internal static class TestCaseExtensions
         ManagedNameConstants.ManagedTypePropertyId,
         ManagedNameConstants.ManagedTypeLabel,
         string.Empty,
-        string.Empty,
+        "holds the test suite class name",
         typeof(string),
         o => !string.IsNullOrWhiteSpace(o as string),
         TestPropertyAttributes.Hidden,
@@ -34,11 +37,32 @@ internal static class TestCaseExtensions
         ManagedNameConstants.ManagedMethodPropertyId,
         ManagedNameConstants.ManagedMethodLabel,
         string.Empty,
-        string.Empty,
+        "holds the test method name",
         typeof(string),
         o => !string.IsNullOrWhiteSpace(o as string),
         TestPropertyAttributes.Hidden,
         typeof(TestCase));
+
+    internal static readonly TestProperty ManagedMethodAttributeIndexProperty = TestProperty.Register(
+        ManagedMethodAttributeIndexId,
+        ManagedMethodAttributeIndexLabel,
+        string.Empty,
+        "Holds the test method attribute index",
+        typeof(int),
+        value => value is int and >= 0,
+        TestPropertyAttributes.Hidden,
+        typeof(TestCase));
+
+    internal static readonly TestProperty RequireRunningGodotEngineProperty = TestProperty.Register(
+        "TestCase.RequireRunningGodotEngineLabel",
+        "RequireRunningGodotEngineLabel",
+        string.Empty,
+        "Indicates that the test method must execute inside Godot engine context.",
+        typeof(bool),
+        value => value is bool,
+        TestPropertyAttributes.Hidden,
+        typeof(TestCase));
+
 
     internal static readonly TestProperty HierarchyProperty = TestProperty.Register(
         HierarchyConstants.HierarchyPropertyId,
@@ -49,13 +73,4 @@ internal static class TestCaseExtensions
         null,
         TestPropertyAttributes.Immutable,
         typeof(TestCase));
-
-    internal sealed class TestCaseDescriptor
-    {
-        internal string? ManagedType { get; init; }
-        internal string? ManagedMethod { get; init; }
-        internal ReadOnlyCollection<string?>? HierarchyValues { get; init; }
-        internal string DisplayName { get; init; } = "";
-        internal string FullyQualifiedName { get; init; } = "";
-    }
 }

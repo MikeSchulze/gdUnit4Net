@@ -26,6 +26,8 @@ using Newtonsoft.Json;
 
 using Utilities;
 
+using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
+
 internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListener
 {
     private readonly NamedPipeServerStream server = new(TestAdapterReporter.PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
@@ -75,13 +77,13 @@ internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListen
                     // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
                     if (FindParameterizedTestCase(e))
                         return;
-                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case {e.FullyQualifiedName}");
+                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case Id: {e.Id}");
                     return;
                 }
 
                 Framework.RecordStart(testCase);
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {e.FullyQualifiedName} Processing...");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} Processing...");
                 break;
             }
 
@@ -338,7 +340,7 @@ internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListen
 
 
     private TestCase? FindTestCase(TestEvent e)
-        => TestCases.FirstOrDefault(t => e.FullyQualifiedName.Equals(t.FullyQualifiedName, StringComparison.Ordinal));
+        => TestCases.FirstOrDefault(t => e.Id.Equals(t.Id));
 
     private bool FindParameterizedTestCase(TestEvent e)
         => TestCases.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));

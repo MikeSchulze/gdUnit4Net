@@ -10,7 +10,6 @@ using Api;
 
 using Extensions;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
@@ -19,6 +18,7 @@ using Newtonsoft.Json;
 using Settings;
 
 using Environment = System.Environment;
+using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
 internal abstract class BaseTestExecutor
 {
