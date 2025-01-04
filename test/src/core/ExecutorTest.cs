@@ -142,7 +142,7 @@ public class ExecutorTest : ITestEventListener
         var expectedEvents = new List<ITuple> { Tuple(TESTCASE_BEFORE, suiteName, testName, 0) };
         foreach (var testCaseParam in testCaseParams)
         {
-            var testCaseName = TestCase.BuildDisplayName(testName, testCaseParam);
+            var testCaseName = TestCase.BuildDisplayName(testName, new TestCaseAttribute(testCaseParam));
             expectedEvents.Add(Tuple(TESTCASE_BEFORE, suiteName, testCaseName, 0));
             expectedEvents.Add(Tuple(TESTCASE_AFTER, suiteName, testCaseName, 0));
         }
@@ -719,20 +719,20 @@ public class ExecutorTest : ITestEventListener
         AssertEventStates(events).Contains(
             Tuple(TESTSUITE_BEFORE, "Before", true, false, false, false),
             Tuple(TESTCASE_BEFORE, "ParameterizedBoolValue", true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", 0, false), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", 1, true), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue"), true, false, false, false),
-            Tuple(TESTCASE_BEFORE, TestCase.BuildDisplayName("ParameterizedIntValues"), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 1, 2, 3, 6), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 3, 4, 5, 12), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 6, 7, 8, 21), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues"), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(0, false)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(1, true)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute()), true, false, false, false),
+            Tuple(TESTCASE_BEFORE, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(1, 2, 3, 6)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(3, 4, 5, 12)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(6, 7, 8, 21)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
             // a test with failing test cases
             Tuple(TESTCASE_BEFORE, "ParameterizedIntValuesFail", true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 1, 2, 3, 6), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 3, 4, 5, 11), false, false, true, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 6, 7, 8, 22), false, false, true, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail"), false, false, true, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(1, 2, 3, 6)), true, false, false, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(3, 4, 5, 11)), false, false, true, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(6, 7, 8, 22)), false, false, true, false),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute()), false, false, true, false),
             // the single parameterized test
             Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest", true, false, false, false),
             Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest(True)", true, false, false, false),
@@ -744,20 +744,20 @@ public class ExecutorTest : ITestEventListener
 
         AssertReports(events).Contains(
             Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", 0, false), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", 1, true), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 1, 2, 3, 6), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 3, 4, 5, 12), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", 6, 7, 8, 21), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 1, 2, 3, 6), new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 3, 4, 5, 11), new List<TestReport>
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(0, false)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(1, true)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(1, 2, 3, 6)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(3, 4, 5, 12)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(6, 7, 8, 21)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(1, 2, 3, 6)), new List<TestReport>()),
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(3, 4, 5, 11)), new List<TestReport>
             {
                 new(FAILURE, 25, """
                                  Expecting be equal:
                                      '11' but is '12'
                                  """)
             }),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", 6, 7, 8, 22), new List<TestReport>
+            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(6, 7, 8, 22)), new List<TestReport>
             {
                 new(FAILURE, 25, """
                                  Expecting be equal:

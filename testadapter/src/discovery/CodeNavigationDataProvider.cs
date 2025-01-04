@@ -77,5 +77,13 @@ internal sealed class CodeNavigationDataProvider : IDisposable
         public required int Line { get; init; }
         public required string? Source { get; init; }
         public readonly bool IsValid => Source != null;
+
+        public override string ToString()
+            => $"""
+                CodeNavigation:
+                  Name: {Method.Name}
+                  Line: {Line}
+                  Source: {Source}"";
+                """;
     }
 }

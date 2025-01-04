@@ -19,8 +19,7 @@ internal static class TestCaseDiscoverer
         var testCases = testSuites.SelectMany(type =>
             {
                 var testCases = type.GetMethods()
-                    .Where(m => m.GetCustomAttributes()
-                        .Any(attr => typeof(TestCaseAttribute).IsAssignableFrom(attr.GetType())))
+                    .Where(m => m.GetCustomAttributes().Any(attr => attr is TestCaseAttribute))
                     .ToList()
                     .AsParallel()
                     .SelectMany(mi => DiscoverTestCasesFromMethod(mi, testAssembly, type.FullName!))
@@ -38,12 +37,12 @@ internal static class TestCaseDiscoverer
         return testCases;
     }
 
-    private static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(
+    internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(
         MethodInfo mi,
         string assemblyPath,
-        string className) =>
-        mi.GetCustomAttributes()
-            .Where(attr => typeof(TestCaseAttribute).IsAssignableFrom(attr.GetType()))
+        string className)
+        => mi.GetCustomAttributes()
+            .Where(attr => attr is TestCaseAttribute)
             .Cast<TestCaseAttribute>()
             .Select((attr, index) => new TestCaseDescriptor
             {
@@ -52,21 +51,13 @@ internal static class TestCaseDiscoverer
                 ManagedType = className,
                 ManagedMethod = mi.Name,
                 FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, attr),
-                SimpleName = BuildSimpleDisplayName(mi.Name, index, attr),
+                SimpleName = TestCase.BuildDisplayName(mi.Name, attr, index, mi.GetCustomAttributes().Count() > 1),
                 AttributeIndex = index,
                 LineNumber = 0,
                 RequireRunningGodotEngine = attr is GodotTestCaseAttribute
             })
             .OrderBy(test => test.ManagedMethod)
             .ToList();
-
-    private static string BuildSimpleDisplayName(string testName, long index, TestCaseAttribute attribute)
-    {
-        var displayName = attribute.TestName ?? testName;
-        if (index == -1 || attribute.Arguments.Length == 0)
-            return displayName;
-        return $"{displayName}'{index}";
-    }
 
     private static bool IsTestSuite(Type type) =>
         type is { IsClass: true, IsAbstract: false }

@@ -70,37 +70,24 @@ internal sealed class TestCase
                 )
             ).ToList();
 
-    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute)
+    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = 0, bool withAttributeIndex = false)
     {
         var name = attribute.TestName ?? testName;
-        if (attribute.Arguments.Length > 0)
-        {
-            var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
-            return $"{name}({parameters})";
-        }
+        if (withAttributeIndex) return $"{name} #{attributeIndex}";
 
-        return name;
+        if (attribute.Arguments.Length <= 0) return name;
+        var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
+        return $"{name} ({parameters})";
     }
 
     internal static string BuildDisplayName(string testName)
         => testName;
 
-    internal static string BuildDisplayName(string testName, params object[] arguments)
+    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute attr)
     {
-        if (arguments.Length > 0)
-        {
-            var parameters = string.Join(", ", arguments.Select(GdUnitExtensions.Formatted));
-            return $"{testName}({parameters})";
-        }
-
-        return testName;
-    }
-
-    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute? attr)
-    {
-        if (attr == null || attr.Arguments.Length == 0)
-            return $"{classNameSpace}.{testName}";
-        var parameterizedTestName = BuildDisplayName(testName, attr);
+        if (attr.Arguments.Length == 0)
+            return $"{classNameSpace}.{attr.TestName ?? testName}";
+        var parameterizedTestName = BuildDisplayName(testName, attr, -1);
         return $"{classNameSpace}.{testName}.{parameterizedTestName}";
     }
 }

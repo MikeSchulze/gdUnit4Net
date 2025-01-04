@@ -110,7 +110,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         if (hierarchyValues.Length > 0)
         {
             hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
-            hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = methodName;
+            hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = descriptor.ManagedMethod;
             testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
         }
 
@@ -121,7 +121,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         => gdUnitSettings.DisplayName switch
         {
             DisplayNameOptions.SimpleName => input.SimpleName,
-            DisplayNameOptions.FullyQualifiedName => input.FullyQualifiedName,
+            DisplayNameOptions.FullyQualifiedName => input.FullyQualifiedName.Substring(input.FullyQualifiedName.LastIndexOf('.') + 1),
             _ => input.ManagedMethod
         };
 
