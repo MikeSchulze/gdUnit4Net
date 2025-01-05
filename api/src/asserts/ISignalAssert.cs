@@ -33,7 +33,7 @@ public interface ISignalAssert : IAssertBase<GodotObject>
     /// <param name="args">Optional signal arguments</param>
     /// Example: it waits until 2000ms and is failing if the signal is emitted in this time
     /// await AssertSignal(node).IsNotEmitted("draw").WithTimeout(2000);
-    /// <returns>Tahs</returns>
+    /// <returns>Task</returns>
     public Task<ISignalAssert> IsNotEmitted(string signal, params Variant[] args);
 
     /// <summary>

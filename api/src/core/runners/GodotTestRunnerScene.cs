@@ -3,7 +3,6 @@
 namespace GdUnit4.Core.Runners;
 
 using System;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -34,13 +33,13 @@ public partial class GodotTestRunnerScene : SceneTree
             Server = new GodotGdUnit4RestServer(Logger);
         }
 
-        private GodotLogger Logger { get; }
+        private ITestEngineLogger Logger { get; }
 
         private GodotGdUnit4RestServer Server { get; }
 
-        public override void _Ready() => Task.Run(() => Server.Start());
+        public override void _Ready() => _ = Server.Start();
 
-        public override void _Process(double delta) => Task.Run(async () => await Server.Process());
+        public override void _Process(double delta) => _ = Server.Process();
 
         public override void _Notification(int what)
         {

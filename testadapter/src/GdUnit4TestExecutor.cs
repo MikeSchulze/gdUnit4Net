@@ -78,8 +78,13 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         {
             CaptureStdOut = settings.CaptureStdOut,
             Parameters = settings.Parameters,
-            MaxCpuCount = Math.Max(1, runConfiguration.MaxCpuCount)
+            MaxCpuCount = Math.Max(1, runConfiguration.MaxCpuCount),
+            SessionTimeout = (int)(runConfiguration.TestSessionTimeout == 0
+                ? 30000
+                : runConfiguration.TestSessionTimeout)
         };
+
+
         testEngine = ITestEngine.GetInstance(engineSettings, Log);
         Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
 
@@ -94,10 +99,11 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         try
         {
             SetupRunnerEnvironment(runContext, frameworkHandle);
-            using var testEventListener = new TestEventReportServer(frameworkHandle, testCases);
             var testsByAssembly = ToGdUnitTestNodes(testCases);
-            Log.LogInfo("Test execution stopped successfully.");
-            testEngine.Execute(testsByAssembly, testEventListener);
+            using var testEventListener = new TestEventReportServer(frameworkHandle, testCases);
+            var debuggerFramework = GetDebuggerFramework(frameworkHandle);
+            testEngine.Execute(testsByAssembly, testEventListener, debuggerFramework);
+            Log.LogInfo("Test execution stopped.");
 
             // enable just to verify all allocated objects are freed
             /*
@@ -105,9 +111,6 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             GC.WaitForPendingFinalizers();
             GC.Collect();
             */
-
-
-            Log.LogInfo("Test execution stopped successfully.");
         }
         catch (Exception ex)
         {
@@ -147,6 +150,11 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
 
     public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
+
+    private static IDebuggerFramework GetDebuggerFramework(IFrameworkHandle frameworkHandle)
+        => IsJetBrainsRider(frameworkHandle)
+            ? new RiderDebuggerFramework(frameworkHandle)
+            : new DefaultDebuggerFramework(frameworkHandle);
 
     private static List<TestAssemblyNode> ToGdUnitTestNodes(IEnumerable<TestCase> testCases) =>
         // Group test cases by assembly path
@@ -210,5 +218,17 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         {
             frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
         }
+    }
+
+    private static bool IsJetBrainsRider(IFrameworkHandle frameworkHandle)
+    {
+        var version = frameworkHandle.GetType().Assembly.GetName().Version;
+        if (frameworkHandle is not IFrameworkHandle2
+            || !frameworkHandle.GetType().ToString().Contains("JetBrains")
+            || version < new Version("2.16.1.14"))
+            return false;
+
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"JetBrains Rider detected {version}");
+        return true;
     }
 }

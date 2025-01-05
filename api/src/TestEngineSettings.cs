@@ -19,5 +19,12 @@ public sealed class TestEngineSettings
     /// </summary>
     public bool CaptureStdOut { get; init; }
 
-    public int MaxCpuCount { get; set; }
+    public int MaxCpuCount { get; init; }
+
+
+    /// <summary>
+    ///     The test session timout in milliseconds.
+    ///     Default: 30s
+    /// </summary>
+    public int SessionTimeout { get; init; } = 30000;
 }

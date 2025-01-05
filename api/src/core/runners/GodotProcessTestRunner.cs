@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -20,7 +19,13 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
 {
     private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
 
-    internal GodotProcessTestRunner(ITestEngineLogger logger) : base(new GodotGdUnit4RestClient(logger), logger) { }
+    private Process? process;
+
+    internal GodotProcessTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework) : base(new GodotGdUnit4RestClient(logger), logger)
+        => DebuggerFramework = debuggerFramework;
+
+    private object ProcessLock { get; } = new();
+    private IDebuggerFramework DebuggerFramework { get; }
 
     private string? WorkingDirectory { get; set; }
 
@@ -38,76 +43,65 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
         }
     }
 
-    protected static DataReceivedEventHandler StdErrorProcessor => (_, args) =>
+    private DataReceivedEventHandler StdErrorProcessor => (_, args) =>
     {
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
             return;
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        Console.WriteLine($"{message}");
+        Logger.LogError($"{message}");
     };
 
-    protected static EventHandler ExitHandler => (sender, _) =>
+    private EventHandler ExitHandler => (sender, _) =>
     {
         Console.Out.Flush();
-        //if (sender is Process p)
-        //  frameworkHandle?.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
+        if (sender is Process p)
+            Logger.LogInfo($"Godot ends with exit code: {p.ExitCode}");
     };
-
-    public new void RunAndWait2(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
-    {
-        Task.Run(async () =>
-        {
-            await using var server = new GodotGdUnit4RestServer(Logger);
-            await server.Start();
-
-            while (true) await server.Process();
-        });
-
-        base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
-
-
-        Thread.Sleep(1000);
-    }
 
     public new void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
-        InitRuntimeEnvironment();
-        var processStartInfo =
-            new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments())
+        lock (ProcessLock)
+        {
+            InitRuntimeEnvironment();
+            var processStartInfo =
+                new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments())
+                {
+                    StandardOutputEncoding = Encoding.Default,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    WorkingDirectory = WorkingDirectory
+                };
+
+            if (DebuggerFramework.IsDebugProcess)
+                process = DebuggerFramework.LaunchProcessWithDebuggerAttached(processStartInfo);
+            else
             {
-                StandardOutputEncoding = Encoding.Default,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = WorkingDirectory
-            };
+                process = new Process { StartInfo = processStartInfo };
+                process.EnableRaisingEvents = true;
+                process.ErrorDataReceived += StdErrorProcessor;
+                process.Exited += ExitHandler;
+                process.Start();
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
+                if (DebuggerFramework.IsDebugAttach)
+                    DebuggerFramework.AttachDebuggerToProcess(process);
+            }
 
-        var pProcess = new Process { StartInfo = processStartInfo };
-        pProcess.EnableRaisingEvents = true;
-        pProcess.ErrorDataReceived += StdErrorProcessor;
-        pProcess.Exited += ExitHandler;
+            base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
-        pProcess.Start();
-        pProcess.BeginErrorReadLine();
-        pProcess.BeginOutputReadLine();
-        // --> i need here to attach the current running debugger
-        Console.WriteLine($"Debugger: {Debugger.IsAttached}");
-        //DebuggerUtils.AttachDebuggerToProcess(pProcess.Id);
-
-
-        base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
-
-        if (!pProcess.WaitForExit(1000)) // 30 second timeout
-            pProcess.Kill();
-        pProcess.CancelErrorRead();
-        pProcess.CancelOutputRead();
-        pProcess.ErrorDataReceived -= StdErrorProcessor;
-        pProcess.Exited -= ExitHandler;
-        pProcess.Dispose();
+            if (!process.WaitForExit(1000)) // 30 second timeout
+                process.Kill();
+            process.CancelErrorRead();
+            process.CancelOutputRead();
+            process.ErrorDataReceived -= StdErrorProcessor;
+            process.Exited -= ExitHandler;
+            process.Dispose();
+        }
     }
 
     private void InitRuntimeEnvironment()

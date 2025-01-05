@@ -21,7 +21,7 @@ public class ExecuteTestCommand : BaseCommand
 
     public override async Task<Response> Execute()
     {
-        var executionContext = CurrentExecutionContext(Test.Id);
+        var executionContext = CurrentExecutionContext(Test.Id)!;
 
         var testCase = executionContext.CurrentTestCase;
         using var testCaseContext = new ExecutionContext(executionContext, testCase.Arguments);

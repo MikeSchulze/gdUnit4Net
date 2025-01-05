@@ -26,6 +26,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
 
     private TestEngineSettings Settings { get; }
     private ITestEngineLogger Logger { get; }
+    private IDebuggerFramework DebuggerFramework { get; set; }
 
     public void Dispose() => cancellationSource?.Dispose();
 
@@ -36,9 +37,10 @@ internal sealed class GdUnit4TestEngine : ITestEngine
 
     public List<TestCaseDescriptor> Discover(string testAssembly) => TestCaseDiscoverer.Discover(Settings, Logger, testAssembly);
 
-    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener)
+    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework)
     {
-        lock (taskLock) cancellationSource = new CancellationTokenSource();
+        DebuggerFramework = debuggerFramework;
+        lock (taskLock) cancellationSource = new CancellationTokenSource(Settings.SessionTimeout);
 
         var tasks = new List<Task>();
         var semaphore = new SemaphoreSlim(Settings.MaxCpuCount);
@@ -119,7 +121,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
         {
-            var godotRunner = new GodotProcessTestRunner(Logger);
+            var godotRunner = new GodotProcessTestRunner(Logger, DebuggerFramework);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
         }
     }

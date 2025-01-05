@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Core.Commands;
+using Core.Extensions;
 
 using Newtonsoft.Json;
 
@@ -16,9 +17,8 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
     private readonly SemaphoreSlim processLock = new(1, 1);
 
     public GodotGdUnit4RestServer(ITestEngineLogger logger)
-        : base(new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous),
-            logger)
-        => Logger.LogInfo("Starting GdUnit4 RestApi.");
+        : base(new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
+        => Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
 
     public new async ValueTask DisposeAsync()
     {
@@ -32,7 +32,7 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
     {
         Logger.LogInfo("GodotGdUnit4RestApi:: Waiting for client connecting.");
         await Proxy.WaitForConnectionAsync();
-        Logger.LogInfo($"GodotGdUnit4RestApi:: Client connected. {Proxy.GetImpersonationUserName()}");
+        Logger.LogInfo($"GodotGdUnit4RestApi:: Client connected. User:{Proxy.GetImpersonationUserName()}");
     }
 
     public void Stop() => Task.Run(async () =>
@@ -55,11 +55,8 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
         if (!IsConnected)
             return;
 
-        if (!await processLock.WaitAsync(TimeSpan.FromSeconds(1)))
-        {
-            Logger.LogWarning("GodotGdUnit4RestApi:: Process already in progress.");
-            return;
-        }
+        await GodotObjectExtensions.SyncProcessFrame;
+        if (!await processLock.WaitAsync(TimeSpan.FromSeconds(1))) return;
 
         try
         {
@@ -92,7 +89,7 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
     {
         try
         {
-            Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
+            //Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
             return await command.Execute();
         }
         catch (Exception ex)

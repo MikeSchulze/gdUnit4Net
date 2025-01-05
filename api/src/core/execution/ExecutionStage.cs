@@ -21,6 +21,8 @@ using Reporting;
 
 using static Reporting.TestReport;
 
+using Environment = System.Environment;
+
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
     private readonly GodotExceptionMonitor? godotExceptionMonitor;
@@ -190,9 +192,9 @@ internal abstract class ExecutionStage<T> : IExecutionStage
     {
         using var tokenSource = new CancellationTokenSource();
         var timeout = TimeSpan.FromMilliseconds(StageAttribute!.Timeout != -1 ? StageAttribute.Timeout : DefaultTimeout);
-        //Godot.GD.PrintS("Execute", StageName);//, context.MethodArguments.Formatted());
+        //GD.PrintS("Execute", StageName); //, context.MethodArguments.Formatted());
         var obj = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments);
-        var task = obj is Task t ? t : Task.Run(() => { });
+        var task = obj is Task t ? t : Task.CompletedTask;
         var completedTask = await Task.WhenAny(task, Task.Delay(timeout, tokenSource.Token));
         tokenSource.Cancel();
         if (completedTask == task)

@@ -23,8 +23,7 @@ public static class Utils
         return stopwatch.ElapsedMilliseconds;
     }
 
-    internal static string GodotTempDir() =>
-        Path.GetFullPath(ProjectSettings.GlobalizePath(GD_UNIT_TEMP));
+    internal static string GodotTempDir() => Path.Combine(Path.GetTempPath(), "gdUnit4Net");
 
     /// <summary>
     ///     Creates a temporary folder under Godot managed user directory

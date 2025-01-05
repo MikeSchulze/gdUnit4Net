@@ -35,8 +35,9 @@ public interface ITestEngine : IDisposable
     /// </summary>
     /// <param name="testAssemblyNodes">List of test assemblies to execute</param>
     /// <param name="eventListener">The listener to receive all test execution events</param>
+    /// <param name="debuggerFramework">The debugging framework to get access to the actual debugger</param>
     /// <returns>Task representing the execution result count</returns>
-    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener);
+    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework);
 
     /// <summary>
     ///     Gets the version of the GdUnit4 test engine.

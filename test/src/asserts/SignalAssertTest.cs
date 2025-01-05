@@ -24,7 +24,6 @@ public partial class SignalAssertTest
             .IsEmpty();
     }
 
-
     [GodotTestCase]
     public async Task IsEmitted()
     {
@@ -166,7 +165,6 @@ public partial class SignalAssertTest
 
         // verify initial the emitters are not monitored
         AssertThat(GodotSignalCollector.Instance.IsSignalCollecting(emitter, NonNodeEmitter.SignalName.SignalA)).IsFalse();
-
 
         // start monitoring on the emitter
         AssertSignal(emitter).StartMonitoring();
