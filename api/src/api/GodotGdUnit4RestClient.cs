@@ -1,7 +1,9 @@
 ﻿namespace GdUnit4.Api;
 
 using System;
+using System.IO;
 using System.IO.Pipes;
+using System.Net;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +24,17 @@ public sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStrea
         try
         {
             await WriteCommand(command);
-            return await ReadResponse();
+            return await ReadResponse(cancellationToken);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            if (e is IOException && cancellationToken.IsCancellationRequested)
+                return new Response
+                {
+                    StatusCode = HttpStatusCode.ServiceUnavailable,
+                    Payload = "Connection interrupted by user."
+                };
+
             throw;
         }
     }

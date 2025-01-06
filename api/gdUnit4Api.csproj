@@ -66,7 +66,7 @@
     <None Include="../icon.png" Pack="true" PackagePath="/"/>
 
     <!-- provide the test runner scene as resource -->
-    <EmbeddedResource Include="src/core/runners/GodotTestRunnerScene.cs"/>
+    <EmbeddedResource Include="src/core/runners/GdUnit4TestRunnerScene.cs"/>
 
   </ItemGroup>
 </Project>

@@ -67,7 +67,7 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
                 return;
             }
 
-            var command = await ReadCommand<BaseCommand>();
+            var command = await ReadCommand<BaseCommand>(tokenSource.Token);
             var response = await ProcessCommand(command);
             await WriteResponse(response);
         }

@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Core.Commands;
@@ -46,15 +47,26 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         GC.SuppressFinalize(this);
     }
 
-    protected async Task<Response> ReadResponse()
+    protected async Task<Response> ReadResponse(CancellationToken cancellationToken)
     {
         var responseLengthBytes = new byte[4];
-        await ReadExactBytesAsync(responseLengthBytes, 0, 4);
+        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return new Response
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+                Payload = "Connection interrupted by user."
+            };
+
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
-
-
         var responseBytes = new byte[responseLength];
-        await ReadExactBytesAsync(responseBytes, 0, responseLength);
+        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return new Response
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+                Payload = "Connection interrupted by user."
+            };
 
         var json = Encoding.UTF8.GetString(responseBytes);
 
@@ -64,17 +76,17 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 
     protected async Task WriteResponse(Response response) => await WriteAsync(response);
 
-    protected async Task<TCommand> ReadCommand<TCommand>() where TCommand : BaseCommand
+    protected async Task<TCommand> ReadCommand<TCommand>(CancellationToken cancellationToken) where TCommand : BaseCommand
     {
         var responseLengthBytes = new byte[4];
-        await ReadExactBytesAsync(responseLengthBytes, 0, 4);
+        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
 
         if (!IsConnected)
             throw new IOException("Client not connected");
 
         var responseBytes = new byte[responseLength];
-        await ReadExactBytesAsync(responseBytes, 0, responseLength);
+        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken);
         if (!IsConnected)
             throw new IOException("Client not connected");
 
@@ -123,14 +135,20 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         return command;
     }
 
-    private async Task ReadExactBytesAsync(byte[] buffer, int offset, int count)
+    private async Task ReadExactBytesAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         var totalBytesRead = 0;
         while (IsConnected && totalBytesRead < count)
-        {
-            var bytesRead = await Pipe.ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead));
-            totalBytesRead += bytesRead;
-        }
+            try
+            {
+                var bytesRead = await Pipe.ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead), cancellationToken);
+                totalBytesRead += bytesRead;
+            }
+            catch (OperationCanceledException e)
+            {
+                if (!cancellationToken.IsCancellationRequested) throw;
+                break;
+            }
 
         //Console.WriteLine($"{typeof(TPipe)} Read {count} bytes from {totalBytesRead} of {count}, {IsConnected}");
     }

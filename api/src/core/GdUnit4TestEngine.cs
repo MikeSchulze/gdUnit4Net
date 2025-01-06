@@ -28,11 +28,14 @@ internal sealed class GdUnit4TestEngine : ITestEngine
     private ITestEngineLogger Logger { get; }
     private IDebuggerFramework DebuggerFramework { get; set; }
 
+    private List<ITestRunner> ActiveTestRunners { get; } = new();
+
     public void Dispose() => cancellationSource?.Dispose();
 
     public void Cancel()
     {
         lock (taskLock) cancellationSource?.Cancel();
+        foreach (var activeTestRunner in ActiveTestRunners) activeTestRunner.Cancel();
     }
 
     public List<TestCaseDescriptor> Discover(string testAssembly) => TestCaseDiscoverer.Discover(Settings, Logger, testAssembly);
@@ -61,7 +64,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         }
         catch (OperationCanceledException)
         {
-            Logger.LogInfo("Test execution cancelled");
+            Logger.LogInfo("Test execution was cancelled!");
             // Cancel any remaining tasks
             cancellationSource.Cancel();
             try
@@ -73,8 +76,6 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             {
                 Logger.LogError($"Error during cancellation cleanup: {ex.Message}");
             }
-
-            throw;
         }
         catch (AggregateException ae)
         {
@@ -105,7 +106,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             ExecuteEngineTests(testAssemblyNode.Suites, eventListener, cancellationToken);
 
             Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
-        }, cancellationToken);
+        }, CancellationToken.None);
 
     private void ExecuteEngineTests(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
@@ -115,14 +116,18 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         if (directExecutorTestSuites.Count > 0)
         {
             var directRunner = new DirectTestRunner(Logger);
+            ActiveTestRunners.Add(directRunner);
             directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
+            ActiveTestRunners.Remove(directRunner);
         }
 
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
         {
             var godotRunner = new GodotProcessTestRunner(Logger, DebuggerFramework);
+            ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
+            ActiveTestRunners.Remove(godotRunner);
         }
     }
 

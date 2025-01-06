@@ -143,7 +143,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     /// </summary>
     public void Cancel()
     {
-        Log?.LogInfo("Cancel pressed  -----");
+        Log?.LogInfo("User has canceled the test execution.");
         testEngine?.Cancel();
     }
 

@@ -8,14 +8,13 @@ using Api;
 
 using Godot;
 
-public partial class GodotTestRunnerScene : SceneTree
+public partial class GdUnit4TestRunnerScene : SceneTree
 {
     public override void _Initialize()
     {
         try
         {
-            var testCaseRunner = new TestRunner();
-            Root.AddChild(testCaseRunner);
+            Root.AddChild(new TestRunner());
         }
         catch (Exception e)
         {

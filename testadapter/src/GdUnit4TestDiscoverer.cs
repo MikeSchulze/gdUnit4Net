@@ -76,7 +76,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 }
                 catch (Exception e)
                 {
-                    Log.LogError($"Error discovering tests in {assemblyPath}: {e}");
+                    Log.LogError($"Error discovering tests for assembly {assemblyPath}: {e}");
                 }
         }
         catch (Exception e)

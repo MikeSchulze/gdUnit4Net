@@ -34,9 +34,9 @@ public class BaseTestRunner : ITestRunner
         GC.SuppressFinalize(this);
     }
 
-    public void Cancel()
+    public virtual void Cancel()
     {
-        Logger.LogInfo("Cancelling... test run.");
+        Logger.LogInfo("Try cancelling the test run...");
         lock (SyncLock) RunnerCancellationToken?.Cancel();
     }
 
@@ -58,11 +58,13 @@ public class BaseTestRunner : ITestRunner
                         {
                             foreach (var test in testSuite.Tests)
                             {
-                                cancellationToken.ThrowIfCancellationRequested();
                                 eventListener.PublishEvent(TestEvent.SetupTest(test.Id));
+                                cancellationToken.ThrowIfCancellationRequested();
                                 await Executor.ExecuteCommand(new ExecuteTestSetupCommand(test), token);
+                                cancellationToken.ThrowIfCancellationRequested();
                                 await Executor.ExecuteCommand(new ExecuteTestCommand(test), token)
                                     .ContinueWith(result => { });
+                                cancellationToken.ThrowIfCancellationRequested();
                                 await Executor.ExecuteCommand(new ExecuteTestTeardownCommand(test), token)
                                     .ContinueWith(result =>
                                     {
@@ -99,16 +101,11 @@ public class BaseTestRunner : ITestRunner
                 }
                 catch (OperationCanceledException)
                 {
-                    Logger.LogInfo("Test execution was cancelled");
+                    //Logger.LogInfo("Running tests are cancelled.");
                 }
                 catch (Exception ex)
                 {
                     Logger.LogError($"{ex.Message}\n{ex.StackTrace}");
-                }
-                finally
-                {
-                    Console.WriteLine("Test execution was stopped");
-                    //  await Executor.Stop();
                 }
             }, token)
             .ContinueWith(t =>

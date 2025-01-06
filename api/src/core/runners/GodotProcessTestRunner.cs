@@ -26,7 +26,6 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
 
     private object ProcessLock { get; } = new();
     private IDebuggerFramework DebuggerFramework { get; }
-
     private string? WorkingDirectory { get; set; }
 
     private static string GodotBin
@@ -58,6 +57,17 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
         if (sender is Process p)
             Logger.LogInfo($"Godot ends with exit code: {p.ExitCode}");
     };
+
+    public override void Cancel()
+    {
+        base.Cancel();
+        lock (ProcessLock)
+        {
+            process?.Kill(true);
+            process?.WaitForExit(1000);
+            CloseProcess();
+        }
+    }
 
     public new void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
@@ -96,12 +106,19 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
 
             if (!process.WaitForExit(1000)) // 30 second timeout
                 process.Kill();
-            process.CancelErrorRead();
-            process.CancelOutputRead();
-            process.ErrorDataReceived -= StdErrorProcessor;
-            process.Exited -= ExitHandler;
-            process.Dispose();
+            CloseProcess();
         }
+    }
+
+    private void CloseProcess()
+    {
+        if (process == null)
+            return;
+        process.CancelErrorRead();
+        process.CancelOutputRead();
+        process.ErrorDataReceived -= StdErrorProcessor;
+        process.Exited -= ExitHandler;
+        process.Dispose();
     }
 
     private void InitRuntimeEnvironment()
@@ -136,25 +153,74 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
     private void InstallTestRunnerClasses()
     {
         var destinationFolderPath = Path.Combine(WorkingDirectory!, @$"{TEMP_TEST_RUNNER_DIR}");
-        //if (Directory.Exists(destinationFolderPath))
-        //    return;
-        Directory.CreateDirectory(destinationFolderPath);
+        if (!Directory.Exists(destinationFolderPath))
+            Directory.CreateDirectory(destinationFolderPath);
 
-        Logger.LogInfo($"Installing GdUnit4 `TestRunner` at {destinationFolderPath}...");
+        var sceneRunnerSource = Path.Combine(destinationFolderPath, "GdUnit4TestRunnerScene.cs");
+        // check if the scene runner already installed
+        if (File.Exists(sceneRunnerSource))
+            return;
+
+        Logger.LogInfo($"Installing GdUnit4 TestRunner at {destinationFolderPath}...");
+
         var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GodotTestRunnerScene.cs");
+        using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerScene.cs");
         using var reader = new StreamReader(stream!);
         var content = reader.ReadToEnd();
-        File.WriteAllText(Path.Combine(destinationFolderPath, "GodotTestRunnerScene.cs"), content);
+        File.WriteAllText(sceneRunnerSource, content);
+        /*
+        // compile the scene
+        try
+        {
+            Logger.LogInfo($"Compile GdUnit4 TestRunner at {destinationFolderPath}...");
+            var processStartInfo = new ProcessStartInfo($"{GodotBin}", @"--path . --headless --build-solutions --quit-after 1000")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = false,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Normal,
+                WorkingDirectory = @$"{WorkingDirectory}"
+            };
+
+            Logger.LogInfo($"Run Rebuild ... {GodotBin} {processStartInfo.Arguments} at {WorkingDirectory}");
+            using var compileProcess = new Process();
+            compileProcess.StartInfo = processStartInfo;
+            compileProcess.EnableRaisingEvents = true;
+            compileProcess.OutputDataReceived += (_, args) =>
+            {
+                var message = args.Data?.Trim();
+                if (string.IsNullOrEmpty(message))
+                    return;
+
+                Logger.LogInfo($"{message}");
+            };
+            compileProcess.ErrorDataReceived += (_, args) =>
+            {
+                var message = args.Data?.Trim();
+                if (string.IsNullOrEmpty(message))
+                    return;
+
+                Logger.LogError($"{message}");
+            };
+            //compileProcess.Exited += ExitHandler;
+            compileProcess.Start();
+            compileProcess.BeginErrorReadLine();
+            compileProcess.BeginOutputReadLine();
+
+            if (!compileProcess.WaitForExit(5000)) // 5 second timeout
+                compileProcess.Kill(true);
+
+            Logger.LogInfo($"GdUnit4 TestRunner successfully installed: {compileProcess.ExitCode}");
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(@$"Install GdUnit4 `TestRunner` fails with: {e.Message}");
+        }
+        */
     }
 
     private string BuildGodotArguments()
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var args =
-            $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GodotTestRunnerScene.cs --test-assembly {assembly.Location} --test-suite ClassName --test-case MethodName";
-
-
-        return args;
-    }
+        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs";
 }
