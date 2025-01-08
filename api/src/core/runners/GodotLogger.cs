@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Api;
+﻿namespace GdUnit4.Core.Runners;
 
 using Godot;
 

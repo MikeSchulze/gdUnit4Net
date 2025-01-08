@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,6 +12,8 @@ using Api;
 using Discovery;
 
 using Events;
+
+using Extensions;
 
 using Runners;
 
@@ -26,8 +30,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
 
     private TestEngineSettings Settings { get; }
     private ITestEngineLogger Logger { get; }
-    private IDebuggerFramework DebuggerFramework { get; set; }
-
+    private IDebuggerFramework DebuggerFramework { get; set; } = null!;
     private List<ITestRunner> ActiveTestRunners { get; } = new();
 
     public void Dispose() => cancellationSource?.Dispose();
@@ -43,10 +46,14 @@ internal sealed class GdUnit4TestEngine : ITestEngine
     public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework)
     {
         DebuggerFramework = debuggerFramework;
-        lock (taskLock) cancellationSource = new CancellationTokenSource(Settings.SessionTimeout);
+        var sessionTimeoutCancellationSource = new CancellationTokenSource(Settings.SessionTimeout);
+        lock (taskLock)
+            cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(sessionTimeoutCancellationSource.Token);
 
         var tasks = new List<Task>();
         var semaphore = new SemaphoreSlim(Settings.MaxCpuCount);
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         try
         {
@@ -64,13 +71,32 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         }
         catch (OperationCanceledException)
         {
-            Logger.LogInfo("Test execution was cancelled!");
-            // Cancel any remaining tasks
-            cancellationSource.Cancel();
+            // is running into session timeout we need to manually cancel the current test run
+            if (sessionTimeoutCancellationSource.IsCancellationRequested)
+            {
+                stopwatch.Stop();
+                Logger.LogInfo($"Test execution is stopped because of running into session timeout of {TimeSpan.FromMilliseconds(Settings.SessionTimeout)}.!");
+                Logger.LogInfo($"""
+
+                                ╔═══════════════════════ TEST SESSION TIMEOUT ═══════════════════════════════════════╗
+
+                                  Test execution exceeded maximum allowed time:
+                                    • Timeout: {TimeSpan.FromMilliseconds(Settings.SessionTimeout).Humanize()}
+                                    • Total tests: {TotalTests(testAssemblyNodes)}
+                                    • Completed tests: {eventListener.CompletedTests}
+                                    • Time elapsed: {stopwatch.Elapsed.Humanize()}
+
+                                  ACTION REQUIRED: Please increase 'TestSessionTimeout' in your '.runsettings' file
+
+                                ╚════════════════════════════════════════════════════════════════════════════════════╝
+                                """);
+                Cancel();
+            }
+
             try
             {
                 // Wait for tasks to complete cancellation
-                Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(30));
+                Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(2));
             }
             catch (Exception ex)
             {
@@ -98,6 +124,13 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         }
     }
 
+    private static int TotalTests(List<TestAssemblyNode> testAssemblyNodes)
+    {
+        var totalTests = 0;
+        foreach (var assemblyNode in testAssemblyNodes) totalTests += assemblyNode.Suites.Sum(ts => ts.Tests.Count);
+        return totalTests;
+    }
+
     private Task ExecuteTestsInAssembly(TestAssemblyNode testAssemblyNode, ITestEventListener eventListener, CancellationToken cancellationToken)
         => Task.Run(() =>
         {
@@ -106,7 +139,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             ExecuteEngineTests(testAssemblyNode.Suites, eventListener, cancellationToken);
 
             Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
-        }, CancellationToken.None);
+        }, cancellationToken);
 
     private void ExecuteEngineTests(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
@@ -115,7 +148,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         // Run tests that don't require Godot runtime
         if (directExecutorTestSuites.Count > 0)
         {
-            var directRunner = new DirectTestRunner(Logger);
+            var directRunner = new DefaultTestRunner(Logger, Settings);
             ActiveTestRunners.Add(directRunner);
             directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
             ActiveTestRunners.Remove(directRunner);
@@ -124,7 +157,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
         {
-            var godotRunner = new GodotProcessTestRunner(Logger, DebuggerFramework);
+            var godotRunner = new GodotRuntimeTestRunner(Logger, DebuggerFramework, Settings);
             ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
             ActiveTestRunners.Remove(godotRunner);

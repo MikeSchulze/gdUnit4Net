@@ -1,14 +1,16 @@
 ﻿//!/usr/bin/env -S godot -s
 
-namespace GdUnit4.Core.Runners;
+// ReSharper disable once CheckNamespace
+
+namespace GdUnit4.TestRunner;
 
 using System;
 
-using Api;
+using Core.Runners;
 
 using Godot;
 
-public partial class GdUnit4TestRunnerScene : SceneTree
+public partial class GdUnit4TestRunnerSceneTemplate : SceneTree
 {
     public override void _Initialize()
     {
@@ -24,7 +26,7 @@ public partial class GdUnit4TestRunnerScene : SceneTree
     }
 
     // ReSharper disable once PartialTypeWithSinglePart
-    private partial class TestRunner : Node
+    private sealed partial class TestRunner : Node
     {
         public TestRunner()
         {

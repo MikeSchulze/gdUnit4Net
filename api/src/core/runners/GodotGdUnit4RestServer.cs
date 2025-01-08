@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Api;
+﻿namespace GdUnit4.Core.Runners;
 
 using System;
 using System.IO;
@@ -7,18 +7,36 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Core.Commands;
-using Core.Extensions;
+using Commands;
+
+using Events;
+
+using Extensions;
 
 using Newtonsoft.Json;
 
-public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStream>
+internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStream>, ITestEventListener
 {
     private readonly SemaphoreSlim processLock = new(1, 1);
 
     public GodotGdUnit4RestServer(ITestEngineLogger logger)
         : base(new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
         => Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
+
+    public void Dispose()
+    {
+    }
+
+
+    public bool IsFailed { get; set; }
+
+    public int CompletedTests { get; set; }
+
+    public void PublishEvent(TestEvent testEvent)
+    {
+        Console.WriteLine($"GodotGdUnit4RestApi:: Publishing event: {testEvent}");
+        Task.Run(async () => await WriteAsync(testEvent)).Wait();
+    }
 
     public new async ValueTask DisposeAsync()
     {
@@ -68,7 +86,7 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
             }
 
             var command = await ReadCommand<BaseCommand>(tokenSource.Token);
-            var response = await ProcessCommand(command);
+            var response = await ProcessCommand(command, this);
             await WriteResponse(response);
         }
         catch (IOException e)
@@ -85,12 +103,12 @@ public sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStrea
         }
     }
 
-    private async Task<Response> ProcessCommand(BaseCommand command)
+    private async Task<Response> ProcessCommand(BaseCommand command, ITestEventListener testEventListener)
     {
         try
         {
             //Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
-            return await command.Execute();
+            return await command.Execute(testEventListener);
         }
         catch (Exception ex)
         {

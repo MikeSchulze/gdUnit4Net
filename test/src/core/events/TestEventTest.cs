@@ -28,7 +28,7 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeBeforeTest()
     {
-        var testEvent = TestEvent.BeforeTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
+        var testEvent = TestEvent.BeforeTest(Guid.Empty);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
@@ -92,7 +92,7 @@ public class TestEventTest
 
         List<TestReport> reports = new() { new TestReport(TestReport.ReportType.FAILURE, 42, "test failed") };
 
-        var testEvent = TestEvent.AfterTest("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
+        var testEvent = TestEvent.AfterTest(Guid.Empty, statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);

@@ -36,6 +36,7 @@ public class ExecutorTest : ITestEventListener
     private Executor executor = null!;
 
     public bool IsFailed { get; set; }
+    public int CompletedTests { get; set; }
 
 
     void IDisposable.Dispose()

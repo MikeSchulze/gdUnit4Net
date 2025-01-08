@@ -1,12 +1,10 @@
-﻿namespace GdUnit4.Core.Runners;
+﻿namespace GdUnit4.Api;
 
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
-using Api;
-
-using Events;
+using Core.Events;
 
 internal interface ITestRunner : IAsyncDisposable
 {

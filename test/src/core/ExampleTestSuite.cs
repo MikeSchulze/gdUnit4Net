@@ -6,7 +6,7 @@ using static Assertions;
 using static Utils;
 
 [TestSuite]
-public class ExampleTestSuite
+public sealed class ExampleTestSuite
 {
     [Before]
     public void Before()

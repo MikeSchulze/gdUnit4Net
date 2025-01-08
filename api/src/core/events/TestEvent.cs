@@ -74,12 +74,15 @@ internal class TestEvent : IEquatable<TestEvent>
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<TestReport> reports) =>
         new(TYPE.TESTSUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
 
-    public static TestEvent BeforeTest(string resourcePath, string suiteName, string testName) =>
-        new(TYPE.TESTCASE_BEFORE, resourcePath, suiteName, testName);
+    public static TestEvent BeforeTest(Guid id) =>
+        new(TYPE.TESTCASE_BEFORE, id);
 
-    public static TestEvent AfterTest(string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
-        IEnumerable<TestReport>? reports = null) =>
-        new(TYPE.TESTCASE_AFTER, resourcePath, suiteName, testName, 0, statistics, reports);
+    public static TestEvent AfterTest(Guid id, IDictionary<STATISTIC_KEY, object>? statistics = null, List<TestReport>? reports = null) =>
+        new(TYPE.TESTCASE_AFTER, id)
+        {
+            Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
+            Reports = reports ?? new List<TestReport>()
+        };
 
 
     public static TestEvent SetupTest(Guid id) =>

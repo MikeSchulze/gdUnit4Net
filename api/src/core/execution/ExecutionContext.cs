@@ -52,7 +52,7 @@ internal sealed class ExecutionContext : IDisposable
     {
         context.SubExecutionContexts.Add(this);
         TestCaseName = TestCase.BuildDisplayName(testCase.Name);
-        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
+        //FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
         CurrentTestCase = testCase;
         CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
@@ -165,7 +165,7 @@ internal sealed class ExecutionContext : IDisposable
         get;
     }
 
-    private IEnumerable<TestReport> CollectReports => ReportCollector.Reports;
+    private List<TestReport> CollectReports => ReportCollector.Reports;
 
     private int SkippedCount => SubExecutionContexts.Count(context => context.IsSkipped);
 
@@ -232,18 +232,13 @@ internal sealed class ExecutionContext : IDisposable
 
     public void FireBeforeTestEvent() =>
         FireTestEvent(TestEvent
-            .BeforeTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
+            .BeforeTest(CurrentTestCase!.Id)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public void FireAfterTestEvent() =>
         FireTestEvent(TestEvent
-            .AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
+            .AfterTest(CurrentTestCase!.Id, BuildStatistics(OrphanCount(true)), CollectReports)
             .WithFullyQualifiedName(FullyQualifiedName));
-
-
-    public TestEvent TearDownTestEvent(Guid id) =>
-        TestEvent.TearDownTest(id, BuildStatistics(OrphanCount(true)), CollectReports.ToList());
-
 
     public static void RegisterDisposable(IDisposable disposable) =>
         Current?.Disposables.Add(disposable);

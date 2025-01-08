@@ -9,14 +9,17 @@ using Extensions;
 
 internal sealed class TestCase
 {
-    public TestCase(MethodInfo methodInfo, int lineNumber)
+    public TestCase(Guid id, MethodInfo methodInfo, int lineNumber)
     {
+        Id = id;
         MethodInfo = methodInfo;
         Line = lineNumber;
         Parameters = InitialParameters();
     }
 
     public string Name => MethodInfo.Name;
+
+    public Guid Id { get; }
 
     public int Line
     {

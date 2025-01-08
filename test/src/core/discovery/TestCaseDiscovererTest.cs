@@ -149,7 +149,7 @@ public class TestCaseDiscovererTest
     }
 }
 
-internal class ExampleTestSuite
+internal sealed class ExampleTestSuite
 {
     [TestCase]
     public void SingleTestCase() { }

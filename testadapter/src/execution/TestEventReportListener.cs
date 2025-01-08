@@ -2,13 +2,7 @@ namespace GdUnit4.TestAdapter.Execution;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Pipes;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Api;
 
 using Core.Events;
 using Core.Extensions;
@@ -16,23 +10,17 @@ using Core.Reporting;
 
 using Extensions;
 
-using Godot;
-
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-
-using Newtonsoft.Json;
 
 using Utilities;
 
 using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
-internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListener
+internal sealed class TestEventReportListener : ITestEventListener
 {
-    private readonly NamedPipeServerStream server = new(TestAdapterReporter.PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-    public TestEventReportServer(IFrameworkHandle framework, IReadOnlyList<TestCase> testCases)
+    public TestEventReportListener(IFrameworkHandle framework, IReadOnlyList<TestCase> testCases)
     {
         Framework = framework;
         TestCases = testCases;
@@ -41,23 +29,12 @@ internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListen
 
     private IFrameworkHandle Framework { get; }
     private IReadOnlyList<TestCase> TestCases { get; }
-    internal int CompletedTests { get; private set; }
     private bool DetailedOutput { get; }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (server.IsConnected)
-            server.Close();
-        await server.DisposeAsync();
-    }
-
+    public int CompletedTests { get; set; }
     public bool IsFailed { get; set; }
 
     public void Dispose()
     {
-        if (server.IsConnected)
-            server.Close();
-        server.Dispose();
     }
 
     public void PublishEvent(TestEvent e)
@@ -129,63 +106,6 @@ internal sealed class TestEventReportServer : IAsyncDisposable, ITestEventListen
         }
     }
 
-
-    internal async Task Start()
-    {
-        Framework.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Wait for connecting GdUnit4 test report client.");
-        await server.WaitForConnectionAsync();
-
-        Framework.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: Connected. {server.GetImpersonationUserName()}");
-
-
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromMinutes(10));
-        using var reader = new StreamReader(server);
-
-        while (server.IsConnected)
-            try
-            {
-                if (tokenSource.Token.IsCancellationRequested)
-                {
-                    Framework.SendMessage(TestMessageLevel.Warning, "GdUnit4.TestEventReportServer:: Operation timed out.");
-                    break;
-                }
-
-                var json = await reader.ReadLineAsync(tokenSource.Token);
-                if (string.IsNullOrEmpty(json))
-                    continue;
-
-                ProcessTestEvent(json);
-            }
-            catch (IOException e)
-            {
-                Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: Client has disconnected by '{e.Message}'");
-                break;
-            }
-            catch (Exception ex)
-            {
-                if (server.IsConnected)
-                {
-                    Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: {ex.Message}");
-                    Framework.SendMessage(TestMessageLevel.Error, $"GdUnit4.TestEventReportServer:: StackTrace: {ex.StackTrace}");
-                    break;
-                }
-            }
-
-        Framework.SendMessage(TestMessageLevel.Informational, "GdUnit4.TestEventReportServer:: Disconnected.");
-    }
-
-    private void ProcessTestEvent(string json)
-    {
-        if (!json.StartsWith("GdUnitTestEvent:"))
-        {
-            Framework.SendMessage(TestMessageLevel.Informational, $"GdUnit4.TestEventReportServer:: {json}");
-            return;
-        }
-
-        json = json.TrimPrefix("GdUnitTestEvent:");
-        var e = JsonConvert.DeserializeObject<TestEvent>(json)!;
-        PublishEvent(e);
-    }
 
 // ReSharper disable once UnusedMethodReturnValue.Local
     private TestResult AddTestReport(TestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch

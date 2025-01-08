@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Api;
+﻿namespace GdUnit4.Core.Runners;
 
 using System;
 using System.Buffers.Binary;
@@ -9,11 +9,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Core.Commands;
+using Commands;
 
 using Newtonsoft.Json;
 
-public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
+internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 {
     protected const string PipeName = "gdunit4-message-pipe";
 
@@ -34,7 +34,6 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 
     protected ITestEngineLogger Logger { get; }
 
-
     protected bool IsConnected => Pipe.IsConnected;
 
     protected TPipe Proxy => Pipe;
@@ -47,7 +46,7 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         GC.SuppressFinalize(this);
     }
 
-    protected async Task<Response> ReadResponse(CancellationToken cancellationToken)
+    protected async Task<object?> ReadInData(CancellationToken cancellationToken)
     {
         var responseLengthBytes = new byte[4];
         await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
@@ -69,9 +68,11 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
             };
 
         var json = Encoding.UTF8.GetString(responseBytes);
+        if (json.Length == 0)
+            return null;
 
-        return JsonConvert.DeserializeObject<Response>(json, JsonSettings)
-               ?? throw new JsonSerializationException("Failed to deserialize response");
+        return JsonConvert.DeserializeObject(json, JsonSettings)
+               ?? throw new JsonSerializationException($"Failed to deserialize response:\n{json}");
     }
 
     protected async Task WriteResponse(Response response) => await WriteAsync(response);
@@ -96,7 +97,7 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 
     protected async Task WriteCommand<TCommand>(TCommand command) where TCommand : BaseCommand => await WriteAsync(command);
 
-    private async Task WriteAsync<TData>(TData data)
+    protected async Task WriteAsync<TData>(TData data)
     {
         var json = SerializeObject(data);
         var messageBytes = Encoding.UTF8.GetBytes(json);
@@ -144,7 +145,7 @@ public class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
                 var bytesRead = await Pipe.ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead), cancellationToken);
                 totalBytesRead += bytesRead;
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 if (!cancellationToken.IsCancellationRequested) throw;
                 break;

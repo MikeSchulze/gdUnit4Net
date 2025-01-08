@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Exceptions;
@@ -190,16 +189,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private async Task ExecuteStage(ExecutionContext context)
     {
-        using var tokenSource = new CancellationTokenSource();
-        var timeout = TimeSpan.FromMilliseconds(StageAttribute!.Timeout != -1 ? StageAttribute.Timeout : DefaultTimeout);
-        //GD.PrintS("Execute", StageName); //, context.MethodArguments.Formatted());
-        var obj = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments);
-        var task = obj is Task t ? t : Task.CompletedTask;
-        var completedTask = await Task.WhenAny(task, Task.Delay(timeout, tokenSource.Token));
-        tokenSource.Cancel();
+        var timeout = TimeSpan.FromMilliseconds(StageAttribute?.Timeout ?? DefaultTimeout);
+        var task = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments) as Task ?? Task.CompletedTask;
+        var completedTask = await Task.WhenAny(task, Task.Delay(timeout));
         if (completedTask == task)
-            // Very important in order to propagate exceptions
-            await task;
+            await task; // Propagate exceptions from the original task
         else
             throw new ExecutionTimeoutException($"The execution has timed out after {timeout.Humanize()}.", ExecutionLineNumber(context));
     }

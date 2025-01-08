@@ -15,13 +15,14 @@ using Events;
 
 using Environment = System.Environment;
 
-internal sealed class GodotProcessTestRunner : BaseTestRunner
+internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 {
     private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
 
     private Process? process;
 
-    internal GodotProcessTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework) : base(new GodotGdUnit4RestClient(logger), logger)
+    internal GodotRuntimeTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
+        : base(new GodotGdUnit4RestClient(logger), logger, settings)
         => DebuggerFramework = debuggerFramework;
 
     private object ProcessLock { get; } = new();
@@ -114,11 +115,12 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
     {
         if (process == null)
             return;
-        process.CancelErrorRead();
-        process.CancelOutputRead();
+        //process.CancelErrorRead();
+        //process.CancelOutputRead();
         process.ErrorDataReceived -= StdErrorProcessor;
         process.Exited -= ExitHandler;
         process.Dispose();
+        process = null;
     }
 
     private void InitRuntimeEnvironment()
@@ -164,9 +166,10 @@ internal sealed class GodotProcessTestRunner : BaseTestRunner
         Logger.LogInfo($"Installing GdUnit4 TestRunner at {destinationFolderPath}...");
 
         var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerScene.cs");
+        using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerSceneTemplate.cs");
         using var reader = new StreamReader(stream!);
         var content = reader.ReadToEnd();
+        content = content.Replace("GdUnit4TestRunnerSceneTemplate", "GdUnit4TestRunnerScene");
         File.WriteAllText(sceneRunnerSource, content);
         /*
         // compile the scene

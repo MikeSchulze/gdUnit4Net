@@ -33,6 +33,8 @@ internal class TestAdapterReporter : ITestEventListener
             }
     }
 
+    public int CompletedTests { get; set; }
+
     public void Dispose()
     {
         Console.WriteLine("GdUnit4.TestAdapterReporter: Disconnecting from GdUnit4 test report server.");

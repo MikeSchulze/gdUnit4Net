@@ -121,6 +121,8 @@ public partial class Executor : RefCounted, IExecutor
             set => throw new NotImplementedException();
         }
 
+        public int CompletedTests { get; set; }
+
         public void PublishEvent(TestEvent testEvent)
         {
             Godot.Collections.Dictionary<string, Variant> data = new()

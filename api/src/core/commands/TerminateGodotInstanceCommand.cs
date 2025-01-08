@@ -4,11 +4,13 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
+using Events;
+
 using Godot;
 
 public class TerminateGodotInstanceCommand : BaseCommand
 {
-    public override Task<Response> Execute()
+    public override Task<Response> Execute(ITestEventListener testEventListener)
     {
         Console.WriteLine("Terminating Godot instance.");
         var hint = Engine.IsEditorHint();

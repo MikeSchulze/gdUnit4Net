@@ -106,7 +106,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         testCase.SetPropertyValue(RequireRunningGodotEngineProperty, descriptor.RequireRunningGodotEngine);
 
         ManagedNameHelper.GetManagedName(navData.Method, out _, out _, out var hierarchyValues);
-        ManagedNameParser.ParseManagedMethodName(descriptor.ManagedMethod, out var methodName, out _, out _);
+        //ManagedNameParser.ParseManagedMethodName(descriptor.ManagedMethod, out _, out _, out _);
         if (hierarchyValues.Length > 0)
         {
             hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
