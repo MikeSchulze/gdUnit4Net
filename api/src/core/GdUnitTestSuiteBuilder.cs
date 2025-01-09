@@ -6,44 +6,48 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-using GdUnit4.Executions;
+using Execution;
+
+using Godot;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-
-public class GdUnitTestSuiteBuilder
+public static class GdUnitTestSuiteBuilder
 {
     private const string DEFAULT_TEMP_TS_CS = """
-        // GdUnit generated TestSuite
+                                                  // GdUnit generated TestSuite
 
-        using Godot;
-        using GdUnit4;
+                                                  using Godot;
+                                                  using GdUnit4;
 
-        namespace ${name_space}
-        {
-            using static Assertions;
-            using static Utils;
+                                                  namespace ${name_space}
+                                                  {
+                                                      using static Assertions;
+                                                      using static Utils;
 
-            [TestSuite]
-            public class ${suite_class_name}
-            {
-                // TestSuite generated from
-                private const string sourceClazzPath = "${source_resource_path}";
+                                                      [TestSuite]
+                                                      public class ${suite_class_name}
+                                                      {
+                                                          // TestSuite generated from
+                                                          private const string sourceClazzPath = "${source_resource_path}";
 
-            }
-        }
-    """;
+                                                      }
+                                                  }
+                                              """;
+
+    private const string TAG_TEST_SUITE_NAMESPACE = "${name_space}";
+    private const string TAG_TEST_SUITE_CLASS = "${suite_class_name}";
+    private const string TAG_SOURCE_CLASS_NAME = "${source_class}";
+    private const string TAG_SOURCE_CLASS_VARNAME = "${source_var}";
+    private const string TAG_SOURCE_RESOURCE_PATH = "${source_resource_path}";
 
     private static readonly Dictionary<string, Type> ClazzCache = new();
 
     public static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
     {
-        var result = new Dictionary<string, object>
-        {
-            { "path", testSuitePath }
-        };
+        var result = new Dictionary<string, object> { { "path", testSuitePath } };
         try
         {
             var classDefinition = ParseFullqualifiedClassName(sourcePath);
@@ -52,7 +56,8 @@ public class GdUnitTestSuiteBuilder
                 result.Add("error", $"Can't parse class type from {sourcePath}:{lineNumber}.");
                 return result;
             }
-            var methodToTest = FindMethod(sourcePath, lineNumber) ?? "";
+
+            var methodToTest = FindMethod(sourcePath, lineNumber);
             if (string.IsNullOrEmpty(methodToTest))
             {
                 result.Add("error", $"Can't parse method name from {sourcePath}:{lineNumber}.");
@@ -71,13 +76,10 @@ public class GdUnitTestSuiteBuilder
                 //var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
                 var toWrite = AddTestCase(syntaxTree, methodToTest);
 
-                using (var streamWriter = File.CreateText(testSuitePath))
-                {
-                    toWrite.WriteTo(streamWriter);
-                }
+                using (var streamWriter = File.CreateText(testSuitePath)) toWrite.WriteTo(streamWriter);
                 result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
             }
-            else if (methodToTest != null)
+            else
             {
                 var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(testSuitePath));
                 var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
@@ -86,13 +88,12 @@ public class GdUnitTestSuiteBuilder
                     result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
                     return result;
                 }
+
                 toWrite = AddTestCase(syntaxTree, methodToTest);
-                using (var streamWriter = File.CreateText(testSuitePath))
-                {
-                    toWrite.WriteTo(streamWriter);
-                }
+                using (var streamWriter = File.CreateText(testSuitePath)) toWrite.WriteTo(streamWriter);
                 result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
             }
+
             return result;
         }
         catch (Exception e)
@@ -103,25 +104,6 @@ public class GdUnitTestSuiteBuilder
         }
     }
 
-    internal class ClassDefinition : IEquatable<object>
-    {
-        public ClassDefinition(string? nameSpace, string name)
-        {
-            Namespace = nameSpace;
-            Name = name;
-        }
-
-        public string? Namespace { get; }
-        public string Name { get; }
-        public string ClassName => Namespace == null ? Name : $"{Namespace}.{Name}";
-        public override bool Equals(object? obj)
-            => obj is ClassDefinition definition &&
-                   Namespace == definition.Namespace &&
-                   Name == definition.Name;
-
-        public override int GetHashCode() => HashCode.Combine(Namespace, Name, ClassName);
-    }
-
     internal static ClassDefinition? ParseFullqualifiedClassName(string classPath)
     {
         if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
@@ -129,6 +111,7 @@ public class GdUnitTestSuiteBuilder
             Console.Error.WriteLine($"Class `{classPath}` does not exist.");
             return null;
         }
+
         try
         {
             var code = File.ReadAllText(classPath);
@@ -150,6 +133,7 @@ public class GdUnitTestSuiteBuilder
             var classSyntax = namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
             return new ClassDefinition(namespaceSyntax.Name.ToString(), classSyntax.Identifier.ValueText);
         }
+
         return new ClassDefinition(null, root.Members.OfType<ClassDeclarationSyntax>().First().Identifier.ValueText);
     }
 
@@ -171,10 +155,11 @@ public class GdUnitTestSuiteBuilder
         {
             // Construct full class name with namespace
             var namespaceSyntax = classDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()
-                ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
-            var className = namespaceSyntax != null ? namespaceSyntax!.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
+                                  ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
+            var className = namespaceSyntax != null ? namespaceSyntax.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
             return FindTypeOnAssembly(className);
         }
+
         Console.WriteLine($"Warning: No class found in the provided code ({classPath}).");
         return null;
     }
@@ -186,6 +171,7 @@ public class GdUnitTestSuiteBuilder
             Console.WriteLine($"Warning: Class `{classPath}` does not exist.");
             return null;
         }
+
         return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
     }
 
@@ -200,6 +186,7 @@ public class GdUnitTestSuiteBuilder
             Console.Error.WriteLine($"Parse Error: Class `{classPath}` does not exist.");
             return null;
         }
+
         try
         {
             var code = File.ReadAllText(classPath);
@@ -213,13 +200,14 @@ public class GdUnitTestSuiteBuilder
                     var lineNumber = TestCaseLineNumber(syntaxTree, mi.Name);
                     // collect testcase if multiple TestCaseAttribute exists
                     var attributes = mi.GetCustomAttributes(typeof(TestCaseAttribute))
-                            .Cast<TestCaseAttribute>();
+                        .Cast<TestCaseAttribute>()
+                        .ToList();
                     var testCases = attributes
-                        .Where(attr => attr.Arguments?.Length != 0)
+                        .Where(attr => attr.Arguments.Length != 0)
                         .Select(attr => TestCase.BuildDisplayName(mi.Name, attr))
                         .ToList();
                     // create test
-                    var testName = attributes.Count() == 1 ? attributes.First().TestName ?? mi.Name : mi.Name;
+                    var testName = attributes.Count == 1 ? attributes.First().TestName ?? mi.Name : mi.Name;
                     return new CsNode(testName, classPath, lineNumber, testCases);
                 })
                 .Aggregate(new CsNode(classDefinition.Name, classPath), (acc, node) =>
@@ -239,10 +227,8 @@ public class GdUnitTestSuiteBuilder
 
     private static Type? FindTypeOnAssembly(string clazz)
     {
-#pragma warning disable CA1854
-        if (ClazzCache.ContainsKey(clazz))
-            return ClazzCache[clazz];
-#pragma warning restore CA1854
+        if (ClazzCache.TryGetValue(clazz, out var onAssembly))
+            return onAssembly;
         var type = Type.GetType(clazz);
         if (type != null)
             return type;
@@ -257,21 +243,16 @@ public class GdUnitTestSuiteBuilder
                 return type;
             }
         }
+
         return null;
     }
 
     private static string LoadTestSuiteTemplate()
     {
-        if (Godot.ProjectSettings.HasSetting("gdunit4/templates/testsuite/CSharpScript"))
-            return (string)Godot.ProjectSettings.GetSetting("gdunit4/templates/testsuite/CSharpScript");
+        if (ProjectSettings.HasSetting("gdunit4/templates/testsuite/CSharpScript"))
+            return (string)ProjectSettings.GetSetting("gdunit4/templates/testsuite/CSharpScript");
         return DEFAULT_TEMP_TS_CS;
     }
-
-    private const string TAG_TEST_SUITE_NAMESPACE = "${name_space}";
-    private const string TAG_TEST_SUITE_CLASS = "${suite_class_name}";
-    private const string TAG_SOURCE_CLASS_NAME = "${source_class}";
-    private const string TAG_SOURCE_CLASS_VARNAME = "${source_var}";
-    private const string TAG_SOURCE_RESOURCE_PATH = "${source_resource_path}";
 
     private static string FillFromTemplate(string template, ClassDefinition classDefinition, string classPath) =>
         template
@@ -281,7 +262,7 @@ public class GdUnitTestSuiteBuilder
             .Replace(TAG_SOURCE_CLASS_NAME, classDefinition.Name)
             .Replace(TAG_SOURCE_CLASS_VARNAME, classDefinition.Name);
 
-    internal static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
+    private static ClassDeclarationSyntax ClassDeclaration(CompilationUnitSyntax root)
     {
         var namespaceSyntax = ParseNameSpaceSyntax(root);
         return namespaceSyntax == null
@@ -295,21 +276,21 @@ public class GdUnitTestSuiteBuilder
         // lookup on test cases
         var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
             .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
-        if (method != null && method.Body != null)
+        if (method?.Body != null)
             return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
-        // If method has no body, return the line of the method declaration
+        // If method has not a body, return the line of the method declaration
         return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
     }
 
-    internal static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>
+    private static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>
         ClassDeclaration(root).Members.OfType<MethodDeclarationSyntax>()
             .Any(method => method.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
 
-    internal static CompilationUnitSyntax AddTestCase(SyntaxTree syntaxTree, string testCaseName)
+    private static CompilationUnitSyntax AddTestCase(SyntaxTree syntaxTree, string testCaseName)
     {
         var root = syntaxTree.GetCompilationUnitRoot();
         var programClassSyntax = ClassDeclaration(root);
-        var insertAt = programClassSyntax.ChildNodes().Last()!;
+        var insertAt = programClassSyntax.ChildNodes().Last();
 
         var testCaseAttribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("TestCase"));
         var attributes = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(testCaseAttribute));
@@ -336,25 +317,35 @@ public class GdUnitTestSuiteBuilder
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath));
         var programClassSyntax = ClassDeclaration(syntaxTree.GetCompilationUnitRoot());
-        if (programClassSyntax == null)
-        {
-            Console.Error.WriteLine($"Can't parse method name from {sourcePath}:{lineNumber}. Error: no class declaration found.");
-            return null;
-        }
-
         var spanToFind = syntaxTree.GetText().Lines[lineNumber - 1].Span;
         // lookup on properties
         foreach (var m in programClassSyntax.Members.OfType<PropertyDeclarationSyntax>())
-        {
             if (m.FullSpan.IntersectsWith(spanToFind))
                 return m.Identifier.Text;
-        }
         // lookup on methods
         foreach (var m in programClassSyntax.Members.OfType<MethodDeclarationSyntax>())
-        {
             if (m.FullSpan.IntersectsWith(spanToFind))
                 return m.Identifier.Text;
-        }
         return null;
+    }
+
+    internal class ClassDefinition : IEquatable<object>
+    {
+        public ClassDefinition(string? nameSpace, string name)
+        {
+            Namespace = nameSpace;
+            Name = name;
+        }
+
+        public string? Namespace { get; }
+        public string Name { get; }
+        public string ClassName => Namespace == null ? Name : $"{Namespace}.{Name}";
+
+        public override bool Equals(object? obj)
+            => obj is ClassDefinition definition &&
+               Namespace == definition.Namespace &&
+               Name == definition.Name;
+
+        public override int GetHashCode() => HashCode.Combine(Namespace, Name, ClassName);
     }
 }

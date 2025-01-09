@@ -3,9 +3,9 @@ namespace GdUnit4.Tests.Asserts;
 
 using System.Threading.Tasks;
 
-using Exceptions;
-
 using GdUnit4.Asserts;
+using GdUnit4.Core.Execution.Exceptions;
+using GdUnit4.Core.Extensions;
 using GdUnit4.Core.Signals;
 
 using Godot;

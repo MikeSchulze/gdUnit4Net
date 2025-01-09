@@ -1,18 +1,20 @@
 namespace GdUnit4.Asserts;
+
 using System;
 using System.Numerics;
 
-internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
-    where TValue : notnull, IComparable, IComparable<TValue>, IEquatable<TValue>,
+public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
+    where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
     public NumberAssert(TValue current) : base(current)
-    { }
+    {
+    }
 
     public INumberAssert<TValue> IsBetween(TValue min, TValue max)
     {
         if (Current?.CompareTo(min) < 0 || Current?.CompareTo(max) > 0)
-            ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, new TValue[] { min, max });
+            ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, new[] { min, max });
         return this;
     }
 

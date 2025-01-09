@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.api", "./api/gdUnit4Api.csproj", "{E5ED8330-DA73-49CE-A060-103CD6B8DC6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.api", ".\api\gdUnit4Api.csproj", "{E5ED8330-DA73-49CE-A060-103CD6B8DC6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test.adapter", "./testadapter/gdUnit4TestAdapter.csproj", "{42C45312-5065-4E36-BBB4-8FA958C5DA50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test.adapter", ".\testadapter\gdUnit4TestAdapter.csproj", "{42C45312-5065-4E36-BBB4-8FA958C5DA50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test", "./test/gdUnit4Test.csproj", "{B97C5043-B4BE-4156-BE0F-FDCBDECA61F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test", ".\test\gdUnit4Test.csproj", "{B97C5043-B4BE-4156-BE0F-FDCBDECA61F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example", "./example/exampleProject.csproj", "{29AC603E-2EEB-41A0-90AF-BE0B3EA966D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example", ".\example\exampleProject.csproj", "{29AC603E-2EEB-41A0-90AF-BE0B3EA966D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers", "analyzers\gdUnit4Analyzers.csproj", "{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", "analyzers.test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4TestAdapter.Tests", "testadapter.test\gdUnit4TestAdapter.Tests.csproj", "{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +42,17 @@ Global
 		{29AC603E-2EEB-41A0-90AF-BE0B3EA966D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29AC603E-2EEB-41A0-90AF-BE0B3EA966D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29AC603E-2EEB-41A0-90AF-BE0B3EA966D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F967E151-003F-4390-8B5E-62EC86C33528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F967E151-003F-4390-8B5E-62EC86C33528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F967E151-003F-4390-8B5E-62EC86C33528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F967E151-003F-4390-8B5E-62EC86C33528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

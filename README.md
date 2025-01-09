@@ -106,6 +106,11 @@ We value your input and appreciate your contributions to make GdUnit4 even bette
 
 ### Thank you for supporting my project
 
+
+## Sponsors
+
+[<img src="https://avatars.githubusercontent.com/u/4674635?v=4)" alt="Jeff" width="125"/>](https://github.com/jlb0170) Jeff
+
 ---
 
 ## Sponsors

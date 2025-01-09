@@ -1,9 +1,11 @@
+// ReSharper disable once CheckNamespace
+
 namespace GdUnit4;
 
 using System;
 using System.Collections.Generic;
 
-[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Parameter)]
 public class FuzzerAttribute : Attribute, IValueProvider
 {
     private int value;

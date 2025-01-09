@@ -1,9 +1,11 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+
+using Extensions;
 
 internal sealed class TestCase
 {
@@ -17,32 +19,43 @@ internal sealed class TestCase
     public string Name => MethodInfo.Name;
 
     public int Line
-    { get; private set; }
+    {
+        get;
+        private set;
+    }
 
     public IEnumerable<TestCaseAttribute> TestCaseAttributes
         => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter);
 
-    public Func<TestCaseAttribute, bool> TestParametersFilter { get; set; } = _ => true;
+    private Func<TestCaseAttribute, bool> TestParametersFilter { get; } = _ => true;
 
     public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
 
     internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
+    internal bool HasDataPoint => DataPoint != null;
+
+    internal DataPointAttribute? DataPoint => MethodInfo.GetCustomAttribute<DataPointAttribute>();
+
     public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
     private IEnumerable<object> Parameters
-    { get; set; }
+    {
+        get;
+    }
 
     public MethodInfo MethodInfo
-    { get; set; }
+    {
+        get;
+        set;
+    }
+
+    public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
 
     private IEnumerable<object> ResolveParam(object input)
     {
-        if (input is IValueProvider provider)
-        {
-            return provider.GetValues();
-        }
-        return new object[] { input };
+        if (input is IValueProvider provider) return provider.GetValues();
+        return new[] { input };
     }
 
     private List<object> InitialParameters()
@@ -50,23 +63,22 @@ internal sealed class TestCase
             .SelectMany(pi => pi.GetCustomAttributesData()
                 .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
                 .Select(attr =>
-                {
-                    var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
-                    return attr.Constructor.Invoke(arguments);
-                }
-            )
-         ).ToList();
-
-    public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
+                    {
+                        var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
+                        return attr.Constructor.Invoke(arguments);
+                    }
+                )
+            ).ToList();
 
     internal static string BuildDisplayName(string testName, TestCaseAttribute attribute)
     {
         var name = attribute.TestName ?? testName;
         if (attribute.Arguments.Length > 0)
         {
-            var parameters = string.Join(", ", attribute!.Arguments.Select(GdUnitExtensions.Formatted));
+            var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
             return $"{name}({parameters})";
         }
+
         return name;
     }
 
@@ -80,6 +92,7 @@ internal sealed class TestCase
             var parameters = string.Join(", ", arguments.Select(GdUnitExtensions.Formatted));
             return $"{testName}({parameters})";
         }
+
         return testName;
     }
 

@@ -16,36 +16,52 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using Newtonsoft.Json;
 
+using Settings;
+
 using Environment = System.Environment;
 
 internal abstract class BaseTestExecutor
 {
-    protected string GodotBin { get; set; } = Environment.GetEnvironmentVariable("GODOT_BIN")
-                                              ?? throw new ArgumentNullException("Godot runtime is not set! Set env 'GODOT_BIN' is missing!");
+    protected static string GodotBin
+    {
+        get
+        {
+            var godotPath = Environment.GetEnvironmentVariable("GODOT_BIN");
+            if (string.IsNullOrEmpty(godotPath))
+                throw new InvalidOperationException(
+                    "Godot runtime is not configured. The environment variable 'GODOT_BIN' is not set or empty. Please set it to the Godot executable path.");
+            if (!File.Exists(godotPath))
+                throw new InvalidOperationException($"The Godot executable was not found at path: {godotPath}");
+            return godotPath;
+        }
+    }
 
-    protected static EventHandler ExitHandler(IFrameworkHandle frameworkHandle) => (sender, e) =>
+    protected static EventHandler ExitHandler(IFrameworkHandle? frameworkHandle) => (sender, _) =>
     {
         Console.Out.Flush();
         if (sender is Process p)
-            frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
+            frameworkHandle?.SendMessage(TestMessageLevel.Informational, $"Godot ends with exit code: {p.ExitCode}");
     };
 
-    protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => (sender, args) =>
+    protected static DataReceivedEventHandler StdErrorProcessor(IFrameworkHandle frameworkHandle) => (_, args) =>
     {
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
             return;
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"Error: {message}");
+        frameworkHandle.SendMessage(TestMessageLevel.Informational, $"{message}");
     };
 
-    protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites)
+    protected static string WriteTestRunnerConfig(Dictionary<string, List<TestCase>> groupedTestSuites, GdUnit4Settings gdUnit4Settings)
     {
         try
         {
             CleanupRunnerConfigurations();
         }
-        catch (Exception) { }
+        catch (Exception)
+        {
+            // ignored
+        }
 
         var fileName = $"GdUnitRunner_{Guid.NewGuid()}.cfg";
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
@@ -54,13 +70,16 @@ internal abstract class BaseTestExecutor
         {
             Included = groupedTestSuites.ToDictionary(
                 suite => suite.Key,
-                suite => suite.Value.Select(t => new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
-            )
+                suite => suite.Value.Select(t =>
+                    new TestCaseConfig { Name = t.GetPropertyValue(TestCaseExtensions.TestCaseNameProperty, t.FullyQualifiedName) })
+            ),
+            CaptureStdOut = gdUnit4Settings.CaptureStdOut
         };
 
         File.WriteAllText(filePath, JsonConvert.SerializeObject(testConfig, Formatting.Indented));
         return filePath;
     }
+
 
     private static void CleanupRunnerConfigurations()
         => Directory.GetFiles(Directory.GetCurrentDirectory(), "GdUnitRunner_*.cfg")
@@ -73,8 +92,7 @@ internal abstract class BaseTestExecutor
             fh2.AttachDebuggerToProcess(process.Id);
     }
 
-
-    protected static string? LookupGodotProjectPath(string classPath)
+    protected static string LookupGodotProjectPath(string classPath)
     {
         var currentDir = new DirectoryInfo(classPath).Parent;
         while (currentDir != null)
@@ -84,6 +102,6 @@ internal abstract class BaseTestExecutor
             currentDir = currentDir.Parent;
         }
 
-        return null;
+        throw new FileNotFoundException("Godot project file '\"project.godot' does not exist");
     }
 }

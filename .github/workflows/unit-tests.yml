@@ -59,4 +59,3 @@ jobs:
             res://.
           timeout: 5
           report-name: test_report.xml
-

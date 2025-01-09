@@ -1,0 +1,19 @@
+﻿v1.0.0-rc1
+This is the Initial release of the analyzers.
+
+Features:
+- Compile-time validation of GdUnit4 attribute combinations
+- Provides clear error messages with method name identification
+- Integrates seamlessly with Visual Studio and other IDEs
+
+Integration:
+- Built for .NET Standard 2.0 compatibility
+
+Technical Details:
+- Implementation based on Roslyn analyzer framework
+- IDE support for real-time error detection
+- Includes help link to documentation
+
+Known Limitations:
+- Currently only validates TestCase and DataPoint attribute combinations
+- Additional attribute validations planned for future releases

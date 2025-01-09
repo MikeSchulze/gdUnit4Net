@@ -2,6 +2,7 @@ namespace GdUnit4.Tests.Extractors;
 
 using static Assertions;
 using GdUnit4.Asserts;
+using GdUnit4.Extractors;
 
 [TestSuite]
 public class ValueExtractorTest

@@ -1,13 +1,10 @@
-using GdUnit4;
-
 namespace Spike;
+
+using GdUnit4;
 
 [TestSuite]
 public class Tests
 {
     [TestCase]
-    public static void TestFoo()
-    {
-        Assertions.AssertThat(5).IsEqual(5);
-    }
+    public static void TestFoo() => Assertions.AssertThat(5).IsEqual(5);
 }

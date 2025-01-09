@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using CommandLine;
 
 using Core;
-
-using Executions;
+using Core.Events;
+using Core.Execution;
 
 using Godot;
 
@@ -33,21 +33,29 @@ public partial class TestRunner : Node
             .WithParsedAsync(async o =>
             {
                 FailFast = o.FailFast;
-                var exitCode = await (o.TestAdapter
-                    ? RunTests(LoadTestSuites(o.ConfigFile), new TestAdapterReporter())
-                    : RunTests(LoadTestSuites(new DirectoryInfo(o.Add)), new TestReporter()));
-                Console.WriteLine($"Testrun ends with exit code: {exitCode}, FailFast:{FailFast}");
+
+                var runnerConfig = LoadTestRunnerConfig(o.ConfigFile);
+                if (runnerConfig == null)
+                {
+                    await Console.Error.WriteLineAsync($"Can't read the runner config file '{o.ConfigFile}', Abort!");
+                    GetTree().Quit(200);
+                }
+
+                var testSuites = LoadTestSuites(runnerConfig!);
+                var exitCode = await RunTests(testSuites, runnerConfig!, new TestAdapterReporter());
+
+                Console.WriteLine($"Test run ends with exit code: {exitCode}, FailFast:{FailFast}");
                 GetTree().Quit(exitCode);
             });
     }
 
-    private async Task<int> RunTests(IEnumerable<TestSuite> testSuites, ITestEventListener listener)
+    private async Task<int> RunTests(List<TestSuite> testSuites, TestRunnerConfig runnerConfig, ITestEventListener listener)
     {
         using (listener)
         {
-            if (!testSuites.Any())
+            if (testSuites.Count == 0)
             {
-                Console.Error.WriteLine("No testsuite's specified!, Abort!");
+                await Console.Error.WriteLineAsync("No test suite's are specified!, Abort!");
                 return -1;
             }
 
@@ -56,7 +64,7 @@ public partial class TestRunner : Node
 
             foreach (var testSuite in testSuites)
             {
-                await executor.ExecuteInternally(testSuite!);
+                await executor.ExecuteInternally(testSuite, runnerConfig);
                 if (listener.IsFailed && FailFast)
                     break;
             }
@@ -77,38 +85,15 @@ public partial class TestRunner : Node
         return null;
     }
 
-    private static List<TestSuite> LoadTestSuites(string runnerConfigFile)
-    {
-        var runnerConfig = LoadTestRunnerConfig(runnerConfigFile);
-        return runnerConfig?.Included
-            .Select(TryCreateTestSuite)
-            .OfType<TestSuite>() // Filter out invalid test suites
-            .ToList() ?? new List<TestSuite>();
-    }
+    private static List<TestSuite> LoadTestSuites(TestRunnerConfig runnerConfig) => runnerConfig.Included
+        .Select(TryCreateTestSuite)
+        .OfType<TestSuite>() // Filter out invalid test suites
+        .ToList();
 
     private static TestRunnerConfig? LoadTestRunnerConfig(string configFile)
     {
         var json = File.ReadAllText(configFile.Trim('\''));
         return JsonConvert.DeserializeObject<TestRunnerConfig>(json);
-    }
-
-    private static IEnumerable<TestSuite> LoadTestSuites(DirectoryInfo rootDir, string searchPattern = "*.cs")
-    {
-        Stack<DirectoryInfo> stack = new();
-        stack.Push(rootDir);
-
-        while (stack.Count > 0)
-        {
-            var currentDir = stack.Pop();
-            Console.WriteLine($"Scanning for test suites in: {currentDir.FullName}");
-
-            foreach (var filePath in Directory.EnumerateFiles(currentDir.FullName, searchPattern))
-                if (GdUnitTestSuiteBuilder.ParseType(filePath, true) != null)
-                    yield return new TestSuite(filePath);
-
-            foreach (var directory in currentDir.GetDirectories())
-                stack.Push(directory);
-        }
     }
 
     public class Options

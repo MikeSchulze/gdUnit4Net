@@ -1,10 +1,12 @@
 namespace GdUnit4.Asserts;
+
 using System;
 using System.Globalization;
 
-internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : notnull, IEquatable<TValue>
-{
+using Godot;
 
+public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : IEquatable<TValue>
+{
     public VectorAssert(TValue current) : base(current)
     {
     }
@@ -52,10 +54,10 @@ internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> 
         return this;
     }
 
-    public IVectorAssert<TValue> IsNotBetween(TValue from, TValue to)
+    public IVectorAssert<TValue> IsNotBetween(TValue min, TValue max)
     {
-        if (CompareTo(Current, from) >= 0 && CompareTo(Current, to) <= 0)
-            ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, from, to), Current, from);
+        if (CompareTo(Current, min) >= 0 && CompareTo(Current, max) <= 0)
+            ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, min, max), Current, min);
         return this;
     }
 
@@ -69,12 +71,12 @@ internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> 
             return -1;
         return (left, right) switch
         {
-            (Godot.Vector2 l, Godot.Vector2 r) => l == r ? 0 : l > r ? 1 : -1,
-            (Godot.Vector2I l, Godot.Vector2I r) => l == r ? 0 : l > r ? 1 : -1,
-            (Godot.Vector3 l, Godot.Vector3 r) => l == r ? 0 : l > r ? 1 : -1,
-            (Godot.Vector3I l, Godot.Vector3I r) => l == r ? 0 : l > r ? 1 : -1,
-            (Godot.Vector4 l, Godot.Vector4 r) => l == r ? 0 : l > r ? 1 : -1,
-            (Godot.Vector4I l, Godot.Vector4I r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector2 l, Vector2 r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector2I l, Vector2I r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector3 l, Vector3 r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector3I l, Vector3I r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector4 l, Vector4 r) => l == r ? 0 : l > r ? 1 : -1,
+            (Vector4I l, Vector4I r) => l == r ? 0 : l > r ? 1 : -1,
             _ => 0
         };
     }
@@ -82,14 +84,19 @@ internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> 
 #pragma warning disable CS8619
     private static (TValue, TValue) MinMax(TValue left, TValue right) => (left, right) switch
     {
-        (Godot.Vector2 l, Godot.Vector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        (Godot.Vector2I l, Godot.Vector2I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        (Godot.Vector3 l, Godot.Vector3 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        (Godot.Vector3I l, Godot.Vector3I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        (Godot.Vector4 l, Godot.Vector4 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        (Godot.Vector4I l, Godot.Vector4I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture), (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
-        _ => (default(TValue), default(TValue))
+        (Vector2 l, Vector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Vector2I l, Vector2I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Vector3 l, Vector3 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Vector3I l, Vector3I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Vector4 l, Vector4 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (Vector4I l, Vector4I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        _ => (default, default)
     };
 #pragma warning restore CS8619
-
 }

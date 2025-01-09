@@ -1,11 +1,10 @@
 namespace GdUnit4.Tests;
 
-using static GdUnit4.Assertions;
+using static Assertions;
 
 [TestSuite]
 public class GdUnit4NetAPITest
 {
-
     [TestCase]
     public void IsTestSuite()
     {
@@ -16,5 +15,5 @@ public class GdUnit4NetAPITest
 
     [TestCase]
     public void Version()
-        => AssertThat(GdUnit4NetAPI.Version()).StartsWith("4.3");
+        => AssertThat(GdUnit4NetAPI.Version()).StartsWith("4.4");
 }
