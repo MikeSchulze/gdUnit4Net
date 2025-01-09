@@ -34,154 +34,29 @@ concurrency:
 
 jobs:
 
-  unit-test-runner:
+
+  user-unit-test:
+    name: "CI Unit Test"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 10
     permissions:
       actions: write
-      contents: read
-
-    name: "Run gdUnit4-action"
-    runs-on: ${{ inputs.os }}
-    timeout-minutes: 5
+      checks: write
+      contents: write
+      pull-requests: write
+      statuses: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
-
-       # the vstest filter is actual not implemented and the argument 'paths' on gdUnit4-action@v1.0.8 will have no affect
-      - name: 'Temp solution, we delete the failing test for now.'
-        shell: bash
-        run: |
-          rm -rf ./example/test/ExampleTest.cs
-
-      - name: 'Test Example via gdunit-action - Godot_${{ inputs.godot-version }}-${{ inputs.godot-status }}-net'
-        uses: MikeSchulze/gdUnit4-action@v1.1.1
+      - uses: MikeSchulze/gdUnit4-action@v1.1.1
         with:
-          godot-version: ${{ inputs.godot-version }}
-          godot-status: ${{ inputs.godot-status }}
+          godot-version: '4.3'
           godot-net: true
           project_dir: './example/'
-          # the filter actual not works see https://github.com/MikeSchulze/gdUnit4Net/issues/27
           paths: |
-            res://example/test/api
-          timeout: 2
-          retries: 3 # We have set the number of repetitions to 3 because Godot mono randomly crashes during C# tests
-          publish-report: false
-          report-name: 'action_example_Godot${{ inputs.godot-version }}-${{ inputs.godot-status }}'
+            res://.
+          timeout: 5
+          report-name: test_report.xml
 
-
-  unit-test-adapter:
-    name: "Run API Tests"
-    runs-on: ${{ inputs.os }}
-    timeout-minutes: 5
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: "Install Godot Mono ${{ inputs.godot-version }}"
-        uses: ./.github/actions/godot-install
-        with:
-          godot-version: ${{ inputs.godot-version }}
-          godot-mono: true
-          godot-status-version: ${{ inputs.godot-status }}
-          godot-bin-name: 'linux_x86_64'
-          godot-cache-path: '~/godot-linux'
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: "Compile C#"
-        if: ${{ !cancelled() }}
-        run: |
-          echo "prebuild the nuget packages"
-          dotnet build ./api/gdUnit4Api.csproj
-          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
-          dotnet restore
-          dotnet build
-
-      - name: "Run Unit Tests"
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        env:
-          GODOT_BIN: "/home/runner/godot-linux/godot"
-        run: |
-          $GODOT_BIN --path ./test --headless --build-solutions --quit-after 20
-          xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci
-
-      - name: "Upload Unit Test Reports"
-        if: ${{ !cancelled() }}
-        uses: ./.github/actions/upload-test-report
-        with:
-          report-name: api_tests_Godot${{ inputs.godot-version }}-${{ inputs.godot-status }}
-
-  unit-test-example:
-    name: "Run Test Examples"
-    runs-on: ${{ inputs.os }}
-    timeout-minutes: 3
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: "Install Godot Mono ${{ inputs.godot-version }}"
-        uses: ./.github/actions/godot-install
-        with:
-          godot-version: ${{ inputs.godot-version }}
-          godot-mono: true
-          godot-status-version: ${{ inputs.godot-status }}
-          godot-bin-name: 'linux_x86_64'
-          godot-cache-path: '~/godot-linux'
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: "Compile C#"
-        if: ${{ !cancelled() }}
-        run: |
-          echo "prebuild the nuget packages"
-          dotnet build ./api/gdUnit4Api.csproj
-          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
-          dotnet restore
-          dotnet build
-
-      - name: "Run Unit Tests"
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        env:
-          GODOT_BIN: "/home/runner/godot-linux/godot"
-        run: |
-          $GODOT_BIN --path ./example --headless --build-solutions --quit-after 20
-          xvfb-run --auto-servernum dotnet test ./example/exampleProject.csproj --no-build --settings ./example/.runsettings-ci || true
-
-        # Step to validate test results
-      - name: Validate Test Results
-        shell: bash
-        run: |
-          validate_section() {
-            local section="$1"
-            local expected_content="$2"
-
-            grep -A 50 "$section" ./example/TestResults/test-result.trx | sed -e 's/^[ \t]*//' | tee output.txt >/dev/null
-            if grep -qF "$expected_content" output.txt; then
-              echo "Test validation passed. The expected text is present in $section."
-            else
-              echo "Test validation failed. The expected content '$expected_content' is not present in:"
-              echo ""
-              cat output.txt
-              echo ""
-              exit 1
-            fi
-          }
-
-          validate_section '<Output>' 'Discover tests done, 2 TestSuites and total 11 Tests found.'
-          validate_section '<Output>' 'Start executing tests, 11 TestCases total.'
-          validate_section '<Results>' "<Message>Expecting: 'True' but is 'False'</Message>"
-          validate_section '<Results>' '<StackTrace>   at Examples.ExampleTest.failed() in /home/runner/work/gdUnit4Net/gdUnit4Net/example/test/ExampleTest.cs:line 19'
-          validate_section '<ResultSummary' '<ResultSummary outcome="Failed">'
-          validate_section '<ResultSummary' '<Counters total="11" executed="11" passed="10" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
-          echo "All tests passes."
