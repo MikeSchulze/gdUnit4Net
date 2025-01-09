@@ -57,4 +57,4 @@ jobs:
           paths: |
             res://.
           timeout: 5
-          report-name: 'action_example_Godot${{ inputs.godot-version }}-${{ inputs.godot-status }}'
+          report-name: 'action_example_Godot${{ inputs.godot-version }}-${{ inputs.godot-status }}.xml'
