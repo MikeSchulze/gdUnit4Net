@@ -1,22 +1,10 @@
-namespace Examples;
+namespace Spike;
 
 using GdUnit4;
-using static GdUnit4.Assertions;
 
 [TestSuite]
-public class ExampleTest
+public class Tests
 {
     [TestCase]
-    public void success()
-    {
-        AssertBool(true).IsTrue();
-    }
-
-
-    [TestCase]
-    public void failed()
-    {
-        AssertBool(false).IsTrue();
-    }
-
+    public static void TestFoo() => Assertions.AssertThat(5).IsEqual(5);
 }
