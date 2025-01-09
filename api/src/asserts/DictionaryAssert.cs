@@ -1,6 +1,5 @@
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +8,13 @@ using CommandLine;
 
 public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
 {
+    public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
+    {
+    }
+
+    private DictionaryAssert(IDictionary? current) : base(current)
+    {
+    }
 
     private bool IsGeneric => CurrentTyped != null;
 
@@ -16,27 +22,9 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     private IDictionary<TKey, TValue>? CurrentTyped => base.Current as IDictionary<TKey, TValue>;
 
-    public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
-    { }
-
-#pragma warning disable CA1000 // Do not declare static members on generic types
-    public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
-#pragma warning restore CA1000 // Do not declare static members on generic types
-        => new(current);
-
-    private DictionaryAssert(IDictionary? current) : base(current)
-    { }
-
     private int ItemCount => IsGeneric ? CurrentTyped?.Count ?? 0 : Current?.Count ?? 0;
 
     private ICollection<TKey> Keys => (IsGeneric ? CurrentTyped?.Keys : Current?.Keys.Cast<TKey>().ToList()) ?? new List<TKey>();
-
-    private TValue? TryGetValue(TKey key)
-    {
-        if (Current != null)
-            return Current[key].Cast<TValue>();
-        return CurrentTyped?.ContainsKey(key) == true ? CurrentTyped[key] : default;
-    }
 
     public IDictionaryAssert<TKey, TValue> IsEmpty()
     {
@@ -45,12 +33,6 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         if (ItemCount != 0)
             ThrowTestFailureReport(AssertFailures.IsEmpty(ItemCount, CurrentTyped == null && Current == null), ItemCount, null);
         return this;
-    }
-
-    public void CheckNotNull()
-    {
-        if (base.Current == null)
-            ThrowTestFailureReport(AssertFailures.IsNotNull(), base.Current, null);
     }
 
     public IDictionaryAssert<TKey, TValue> IsNotEmpty()
@@ -75,7 +57,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         var notFound = expected.Where(key => !Keys.Contains(key)).ToList();
 
         if (notFound.Count > 0)
-            ThrowTestFailureReport(AssertFailures.Contains(Keys, expected!, notFound), base.Current, expected);
+            ThrowTestFailureReport(AssertFailures.Contains(Keys, expected, notFound), base.Current, expected);
         return this;
     }
 
@@ -98,7 +80,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     {
         CheckNotNull();
         var hasKey = Keys.Contains(key);
-        var expectedKeyValue = new Dictionary<TKey, TValue>() { { key, value } };
+        var expectedKeyValue = new Dictionary<TKey, TValue> { { key, value } };
         if (!hasKey)
             ThrowTestFailureReport(AssertFailures.ContainsKeyValue(expectedKeyValue), base.Current, expectedKeyValue);
 
@@ -112,7 +94,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     public IDictionaryAssert<TKey, TValue> NotContainsSameKeys(params TKey[] expected)
     {
         CheckNotNull();
-        var found = expected.Where(key => Enumerable.Any(Keys, (k) => IsSame(k, key))).ToList();
+        var found = expected.Where(key => Keys.Any(k => IsSame(k, key))).ToList();
         if (found.Count > 0)
             ThrowTestFailureReport(AssertFailures.NotContains(Keys, expected, found), base.Current, expected);
         return this;
@@ -124,9 +106,9 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     public IDictionaryAssert<TKey, TValue> ContainsSameKeys(params TKey[] expected)
     {
         CheckNotNull();
-        var notFound = expected.Where(key => !Enumerable.Any(Keys, (k) => IsSame(k, key))).ToList();
+        var notFound = expected.Where(key => !Keys.Any(k => IsSame(k, key))).ToList();
         if (notFound.Count > 0)
-            ThrowTestFailureReport(AssertFailures.Contains(Keys, expected!, notFound), base.Current, expected);
+            ThrowTestFailureReport(AssertFailures.Contains(Keys, expected, notFound), base.Current, expected);
         return this;
     }
 
@@ -136,8 +118,8 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     public IDictionaryAssert<TKey, TValue> ContainsSameKeyValue(TKey key, TValue value)
     {
         CheckNotNull();
-        var hasKey = Enumerable.Any(Keys, (k) => IsSame(k, key));
-        var expectedKeyValue = new Dictionary<TKey, TValue>() { { key, value } };
+        var hasKey = Keys.Any(k => IsSame(k, key));
+        var expectedKeyValue = new Dictionary<TKey, TValue> { { key, value } };
         if (!hasKey)
             ThrowTestFailureReport(AssertFailures.ContainsKeyValue(expectedKeyValue), base.Current, expectedKeyValue);
 
@@ -178,4 +160,22 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     public new IDictionaryAssert<TKey, TValue> OverrideFailureMessage(string message)
         => (IDictionaryAssert<TKey, TValue>)base.OverrideFailureMessage(message);
+
+#pragma warning disable CA1000 // Do not declare static members on generic types
+    public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
+#pragma warning restore CA1000 // Do not declare static members on generic types
+        => new(current);
+
+    private TValue? TryGetValue(TKey key)
+    {
+        if (Current != null)
+            return Current[key].Cast<TValue>();
+        return CurrentTyped?.ContainsKey(key) == true ? CurrentTyped[key] : default;
+    }
+
+    private void CheckNotNull()
+    {
+        if (base.Current == null)
+            ThrowTestFailureReport(AssertFailures.IsNotNull(), base.Current, null);
+    }
 }

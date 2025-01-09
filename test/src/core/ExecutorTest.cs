@@ -4,18 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Executions;
+using Api;
 
 using GdUnit4.Asserts;
 using GdUnit4.Core;
+using GdUnit4.Core.Events;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Extensions;
+using GdUnit4.Core.Reporting;
 
 using Godot;
 
 using static Assertions;
 
-using static TestEvent.TYPE;
-
-using static TestReport.ReportType;
+using static GdUnit4.Core.Events.TestEvent.TYPE;
+using static GdUnit4.Core.Reporting.TestReport.ReportType;
 
 [TestSuite]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
@@ -86,7 +89,7 @@ public class ExecutorTest : ITestEventListener
 
         if (verbose)
             Console.WriteLine($"Execute {testSuiteName}.");
-        await executor.ExecuteInternally(testSuite);
+        await executor.ExecuteInternally(testSuite, new TestRunnerConfig());
         if (verbose)
             Console.WriteLine($"Execution {testSuiteName} done.");
         return events;
@@ -118,7 +121,10 @@ public class ExecutorTest : ITestEventListener
     {
         var extractedEvents = events.ConvertAll(e =>
         {
-            var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
+            var reports = new List<TestReport>(e.Reports)
+                // we exclude standard out reports
+                .FindAll(r => r.Type != STDOUT)
+                .ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
             return new
             {
                 e.TestName,
@@ -798,7 +804,7 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
             Tuple(TESTCASE_AFTER, "ExceptionIsThrownOnSceneInvoke", new List<TestReport>
             {
-                new(FAILURE, 12, """
+                new(FAILURE, 14, """
                                  Test Exception
                                  """)
             }),

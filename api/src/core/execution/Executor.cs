@@ -1,4 +1,4 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Collections.Generic;
@@ -6,24 +6,28 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Core;
+using Api;
+
+using Events;
+
+using Extensions;
 
 using Godot;
 
 using Newtonsoft.Json;
 
-public sealed partial class Executor : RefCounted, IExecutor
+public partial class Executor : RefCounted, IExecutor
 {
     [Signal]
     public delegate void ExecutionCompletedEventHandler();
 
     private readonly List<ITestEventListener> eventListeners = new();
 
-    private bool ReportOrphanNodesEnabled => GdUnit4Settings.IsVerboseOrphans();
+    private static bool ReportOrphanNodesEnabled => GdUnit4Settings.IsVerboseOrphans();
 
     public IExecutor AddGdTestEventListener(GodotObject listener)
     {
-        // I want to using anonyms implementation to remove the extra delegator class
+        // I want to use anonymous implementation to remove the extra delegator class
         eventListeners.Add(new GdTestEventListenerDelegator(listener));
         return this;
     }
@@ -39,7 +43,7 @@ public sealed partial class Executor : RefCounted, IExecutor
         try
         {
             var includedTests = LoadTestFilter(testSuite);
-            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests, true, true));
+            var task = ExecuteInternally(new TestSuite(testSuite.ResourcePath(), includedTests, true, true), new TestRunnerConfig());
             // use this call as workaround to hold the signal list, it is disposed for some unknown reason.
             // could be related to https://github.com/godotengine/godot/issues/84254
             GetSignalConnectionList("ExecutionCompleted");
@@ -64,9 +68,9 @@ public sealed partial class Executor : RefCounted, IExecutor
     /// </summary>
     /// <param name="testSuite"></param>
     /// <returns></returns>
-    private IEnumerable<string>? LoadTestFilter(CsNode testSuite)
+    private static List<string>? LoadTestFilter(CsNode testSuite)
     {
-        // try to load runner config written by gdunit4 plugin
+        // try to load runner config written by GdUnit4 plugin
         var configPath = Path.Combine(Directory.GetCurrentDirectory(), "addons/gdUnit4/GdUnitRunner.cfg");
         if (!File.Exists(configPath))
             return null;
@@ -77,24 +81,26 @@ public sealed partial class Executor : RefCounted, IExecutor
         // Filter by testSuitePath and add values from runnerConfig.Included to the list
         var filteredTests = runnerConfig?.Included
             .Where(entry => entry.Key.EndsWith(testSuitePath))
-            .SelectMany(entry => entry.Value);
-        return filteredTests?.Any() == true ? filteredTests : null;
+            .SelectMany(entry => entry.Value)
+            .ToList();
+        return filteredTests?.Count > 0 ? filteredTests : null;
     }
 
-    internal async Task ExecuteInternally(TestSuite testSuite)
+    internal async Task ExecuteInternally(TestSuite testSuite, TestRunnerConfig runnerConfig)
     {
         try
         {
             if (!ReportOrphanNodesEnabled)
                 Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
-            await ISceneRunner.SyncProcessFrame;
+            await GodotObjectExtensions.SyncProcessFrame;
             using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled);
+            context.IsCaptureStdOut = runnerConfig.CaptureStdOut;
             await new TestSuiteExecutionStage(testSuite).Execute(context);
         }
         // handle unexpected exceptions
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
+            await Console.Error.WriteLineAsync($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
         }
         finally
         {
@@ -109,7 +115,11 @@ public sealed partial class Executor : RefCounted, IExecutor
         public GdTestEventListenerDelegator(GodotObject listener)
             => this.listener = listener;
 
-        public bool IsFailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool IsFailed
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
 
         public void PublishEvent(TestEvent testEvent)
         {
@@ -123,7 +133,7 @@ public sealed partial class Executor : RefCounted, IExecutor
                 { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
             };
 
-            if (testEvent.Reports.Any())
+            if (testEvent.Reports.Count > 0)
             {
                 var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
                 data.Add("reports", serializedReports);
@@ -145,6 +155,6 @@ public sealed partial class Executor : RefCounted, IExecutor
 
     private class GdUnitRunnerConfig
     {
-        public Dictionary<string, IEnumerable<string>> Included { get; } = new();
+        [JsonProperty] public Dictionary<string, IEnumerable<string>> Included { get; private set; } = new();
     }
 }

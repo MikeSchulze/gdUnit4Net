@@ -1,8 +1,9 @@
 namespace GdUnit4.Tests.Asserts;
 
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Execution.Exceptions;
+
 using static Assertions;
-using Executions;
-using Exceptions;
 
 [TestSuite]
 public class BoolAssertTest
@@ -13,7 +14,7 @@ public class BoolAssertTest
         AssertBool(true).IsTrue();
         AssertThrown(() => AssertBool(false).IsTrue())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(14)
+            .HasFileLineNumber(15)
             .HasMessage("Expecting: 'True' but is 'False'");
     }
 
@@ -23,7 +24,7 @@ public class BoolAssertTest
         AssertBool(false).IsFalse();
         AssertThrown(() => AssertBool(true).IsFalse())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(24)
+            .HasFileLineNumber(25)
             .HasMessage("Expecting: 'False' but is 'True'");
     }
 
@@ -32,20 +33,20 @@ public class BoolAssertTest
     {
         AssertThrown(() => AssertBool(true).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(33)
+            .HasFileLineNumber(34)
             .StartsWithMessage("""
-                Expecting be <Null>:
-                 but is
-                    'True'
-                """);
+                               Expecting be <Null>:
+                                but is
+                                   'True'
+                               """);
         AssertThrown(() => AssertBool(false).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(41)
+            .HasFileLineNumber(42)
             .StartsWithMessage("""
-                Expecting be <Null>:
-                 but is
-                    'False'
-                """);
+                               Expecting be <Null>:
+                                but is
+                                   'False'
+                               """);
     }
 
     [TestCase]
@@ -62,11 +63,11 @@ public class BoolAssertTest
         AssertBool(false).IsEqual(false);
         AssertThrown(() => AssertBool(true).IsEqual(false))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(63)
+            .HasFileLineNumber(64)
             .HasMessage("""
-                Expecting be equal:
-                    'False' but is 'True'
-                """);
+                        Expecting be equal:
+                            'False' but is 'True'
+                        """);
     }
 
     [TestCase]
@@ -76,11 +77,11 @@ public class BoolAssertTest
         AssertBool(false).IsNotEqual(true);
         AssertThrown(() => AssertBool(true).IsNotEqual(true))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(77)
+            .HasFileLineNumber(78)
             .HasMessage("""
-                Expecting be NOT equal:
-                    'True' but is 'True'
-                """);
+                        Expecting be NOT equal:
+                            'True' but is 'True'
+                        """);
     }
 
     [TestCase]
@@ -94,7 +95,7 @@ public class BoolAssertTest
     public void OverrideFailureMessage()
         => AssertThrown(() => AssertBool(true).OverrideFailureMessage("Custom failure message").IsFalse())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(95)
+            .HasFileLineNumber(96)
             .HasMessage("Custom failure message");
 
     [TestCase]

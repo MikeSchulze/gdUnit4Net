@@ -1,4 +1,4 @@
-namespace GdUnit4.Executions;
+namespace GdUnit4.Core.Execution;
 
 using System.Linq;
 using System.Reflection;
@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 using Asserts;
 
-using Core.Signals;
+using Reporting;
+
+using Signals;
 
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
 {
@@ -20,11 +22,9 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
         {
             GodotSignalCollector.Instance.Clean();
             context.MemoryPool.SetActive(StageName);
-            context.OrphanMonitor.Start();
             await base.Execute(context);
-            context.MemoryPool.ReleaseRegisteredObjects();
-            context.OrphanMonitor.Stop();
-            if (context.OrphanMonitor.OrphanCount > 0)
+            await context.MemoryPool.Gc();
+            if (context.MemoryPool.OrphanCount > 0)
                 context.ReportCollector.PushFront(new TestReport(TestReport.ReportType.WARN, 0, ReportOrphans(context)));
         }
 
@@ -50,12 +50,12 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
         if (beforeAttribute != null && afterAttributes != null)
             return $"""
                     {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
-                        Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test setup stage!
+                        Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test setup stage!
                         Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!
                     """;
         return $"""
                 {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
-                    Detected <{context.OrphanMonitor.OrphanCount}> orphan nodes during test setup stage!
+                    Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test setup stage!
                     Check [b]{(beforeAttribute != null ? beforeAttribute.Name + ":" + beforeAttribute.Line : afterAttributes?.Name + ":" + afterAttributes?.Line)}[/b] for unfreed instances!
                 """;
     }

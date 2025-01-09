@@ -1,13 +1,24 @@
 
+v2.1.0
+Improvements:
+* GD-138: Add capture test case execution stdout to the test report if `CaptureStdOut` is enabled
+* GD-141: Code cleanup and formatting
+
+--------------------------------------------------------------------------
+
 v2.0.0
 - Changed test event sending via std:out to using IPC
 - Enable debugging in Rider 2024.2 without using hacks
 'gdUnit4.test.adapter' v2.0.0 requires 'gdUnit4.api' v4.3.0
 
+--------------------------------------------------------------------------
+
 v1.1.2
 Bug Fixes:
 - Fixes the test adapter gdUnit4.api version resolving
 - Fixing Debug tests gets stuck when using --verbose
+
+--------------------------------------------------------------------------
 
 v1.1.1
 

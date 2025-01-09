@@ -4,19 +4,21 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Exceptions;
+using Core.Execution.Exceptions;
 using Core.Signals;
 
-internal sealed class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAssert
+using Godot;
+
+public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 {
-    public SignalAssert(Godot.GodotObject current) : base(current)
+    public SignalAssert(GodotObject current) : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
 
     // Is just a dummy method that is called to register the monitor on the emitter, which is done in the constructor
     public ISignalAssert StartMonitoring()
         => this;
 
-    public async Task<ISignalAssert> IsEmitted(string signal, params Godot.Variant[] args)
+    public async Task<ISignalAssert> IsEmitted(string signal, params Variant[] args)
     {
         IsNotNull();
         IsSignalExists(signal);
@@ -28,7 +30,7 @@ internal sealed class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAsser
         return this;
     }
 
-    public async Task<ISignalAssert> IsNotEmitted(string signal, params Godot.Variant[] args)
+    public async Task<ISignalAssert> IsNotEmitted(string signal, params Variant[] args)
     {
         IsNotNull();
         IsSignalExists(signal);
@@ -48,7 +50,7 @@ internal sealed class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAsser
         return this;
     }
 
-    public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Godot.Variant[] args)
+    public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Variant[] args)
     {
         IsNotNull();
         IsSignalExists(signal);
@@ -58,7 +60,7 @@ internal sealed class SignalAssert : AssertBase<Godot.GodotObject>, ISignalAsser
         return this;
     }
 
-    private async Task<bool> IsEmittedTask(string signal, params Godot.Variant[] args)
+    private async Task<bool> IsEmittedTask(string signal, params Variant[] args)
     {
         using var signalCancellationToken = new CancellationTokenSource();
         Thread.SetData(Thread.GetNamedDataSlot("SignalCancellationToken"), signalCancellationToken);

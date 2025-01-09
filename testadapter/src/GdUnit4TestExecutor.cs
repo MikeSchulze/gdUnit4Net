@@ -10,17 +10,15 @@ using Execution;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 
 using Settings;
 
-using static Utilities.Utils;
-
-using ITestExecutor = Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor;
+using Utilities;
 
 [ExtensionUri(ExecutorUri)]
-public class GdUnit4TestExecutor : ITestExecutor, IDisposable
+// ReSharper disable once ClassNeverInstantiated.Global
+public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 {
     /// <summary>
     ///     The Uri used to identify the GdUnit4 Executor
@@ -37,6 +35,10 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     private TestExecutor? executor;
 
     private IFrameworkHandle? fh;
+
+#pragma warning disable CA1859
+    private ITestEngineLogger? Log { get; set; }
+#pragma warning restore CA1859
 
     public void Dispose()
     {
@@ -56,15 +58,24 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.3.0")))
+        var testCases = tests.ToList();
+        if (testCases.Count == 0)
+            return;
+
+
+        Log = new Logger(frameworkHandle);
+        if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
         {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
+            Log.LogError(
+                $"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
+            Log.LogError("Abort the test discovery.");
             return;
         }
 
         var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
+        //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        // ReSharper disable once UnusedVariable
         var filterExpression = runContext.GetTestCaseFilter(supportedProperties.Keys, propertyName =>
         {
             supportedProperties.TryGetValue(propertyName, out var testProperty);
@@ -72,34 +83,25 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
         });
 
         executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, tests.ToList());
+        executor.Run(fh, runContext, testCases);
     }
 
     /// <summary>
     ///     Runs 'all' the tests present in the specified 'containers'.
     /// </summary>
-    /// <param name="tests">Path to test container files to look for tests in.</param>
+    /// <param name="sources">Path to test container files to look for tests in.</param>
     /// <param name="runContext">Context to use when executing the tests.</param>
     /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
-    public void RunTests(IEnumerable<string>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
+    public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
-        _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'containers' is null, abort!");
+        _ = sources ?? throw new ArgumentNullException(nameof(sources), "Argument 'containers' is null, abort!");
         _ = runContext ?? throw new ArgumentNullException(nameof(runContext), "Argument 'runContext' is null, abort!");
         fh = frameworkHandle ?? throw new ArgumentNullException(nameof(frameworkHandle), "Argument 'frameworkHandle' is null, abort!");
 
-        if (!CheckGdUnit4ApiMinimumRequiredVersion(fh, new Version("4.3.0")))
-        {
-            fh.SendMessage(TestMessageLevel.Error, "Abort the test discovery.");
-            return;
-        }
-
         TestCaseDiscoverySink discoverySink = new();
-        new GdUnit4TestDiscoverer().DiscoverTests(tests, runContext, fh, discoverySink);
-        var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(runContext.RunSettings?.SettingsXml);
-        var gdUnitSettings = runContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
-
-        executor = new TestExecutor(runConfiguration, gdUnitSettings?.Settings ?? new GdUnit4Settings());
-        executor.Run(fh, runContext, discoverySink.TestCases);
+        new GdUnit4TestDiscoverer().DiscoverTests(sources, runContext, fh, discoverySink);
+        if (discoverySink.TestCases.Count == 0) return;
+        RunTests(discoverySink.TestCases, runContext, frameworkHandle);
     }
 
     /// <summary>
@@ -107,7 +109,11 @@ public class GdUnit4TestExecutor : ITestExecutor, IDisposable
     /// </summary>
     public void Cancel()
     {
-        fh?.SendMessage(TestMessageLevel.Informational, "Cancel pressed  -----");
+        Log?.LogInfo("Cancel pressed  -----");
         executor?.Cancel();
     }
+
+    public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
+
+    public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
 }

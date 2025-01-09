@@ -5,46 +5,44 @@ using System.Linq;
 using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-public class CodeNavigationDataProvider : IDisposable
+internal sealed class CodeNavigationDataProvider : IDisposable
 {
-
-    public struct CodeNavigation
-    {
-        public int Line { get; set; }
-        public string? Source { get; set; }
-        public readonly bool IsValid => Source != null;
-    }
-
-    private readonly Assembly? assembly;
+    private readonly Assembly assembly;
     private readonly DiaSession diaSession;
+    private bool disposed;
 
-    public CodeNavigationDataProvider(string assemblyPath, IMessageLogger logger)
+    public CodeNavigationDataProvider(string assemblyPath)
     {
-        try
-        {
-            assembly = Assembly.LoadFrom(assemblyPath);
-        }
-        catch (Exception e)
-        {
-            logger.SendMessage(TestMessageLevel.Error, e.Message);
-        }
-        diaSession = new(assemblyPath);
+        assembly = Assembly.LoadFrom(assemblyPath);
+        diaSession = new DiaSession(assemblyPath);
     }
 
-    public Assembly? GetAssembly() => assembly;
-
-    public CodeNavigation GetNavigationData(string className, MethodInfo methodInfo)
+    public void Dispose()
     {
-        var navigationData = TryGetNavigationDataForMethod(className, methodInfo)
-            ?? TryGetNavigationDataForAsyncMethod(methodInfo);
-        return new CodeNavigation()
+        if (disposed)
+            return;
+        diaSession.Dispose();
+        disposed = true;
+        // ReSharper disable once GCSuppressFinalizeForTypeWithoutDestructor
+        GC.SuppressFinalize(this);
+    }
+
+    public CodeNavigation GetNavigationData(string managedType, string managedMethod)
+    {
+        var mi = GetMethodInfo(managedType, managedMethod);
+        var navigationData = TryGetNavigationDataForMethod(managedType, mi)
+                             ?? TryGetNavigationDataForAsyncMethod(mi);
+        return new CodeNavigation
         {
             Line = navigationData?.MinLineNumber ?? -1,
-            Source = navigationData?.FileName
+            Source = navigationData?.FileName,
+            Method = mi
         };
     }
+
+    private MethodInfo GetMethodInfo(string managedType, string managedMethod) =>
+        assembly.GetType(managedType)!.GetMethod(managedMethod)!;
 
     private DiaNavigationData? TryGetNavigationDataForMethod(string className, MethodInfo methodInfo)
     {
@@ -63,18 +61,21 @@ public class CodeNavigationDataProvider : IDisposable
     }
 
     private static Attribute? GetStateMachineAttribute(MethodInfo method) =>
-            method.GetCustomAttributes(false)
-                .Cast<Attribute>()
-                .FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
+        method.GetCustomAttributes(false)
+            .Cast<Attribute>()
+            .FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
 
     private static Type? GetStateMachineType(Attribute stateMachineAttribute) =>
         stateMachineAttribute.GetType()
             .GetProperty("StateMachineType")?
             .GetValue(stateMachineAttribute) as Type ?? null;
 
-    public void Dispose()
+
+    public readonly struct CodeNavigation
     {
-        diaSession?.Dispose();
-        GC.SuppressFinalize(this);
+        public required MethodInfo Method { get; init; }
+        public required int Line { get; init; }
+        public required string? Source { get; init; }
+        public readonly bool IsValid => Source != null;
     }
 }

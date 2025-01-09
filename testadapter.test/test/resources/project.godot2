@@ -1,0 +1,83 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="gdUnit4"
+config/tags=PackedStringArray("addon", "godot4", "testing")
+config/features=PackedStringArray("4.3", "C#")
+config/icon="res://icon.png"
+
+[audio]
+
+default_bus_layout=""
+
+[debug]
+
+file_logging/log_path="res://godot_session.log"
+gdscript/warnings/exclude_addons=false
+gdscript/warnings/untyped_declaration=2
+gdscript/warnings/unsafe_property_access=1
+gdscript/warnings/unsafe_method_access=1
+gdscript/warnings/unsafe_cast=1
+gdscript/warnings/unsafe_call_argument=1
+
+[dotnet]
+
+project/assembly_name="gdUnit4"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
+
+[gdunit4]
+
+ui/inspector/node_collapse=false
+ui/toolbar/run_overall=true
+ui/inspector/tree_sort_mode=1
+report/godot/script_error=false
+settings/test/flaky_check_enable=true
+settings/common/update_notification_enabled=false
+
+[importer_defaults]
+
+texture={
+"compress/channel_pack": 0,
+"compress/hdr_compression": 1,
+"compress/high_quality": false,
+"compress/lossy_quality": 0.7,
+"compress/mode": 0,
+"compress/normal_map": 0,
+"detect_3d/compress_to": 1,
+"editor/convert_colors_with_editor_theme": true,
+"editor/scale_with_editor_scale": true,
+"mipmaps/generate": false,
+"mipmaps/limit": -1,
+"process/fix_alpha_border": true,
+"process/hdr_as_srgb": false,
+"process/hdr_clamp_exposure": false,
+"process/normal_map_invert_y": false,
+"process/premult_alpha": false,
+"process/size_limit": 0,
+"roughness/mode": 0,
+"roughness/src_normal": "",
+"svg/scale": 1.0
+}
+
+[network]
+
+limits/debugger_stdout/max_chars_per_second=60048
+limits/debugger_stdout/max_messages_per_frame=100
+limits/debugger_stdout/max_errors_per_second=1000
+limits/debugger_stdout/max_warnings_per_second=1000
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

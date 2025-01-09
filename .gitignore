@@ -3,6 +3,7 @@
 .idea
 .godot
 obj/
+bin/
 nupkg/*
 .generated/
 *.*.import
@@ -24,3 +25,5 @@ mono_crash.*.json
 .fake
 .ionide
 gdUnit4Net.sln.DotSettings.user
+test/godot.log
+

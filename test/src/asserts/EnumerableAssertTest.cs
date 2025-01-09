@@ -1,18 +1,140 @@
 namespace GdUnit4.Tests.Asserts;
 
-using System;
 using System.Collections.Generic;
 
+using GdUnit4.Asserts;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Execution.Exceptions;
+
 using Godot;
-using Executions;
-using Exceptions;
+using Godot.Collections;
 
 using static Assertions;
-using GdUnit4.Asserts;
+
+using Array = System.Array;
 
 [TestSuite]
 public partial class EnumerableAssertTest
 {
+    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
+    public static readonly object[] TestDataPointEmptyArrays = { Array.Empty<object>(), new List<object>(), new Godot.Collections.Array(), new Array<RefCounted>() };
+
+    public static readonly object[] TestDataPointStringValues =
+    {
+        new object[] { new[] { "a", "b", "c", "a" }, new[] { "a", "b", "c", "a" }, "X" }, new object[]
+        {
+            new List<string>
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            new List<string>
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            "X"
+        },
+        new object[]
+        {
+            new Godot.Collections.Array
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            new Godot.Collections.Array
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            "X"
+        },
+        new object[]
+        {
+            new Array<string>
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            new Array<string>
+            {
+                "a",
+                "b",
+                "c",
+                "a"
+            },
+            "X"
+        }
+    };
+
+    public static readonly object[] TestDataPointObjectValues =
+    {
+        new object[] { new object[] { new(), new(), new(), new() }, new object[] { new(), new(), new(), new() }, new() }, new object[]
+        {
+            new List<object>
+            {
+                new(),
+                new(),
+                new(),
+                new()
+            },
+            new List<object>
+            {
+                new(),
+                new(),
+                new(),
+                new()
+            },
+            new()
+        },
+        new object[]
+        {
+            new Godot.Collections.Array
+            {
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted()
+            },
+            new Godot.Collections.Array
+            {
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted()
+            },
+            new RefCounted()
+        },
+        new object[]
+        {
+            new Array<GodotObject>
+            {
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted()
+            },
+            new Array<GodotObject>
+            {
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted(),
+                new RefCounted()
+            },
+            new RefCounted()
+        }
+    };
+
     [TestCase(0, TestName = "Array")]
     [TestCase(1, TestName = "List")]
     [TestCase(2, TestName = "GodotArray")]
@@ -25,12 +147,12 @@ public partial class EnumerableAssertTest
         // should fail because the current is not null
         AssertThrown(() => AssertArray(current).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(26)
+            .HasFileLineNumber(148)
             .HasMessage("""
-                    Expecting be <Null>:
-                     but is
-                        <Empty>
-                    """);
+                        Expecting be <Null>:
+                         but is
+                            <Empty>
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -45,7 +167,7 @@ public partial class EnumerableAssertTest
         // should fail because the current is null
         AssertThrown(() => AssertArray(null).IsNotNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(46)
+            .HasFileLineNumber(168)
             .HasMessage("Expecting be NOT <Null>:");
     }
 
@@ -54,130 +176,311 @@ public partial class EnumerableAssertTest
     {
         AssertArray(Array.Empty<object>()).IsEqual(Array.Empty<object>());
         AssertArray(Array.Empty<int>()).IsEqual(Array.Empty<int>());
-        AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 4, 5 });
+        AssertArray(new[] { 1, 2, 4, 5 }).IsEqual(new[] { 1, 2, 4, 5 });
         AssertArray(new Godot.Collections.Array()).IsEqual(new Godot.Collections.Array());
-        AssertArray(new Godot.Collections.Array<Variant>()).IsEqual(new Godot.Collections.Array<Variant>());
-        AssertArray(new Godot.Collections.Array { 1, 2, 3, 4 }).IsEqual(new Godot.Collections.Array { 1, 2, 3, 4 });
-        AssertArray(new Godot.Collections.Array<Variant> { 1, 2, 4, 5 }).IsEqual(new Godot.Collections.Array<Variant> { 1, 2, 4, 5 });
+        AssertArray(new Array<Variant>()).IsEqual(new Array<Variant>());
+        AssertArray(new Godot.Collections.Array
+        {
+            1,
+            2,
+            3,
+            4
+        }).IsEqual(new Godot.Collections.Array
+        {
+            1,
+            2,
+            3,
+            4
+        });
+        AssertArray(new Array<Variant>
+        {
+            1,
+            2,
+            4,
+            5
+        }).IsEqual(new Array<Variant>
+        {
+            1,
+            2,
+            4,
+            5
+        });
 
-        AssertThrown(() => AssertArray(new int[] { 1, 2, 4, 5 }).IsEqual(new int[] { 1, 2, 3, 4, 2, 5 }))
+        AssertThrown(() => AssertArray(new[] { 1, 2, 4, 5 }).IsEqual(new[] { 1, 2, 3, 4, 2, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(63)
+            .HasFileLineNumber(209)
             .HasMessage("""
-                    Expecting be equal:
-                        [1, 2, 3, 4, 2, 5]
-                     but is
-                        [1, 2, 4, 5]
-                    """);
-        AssertThrown(() => AssertArray(new Godot.Collections.Array<Variant> { 1, 2, 4, 5 }).IsEqual(new Godot.Collections.Array<Variant> { 1, 2, 3, 4, 2, 5 }))
+                        Expecting be equal:
+                            [1, 2, 3, 4, 2, 5]
+                         but is
+                            [1, 2, 4, 5]
+                        """);
+        AssertThrown(() => AssertArray(new Array<Variant>
+            {
+                1,
+                2,
+                4,
+                5
+            }).IsEqual(new Array<Variant>
+            {
+                1,
+                2,
+                3,
+                4,
+                2,
+                5
+            }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(72)
+            .HasFileLineNumber(218)
             .HasMessage("""
-                    Expecting be equal:
-                        [1, 2, 3, 4, 2, 5]
-                     but is
-                        [1, 2, 4, 5]
-                    """);
+                        Expecting be equal:
+                            [1, 2, 3, 4, 2, 5]
+                         but is
+                            [1, 2, 4, 5]
+                        """);
         AssertThrown(() => AssertArray<object>(null).IsEqual(Array.Empty<object>()))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(81)
+            .HasFileLineNumber(241)
             .HasMessage("""
-                    Expecting be equal:
-                        <Empty>
-                     but is
-                        <Null>
-                    """);
+                        Expecting be equal:
+                            <Empty>
+                         but is
+                            <Null>
+                        """);
     }
 
     [TestCase]
     public void IsEqualIgnoringCase()
     {
-        AssertArray(new string[] { "this", "is", "a", "message" })
-            .IsEqualIgnoringCase(new string[] { "This", "is", "a", "Message" });
-        AssertArray(new List<string> { "this", "is", "a", "message" })
-            .IsEqualIgnoringCase(new List<string> { "This", "is", "a", "Message" });
-        AssertArray(new Godot.Collections.Array { "this", "is", "a", "message" })
-            .IsEqualIgnoringCase(new Godot.Collections.Array { "This", "is", "a", "Message" });
-        AssertArray(new Godot.Collections.Array<string> { "this", "is", "a", "message" })
-            .IsEqualIgnoringCase(new Godot.Collections.Array<string> { "This", "is", "a", "Message" });
+        AssertArray(new[] { "this", "is", "a", "message" })
+            .IsEqualIgnoringCase(new[] { "This", "is", "a", "Message" });
+        AssertArray(new List<string>
+            {
+                "this",
+                "is",
+                "a",
+                "message"
+            })
+            .IsEqualIgnoringCase(new List<string>
+            {
+                "This",
+                "is",
+                "a",
+                "Message"
+            });
+        AssertArray(new Godot.Collections.Array
+            {
+                "this",
+                "is",
+                "a",
+                "message"
+            })
+            .IsEqualIgnoringCase(new Godot.Collections.Array
+            {
+                "This",
+                "is",
+                "a",
+                "Message"
+            });
+        AssertArray(new Array<string>
+            {
+                "this",
+                "is",
+                "a",
+                "message"
+            })
+            .IsEqualIgnoringCase(new Array<string>
+            {
+                "This",
+                "is",
+                "a",
+                "Message"
+            });
         // should fail because the array not contains same elements
-        AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
-                .IsEqualIgnoringCase(new string[] { "This", "is", "an", "Message" }))
+        AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
+                .IsEqualIgnoringCase(new[] { "This", "is", "an", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(104)
+            .HasFileLineNumber(300)
             .HasMessage("""
-                    Expecting be equal (ignoring case):
-                        ["This", "is", "an", "Message"]
-                     but is
-                        ["this", "is", "a", "message"]
-                    """);
-        AssertThrown(() => AssertArray(new Godot.Collections.Array { "this", "is", "a", "message" })
-                .IsEqualIgnoringCase(new Godot.Collections.Array { "This", "is", "an", "Message" }))
+                        Expecting be equal (ignoring case):
+                            ["This", "is", "an", "Message"]
+                         but is
+                            ["this", "is", "a", "message"]
+                        """);
+        AssertThrown(() => AssertArray(new Godot.Collections.Array
+                {
+                    "this",
+                    "is",
+                    "a",
+                    "message"
+                })
+                .IsEqualIgnoringCase(new Godot.Collections.Array
+                {
+                    "This",
+                    "is",
+                    "an",
+                    "Message"
+                }))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
-                    Expecting be equal (ignoring case):
-                        ["This", "is", "an", "Message"]
-                     but is
-                        ["this", "is", "a", "message"]
-                    """);
+                        Expecting be equal (ignoring case):
+                            ["This", "is", "an", "Message"]
+                         but is
+                            ["this", "is", "a", "message"]
+                        """);
         AssertThrown(() => AssertArray<object>(null)
-               .IsEqualIgnoringCase(new string[] { "This", "is" }))
+                .IsEqualIgnoringCase(new[] { "This", "is" }))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
-                    Expecting be equal (ignoring case):
-                        ["This", "is"]
-                     but is
-                        <Null>
-                    """);
+                        Expecting be equal (ignoring case):
+                            ["This", "is"]
+                         but is
+                            <Null>
+                        """);
     }
 
     [TestCase]
     public void IsNotEqual()
     {
-        AssertArray<int>(null).IsNotEqual(new int[] { 1, 2, 3, 4, 5 });
-        AssertArray(new int[] { 1, 2, 3, 4, 5 }).IsNotEqual(new int[] { 1, 2, 3, 4, 5, 6 });
-        AssertArray(new List<int> { 1, 2, 3, 4, 5 }).IsNotEqual(new List<int> { 1, 2, 3, 4, 5, 6 });
-        AssertArray(new Godot.Collections.Array { 1, 2, 3, 4, 5 }).IsNotEqual(new Godot.Collections.Array { 1, 2, 3, 4, 5, 6 });
-        AssertArray(new Godot.Collections.Array<int> { 1, 2, 3, 4, 5 }).IsNotEqual(new Godot.Collections.Array<int> { 1, 2, 3, 4, 5, 6 });
+        AssertArray<int>(null).IsNotEqual(new[] { 1, 2, 3, 4, 5 });
+        AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual(new[] { 1, 2, 3, 4, 5, 6 });
+        AssertArray(new List<int>
+        {
+            1,
+            2,
+            3,
+            4,
+            5
+        }).IsNotEqual(new List<int>
+        {
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+        });
+        AssertArray(new Godot.Collections.Array
+        {
+            1,
+            2,
+            3,
+            4,
+            5
+        }).IsNotEqual(new Godot.Collections.Array
+        {
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+        });
+        AssertArray(new Array<int>
+        {
+            1,
+            2,
+            3,
+            4,
+            5
+        }).IsNotEqual(new Array<int>
+        {
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+        });
         // should fail because the array  contains same elements
-        AssertThrown(() => AssertArray(new int[] { 1, 2, 3, 4, 5 }).IsNotEqual(new int[] { 1, 2, 3, 4, 5 }))
+        AssertThrown(() => AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual(new[] { 1, 2, 3, 4, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(143)
+            .HasFileLineNumber(396)
             .HasMessage("""
-                    Expecting be NOT equal:
-                        [1, 2, 3, 4, 5]
-                     but is
-                        [1, 2, 3, 4, 5]
-                    """);
-        AssertThrown(() => AssertArray(new Godot.Collections.Array { 1, 2, 3, 4, 5 }).IsNotEqual(new Godot.Collections.Array { 1, 2, 3, 4, 5 }))
+                        Expecting be NOT equal:
+                            [1, 2, 3, 4, 5]
+                         but is
+                            [1, 2, 3, 4, 5]
+                        """);
+        AssertThrown(() => AssertArray(new Godot.Collections.Array
+            {
+                1,
+                2,
+                3,
+                4,
+                5
+            }).IsNotEqual(new Godot.Collections.Array
+            {
+                1,
+                2,
+                3,
+                4,
+                5
+            }))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
-                    Expecting be NOT equal:
-                        [1, 2, 3, 4, 5]
-                     but is
-                        [1, 2, 3, 4, 5]
-                    """);
+                        Expecting be NOT equal:
+                            [1, 2, 3, 4, 5]
+                         but is
+                            [1, 2, 3, 4, 5]
+                        """);
     }
 
     [TestCase]
     public void IsNotEqualIgnoringCase()
     {
-        AssertArray(null).IsNotEqualIgnoringCase(new string[] { "This", "is", "an", "Message" });
-        AssertArray(new string[] { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new string[] { "This", "is", "an", "Message" });
-        AssertArray(new List<string> { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new List<string> { "This", "is", "an", "Message" });
-        AssertArray(new Godot.Collections.Array { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new Godot.Collections.Array { "This", "is", "an", "Message" });
-        AssertArray(new Godot.Collections.Array<string> { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new Godot.Collections.Array<string> { "This", "is", "an", "Message" });
+        AssertArray(null).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
+        AssertArray(new[] { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
+        AssertArray(new List<string>
+        {
+            "this",
+            "is",
+            "a",
+            "message"
+        }).IsNotEqualIgnoringCase(new List<string>
+        {
+            "This",
+            "is",
+            "an",
+            "Message"
+        });
+        AssertArray(new Godot.Collections.Array
+        {
+            "this",
+            "is",
+            "a",
+            "message"
+        }).IsNotEqualIgnoringCase(new Godot.Collections.Array
+        {
+            "This",
+            "is",
+            "an",
+            "Message"
+        });
+        AssertArray(new Array<string>
+        {
+            "this",
+            "is",
+            "a",
+            "message"
+        }).IsNotEqualIgnoringCase(new Array<string>
+        {
+            "This",
+            "is",
+            "an",
+            "Message"
+        });
         // should fail because the array contains same elements ignoring case sensitive
-        AssertThrown(() => AssertArray(new string[] { "this", "is", "a", "message" })
-                .IsNotEqualIgnoringCase(new string[] { "This", "is", "a", "Message" }))
+        AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
+                .IsNotEqualIgnoringCase(new[] { "This", "is", "a", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(171)
+            .HasFileLineNumber(474)
             .HasMessage("""
-                    Expecting be NOT equal (ignoring case):
-                        ["This", "is", "a", "Message"]
-                     but is
-                        ["this", "is", "a", "message"]
-                    """);
+                        Expecting be NOT equal (ignoring case):
+                            ["This", "is", "a", "Message"]
+                         but is
+                            ["this", "is", "a", "message"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -188,17 +491,17 @@ public partial class EnumerableAssertTest
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
         dynamic? expected = TestDataPointStringValues[dataIndex] as object[];
-        dynamic filled = expected![0];
+        var filled = expected![0];
 
         AssertArray(empty).IsEmpty();
         // should fail because the array is not empty it has a size of one
         AssertThrown(() => AssertArray(filled).IsEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(195)
+            .HasFileLineNumber(498)
             .HasMessage("""
-                    Expecting be empty:
-                     but has size '4'
-                    """);
+                        Expecting be empty:
+                         but has size '4'
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -209,18 +512,18 @@ public partial class EnumerableAssertTest
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
         dynamic? expected = TestDataPointStringValues[dataIndex] as object[];
-        dynamic filled = expected![0];
+        var filled = expected![0];
 
         AssertArray(null).IsNotEmpty();
         AssertArray(filled).IsNotEmpty();
         // should fail because the array is empty
         AssertThrown(() => AssertArray(empty).IsNotEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(217)
+            .HasFileLineNumber(520)
             .HasMessage("""
-                    Expecting being NOT empty:
-                     but is empty
-                    """);
+                        Expecting being NOT empty:
+                         but is empty
+                        """);
     }
 
 
@@ -231,23 +534,23 @@ public partial class EnumerableAssertTest
     public void HasSize(int dataIndex)
     {
         dynamic? expected = TestDataPointStringValues[dataIndex] as object[];
-        dynamic current = expected![0];
+        var current = expected![0];
 
         AssertArray(current).HasSize(4);
         // should fail because the array has a size of 4
         AssertThrown(() => AssertArray(current).HasSize(5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(238)
+            .HasFileLineNumber(541)
             .HasMessage("""
-                    Expecting size:
-                        '5' but is '4'
-                    """);
+                        Expecting size:
+                            '5' but is '4'
+                        """);
         AssertThrown(() => AssertArray(null).HasSize(4))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
-                    Expecting size:
-                        '4' but is unknown
-                    """);
+                        Expecting size:
+                            '4' but is unknown
+                        """);
     }
 
     [TestCase(0, TestName = "Array<string>")]
@@ -258,10 +561,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -273,27 +576,27 @@ public partial class EnumerableAssertTest
         AssertArray(current).Contains(current);
         AssertThrown(() => AssertArray(current).Contains(obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(274)
+            .HasFileLineNumber(577)
             .HasMessage("""
-                    Expecting contains elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["X"]
-                     but could not find elements:
-                        ["X"]
-                    """);
+                        Expecting contains elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["X"]
+                         but could not find elements:
+                            ["X"]
+                        """);
 
         AssertThrown(() => AssertArray(current).Contains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(286)
+            .HasFileLineNumber(589)
             .HasMessage("""
-                    Expecting contains elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "b", "X"]
-                     but could not find elements:
-                        ["X"]
-                    """);
+                        Expecting contains elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "b", "X"]
+                         but could not find elements:
+                            ["X"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -304,10 +607,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -319,37 +622,37 @@ public partial class EnumerableAssertTest
         AssertArray(current).Contains(current);
         AssertThrown(() => AssertArray(current).Contains(obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(320)
+            .HasFileLineNumber(623)
             .HasMessage("""
-                    Expecting contains elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj5]
-                     but could not find elements:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj5]
+                 but could not find elements:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
 
         AssertThrown(() => AssertArray(current).Contains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(337)
+            .HasFileLineNumber(640)
             .HasMessage("""
-                    Expecting contains elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj2, $obj5]
-                     but could not find elements:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj2, $obj5]
+                 but could not find elements:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase(0, TestName = "Array<string>")]
@@ -360,10 +663,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -372,51 +675,51 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsExactly(current);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(373)
+            .HasFileLineNumber(676)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a"]
-                     but others where not expected:
-                        ["b", "c", "a"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a"]
+                         but others where not expected:
+                            ["b", "c", "a"]
+                        """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(384)
+            .HasFileLineNumber(687)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a", "b"]
-                     but others where not expected:
-                        ["c", "a"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a", "b"]
+                         but others where not expected:
+                            ["c", "a"]
+                        """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(395)
+            .HasFileLineNumber(698)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a", "X"]
-                     but others where not expected:
-                        ["b", "c", "a"]
-                     and some elements not found:
-                        ["X"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a", "X"]
+                         but others where not expected:
+                            ["b", "c", "a"]
+                         and some elements not found:
+                            ["X"]
+                        """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj3, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(408)
+            .HasFileLineNumber(711)
             .HasMessage("""
-                Expecting contains exactly elements:
-                    ["a", "b", "c", "a"]
-                 do contains (in same order)
-                    ["a", "c", "b", "a"]
-                 but there has differences in order:
-                    - element at index 0 expect "c" but is "b"
-                    - element at index 1 expect "b" but is "c"
-                """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a", "c", "b", "a"]
+                         but there has differences in order:
+                            - element at index 0 expect "c" but is "b"
+                            - element at index 1 expect "b" but is "c"
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -427,10 +730,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -438,55 +741,55 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsExactly(current);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(439)
+            .HasFileLineNumber(742)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1]
-                     but others where not expected:
-                        [$obj2, $obj3, $obj4]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1]
+                 but others where not expected:
+                    [$obj2, $obj3, $obj4]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(454)
+            .HasFileLineNumber(757)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1, $obj2]
-                     but others where not expected:
-                        [$obj3, $obj4]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1, $obj2]
+                 but others where not expected:
+                    [$obj3, $obj4]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(469)
+            .HasFileLineNumber(772)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1, $obj5]
-                     but others where not expected:
-                        [$obj2, $obj3, $obj4]
-                     and some elements not found:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1, $obj5]
+                 but others where not expected:
+                    [$obj2, $obj3, $obj4]
+                 and some elements not found:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj3, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(487)
+            .HasFileLineNumber(790)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -496,11 +799,11 @@ public partial class EnumerableAssertTest
                     - element at index 0 expect $obj3 but is $obj2
                     - element at index 1 expect $obj2 but is $obj3
                 """
-                    .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                    .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                    .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                    .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                    .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase(0, TestName = "Array<string>")]
@@ -511,10 +814,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsExactlyInAnyOrder(current);
@@ -531,32 +834,33 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsExactlyInAnyOrder(new string[] { obj1, obj2, obj3, obj4 });
             AssertArray(current).ContainsExactlyInAnyOrder(new string[] { obj4, obj2, obj3, obj1 });
         }
+
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(535)
+            .HasFileLineNumber(839)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "b", "X", "c", "a"]
-                     but could not find elements:
-                        ["X"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "b", "X", "c", "a"]
+                         but could not find elements:
+                            ["X"]
+                        """);
         //should fail because is contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(548)
+            .HasFileLineNumber(852)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "b", "a"]
-                     but some elements where not expected:
-                        ["c"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "b", "a"]
+                         but some elements where not expected:
+                            ["c"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -567,10 +871,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsExactlyInAnyOrder(current);
@@ -592,42 +896,43 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsExactlyInAnyOrder(new object[] { obj1, obj2, obj3, obj4 });
             AssertArray(current).ContainsExactlyInAnyOrder(new object[] { obj4, obj2, obj3, obj1 });
         }
+
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(596)
+            .HasFileLineNumber(901)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj2, $obj5, $obj3, $obj4]
-                     but could not find elements:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj2, $obj5, $obj3, $obj4]
+                 but could not find elements:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         //should fail because is contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(614)
+            .HasFileLineNumber(919)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj2, $obj4]
-                     but some elements where not expected:
-                        [$obj3]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj2, $obj4]
+                 but some elements where not expected:
+                    [$obj3]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
 
@@ -639,10 +944,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsSameExactlyInAnyOrder(current);
@@ -659,32 +964,33 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsSameExactlyInAnyOrder(new string[] { obj1, obj2, obj3, obj4 });
             AssertArray(current).ContainsSameExactlyInAnyOrder(new string[] { obj4, obj2, obj3, obj1 });
         }
+
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(663)
+            .HasFileLineNumber(969)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "b", "X", "c", "a"]
-                     but could not find elements:
-                        ["X"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "b", "X", "c", "a"]
+                         but could not find elements:
+                            ["X"]
+                        """);
         //should fail because is contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(676)
+            .HasFileLineNumber(982)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "b", "a"]
-                     but some elements where not expected:
-                        ["c"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "b", "a"]
+                         but some elements where not expected:
+                            ["c"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -695,10 +1001,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsSameExactlyInAnyOrder(current);
@@ -720,42 +1026,43 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsSameExactlyInAnyOrder(new object[] { obj1, obj2, obj3, obj4 });
             AssertArray(current).ContainsSameExactlyInAnyOrder(new object[] { obj4, obj2, obj3, obj1 });
         }
+
         // should fail because is contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(724)
+            .HasFileLineNumber(1031)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj2, $obj5, $obj3, $obj4]
-                     but could not find elements:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj2, $obj5, $obj3, $obj4]
+                 but could not find elements:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         //should fail because is contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(742)
+            .HasFileLineNumber(1049)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj2, $obj4]
-                     but some elements where not expected:
-                        [$obj3]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj2, $obj4]
+                 but some elements where not expected:
+                    [$obj3]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase]
@@ -777,54 +1084,27 @@ public partial class EnumerableAssertTest
         AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("GetClass")
             .ContainsExactly("RefCounted", "n.a.", "AStarGrid2D", "Node");
         // extracting by a func with arguments
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("HasSignal", new object[] { "tree_entered" })
+        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("HasSignal", "tree_entered")
             .ContainsExactly(false, "n.a.", false, true);
 
         // try extract on object via a func that not exists
         AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("InvalidMethod")
             .ContainsExactly("n.a.", "n.a.", "n.a.", "n.a.");
         // try extract on object via a func that has no return value
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("RemoveMeta", new object[] { "" })
+        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("RemoveMeta", "")
             .ContainsExactly(null, "n.a.", null, null);
         // must fail we can't extract from a null instance
         AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(790)
+            .HasFileLineNumber(1097)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        <Null>
-                     do contains (in same order)
-                        ["AStar", "Node"]
-                     but some elements not found:
-                        ["AStar", "Node"]
-                    """);
-    }
-
-    private sealed partial class TestObj : RefCounted
-    {
-        private string name;
-        private readonly object? value;
-        private readonly object? x;
-
-        public TestObj(string name, object? value, object? x = null)
-        {
-            this.name = name;
-            this.value = value;
-            this.x = x;
-        }
-
-        public string GetName() => name;
-        public object? GetValue() => value;
-        public object? GetX() => x;
-        public string GetX1() => "x1";
-        public string GetX2() => "x2";
-        public string GetX3() => "x3";
-        public string GetX4() => "x4";
-        public string GetX5() => "x5";
-        public string GetX6() => "x6";
-        public string GetX7() => "x7";
-        public string GetX8() => "x8";
-        public string GetX9() => "x9";
+                        Expecting contains exactly elements:
+                            <Null>
+                         do contains (in same order)
+                            ["AStar", "Node"]
+                         but some elements not found:
+                            ["AStar", "Node"]
+                        """);
     }
 
     [TestCase]
@@ -846,15 +1126,15 @@ public partial class EnumerableAssertTest
                 .ExtractV(Extr("GetName"), Extr("GetValue"), Extr("GetX"))
                 .ContainsExactly(Tuple("A", 10, null)))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(845)
+            .HasFileLineNumber(1125)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        <Null>
-                     do contains (in same order)
-                        [tuple("A", 10, <Null>)]
-                     but some elements not found:
-                        [tuple("A", 10, <Null>)]
-                    """);
+                        Expecting contains exactly elements:
+                            <Null>
+                         do contains (in same order)
+                            [tuple("A", 10, <Null>)]
+                         but some elements not found:
+                            [tuple("A", 10, <Null>)]
+                        """);
     }
 
     [TestCase]
@@ -932,7 +1212,7 @@ public partial class EnumerableAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(931)
+            .HasFileLineNumber(1211)
             .HasMessage("Custom failure message");
 
     [TestCase]
@@ -961,13 +1241,13 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).IsSame(other))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(962)
+            .HasFileLineNumber(1242)
             .HasMessage("""
-                Expecting be same:
-                    ["a", "b", "c", "a"]
-                 to refer to the same object
-                    ["a", "b", "c", "a"]
-                """);
+                        Expecting be same:
+                            ["a", "b", "c", "a"]
+                         to refer to the same object
+                            ["a", "b", "c", "a"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -983,10 +1263,10 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).IsNotSame(current))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(984)
+            .HasFileLineNumber(1264)
             .HasMessage("""
-                Expecting be NOT same: ["a", "b", "c", "a"]
-                """);
+                        Expecting be NOT same: ["a", "b", "c", "a"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -997,10 +1277,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsSame(obj1);
@@ -1012,15 +1292,15 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 'xxx' and 'yyy'
         AssertThrown(() => AssertArray(current).ContainsSame(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1013)
+            .HasFileLineNumber(1293)
             .HasMessage("""
-                    Expecting contains elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in any order)
-                        ["a", "X"]
-                     but could not find elements:
-                        ["X"]
-                    """);
+                        Expecting contains elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in any order)
+                            ["a", "X"]
+                         but could not find elements:
+                            ["X"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array")]
@@ -1031,10 +1311,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[dataPointIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).ContainsSame(obj1);
@@ -1046,20 +1326,20 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 'obj5'
         AssertThrown(() => AssertArray(current).ContainsSame(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1047)
+            .HasFileLineNumber(1327)
             .HasMessage("""
-                    Expecting contains elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in any order)
-                        [$obj1, $obj5]
-                     but could not find elements:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in any order)
+                    [$obj1, $obj5]
+                 but could not find elements:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase(0, TestName = "Array")]
@@ -1070,10 +1350,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -1082,40 +1362,40 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsSameExactly(current);
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1083)
+            .HasFileLineNumber(1363)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a"]
-                     but others where not expected:
-                        ["b", "c", "a"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a"]
+                         but others where not expected:
+                            ["b", "c", "a"]
+                        """);
 
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1095)
+            .HasFileLineNumber(1375)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a", "b"]
-                     but others where not expected:
-                        ["c", "a"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a", "b"]
+                         but others where not expected:
+                            ["c", "a"]
+                        """);
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1106)
+            .HasFileLineNumber(1386)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        ["a", "b", "c", "a"]
-                     do contains (in same order)
-                        ["a", "X"]
-                     but others where not expected:
-                        ["b", "c", "a"]
-                     and some elements not found:
-                        ["X"]
-                    """);
+                        Expecting contains exactly elements:
+                            ["a", "b", "c", "a"]
+                         do contains (in same order)
+                            ["a", "X"]
+                         but others where not expected:
+                            ["b", "c", "a"]
+                         and some elements not found:
+                            ["X"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -1126,10 +1406,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         // test against only one element
@@ -1138,69 +1418,69 @@ public partial class EnumerableAssertTest
         // when compare by reference equal obj1 != obj4
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2, obj3, obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1139)
+            .HasFileLineNumber(1419)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1, $obj2, $obj3, $obj1]
-                     but others where not expected:
-                        [$obj4]
-                     and some elements not found:
-                        [$obj1]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1, $obj2, $obj3, $obj1]
+                 but others where not expected:
+                    [$obj4]
+                 and some elements not found:
+                    [$obj1]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1156)
+            .HasFileLineNumber(1436)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1]
-                     but others where not expected:
-                        [$obj2, $obj3, $obj4]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1]
+                 but others where not expected:
+                    [$obj2, $obj3, $obj4]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1171)
+            .HasFileLineNumber(1451)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1, $obj2]
-                     but others where not expected:
-                        [$obj3, $obj4]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1, $obj2]
+                 but others where not expected:
+                    [$obj3, $obj4]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1186)
+            .HasFileLineNumber(1466)
             .HasMessage("""
-                    Expecting contains exactly elements:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do contains (in same order)
-                        [$obj1, $obj5]
-                     but others where not expected:
-                        [$obj2, $obj3, $obj4]
-                     and some elements not found:
-                        [$obj5]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting contains exactly elements:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do contains (in same order)
+                    [$obj1, $obj5]
+                 but others where not expected:
+                    [$obj2, $obj3, $obj4]
+                 and some elements not found:
+                    [$obj5]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase(0, TestName = "Array<string>")]
@@ -1211,10 +1491,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).NotContains(obj5);
@@ -1222,26 +1502,26 @@ public partial class EnumerableAssertTest
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1223)
+            .HasFileLineNumber(1503)
             .HasMessage("""
-                    Expecting:
-                        ["a", "b", "c", "a"]
-                     do NOT contains (in any order)
-                        ["a"]
-                     but found elements:
-                        ["a", "a"]
-                    """);
+                        Expecting:
+                            ["a", "b", "c", "a"]
+                         do NOT contains (in any order)
+                            ["a"]
+                         but found elements:
+                            ["a", "a"]
+                        """);
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1234)
+            .HasFileLineNumber(1514)
             .HasMessage("""
-                    Expecting:
-                        ["a", "b", "c", "a"]
-                     do NOT contains (in any order)
-                        ["a", "b", "X"]
-                     but found elements:
-                        ["a", "b", "a"]
-                    """);
+                        Expecting:
+                            ["a", "b", "c", "a"]
+                         do NOT contains (in any order)
+                            ["a", "b", "X"]
+                         but found elements:
+                            ["a", "b", "a"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -1252,46 +1532,46 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).NotContains(obj5);
         AssertArray(current).NotContains(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1263)
+            .HasFileLineNumber(1543)
             .HasMessage("""
-                    Expecting:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do NOT contains (in any order)
-                        [$obj1]
-                     but found elements:
-                        [$obj1]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do NOT contains (in any order)
+                    [$obj1]
+                 but found elements:
+                    [$obj1]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1279)
+            .HasFileLineNumber(1559)
             .HasMessage("""
-                    Expecting:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do NOT contains (in any order)
-                        [$obj1, $obj2, $obj5]
-                     but found elements:
-                        [$obj1, $obj2]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do NOT contains (in any order)
+                    [$obj1, $obj2, $obj5]
+                 but found elements:
+                    [$obj1, $obj2]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
     [TestCase(0, TestName = "Array<string>")]
@@ -1302,10 +1582,10 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).NotContainsSame(obj5);
@@ -1313,26 +1593,26 @@ public partial class EnumerableAssertTest
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1314)
+            .HasFileLineNumber(1594)
             .HasMessage("""
-                    Expecting:
-                        ["a", "b", "c", "a"]
-                     do NOT contains (in any order)
-                        ["a"]
-                     but found elements:
-                        ["a", "a"]
-                    """);
+                        Expecting:
+                            ["a", "b", "c", "a"]
+                         do NOT contains (in any order)
+                            ["a"]
+                         but found elements:
+                            ["a", "a"]
+                        """);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1325)
+            .HasFileLineNumber(1605)
             .HasMessage("""
-                    Expecting:
-                        ["a", "b", "c", "a"]
-                     do NOT contains (in any order)
-                        ["a", "b", "X"]
-                     but found elements:
-                        ["a", "b", "a"]
-                    """);
+                        Expecting:
+                            ["a", "b", "c", "a"]
+                         do NOT contains (in any order)
+                            ["a", "b", "X"]
+                         but found elements:
+                            ["a", "b", "a"]
+                        """);
     }
 
     [TestCase(0, TestName = "Array<object>")]
@@ -1343,91 +1623,72 @@ public partial class EnumerableAssertTest
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
         dynamic current = testData![0];
-        dynamic obj1 = current[0];
-        dynamic obj2 = current[1];
-        dynamic obj3 = current[2];
-        dynamic obj4 = current[3];
+        var obj1 = current[0];
+        var obj2 = current[1];
+        var obj3 = current[2];
+        var obj4 = current[3];
         dynamic obj5 = testData![2];
 
         AssertArray(current).NotContainsSame(obj5);
         AssertArray(current).NotContainsSame(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1354)
+            .HasFileLineNumber(1634)
             .HasMessage("""
-                    Expecting:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do NOT contains (in any order)
-                        [$obj1]
-                     but found elements:
-                        [$obj1]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do NOT contains (in any order)
+                    [$obj1]
+                 but found elements:
+                    [$obj1]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1370)
+            .HasFileLineNumber(1650)
             .HasMessage("""
-                    Expecting:
-                        [$obj1, $obj2, $obj3, $obj4]
-                     do NOT contains (in any order)
-                        [$obj1, $obj2, $obj5]
-                     but found elements:
-                        [$obj1, $obj2]
-                    """
-                        .Replace("$obj1", AssertFailures.AsObjectId(obj1))
-                        .Replace("$obj2", AssertFailures.AsObjectId(obj2))
-                        .Replace("$obj3", AssertFailures.AsObjectId(obj3))
-                        .Replace("$obj4", AssertFailures.AsObjectId(obj4))
-                        .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
+                Expecting:
+                    [$obj1, $obj2, $obj3, $obj4]
+                 do NOT contains (in any order)
+                    [$obj1, $obj2, $obj5]
+                 but found elements:
+                    [$obj1, $obj2]
+                """
+                .Replace("$obj1", AssertFailures.AsObjectId(obj1))
+                .Replace("$obj2", AssertFailures.AsObjectId(obj2))
+                .Replace("$obj3", AssertFailures.AsObjectId(obj3))
+                .Replace("$obj4", AssertFailures.AsObjectId(obj4))
+                .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
-    public static readonly object[] TestDataPointEmptyArrays = new object[]{
-        Array.Empty<object>(),
-        new List<object>(),
-        new Godot.Collections.Array(),
-        new Godot.Collections.Array<RefCounted>()
-    };
+    private sealed partial class TestObj : RefCounted
+    {
+        private readonly object? value;
+        private readonly object? x;
+        private string name;
 
-    public static readonly object[] TestDataPointStringValues = new object[]{
-        new object[]{
-            new string[] { "a", "b", "c", "a" },
-            new string[] { "a", "b", "c", "a" },
-            "X" },
-        new object[]{
-            new List<string>() { "a", "b", "c", "a" },
-            new List<string> { "a", "b", "c", "a" },
-            "X" },
-        new object[]{
-            new Godot.Collections.Array() { "a", "b", "c", "a" },
-            new Godot.Collections.Array { "a", "b", "c", "a" },
-            "X" },
-        new object[]{
-            new Godot.Collections.Array<string>() { "a", "b", "c", "a" },
-            new Godot.Collections.Array<string> { "a", "b", "c", "a" },
-            "X" },
-    };
+        public TestObj(string name, object? value, object? x = null)
+        {
+            this.name = name;
+            this.value = value;
+            this.x = x;
+        }
 
-    public static readonly object[] TestDataPointObjectValues = new object[]{
-        new object[]{
-            new object[] { new(), new(), new(), new() },
-            new object[] { new(), new(), new(), new() },
-            new() },
-        new object[]{
-            new List<object>() { new(), new(), new(), new() },
-            new List<object>() { new(), new(), new(), new() },
-            new() },
-        new object[]{
-            new Godot.Collections.Array() { new RefCounted(), new RefCounted(), new RefCounted(), new RefCounted() },
-            new Godot.Collections.Array() { new RefCounted(), new RefCounted(), new RefCounted(), new RefCounted() },
-            new RefCounted() },
-        new object[]{
-            new Godot.Collections.Array<GodotObject>() { new RefCounted(), new RefCounted(), new RefCounted(), new RefCounted() },
-            new Godot.Collections.Array<GodotObject>() { new RefCounted(), new RefCounted(), new RefCounted(), new RefCounted() },
-            new RefCounted() }
-    };
+        public string GetName() => name;
+        public object? GetValue() => value;
+        public object? GetX() => x;
+        public string GetX1() => "x1";
+        public string GetX2() => "x2";
+        public string GetX3() => "x3";
+        public string GetX4() => "x4";
+        public string GetX5() => "x5";
+        public string GetX6() => "x6";
+        public string GetX7() => "x7";
+        public string GetX8() => "x8";
+        public string GetX9() => "x9";
+    }
 }

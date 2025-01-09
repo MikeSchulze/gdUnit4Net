@@ -17,29 +17,102 @@ concurrency:
 
 
 jobs:
+
+  analyzer-test:
+    name: "🐧 Analyzer Tests"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "Build"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./analyzers/gdUnit4Analyzers.csproj
+          dotnet build ./analyzers.test/gdUnit4Analyzers.Tests.csproj
+
+      - name: "Run Unit Tests"
+        if: ${{ !cancelled() }}
+        run: |
+          cd analyzers.test
+          dotnet test gdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity normal
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 10
+          name: artifact_analyzer
+          path: |
+            ./analyzers.test/TestResults/test-result.trx
+            ./analyzers.test/TestResults/test-result.html
+
+
+  test-adapter-test:
+    name: "🐧 TestAdapter Tests"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "Build"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet build ./example/exampleProject.csproj
+          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
+          dotnet build ./testadapter.test/gdUnit4TestAdapter.Tests.csproj
+
+      - name: "Run Unit Tests"
+        if: ${{ !cancelled() }}
+        run: |
+          cd testadapter.test
+          dotnet test gdUnit4TestAdapter.Tests.csproj --settings .runsettings --no-build --verbosity normal
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 10
+          name: artifact_adapter_tests
+          path: |
+            ./testadapter.test/TestResults/test-result.trx
+            ./testadapter.test/TestResults/test-result.html
+
+
   unit-tests:
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
-        godot-version: ['4.2', '4.2.1', '4.2.2']
+        godot-version: ['4.2', '4.2.1', '4.2.2', '4.3']
         godot-status: ['stable']
         include:
-          - godot-version: '4.3'
-            godot-status: 'beta2'
+          - godot-version: '4.4'
+            godot-status: 'dev3'
 
 
-    name: "CI on Godot 🐧 v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    name: "🐧 Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
       godot-status: ${{ matrix.godot-status }}
 
+
   finalize:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [unit-tests]
+    needs: [analyzer-test, test-adapter-test, unit-tests]
     steps:
       - run: exit 1
         if: >-

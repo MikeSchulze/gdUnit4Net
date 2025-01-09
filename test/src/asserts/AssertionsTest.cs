@@ -1,25 +1,31 @@
-
 namespace GdUnit4.Tests.Asserts;
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
+
+using GdUnit4.Asserts;
+using GdUnit4.Core.Execution;
+using GdUnit4.Core.Extensions;
+
+using Godot;
+using Godot.Collections;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Godot;
-
-using GdUnit4.Asserts;
-using GdUnit4.Executions;
 using static Assertions;
+
+using Array = System.Array;
 
 [TestSuite]
 public class AssertionsTest
 {
-
     [TestCase]
     public void DoAssertNotYetImplemented()
         => AssertThrown(() => AssertNotYetImplemented())
-            .HasFileLineNumber(21)
+            .HasFileLineNumber(27)
             .HasMessage("Test not yet implemented!");
 
     [TestCase]
@@ -44,8 +50,8 @@ public class AssertionsTest
         AssertObject(AssertThat((uint)1)).IsInstanceOf<INumberAssert<uint>>();
         AssertObject(AssertThat((long)-1)).IsInstanceOf<INumberAssert<long>>();
         AssertObject(AssertThat((ulong)1)).IsInstanceOf<INumberAssert<ulong>>();
-        AssertObject(AssertThat((float)1.1f)).IsInstanceOf<INumberAssert<float>>();
-        AssertObject(AssertThat((double)1.1d)).IsInstanceOf<INumberAssert<double>>();
+        AssertObject(AssertThat(1.1f)).IsInstanceOf<INumberAssert<float>>();
+        AssertObject(AssertThat(1.1d)).IsInstanceOf<INumberAssert<double>>();
         AssertObject(AssertThat(1.1m)).IsInstanceOf<INumberAssert<decimal>>();
 
         AssertObject(AssertThat(sbyte.MaxValue)).IsInstanceOf<INumberAssert<sbyte>>();
@@ -80,21 +86,21 @@ public class AssertionsTest
     public void AssertThatEnumerable()
     {
         AssertObject(AssertThat(Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
-        AssertObject(AssertThat(new System.Collections.ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
-        AssertObject(AssertThat(new System.Collections.BitArray(new bool[] { true, false }))).IsInstanceOf<IEnumerableAssert<bool>>();
-        AssertObject(AssertThat(new System.Collections.Generic.HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
-        AssertObject(AssertThat(new System.Collections.Generic.List<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(new ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
+        AssertObject(AssertThat(new BitArray(new[] { true, false }))).IsInstanceOf<IEnumerableAssert<bool>>();
+        AssertObject(AssertThat(new HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(new List<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert<Variant>>();
-        AssertObject(AssertThat(new Godot.Collections.Array<int>())).IsInstanceOf<IEnumerableAssert<int>>();
+        AssertObject(AssertThat(new Array<int>())).IsInstanceOf<IEnumerableAssert<int>>();
     }
 
     [TestCase]
     public void AssertThatDictionary()
     {
-        AssertObject(AssertThat(new Godot.Collections.Dictionary())).IsInstanceOf<IDictionaryAssert<Variant, Variant>>();
+        AssertObject(AssertThat(new Dictionary())).IsInstanceOf<IDictionaryAssert<Variant, Variant>>();
         AssertObject(AssertThat(new Godot.Collections.Dictionary<string, Variant>())).IsInstanceOf<IDictionaryAssert<string, Variant>>();
         AssertObject(AssertThat(new Godot.Collections.Dictionary<string, string>())).IsInstanceOf<IDictionaryAssert<string, string>>();
-        AssertObject(AssertThat(new System.Collections.Hashtable())).IsInstanceOf<IDictionaryAssert<object, object>>();
+        AssertObject(AssertThat(new Hashtable())).IsInstanceOf<IDictionaryAssert<object, object>>();
         AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert<string, object>>();
     }
 
@@ -111,7 +117,7 @@ public class AssertionsTest
         var obj1 = new object();
         var obj2 = new object();
 
-        AssertThat(AssertFailures.AsObjectId(null)).IsEqual($"<Null>");
+        AssertThat(AssertFailures.AsObjectId(null)).IsEqual("<Null>");
         AssertThat(AssertFailures.AsObjectId(obj1)).IsEqual($"<System.Object> (objId: {obj1.GetHashCode()})");
         AssertThat(AssertFailures.AsObjectId(obj1)).IsNotEqual(AssertFailures.AsObjectId(obj2));
 
@@ -126,7 +132,7 @@ public class AssertionsTest
         AssertThat(AssertFailures.AsObjectId(obj5.ToVariant())).IsEqual($"<Godot.RefCounted> (objId: {obj5.GetInstanceId()})");
 
         object? obj6 = null;
-        AssertThat(AssertFailures.AsObjectId(obj6.ToVariant())).IsEqual($"<Godot.Variant> (Null)");
+        AssertThat(AssertFailures.AsObjectId(obj6.ToVariant())).IsEqual("<Godot.Variant> (Null)");
 
         // without overrides ToString
         var obj7 = new ClassWithoutToString("Custom");
@@ -137,7 +143,7 @@ public class AssertionsTest
     }
 
     [TestCase]
-    public void UsingMSTestAssertions()
+    public void UsingMsTestAssertions()
     {
         var currentCulture = CultureInfo.DefaultThreadCurrentCulture;
         var currentUICulture = CultureInfo.DefaultThreadCurrentUICulture;
@@ -160,6 +166,34 @@ public class AssertionsTest
         }
     }
 
+    [TestCase]
+    public async Task TestCatchStdOutFromTestRun()
+    {
+        Console.WriteLine("Console.WriteLine: first message");
+        GD.PrintS("Godot:PrintS: first message");
+
+
+        Console.Write("Console.Write: message");
+        Console.WriteLine("Console.Write: message");
+
+        // do print to stdout by Godot's native functions
+        GD.Print("Godot:Print: message");
+        GD.PrintS("Godot:PrintS: message");
+        GD.PrintT("Godot:PrintT: message");
+        GD.PrintRaw("Godot:PrintRaw: message");
+        GD.PrintRich("Godot:PrintRich: message");
+
+        // std error will not be caught
+        GD.PrintErr("Godot:PrintErr: message");
+
+        // do just a godot sync
+        await ISceneRunner.SyncProcessFrame;
+        Console.WriteLine("Console.WriteLine: This is a test message 1");
+        Console.WriteLine("Console.WriteLine: last message");
+        GD.PrintS("Godot:PrintS last message");
+    }
+
+
     private static IStringAssert AssertTrimmedExceptionStackTrace(IExceptionAssert? exceptionAssert)
     {
         var stackTrace = (exceptionAssert as ExceptionAssert<Exception>)?.GetExceptionStackTrace()!;
@@ -169,10 +203,10 @@ public class AssertionsTest
 
     private class ClassWithoutToString
     {
-        public string Value { get; }
-
         public ClassWithoutToString(string value)
             => Value = value;
+
+        protected string Value { get; }
     }
 
     private sealed class ClassWithToString : ClassWithoutToString
@@ -180,6 +214,7 @@ public class AssertionsTest
         public ClassWithToString(string value) : base(value)
         {
         }
+
         public override string ToString() => $"{Value}";
     }
 }

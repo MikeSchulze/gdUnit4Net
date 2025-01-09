@@ -52,5 +52,9 @@
         <!-- Controls the Display name attribute of the TestCase. Allowed values are SimpleName and FullyQualifiedName.
              This likely determines how the test names are displayed in the test results.-->
         <DisplayName>FullyQualifiedName</DisplayName>
+
+        <!-- When set to true, standard output (stdout) from test cases is captured
+             and included in the test result. This can be useful for debugging. -->
+        <CaptureStdOut>true</CaptureStdOut>
     </GdUnit4>
 </RunSettings>

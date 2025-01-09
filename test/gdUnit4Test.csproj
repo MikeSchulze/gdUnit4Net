@@ -1,5 +1,5 @@
 <Project Sdk="Godot.NET.Sdk">
-  <Import Project="../PackageVersions.props" />
+  <Import Project="../PackageVersions.props"/>
   <PropertyGroup>
     <Version>4.2.0</Version>
     <Copyright>© 2024 Mike Schulze</Copyright>
@@ -20,13 +20,21 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
     <NoWarn>NU1605</NoWarn>
+
+    <!-- Prevent MSTest adapter from being discovered -->
+    <VSTestTestAdapterPath>none</VSTestTestAdapterPath>
+    <TestFramework>GdUnit4</TestFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
     <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions-->
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
-    <ProjectReference Include="..\api\gdUnit4Api.csproj" />
-    <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
+    <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
+    <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj"/>
+    <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

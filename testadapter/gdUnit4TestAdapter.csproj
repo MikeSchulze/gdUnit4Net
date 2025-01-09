@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../PackageVersions.props" />
+  <Import Project="../PackageVersions.props"/>
 
   <PropertyGroup>
     <Title>gdUnit4 TestAdapter</Title>
@@ -41,24 +41,25 @@
     <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
-      <!-- ingnore dependency warnings to pre release version of gdunit.api -->
+    <!-- ingnore dependency warnings to pre release version of gdunit.api -->
     <NoWarn>NU5104</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)" />
-    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="None" />
-    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None" />
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
+    <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
     <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
 
-    <None Include="README.md" Pack="true" PackagePath="/" />
-    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/" />
-    <None Include="LICENSE" Pack="true" PackagePath="/" />
-    <None Include="icon.png" Pack="true" PackagePath="/" />
+    <None Include="README.md" Pack="true" PackagePath="/"/>
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
+    <None Include="../LICENSE" Pack="true" PackagePath="/"/>
+    <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
+    <None Include="../icon.png" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
 </Project>

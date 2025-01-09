@@ -1,5 +1,7 @@
 namespace GdUnit4.Tests.Extensions;
 
+using GdUnit4.Core.Extensions;
+
 using Godot;
 
 using static Assertions;
@@ -7,7 +9,6 @@ using static Assertions;
 [TestSuite]
 public class GodotVariantExtensionsTest
 {
-
     [TestCase(null, Variant.Type.Nil)]
     [TestCase('A', Variant.Type.Int)]
     [TestCase(sbyte.MaxValue, Variant.Type.Int)]
@@ -23,7 +24,6 @@ public class GodotVariantExtensionsTest
     [TestCase("HalloWorld", Variant.Type.String)]
     [TestCase(true, Variant.Type.Bool)]
     //[TestCase(Decimal.MaxValue, Variant.Type.Float)]
-
     public void ToVariant(dynamic? value, Variant.Type type)
     {
         object? val = value;
