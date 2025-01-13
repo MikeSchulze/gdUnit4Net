@@ -1,15 +1,17 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
-public class DiagnosticsDocumentationTest
+public partial class DiagnosticRulesDocumentationTest
 {
     private static readonly string ProjectRoot = Directory.GetCurrentDirectory()
         .Split(Path.DirectorySeparatorChar)
@@ -18,12 +20,45 @@ public class DiagnosticsDocumentationTest
         .Aggregate(Path.Combine);
 
     [TestMethod]
-    [DynamicData(nameof(GetDiagnosticDescriptors), DynamicDataSourceType.Method, DynamicDataDisplayName = "GetCustomDynamicDataDisplayName")]
-    public void CheckDataPointAttributeDocumentation(DiagnosticDescriptor descriptor, string name)
+    public void VerifyIndexDocumentation()
     {
-        var docLink = descriptor.HelpLinkUri.Replace("https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
-        var docPath = Path.Combine(Path.DirectorySeparatorChar.ToString(), ProjectRoot, docLink);
+        var indexPath = Path.Combine(ProjectRoot, "documentation", "index.md");
+        Assert.IsTrue(File.Exists(indexPath), $"Index file not found: {indexPath}");
 
+        var indexContent = File.ReadAllText(indexPath);
+        var lines = indexContent.Split('\n').Select(l => l.Trim()).ToList();
+
+
+        // Get all diagnostic descriptors
+        var diagnostics = GetAllDiagnosticDescriptors().ToList();
+
+        // Skip to table content (after header row and separator)
+        var tableStart = lines.FindIndex(l => l.StartsWith("| Id ")) + 2;
+        Assert.IsTrue(tableStart > 1, "Index file does not contain the expected table format");
+
+        var records = ParseMarkdownTable(lines.GetRange(tableStart, lines.Count - tableStart));
+
+
+        foreach (var (descriptor, _) in diagnostics)
+        {
+            var ruleId = $"[{descriptor.Id}]({descriptor.Id}.md)";
+            var recordIndex = records.Find(record => record.Id.Equals(ruleId, StringComparison.Ordinal));
+            Assert.IsNotNull(recordIndex, $"Missing table entry for rule {descriptor.Id}.");
+            var expected = new DiagnosticRuleTableRecord
+            {
+                Id = ruleId,
+                Title = descriptor.Title.ToString(),
+                Severity = descriptor.DefaultSeverity.ToString()
+            };
+            Assert.AreEqual(expected, recordIndex, $"Diagnostic rule record was not found in '{indexPath}'.");
+            // verify the documentation rule file exists
+            CheckDocumentationFile(descriptor);
+        }
+    }
+
+    private static void CheckDocumentationFile(DiagnosticDescriptor descriptor)
+    {
+        var docPath = Path.Combine(ProjectRoot, "documentation", $"{descriptor.Id}.md");
         Assert.IsTrue(File.Exists(docPath), $"Documentation file not found: {docPath}\nExpected documentation for rule {descriptor.Id}");
 
         var docContent = File.ReadAllText(docPath);
@@ -33,21 +68,56 @@ public class DiagnosticsDocumentationTest
         var firstLine = lines.FirstOrDefault();
         var expectedHeader = $"# {descriptor.Id}";
 
-        Assert.IsTrue(firstLine == expectedHeader, $"required header '{expectedHeader}' on the first line.");
-        Assert.IsTrue(lines.Length > 2 && string.IsNullOrEmpty(lines[1]), "Expected an empty line after the header.");
-        StringAssert.Contains(docContent, "# Problem Description", "Documentation should contain ` Problem Description` section");
-        StringAssert.Contains(docContent, $"## {descriptor.Title.ToString()}", "Documentation should contain the diagnostic title");
-        StringAssert.Contains(docContent, descriptor.Description.ToString(), "Documentation should contain the diagnostic description");
+        Assert.IsTrue(firstLine == expectedHeader, $"required header '{expectedHeader}' on the first line in {docPath}.");
+        Assert.IsTrue(lines.Length > 2 && string.IsNullOrEmpty(lines[1]), $"Expected an empty line after the header in {docPath}.");
+        StringAssert.Contains(docContent, "# Problem Description", $"Documentation should contain ` Problem Description` section in {docPath}");
+        StringAssert.Contains(docContent, $"## {descriptor.Title.ToString()}", $"Documentation should contain the diagnostic title in {docPath}");
+        StringAssert.Contains(docContent, descriptor.Description.ToString(), $"Documentation should contain the diagnostic description in {docPath}");
     }
 
-    // ReSharper disable once UnusedMember.Global
-    public static string GetCustomDynamicDataDisplayName(MethodInfo methodInfo, object[] data) => $"Attribute-{data[1]}";
-
-    private static IEnumerable<object[]> GetDiagnosticDescriptors()
+    private static IEnumerable<(DiagnosticDescriptor descriptor, string name)> GetAllDiagnosticDescriptors()
     {
-        var type = typeof(DiagnosticRules.DataPoint);
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            if (field.FieldType == typeof(DiagnosticDescriptor) && field.IsInitOnly) // IsInitOnly checks if it's readonly
-                yield return new[] { field.GetValue(null)!, field.Name.Replace("Attribute", "") }; // Wrap in an object array as required by DynamicData
+        // Get DataPoint diagnostics
+        var dataPointType = typeof(DiagnosticRules.DataPoint);
+        foreach (var field in dataPointType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            if (field.FieldType == typeof(DiagnosticDescriptor) && field.IsInitOnly)
+                yield return ((DiagnosticDescriptor)field.GetValue(null)!, field.Name.Replace("Attribute", ""));
+
+        // Get GodotEngine diagnostics
+        var godotEngineType = typeof(DiagnosticRules.GodotEngine);
+        foreach (var field in godotEngineType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            if (field.FieldType == typeof(DiagnosticDescriptor) && field.IsInitOnly)
+                yield return ((DiagnosticDescriptor)field.GetValue(null)!, field.Name);
+    }
+
+    private static List<DiagnosticRuleTableRecord> ParseMarkdownTable(List<string> lines)
+    {
+        var tableRows = new List<DiagnosticRuleTableRecord>();
+        var rowRegex = IndexTableRowRegex();
+
+        foreach (var line in lines)
+        {
+            var match = rowRegex.Match(line);
+            if (match.Success)
+                tableRows.Add(new DiagnosticRuleTableRecord
+                {
+                    Id = match.Groups[1].Value.Trim(),
+                    Severity = match.Groups[2].Value.Trim(),
+                    Title = match.Groups[3].Value.Trim()
+                });
+        }
+
+        return tableRows;
+    }
+
+    [GeneratedRegex(@"\|\s*([^\|]+)\s*\|\s*([^\|]+)\s*\|\s*([^\|]+)\s*\|")]
+    private static partial Regex IndexTableRowRegex();
+
+    private sealed record DiagnosticRuleTableRecord
+    {
+        public required string Id { get; init; }
+        public required string Severity { get; init; }
+        public required string Title { get; init; }
+        public override string ToString() => $"| {Id} | {Severity} | {Title} |";
     }
 }

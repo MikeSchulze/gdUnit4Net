@@ -15,12 +15,12 @@ size_flags_vertical = 3
 script = ExtResource("1")
 
 [node name="left" parent="." instance=ExtResource("2_u5ccv")]
+auto_translate_mode = 2
 layout_mode = 0
 offset_left = 250.0
 offset_top = 240.0
 offset_right = 355.0
 offset_bottom = 345.0
-auto_translate = false
 localize_numeral_system = false
 metadata/_edit_use_anchors_ = true
 

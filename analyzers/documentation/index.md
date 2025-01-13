@@ -3,7 +3,8 @@
 | Id                          | Severity | Title                                                   |
 |-----------------------------|----------|---------------------------------------------------------|
 | [GdUnit0201](GdUnit0201.md) | Error    | Multiple TestCase attributes not allowed with DataPoint |
-| [GdUnit0501](GdUnit0501.md) | Error    | Godot Engine Required for Test                          |
+| [GdUnit0500](GdUnit0500.md) | Error    | Godot Runtime Required for Test Class                   |
+| [GdUnit0501](GdUnit0501.md) | Error    | Godot Runtime Required for Test Method                  |
 
 # Category Overview
 

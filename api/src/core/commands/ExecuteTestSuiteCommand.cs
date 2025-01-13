@@ -12,6 +12,8 @@ using Events;
 
 using Execution;
 
+using Extensions;
+
 using Newtonsoft.Json;
 
 public class ExecuteTestSuiteCommand : BaseCommand
@@ -45,9 +47,15 @@ public class ExecuteTestSuiteCommand : BaseCommand
                 if (!IsReportOrphanNodesEnabled)
                     Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
 
-                using ExecutionContext context = new(testSuite, new[] { testEventListener }, IsReportOrphanNodesEnabled);
-                context.IsEngineMode = Suite.Tests.First().RequireRunningGodotEngine;
+                var isEngineMode = Suite.Tests.First().RequireRunningGodotEngine;
+                using ExecutionContext context = new(
+                    testSuite,
+                    new[] { testEventListener },
+                    IsReportOrphanNodesEnabled,
+                    isEngineMode);
                 context.IsCaptureStdOut = IsCaptureStdOut;
+                if (context.IsEngineMode)
+                    await GodotObjectExtensions.SyncProcessFrame;
                 await new TestSuiteExecutionStage(testSuite).Execute(context);
             }
             // handle unexpected exceptions

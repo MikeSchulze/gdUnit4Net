@@ -60,7 +60,7 @@ internal sealed class TestEventReportListener : ITestEventListener
 
                 Framework.RecordStart(testCase);
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} Processing...");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} Processing...");
                 break;
             }
 
@@ -87,7 +87,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                 e.Reports.ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}\n");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}");
                 Framework.RecordResult(testResult);
                 Framework.RecordEnd(testCase, testResult.Outcome);
                 CompletedTests += 1;

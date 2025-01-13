@@ -32,6 +32,7 @@ internal sealed class ExecutionContext : IDisposable
         SubExecutionContexts = new List<ExecutionContext>();
         Disposables = new List<IDisposable>();
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
+        IsEngineMode = isEngineMode;
     }
 
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
@@ -232,12 +233,12 @@ internal sealed class ExecutionContext : IDisposable
 
     public void FireBeforeTestEvent() =>
         FireTestEvent(TestEvent
-            .BeforeTest(CurrentTestCase!.Id)
+            .BeforeTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public void FireAfterTestEvent() =>
         FireTestEvent(TestEvent
-            .AfterTest(CurrentTestCase!.Id, BuildStatistics(OrphanCount(true)), CollectReports)
+            .AfterTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public static void RegisterDisposable(IDisposable disposable) =>

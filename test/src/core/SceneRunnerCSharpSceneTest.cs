@@ -14,6 +14,7 @@ using Godot;
 
 using static Assertions;
 
+[RequireGodotRuntime]
 [TestSuite]
 public sealed class SceneRunnerCSharpSceneTest
 {

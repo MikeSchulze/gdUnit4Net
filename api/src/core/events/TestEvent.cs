@@ -24,10 +24,13 @@ internal class TestEvent : IEquatable<TestEvent>
         Reports = reports?.ToList() ?? new List<TestReport>();
     }
 
-    private TestEvent(TYPE type, Guid id)
+    private TestEvent(TYPE type, Guid id, string resourcePath, string suiteName, string testName)
     {
         Type = type;
         Id = id;
+        ResourcePath = resourcePath;
+        SuiteName = suiteName;
+        TestName = testName;
         Statistics = new Dictionary<STATISTIC_KEY, object>();
         Statistics[STATISTIC_KEY.TOTAL_COUNT] = 0;
         Reports = new List<TestReport>();
@@ -74,33 +77,35 @@ internal class TestEvent : IEquatable<TestEvent>
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<TestReport> reports) =>
         new(TYPE.TESTSUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
 
-    public static TestEvent BeforeTest(Guid id) =>
-        new(TYPE.TESTCASE_BEFORE, id);
+    public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
+        new(TYPE.TESTCASE_BEFORE, id, resourcePath, suiteName, testName);
 
-    public static TestEvent AfterTest(Guid id, IDictionary<STATISTIC_KEY, object>? statistics = null, List<TestReport>? reports = null) =>
-        new(TYPE.TESTCASE_AFTER, id)
+    public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
+        List<TestReport>? reports = null) =>
+        new(TYPE.TESTCASE_AFTER, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
             Reports = reports ?? new List<TestReport>()
         };
 
-
-    public static TestEvent SetupTest(Guid id) =>
-        new(TYPE.TESTCASE_BEFORE, id);
-
-    public static TestEvent TearDownTest(Guid id, IDictionary<STATISTIC_KEY, object> statistics, List<TestReport> reports) =>
-        new(TYPE.TESTCASE_AFTER, id)
-        {
-            Statistics = statistics,
-            Reports = reports
-        };
-
-
     public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
+
+
+    internal TestEvent WithStatistic(STATISTIC_KEY key, object value)
+    {
+        Statistics[key] = value;
+        return this;
+    }
 
     internal TestEvent WithFullyQualifiedName(string name)
     {
         FullyQualifiedName = name;
+        return this;
+    }
+
+    internal TestEvent WithReport(TestReport report)
+    {
+        Reports.Add(report);
         return this;
     }
 
@@ -128,9 +133,9 @@ internal class TestEvent : IEquatable<TestEvent>
 #pragma warning restore CA1854
     public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
 
-    public static bool operator ==(TestEvent lhs, TestEvent rhs) => lhs.Equals(rhs);
+    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs.Equals(rhs);
 
-    public static bool operator !=(TestEvent lhs, TestEvent rhs) => !(lhs == rhs);
+    public static bool operator !=(TestEvent? lhs, TestEvent? rhs) => !(lhs == rhs);
 
     public override int GetHashCode() =>
         // ReSharper disable all NonReadonlyMemberInGetHashCode

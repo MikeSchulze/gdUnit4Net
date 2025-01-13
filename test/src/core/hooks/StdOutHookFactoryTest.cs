@@ -12,6 +12,7 @@ using static Assertions;
 
 using Environment = System.Environment;
 
+[RequireGodotRuntime]
 [TestSuite]
 public class StdOutHookFactoryTest
 {
@@ -62,7 +63,7 @@ public class StdOutHookFactoryTest
                      $"Console: Short before 'StopCapture'{Environment.NewLine}");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task CaptureStdOutGodot()
     {
         var stdOutHook = StdOutHookFactory.CreateStdOutHook();
@@ -89,7 +90,7 @@ public class StdOutHookFactoryTest
                      $"Godot: Short before 'StopCapture'{Environment.NewLine}");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task CaptureStdOutConsoleAndGodot()
     {
         var stdOutHook = StdOutHookFactory.CreateStdOutHook();

@@ -12,6 +12,7 @@ using Godot;
 
 using static Assertions;
 
+[RequireGodotRuntime]
 [TestSuite]
 public class SceneRunnerGDScriptSceneTest
 {
@@ -42,7 +43,7 @@ public class SceneRunnerGDScriptSceneTest
             .IsInstanceOf<FileNotFoundException>()
             .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'res://src/core/resources/scenes/NotExistingScene.tscn'. The resource does not exists.");
 
-    [GodotTestCase]
+    [TestCase]
     public void GetProperty()
     {
         AssertObject(sceneRunner.GetProperty("_box1")).IsInstanceOf<ColorRect>().IsNotNull();
@@ -54,7 +55,7 @@ public class SceneRunnerGDScriptSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void SetProperty()
     {
         sceneRunner.SetProperty("_initial_color", Colors.Red);
@@ -64,7 +65,7 @@ public class SceneRunnerGDScriptSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void InvokeSceneMethod()
     {
         AssertString(sceneRunner.Invoke("add", 10, 12).ToString()).IsEqual("22");
@@ -84,7 +85,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertInt((int)stopwatch.ElapsedMilliseconds).IsBetween(900, 1100);
     }
 
-    [GodotTestCase(Timeout = 2000)]
+    [TestCase(Timeout = 2000)]
     public async Task SimulateFrames()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("_box1")!;
@@ -105,7 +106,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertObject(box1.Color).IsNotEqual(Colors.White);
     }
 
-    [GodotTestCase(Timeout = 1000)]
+    [TestCase(Timeout = 1000)]
     public async Task SimulateFramesWithDelay()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("_box1")!;
@@ -121,7 +122,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertObject(box1.Color).IsEqual(Colors.Red);
     }
 
-    [GodotTestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
+    [TestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
     public async Task RunSceneColorCycle()
     {
         sceneRunner.MaximizeView();
@@ -148,7 +149,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }
 
-    [GodotTestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
+    [TestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
     public async Task RunSceneSimulateKeyPressed()
     {
         // initial no spell is fired
@@ -171,7 +172,7 @@ public class SceneRunnerGDScriptSceneTest
         AssertObject(sceneRunner.FindChild("Spell")).IsNull();
     }
 
-    [GodotTestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 2000)]
+    [TestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 2000)]
     public async Task RunSceneSimulateMouseEvents()
     {
         sceneRunner.MaximizeView();
@@ -248,7 +249,7 @@ public class SceneRunnerGDScriptSceneTest
             .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task AwaitSignal()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("_box1")!;
@@ -261,7 +262,7 @@ public class SceneRunnerGDScriptSceneTest
         await sceneRunner.AwaitSignal("panel_color_change", box1, new Color(0, 1, 0)); // Green
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task DisposeSceneRunner()
     {
         var sceneRunner_ = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneGDScript.tscn", true);

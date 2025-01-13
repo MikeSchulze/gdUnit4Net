@@ -28,13 +28,11 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeBeforeTest()
     {
-        var testEvent = TestEvent.BeforeTest(Guid.Empty);
+        var testEvent = TestEvent.BeforeTest(Guid.Empty, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsEqual(testEvent);
-        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
-        AssertThat(current!.TestName).IsEqual("TestCaseA");
     }
 
     [TestCase]
@@ -61,17 +59,17 @@ public class TestEventTest
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
-        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
-        AssertThat(current!.TestName).IsEqual("After");
-        AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
-        AssertThat(current!.ErrorCount).IsEqual(2);
-        AssertThat(current!.FailedCount).IsEqual(3);
-        AssertThat(current!.SkippedCount).IsEqual(4);
-        AssertThat(current!.OrphanCount).IsEqual(0);
-        AssertThat(current!.IsFailed).IsEqual(true);
-        AssertThat(current!.IsError).IsEqual(false);
-        AssertThat(current!.IsWarning).IsEqual(false);
-        AssertThat(current!.IsSkipped).IsEqual(true);
+        AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current.TestName).IsEqual("After");
+        AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
+        AssertThat(current.ErrorCount).IsEqual(2);
+        AssertThat(current.FailedCount).IsEqual(3);
+        AssertThat(current.SkippedCount).IsEqual(4);
+        AssertThat(current.OrphanCount).IsEqual(0);
+        AssertThat(current.IsFailed).IsEqual(true);
+        AssertThat(current.IsError).IsEqual(false);
+        AssertThat(current.IsWarning).IsEqual(false);
+        AssertThat(current.IsSkipped).IsEqual(true);
     }
 
     [TestCase]
@@ -92,22 +90,21 @@ public class TestEventTest
 
         List<TestReport> reports = new() { new TestReport(TestReport.ReportType.FAILURE, 42, "test failed") };
 
-        var testEvent = TestEvent.AfterTest(Guid.Empty, statistics, reports);
+        var testEvent = TestEvent.AfterTest(Guid.Empty, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(TestReport.ReportType.FAILURE, 42, "test failed"));
-        AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
-        AssertThat(current!.TestName).IsEqual("TestCaseA");
-        AssertThat(current!.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
-        AssertThat(current!.ErrorCount).IsEqual(2);
-        AssertThat(current!.FailedCount).IsEqual(3);
-        AssertThat(current!.SkippedCount).IsEqual(4);
-        AssertThat(current!.OrphanCount).IsEqual(0);
-        AssertThat(current!.IsFailed).IsEqual(true);
-        AssertThat(current!.IsError).IsEqual(false);
-        AssertThat(current!.IsWarning).IsEqual(false);
-        AssertThat(current!.IsSkipped).IsEqual(true);
+        AssertThat(current.Id).IsEqual(testEvent.Id);
+        AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
+        AssertThat(current.ErrorCount).IsEqual(2);
+        AssertThat(current.FailedCount).IsEqual(3);
+        AssertThat(current.SkippedCount).IsEqual(4);
+        AssertThat(current.OrphanCount).IsEqual(0);
+        AssertThat(current.IsFailed).IsEqual(true);
+        AssertThat(current.IsError).IsEqual(false);
+        AssertThat(current.IsWarning).IsEqual(false);
+        AssertThat(current.IsSkipped).IsEqual(true);
     }
 }

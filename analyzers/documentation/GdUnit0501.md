@@ -1,6 +1,6 @@
 ﻿# GdUnit0501
 
-## Godot Engine Required for Test
+## Godot Runtime Required for Test Method
 
 | Id         | Category        | Severity | Enabled |
 |------------|-----------------|----------|---------|

@@ -31,6 +31,11 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     /// </summary>
     public const string ExecutorUri = "executor://GdUnit4.TestAdapter";
 
+    /// <summary>
+    ///     The default test session timeout is set to 10min (600000ms)
+    /// </summary>
+    private const int DEFAULT_SESSION_TIMEOUT = 600000;
+
     // Test properties supported for filtering
     private readonly Dictionary<string, TestProperty> supportedProperties = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -80,13 +85,15 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             Parameters = settings.Parameters,
             MaxCpuCount = Math.Max(1, runConfiguration.MaxCpuCount),
             SessionTimeout = (int)(runConfiguration.TestSessionTimeout == 0
-                ? 30000
+                ? DEFAULT_SESSION_TIMEOUT
                 : runConfiguration.TestSessionTimeout)
         };
 
-
         testEngine = ITestEngine.GetInstance(engineSettings, Log);
         Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
+        Log.LogInfo(runConfiguration.TestSessionTimeout == 0
+            ? $"No 'TestSessionTimeout' is specified. Set default test session timeout to: {TimeSpan.FromMilliseconds(DEFAULT_SESSION_TIMEOUT)}"
+            : $"Set test session timeout to: {TimeSpan.FromMilliseconds(engineSettings.SessionTimeout)}");
 
         //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         // ReSharper disable once UnusedVariable

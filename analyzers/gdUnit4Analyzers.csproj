@@ -35,6 +35,12 @@
     <NoWarn>RS2007</NoWarn>
   </PropertyGroup>
 
+  <!-- Enable Diagnostic Logs -->
+  <PropertyGroup>
+    <ReportAnalyzer>true</ReportAnalyzer>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+  
   <!-- Packaging -->
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -69,7 +75,7 @@
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md"/>
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md"/>
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     <Content Include="../LICENSE"/>

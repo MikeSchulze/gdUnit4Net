@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using Godot;
 
 [Serializable]
-internal partial class TestFailedException : Exception
+public partial class TestFailedException : Exception
 {
     private static readonly Regex PushErrorFileInfo = PushErrorFileInfoRegex();
 

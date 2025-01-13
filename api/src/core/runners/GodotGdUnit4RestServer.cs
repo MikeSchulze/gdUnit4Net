@@ -33,10 +33,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     public int CompletedTests { get; set; }
 
     public void PublishEvent(TestEvent testEvent)
-    {
-        Console.WriteLine($"GodotGdUnit4RestApi:: Publishing event: {testEvent}");
-        Task.Run(async () => await WriteAsync(testEvent)).Wait();
-    }
+        => Task.Run(async () => await WriteAsync(testEvent)).Wait();
 
     public new async ValueTask DisposeAsync()
     {

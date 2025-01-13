@@ -1,8 +1,9 @@
 ﻿v1.0.0
 This is the Initial release of the analyzers.
 
-GdUnit0201: Ensures correct usage of TestCase attributes with DataPoint
-GdUnit0501: Ensures proper test configuration for Godot engine dependencies
+GdUnit0201: Multiple TestCase attributes not allowed with DataPoint
+GdUnit0500: Godot Runtime Required for Test Class
+GdUnit0501: Godot Runtime Required for Test Method
 
 Features:
 - Compile-time validation of GdUnit4 attribute combinations

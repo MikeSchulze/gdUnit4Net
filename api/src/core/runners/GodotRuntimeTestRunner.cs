@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -27,7 +26,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
     private object ProcessLock { get; } = new();
     private IDebuggerFramework DebuggerFramework { get; }
-    private string? WorkingDirectory { get; set; }
+
 
     private static string GodotBin
     {
@@ -85,7 +84,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = WorkingDirectory
+                    WorkingDirectory = Environment.CurrentDirectory
                 };
 
             if (DebuggerFramework.IsDebugProcess)
@@ -123,38 +122,13 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         process = null;
     }
 
-    private void InitRuntimeEnvironment()
-    {
-        if (WorkingDirectory != null)
-            return;
-        WorkingDirectory = LookupGodotProjectPath(Environment.CurrentDirectory)
-                           ?? throw new InvalidOperationException("Cannot determine the godot.project! The workingDirectory is not set");
-        if (Directory.Exists(WorkingDirectory))
-        {
-            Directory.SetCurrentDirectory(WorkingDirectory);
-            Logger.LogInfo($"Current directory set to: {WorkingDirectory}");
-        }
-
+    private void InitRuntimeEnvironment() =>
         InstallTestRunnerClasses();
-    }
 
-    private string LookupGodotProjectPath(string assemblyPath)
-    {
-        Logger.LogInfo($"Search 'godot.project' at {assemblyPath}");
-        var currentDir = new DirectoryInfo(assemblyPath).Parent;
-        while (currentDir != null)
-        {
-            if (currentDir.EnumerateFiles("project.godot").Any())
-                return currentDir.FullName;
-            currentDir = currentDir.Parent;
-        }
-
-        throw new FileNotFoundException("Godot project file '\"project.godot' does not exist");
-    }
 
     private void InstallTestRunnerClasses()
     {
-        var destinationFolderPath = Path.Combine(WorkingDirectory!, @$"{TEMP_TEST_RUNNER_DIR}");
+        var destinationFolderPath = Path.Combine(Environment.CurrentDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
             Directory.CreateDirectory(destinationFolderPath);
 

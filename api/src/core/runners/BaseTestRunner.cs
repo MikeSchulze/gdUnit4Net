@@ -64,7 +64,7 @@ public class BaseTestRunner : ITestRunner
                 }
                 catch (OperationCanceledException)
                 {
-                    //Logger.LogInfo("Running tests are cancelled.");
+                    Logger.LogInfo("Running tests are cancelled.");
                 }
                 catch (Exception ex)
                 {

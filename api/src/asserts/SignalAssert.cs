@@ -62,7 +62,7 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     private async Task<bool> IsEmittedTask(string signal, params Variant[] args)
     {
-        using var signalCancellationToken = new CancellationTokenSource();
+        var signalCancellationToken = new CancellationTokenSource();
         Thread.SetData(Thread.GetNamedDataSlot("SignalCancellationToken"), signalCancellationToken);
         return await Task.Run(() => GodotSignalCollector.Instance.IsEmitted(signalCancellationToken, Current!, signal, args), signalCancellationToken.Token);
     }

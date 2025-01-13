@@ -24,7 +24,7 @@ using Environment = System.Environment;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
-    private readonly GodotExceptionMonitor? godotExceptionMonitor;
+    private GodotExceptionMonitor? godotExceptionMonitor;
 
     protected ExecutionStage(string name, Type type, bool isEngineMode = false)
     {
@@ -32,8 +32,6 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             .GetMethods()
             .FirstOrDefault(m => m.IsDefined(typeof(T)));
         InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>()!);
-        if (isEngineMode)
-            godotExceptionMonitor = new GodotExceptionMonitor();
     }
 
     protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute)
@@ -57,7 +55,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
     public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
-        if (Method == default)
+        if (Method == null)
         {
             await Task.Run(() => { });
             return;
@@ -73,11 +71,15 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             }
 
-            if (IsMonitoringOnGodotExceptionsEnabled)
-                godotExceptionMonitor?.Start();
+            if (IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
+            {
+                godotExceptionMonitor = new GodotExceptionMonitor();
+                godotExceptionMonitor.Start();
+            }
+
             await ExecuteStage(context);
-            if (IsMonitoringOnGodotExceptionsEnabled)
-                await godotExceptionMonitor?.StopThrow()!;
+            if (IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
+                await godotExceptionMonitor!.StopThrow();
 
             ValidateForExpectedException(context);
         }

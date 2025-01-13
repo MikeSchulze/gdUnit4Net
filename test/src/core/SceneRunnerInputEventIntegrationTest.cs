@@ -12,6 +12,7 @@ using Moq;
 
 using static Assertions;
 
+[RequireGodotRuntime]
 [TestSuite]
 public sealed class SceneRunnerInputEventIntegrationTest
 {

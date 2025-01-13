@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -136,6 +137,10 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         {
             Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
 
+            var projectWorkingDir = LookupProjectPath(testAssemblyNode.AssemblyPath);
+            Directory.SetCurrentDirectory(projectWorkingDir);
+            Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
+
             ExecuteEngineTests(testAssemblyNode.Suites, eventListener, cancellationToken);
 
             Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
@@ -181,5 +186,27 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         }
 
         return (directExecutorTestSuites, godotExecutorTestSuites);
+    }
+
+
+    private string LookupProjectPath(string assemblyPath)
+    {
+        try
+        {
+            Logger.LogInfo($"Search '.csproj' at {assemblyPath}");
+            var currentDir = new DirectoryInfo(assemblyPath).Parent;
+            while (currentDir != null)
+            {
+                if (currentDir.EnumerateFiles("*.csproj").Any())
+                    return currentDir.FullName;
+                currentDir = currentDir.Parent;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Unable to locate .csproj file: {ex.Message}");
+        }
+
+        throw new FileNotFoundException("Project file does not exist");
     }
 }

@@ -53,8 +53,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         if (cancellationToken.IsCancellationRequested)
             return new Response
             {
-                StatusCode = HttpStatusCode.ServiceUnavailable,
-                Payload = "Connection interrupted by user."
+                StatusCode = HttpStatusCode.Gone,
+                Payload = "Connection interrupted by cancellation requested."
             };
 
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
@@ -63,8 +63,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         if (cancellationToken.IsCancellationRequested)
             return new Response
             {
-                StatusCode = HttpStatusCode.ServiceUnavailable,
-                Payload = "Connection interrupted by user."
+                StatusCode = HttpStatusCode.Gone,
+                Payload = "Connection interrupted by cancellation requested."
             };
 
         var json = Encoding.UTF8.GetString(responseBytes);

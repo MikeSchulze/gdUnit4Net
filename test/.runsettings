@@ -5,8 +5,8 @@
         <TestAdaptersPaths>.</TestAdaptersPaths>
         <ResultsDirectory>./TestResults</ResultsDirectory>
         <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-        <!-- set default session timeout to 5m -->
-        <TestSessionTimeout>500000</TestSessionTimeout>
+        <!-- set default session timeout to 30m (1800000ms)-->
+        <TestSessionTimeout>1800000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
         <EnvironmentVariables>
             <GODOT_BIN>D:\development\Godot_v4.4-dev3_mono_win64\Godot_v4.4-dev3_mono_win64.exe</GODOT_BIN>

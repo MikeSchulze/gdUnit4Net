@@ -15,6 +15,8 @@ using Events;
 
 using Newtonsoft.Json;
 
+using Reporting;
+
 internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
 {
     public GodotGdUnit4RestClient(ITestEngineLogger logger)
@@ -32,6 +34,7 @@ internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStr
         // commit command
         await WriteCommand(command);
         // read incoming data until is command response or canceled
+        TestEvent? lastTestEvent = null;
         while (!cancellationToken.IsCancellationRequested)
             try
             {
@@ -39,9 +42,20 @@ internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStr
                 switch (data)
                 {
                     case TestEvent testEvent:
+                        // save last event to be used for test cancellation report
+                        lastTestEvent = testEvent;
                         testEventListener.PublishEvent(testEvent);
                         break;
                     case Response response:
+                        if (response.StatusCode != HttpStatusCode.Gone || lastTestEvent == null)
+                            return response;
+
+                        // if connection gone we report at interrupted to the actual test
+                        var testCanceledEvent = TestEvent
+                            .AfterTest(lastTestEvent.Id, lastTestEvent.ResourcePath, lastTestEvent.SuiteName, lastTestEvent.TestName)
+                            .WithStatistic(TestEvent.STATISTIC_KEY.ERRORS, 1)
+                            .WithReport(new TestReport(TestReport.ReportType.INTERRUPTED, 0, response.Payload));
+                        testEventListener.PublishEvent(testCanceledEvent);
                         return response;
                 }
             }

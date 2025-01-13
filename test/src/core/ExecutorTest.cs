@@ -2,18 +2,25 @@ namespace GdUnit4.Tests.Core;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 using Api;
 
 using GdUnit4.Asserts;
 using GdUnit4.Core;
+using GdUnit4.Core.Commands;
+using GdUnit4.Core.Discovery;
 using GdUnit4.Core.Events;
 using GdUnit4.Core.Execution;
 using GdUnit4.Core.Extensions;
 using GdUnit4.Core.Reporting;
+using GdUnit4.Core.Runners;
 
 using Godot;
+
+using Resources;
 
 using static Assertions;
 
@@ -22,18 +29,19 @@ using static GdUnit4.Core.Reporting.TestReport.ReportType;
 
 using TestCase = GdUnit4.Core.Execution.TestCase;
 
+[RequireGodotRuntime]
 [TestSuite]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
 public class ExecutorTest : ITestEventListener
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
 {
-    private readonly List<TestEvent> events = new();
-
 #pragma warning disable CS0649
     // enable to verbose debug event
     private readonly bool verbose;
 #pragma warning restore CS0649
     private Executor executor = null!;
+    private List<TestEvent> CollectedEvents { get; } = new();
+
 
     public bool IsFailed { get; set; }
     public int CompletedTests { get; set; }
@@ -57,7 +65,7 @@ public class ExecutorTest : ITestEventListener
                 reports.ForEach(r => Console.WriteLine($"Reports -> {r}"));
         }
 
-        events.Add(e);
+        CollectedEvents.Add(e);
     }
 
     [Before]
@@ -75,27 +83,23 @@ public class ExecutorTest : ITestEventListener
     public void TeardownTest()
         => ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, true);
 
-    private static TestSuite LoadTestSuite(string clazzPath)
+    private async Task<List<TestEvent>> ExecuteTestSuite<T>()
     {
-        var testSuite = new TestSuite(clazzPath, null, false)
-        {
-            // we disable default test filtering
-            FilterDisabled = true
-        };
-        return testSuite;
-    }
-
-    private async Task<List<TestEvent>> ExecuteTestSuite(TestSuite testSuite)
-    {
-        var testSuiteName = testSuite.Name;
-        events.Clear();
+        var type = typeof(T);
+        var testSuiteName = type.Name;
+        CollectedEvents.Clear();
 
         if (verbose)
             Console.WriteLine($"Execute {testSuiteName}.");
-        await executor.ExecuteInternally(testSuite, new TestRunnerConfig());
+        var testSuiteNode = LoadTestSuiteNode(type);
+
+        CollectedEvents.Clear();
+        var response = await new ExecuteTestSuiteCommand(testSuiteNode, false, false).Execute(this);
+        AssertThat(response.StatusCode).IsEqual(HttpStatusCode.OK);
+
         if (verbose)
             Console.WriteLine($"Execution {testSuiteName} done.");
-        return events;
+        return CollectedEvents;
     }
 
     private List<ITuple> ExpectedEvents(string suiteName, params string[] testCaseNames)
@@ -152,13 +156,51 @@ public class ExecutorTest : ITestEventListener
         return expectedEvents;
     }
 
-    [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
+
+    private static TestSuiteNode LoadTestSuiteNode(Type testSuiteType)
+    {
+        ITestEngineLogger logger = new GodotLogger();
+        var assemblyLocation = testSuiteType.Assembly.Location;
+        var tests = TestCaseDiscoverer.DiscoverTests(logger, assemblyLocation, testSuiteType).ToList();
+        var first = tests.First();
+
+        var assemblyNode = new TestAssemblyNode
+        {
+            Id = Guid.NewGuid(),
+            ParentId = Guid.Empty,
+            AssemblyPath = first.AssemblyPath,
+            Suites = new List<TestSuiteNode>()
+        };
+
+        var testSuiteNode = new TestSuiteNode
+        {
+            Id = Guid.NewGuid(),
+            ParentId = assemblyNode.Id,
+            ManagedType = first.ManagedType,
+            AssemblyPath = assemblyNode.AssemblyPath,
+            Tests = new List<TestCaseNode>()
+        };
+
+        var testCaseNodes = tests
+            .Select(descriptor => new TestCaseNode
+            {
+                Id = descriptor.Id,
+                ParentId = testSuiteNode.Id,
+                ManagedMethod = descriptor.ManagedMethod,
+                AttributeIndex = descriptor.AttributeIndex,
+                LineNumber = descriptor.LineNumber,
+                RequireRunningGodotEngine = descriptor.RequireRunningGodotEngine
+            });
+        testSuiteNode.Tests.AddRange(testCaseNodes);
+        assemblyNode.Suites.Add(testSuiteNode);
+        return testSuiteNode;
+    }
+
+
+    [GodotTestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
     public async Task ExecuteSuccess()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteAllStagesSuccess.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteAllStagesSuccess>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteAllStagesSuccess", "TestCase1", "TestCase2"));
@@ -190,13 +232,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "Verifies report a failure on stage 'Before'.")]
+    [GodotTestCase(Description = "Verifies report a failure on stage 'Before'.")]
     public async Task ExecuteFailureOnStageBefore()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageBefore.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnStageBefore>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageBefore", "TestCase1", "TestCase2"));
@@ -231,13 +270,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport> { new(FAILURE, 12, "failed on Before()") }));
     }
 
-    [TestCase(Description = "Verifies report a failure on stage 'After'.")]
+    [GodotTestCase(Description = "Verifies report a failure on stage 'After'.")]
     public async Task ExecuteFailureOnStageAfter()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageAfter.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnStageAfter>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageAfter", "TestCase1", "TestCase2"));
@@ -272,13 +308,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport> { new(FAILURE, 16, "failed on After()") }));
     }
 
-    [TestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
+    [GodotTestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
     public async Task ExecuteFailureOnStageBeforeTest()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageBeforeTest.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnStageBeforeTest>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageBeforeTest", "TestCase1", "TestCase2"));
@@ -312,13 +345,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "Verifies report a failure on stage 'AfterTest'.")]
+    [GodotTestCase(Description = "Verifies report a failure on stage 'AfterTest'.")]
     public async Task ExecuteFailureOnStageAfterTest()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnStageAfterTest.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnStageAfterTest>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnStageAfterTest", "TestCase1", "TestCase2"));
@@ -352,13 +382,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "Verifies a failure is reports for a single test case.")]
+    [GodotTestCase(Description = "Verifies a failure is reports for a single test case.")]
     public async Task ExecuteFailureOnTestCase1()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnTestCase1.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnTestCase1>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnTestCase1", "TestCase1", "TestCase2"));
@@ -399,13 +426,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "Verifies multiple failures are report's for different stages.")]
+    [GodotTestCase(Description = "Verifies multiple failures are report's for different stages.")]
     public async Task ExecuteFailureOnMultiStages()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailOnMultiStages.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailOnMultiStages>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailOnMultiStages", "TestCase1", "TestCase2"));
@@ -449,13 +473,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport> { new(FAILURE, 16, "failed on After()") }));
     }
 
-    [TestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
+    [GodotTestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
     public async Task ExecuteFailureOrphanNodesDetected()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailAndOrphansDetected.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailAndOrphansDetected>();
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrphansDetected", "TestCase1", "TestCase2"));
 
@@ -534,15 +555,12 @@ public class ExecutorTest : ITestEventListener
         );
     }
 
-    [TestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
+    [GodotTestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
     public async Task ExecuteFailureOrphanNodesDetectionDisabled()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteFailAndOrphansDetected.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2");
-
         // simulate test suite execution with disabled orphan detection
         ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, false);
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteFailAndOrphansDetected>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrphansDetected", "TestCase1", "TestCase2"));
@@ -583,13 +601,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "GD-66: The execution must be aborted by a test timeout.")]
+    [GodotTestCase(Description = "GD-66: The execution must be aborted by a test timeout.")]
     public async Task ExecuteAbortOnTimeOut()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteAbortOnTestTimeout.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("TestCase1", "TestCase2", "TestCase3", "TestCase4", "TestCase5");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteAbortOnTestTimeout>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteAbortOnTestTimeout", "TestCase1", "TestCase2", "TestCase3", "TestCase4", "TestCase5"));
@@ -685,14 +700,10 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_AFTER, "After", new List<TestReport>()));
     }
 
-    [TestCase(Description = "Tests is all parameterized tests case executed.")]
+    [GodotTestCase(Description = "Tests is all parameterized tests case executed.")]
     public async Task ExecuteParameterizedTest()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteParameterizedTests.cs");
-        AssertArray(testSuite.TestCases).Extract("Name")
-            .ContainsExactly("ParameterizedBoolValue", "ParameterizedIntValues", "ParameterizedIntValuesFail", "ParameterizedSingleTest");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteParameterizedTests>();
 
         var suiteName = "TestSuiteParameterizedTests";
         var expectedEvents = new List<ITuple> { Tuple(TESTSUITE_BEFORE, suiteName, "Before", 4) };
@@ -769,13 +780,10 @@ public class ExecutorTest : ITestEventListener
         );
     }
 
-    [TestCase(Description = "Verifies the exceptions are catches the right message as failure.")]
+    [GodotTestCase(Description = "Verifies the exceptions are catches the right message as failure.")]
     public async Task ExecuteTestWithExceptions()
     {
-        var testSuite = LoadTestSuite("src/core/resources/testsuites/mono/TestSuiteAllTestsFailWithExceptions.cs");
-        AssertArray(testSuite.TestCases).Extract("Name").ContainsExactly("ExceptionIsThrownOnSceneInvoke", "ExceptionAtAsyncMethod", "ExceptionAtSyncMethod");
-
-        var events = await ExecuteTestSuite(testSuite);
+        var events = await ExecuteTestSuite<TestSuiteAllTestsFailWithExceptions>();
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteAllTestsFailWithExceptions", "ExceptionIsThrownOnSceneInvoke", "ExceptionAtAsyncMethod", "ExceptionAtSyncMethod"));

@@ -16,18 +16,8 @@ internal static class TestCaseDiscoverer
         var assembly = Assembly.LoadFrom(testAssembly);
         var testSuites = assembly.GetTypes().Where(IsTestSuite).ToList();
 
-        var testCases = testSuites.SelectMany(type =>
-            {
-                var testCases = type.GetMethods()
-                    .Where(m => m.GetCustomAttributes().Any(attr => attr is TestCaseAttribute))
-                    .ToList()
-                    .AsParallel()
-                    .SelectMany(mi => DiscoverTestCasesFromMethod(mi, testAssembly, type.FullName!))
-                    .ToList();
-
-                logger.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
-                return testCases;
-            })
+        var testCases = testSuites
+            .SelectMany(type => DiscoverTests(logger, testAssembly, type))
             .ToList();
 
         logger.LogInfo(testCases.Count == 0
@@ -37,8 +27,22 @@ internal static class TestCaseDiscoverer
         return testCases;
     }
 
-    internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(
-        MethodInfo mi,
+    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger logger, string testAssembly, Type type)
+    {
+        var requireEngineMode = type.GetCustomAttributes().Any(attr => attr is RequireGodotRuntimeAttribute);
+        var testCases = type.GetMethods()
+            .Where(m => m.GetCustomAttributes().Any(attr => attr is TestCaseAttribute))
+            .ToList()
+            .AsParallel()
+            .SelectMany(mi => DiscoverTestCasesFromMethod(mi, requireEngineMode, testAssembly, type.FullName!))
+            .ToList();
+
+        logger.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
+        return testCases;
+    }
+
+    internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(MethodInfo mi,
+        bool requireEngineMode,
         string assemblyPath,
         string className)
         => mi.GetCustomAttributes()
@@ -54,7 +58,7 @@ internal static class TestCaseDiscoverer
                 SimpleName = TestCase.BuildDisplayName(mi.Name, attr, index, mi.GetCustomAttributes().Count() > 1),
                 AttributeIndex = index,
                 LineNumber = 0,
-                RequireRunningGodotEngine = attr is GodotTestCaseAttribute
+                RequireRunningGodotEngine = requireEngineMode || attr is GodotTestCaseAttribute
             })
             .OrderBy(test => test.ManagedMethod)
             .ToList();

@@ -12,7 +12,7 @@ public class TestCaseDiscovererTest
     {
         var clazzType = typeof(ExampleTestSuite);
         var methodInfo = clazzType.GetMethod("SingleTestCase")!;
-        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, "/path/to/test_assembly.dll", clazzType.FullName!);
+        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, false, "/path/to/test_assembly.dll", clazzType.FullName!);
 
         AssertThat(tests).ContainsExactly(new TestCaseDescriptor
         {
@@ -33,7 +33,7 @@ public class TestCaseDiscovererTest
     {
         var clazzType = typeof(ExampleTestSuite);
         var methodInfo = clazzType.GetMethod("SingleTestCaseWithCustomName")!;
-        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, "/path/to/test_assembly.dll", clazzType.FullName!);
+        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, false, "/path/to/test_assembly.dll", clazzType.FullName!);
 
         AssertThat(tests).ContainsExactly(new TestCaseDescriptor
         {
@@ -54,7 +54,7 @@ public class TestCaseDiscovererTest
     {
         var clazzType = typeof(ExampleTestSuite);
         var methodInfo = clazzType.GetMethod("MultiRowTestCase")!;
-        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, "/path/to/test_assembly.dll", clazzType.FullName!);
+        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, false, "/path/to/test_assembly.dll", clazzType.FullName!);
 
         AssertThat(tests)
             .HasSize(3)
@@ -104,7 +104,7 @@ public class TestCaseDiscovererTest
     {
         var clazzType = typeof(ExampleTestSuite);
         var methodInfo = clazzType.GetMethod("MultiRowTestCaseWithCustomTestName")!;
-        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, "/path/to/test_assembly.dll", clazzType.FullName!);
+        var tests = TestCaseDiscoverer.DiscoverTestCasesFromMethod(methodInfo, false, "/path/to/test_assembly.dll", clazzType.FullName!);
 
         AssertThat(tests)
             .HasSize(3)

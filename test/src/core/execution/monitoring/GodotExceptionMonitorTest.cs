@@ -19,7 +19,7 @@ public partial class GodotExceptionMonitorTest
         sceneTree.Root.AddChild(new TestNode());
     }
 
-    [TestCase]
+    [GodotTestCase]
     [ThrowsException(typeof(InvalidProgramException), "Exception during scene processing",
         "src/core/resources/scenes/TestSceneWithExceptionTest.cs", 22)]
     public async Task CatchExceptionOnSceneTreeProcessing()
@@ -29,7 +29,7 @@ public partial class GodotExceptionMonitorTest
         await sceneRunner.SimulateFrames(10);
     }
 
-    [TestCase]
+    [GodotTestCase]
     [GodotExceptionMonitor]
     public async Task MonitorOnExceptionsButNotThrows()
     {
@@ -48,7 +48,7 @@ public partial class GodotExceptionMonitorTest
         runner.Invoke("SomeMethodThatThrowsException");
     }
 
-    [TestCase]
+    [GodotTestCase]
     [ThrowsException(typeof(TestFailedException), "Testing Godot PushError",
         "src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 54)]
     public void PushErrorAsTestFailure() => GD.PushError("Testing Godot PushError");
