@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
-public partial class DiagnosticRulesDocumentationTest
+public partial class VerifyDocumentationTest
 {
     private static readonly string ProjectRoot = Directory.GetCurrentDirectory()
         .Split(Path.DirectorySeparatorChar)
@@ -23,6 +23,9 @@ public partial class DiagnosticRulesDocumentationTest
     public void VerifyIndexDocumentation()
     {
         var indexPath = Path.Combine(ProjectRoot, "documentation", "index.md");
+        if (!OperatingSystem.IsWindows())
+            indexPath = Path.Combine("/", indexPath);
+
         Assert.IsTrue(File.Exists(indexPath), $"Index file not found: {indexPath}");
 
         var indexContent = File.ReadAllText(indexPath);
@@ -58,7 +61,8 @@ public partial class DiagnosticRulesDocumentationTest
 
     private static void CheckDocumentationFile(DiagnosticDescriptor descriptor)
     {
-        var docPath = Path.Combine(ProjectRoot, "documentation", $"{descriptor.Id}.md");
+        var docLink = descriptor.HelpLinkUri.Replace("https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
+        var docPath = Path.Combine(Path.DirectorySeparatorChar.ToString(), ProjectRoot, docLink);
         Assert.IsTrue(File.Exists(docPath), $"Documentation file not found: {docPath}\nExpected documentation for rule {descriptor.Id}");
 
         var docContent = File.ReadAllText(docPath);

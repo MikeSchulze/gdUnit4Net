@@ -80,7 +80,7 @@ jobs:
         with:
           lfs: true
 
-      - name: "Install Godot Mono ${{ inputs.godot-version }}"
+      - name: "Install Godot Net ${{ inputs.godot-version }}"
         uses: ./.github/actions/godot-install
         with:
           godot-version: ${{ inputs.godot-version }}
@@ -96,11 +96,11 @@ jobs:
       - name: "Compile C#"
         if: ${{ !cancelled() }}
         run: |
-          echo "prebuild the nuget packages"
+          echo "prebuild projects"
+          dotnet build ./analyzers/gdUnit4Analyzers.csproj
           dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./test/gdUnit4Test.csproj
           dotnet build ./testadapter/gdUnit4TestAdapter.csproj
-          dotnet restore
-          dotnet build
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -108,7 +108,7 @@ jobs:
         env:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
-          $GODOT_BIN --path ./test --headless --build-solutions --quit-after 20
+          $GODOT_BIN --path ./test --headless --build-solutions --quit-after 200 --verbosity normal
           xvfb-run --auto-servernum dotnet test ./test/gdUnit4Test.csproj --no-build --settings ./test/.runsettings-ci --verbosity normal
         # -verbosity:diag --blame
 
@@ -128,7 +128,7 @@ jobs:
         with:
           lfs: true
 
-      - name: "Install Godot Mono ${{ inputs.godot-version }}"
+      - name: "Install Godot Net ${{ inputs.godot-version }}"
         uses: ./.github/actions/godot-install
         with:
           godot-version: ${{ inputs.godot-version }}

@@ -17,12 +17,16 @@ using Environment = System.Environment;
 internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 {
     private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
+    private readonly TestEngineSettings settings;
 
     private Process? process;
 
     internal GodotRuntimeTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
         : base(new GodotGdUnit4RestClient(logger), logger, settings)
-        => DebuggerFramework = debuggerFramework;
+    {
+        this.settings = settings;
+        DebuggerFramework = debuggerFramework;
+    }
 
     private object ProcessLock { get; } = new();
     private IDebuggerFramework DebuggerFramework { get; }
@@ -75,7 +79,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         {
             InitRuntimeEnvironment();
             var processStartInfo =
-                new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments())
+                new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments(settings))
                 {
                     StandardOutputEncoding = Encoding.Default,
                     RedirectStandardOutput = true,
@@ -198,6 +202,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         */
     }
 
-    private string BuildGodotArguments()
-        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs";
+    private string BuildGodotArguments(TestEngineSettings testEngineSettings)
+        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
 }
