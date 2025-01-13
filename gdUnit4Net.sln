@@ -4,13 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.analyzers", ".\analyzers\gdUnit4Analyzers.csproj", "{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", ".\analyzers.test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
-EndProject
+
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.api", ".\api\gdUnit4Api.csproj", "{E5ED8330-DA73-49CE-A060-103CD6B8DC6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.test.adapter", ".\testadapter\gdUnit4TestAdapter.csproj", "{42C45312-5065-4E36-BBB4-8FA958C5DA50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4.analyzers", ".\analyzers\gdUnit4Analyzers.csproj", "{30E2EC2E-571D-4CAE-BA56-228536B3C6B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4Analyzers.Tests", ".\analyzers.test\gdUnit4Analyzers.Tests.csproj", "{F967E151-003F-4390-8B5E-62EC86C33528}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gdUnit4TestAdapter.Tests", ".\testadapter.test\gdUnit4TestAdapter.Tests.csproj", "{99D04331-DF6F-4A29-8F6E-2CB00F27F39E}"
 EndProject
