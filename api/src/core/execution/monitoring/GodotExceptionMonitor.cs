@@ -69,7 +69,6 @@ public class GodotExceptionMonitor
             return;
 
         // we need to wait the current Godot main tread has processed all nodes
-        await GodotObjectExtensions.SyncPhysicsFrame;
         await GodotObjectExtensions.SyncProcessFrame;
 
         try

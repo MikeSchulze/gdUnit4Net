@@ -228,14 +228,14 @@ internal sealed class TestEventReportListener : ITestEventListener
 
     private TestResult AddDefaultTestReport(TestReport report, TestResult testResult)
     {
-        var normalizedMessage = report.Message.RichTextNormalize().TrimEnd().Replace("WARNING:", "Warning:");
+        var normalizedMessage = report.Message.RichTextNormalize().TrimEnd().Replace("WARNING:", "Warning:").Replace("ERROR:", "Error:");
 
         switch (report.Type)
         {
             case TestReport.ReportType.STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 foreach (var message in normalizedMessage.Split("\n"))
-                    Framework.SendMessage(TestMessageLevel.Informational, HtmlEncoder.Default.Encode($"  {message}"));
+                    Framework.SendMessage(TestMessageLevel.Informational, HtmlEncoder.Default.Encode($"    {message}"));
                 break;
 
             case TestReport.ReportType.WARN:
