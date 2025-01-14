@@ -108,10 +108,12 @@ internal sealed partial class ErrorLogEntry
 #pragma warning disable IDE0060
     private static bool IsGodot4X4 => (int)Engine.GetVersionInfo()["hex"] >= 0x40400;
 
+    private static readonly string GodotErrorPattern = IsGodot4X4 ? "ERROR:" : "USER ERROR:";
+
     private static readonly Dictionary<ErrorType, Tuple<string, string>> LoggerPatterns = new()
     {
         { ErrorType.Exception, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
-        { ErrorType.PushError, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
+        { ErrorType.PushError, new Tuple<string, string>(GodotErrorPattern, GodotErrorPattern) },
         { ErrorType.PushWarning, new Tuple<string, string>("USER WARNING:", "USER WARNING:") }
     };
 #pragma warning restore IDE0060
