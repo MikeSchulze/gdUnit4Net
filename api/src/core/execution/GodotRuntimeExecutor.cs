@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Core.Runners;
+﻿namespace GdUnit4.Core.Execution;
 
 using System;
 using System.IO.Pipes;
@@ -17,11 +17,50 @@ using Newtonsoft.Json;
 
 using Reporting;
 
-internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
+using Runners;
+
+/// <summary>
+///     Implements a command executor that communicates with the Godot runtime through named pipes.
+///     Handles test command execution, event processing, and interprocess communication with the Godot engine.
+/// </summary>
+/// <remarks>
+///     This executor uses a named pipe for bidirectional communication with the Godot process.
+///     It manages the connection lifecycle and handles command execution with event propagation.
+/// </remarks>
+internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
 {
-    public GodotGdUnit4RestClient(ITestEngineLogger logger)
+    public GodotRuntimeExecutor(ITestEngineLogger logger)
         : base(new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
         => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
+
+    public async Task StartAsync()
+    {
+        try
+        {
+            await Proxy.ConnectAsync(10000);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task StopAsync()
+    {
+        try
+        {
+            // await ExecuteCommand(new TerminateGodotInstanceCommand(), CancellationToken.None);
+            // Give server time to process shutdown
+            await Task.Delay(100);
+            await DisposeAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 
     public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken) where T : BaseCommand
     {
@@ -73,34 +112,5 @@ internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStr
             StatusCode = HttpStatusCode.InternalServerError,
             Payload = ""
         };
-    }
-
-    public async Task StartAsync()
-    {
-        try
-        {
-            await Proxy.ConnectAsync(10000);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
-    public async Task StopAsync()
-    {
-        try
-        {
-            // await ExecuteCommand(new TerminateGodotInstanceCommand(), CancellationToken.None);
-            // Give server time to process shutdown
-            await Task.Delay(100);
-            await DisposeAsync();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
     }
 }

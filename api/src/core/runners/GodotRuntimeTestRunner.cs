@@ -12,6 +12,8 @@ using Api;
 
 using Events;
 
+using Execution;
+
 using Environment = System.Environment;
 
 internal sealed class GodotRuntimeTestRunner : BaseTestRunner
@@ -22,7 +24,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     private Process? process;
 
     internal GodotRuntimeTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotGdUnit4RestClient(logger), logger, settings)
+        : base(new GodotRuntimeExecutor(logger), logger, settings)
     {
         this.settings = settings;
         DebuggerFramework = debuggerFramework;
