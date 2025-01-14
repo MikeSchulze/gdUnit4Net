@@ -26,7 +26,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 {
     private GodotExceptionMonitor? godotExceptionMonitor;
 
-    protected ExecutionStage(string name, Type type, bool isEngineMode = false)
+    protected ExecutionStage(string name, Type type)
     {
         var method = type
             .GetMethods()
@@ -111,7 +111,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         StageAttribute = stageAttribute;
         IsAsync = method?.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
-        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttribute<GodotExceptionMonitorAttribute>() != null;
+        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
     }
 
 
