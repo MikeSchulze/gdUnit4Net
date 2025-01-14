@@ -107,7 +107,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         {
             SetupRunnerEnvironment(runContext, frameworkHandle);
             var testsByAssembly = ToGdUnitTestNodes(testCases);
-            using var testEventListener = new TestEventReportListener(frameworkHandle, testCases);
+            var testEventListener = new TestEventReportListener(frameworkHandle, testCases);
             var debuggerFramework = GetDebuggerFramework(frameworkHandle);
             testEngine.Execute(testsByAssembly, testEventListener, debuggerFramework);
             Log.LogInfo("Test execution stopped.");

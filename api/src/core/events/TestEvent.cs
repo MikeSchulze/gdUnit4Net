@@ -5,31 +5,36 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+using Api;
+
 using Newtonsoft.Json;
 
 using Reporting;
 
-internal class TestEvent : IEquatable<TestEvent>
+internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 {
     // constructor needs to serialize/deserialize by JsonConvert
     [JsonConstructor]
+    // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
     private TestEvent() { }
 
-    private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null,
+    private TestEvent(ITestEvent.EventType eventType, string resourcePath, string suiteName, string testName, int totalCount = 0,
+        IDictionary<STATISTIC_KEY, object>? statistics = null,
         IEnumerable<TestReport>? reports = null)
     {
-        Type = type;
+        Type = eventType;
         ResourcePath = resourcePath;
         SuiteName = suiteName;
         TestName = testName;
         Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>();
         Statistics[STATISTIC_KEY.TOTAL_COUNT] = totalCount;
         Reports = reports?.ToList() ?? new List<TestReport>();
+        FullyQualifiedName = "";
     }
 
-    private TestEvent(TYPE type, Guid id, string resourcePath, string suiteName, string testName)
+    private TestEvent(ITestEvent.EventType eventType, Guid id, string resourcePath, string suiteName, string testName)
     {
-        Type = type;
+        Type = eventType;
         Id = id;
         ResourcePath = resourcePath;
         SuiteName = suiteName;
@@ -37,6 +42,7 @@ internal class TestEvent : IEquatable<TestEvent>
         Statistics = new Dictionary<STATISTIC_KEY, object>();
         Statistics[STATISTIC_KEY.TOTAL_COUNT] = 0;
         Reports = new List<TestReport>();
+        FullyQualifiedName = "";
     }
 
     public IDictionary<STATISTIC_KEY, object> Statistics { get; private init; } = new Dictionary<STATISTIC_KEY, object>();
@@ -47,12 +53,6 @@ internal class TestEvent : IEquatable<TestEvent>
     public int FailedCount => GetByKeyOrDefault(STATISTIC_KEY.FAILED_COUNT, 0);
     public int OrphanCount => GetByKeyOrDefault(STATISTIC_KEY.ORPHAN_NODES, 0);
     public int SkippedCount => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED_COUNT, 0);
-    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
-    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
-    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
-    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
-    public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
-    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
 
     public bool Equals(TestEvent? other) =>
         other is not null &&
@@ -74,18 +74,26 @@ internal class TestEvent : IEquatable<TestEvent>
             other.FailedCount,
             other.OrphanCount));
 
+
+    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
+    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
+    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
+    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
+    public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
+    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
+
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
-        new(TYPE.TESTSUITE_BEFORE, resourcePath, suiteName, "Before", totalCount);
+        new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount);
 
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<TestReport> reports) =>
-        new(TYPE.TESTSUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
+        new(ITestEvent.EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
 
     public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
-        new(TYPE.TESTCASE_BEFORE, id, resourcePath, suiteName, testName);
+        new(ITestEvent.EventType.TestBefore, id, resourcePath, suiteName, testName);
 
     public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
         List<TestReport>? reports = null) =>
-        new(TYPE.TESTCASE_AFTER, id, resourcePath, suiteName, testName)
+        new(ITestEvent.EventType.TestAfter, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
             Reports = reports ?? new List<TestReport>()
@@ -159,15 +167,6 @@ internal class TestEvent : IEquatable<TestEvent>
 
 #pragma warning disable CA1707
     // ReSharper disable all InconsistentNaming
-    public enum TYPE
-    {
-        INIT,
-        STOP,
-        TESTSUITE_BEFORE,
-        TESTSUITE_AFTER,
-        TESTCASE_BEFORE,
-        TESTCASE_AFTER
-    }
 
     public enum STATISTIC_KEY
     {
@@ -186,11 +185,10 @@ internal class TestEvent : IEquatable<TestEvent>
 #pragma warning restore CA1707
 
 #nullable disable
-    public TYPE Type { get; set; }
+    public ITestEvent.EventType Type { get; set; }
+    public Guid Id { get; set; }
     public string SuiteName { get; set; }
     public string TestName { get; set; }
     public string FullyQualifiedName { get; set; }
     public string ResourcePath { get; set; }
-
-    public Guid Id { get; set; }
 }

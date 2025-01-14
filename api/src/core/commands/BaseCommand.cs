@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 
-using Events;
+using Api;
 
 /// <summary>
 ///     Base class for all test execution commands in the GdUnit4 framework.

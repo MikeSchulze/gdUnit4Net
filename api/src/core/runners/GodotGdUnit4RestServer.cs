@@ -11,8 +11,6 @@ using Api;
 
 using Commands;
 
-using Events;
-
 using Extensions;
 
 using Newtonsoft.Json;
@@ -33,7 +31,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
 
     public int CompletedTests { get; set; }
 
-    public void PublishEvent(TestEvent testEvent)
+    public void PublishEvent(ITestEvent testEvent)
         => Task.Run(async () => await WriteAsync(testEvent)).Wait();
 
     public new async ValueTask DisposeAsync()

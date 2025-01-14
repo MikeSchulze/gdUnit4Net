@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using CommandLine;
 
 using Core;
-using Core.Events;
 using Core.Execution;
 
 using Godot;
@@ -51,26 +50,23 @@ public partial class TestRunner : Node
 
     private async Task<int> RunTests(List<TestSuite> testSuites, TestRunnerConfig runnerConfig, ITestEventListener listener)
     {
-        using (listener)
+        if (testSuites.Count == 0)
         {
-            if (testSuites.Count == 0)
-            {
-                await Console.Error.WriteLineAsync("No test suite's are specified!, Abort!");
-                return -1;
-            }
-
-            using Executor executor = new();
-            executor.AddTestEventListener(listener);
-
-            foreach (var testSuite in testSuites)
-            {
-                await executor.ExecuteInternally(testSuite, runnerConfig);
-                if (listener.IsFailed && FailFast)
-                    break;
-            }
-
-            return listener.IsFailed ? 100 : 0;
+            await Console.Error.WriteLineAsync("No test suite's are specified!, Abort!");
+            return -1;
         }
+
+        using Executor executor = new();
+        executor.AddTestEventListener(listener);
+
+        foreach (var testSuite in testSuites)
+        {
+            await executor.ExecuteInternally(testSuite, runnerConfig);
+            if (listener.IsFailed && FailFast)
+                break;
+        }
+
+        return listener.IsFailed ? 100 : 0;
     }
 
     private static TestSuite? TryCreateTestSuite(KeyValuePair<string, IEnumerable<TestCaseConfig>> entry)

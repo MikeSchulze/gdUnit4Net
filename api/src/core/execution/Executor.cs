@@ -123,11 +123,12 @@ public partial class Executor : RefCounted, IExecutor
 
         public int CompletedTests { get; set; }
 
-        public void PublishEvent(TestEvent testEvent)
+        public void PublishEvent(ITestEvent e)
         {
+            var testEvent = (e as TestEvent)!;
             Godot.Collections.Dictionary<string, Variant> data = new()
             {
-                { "type", testEvent.Type.ToVariant() },
+                { "type", e.Type.ToVariant() },
                 { "resource_path", testEvent.ResourcePath.ToVariant() },
                 { "suite_name", testEvent.SuiteName.ToVariant() },
                 { "test_name", testEvent.TestName.ToVariant() },

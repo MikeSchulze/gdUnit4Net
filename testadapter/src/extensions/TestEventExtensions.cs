@@ -1,12 +1,12 @@
 namespace GdUnit4.TestAdapter.Extensions;
 
-using Core.Events;
+using Api;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 internal static class TestEventExtensions
 {
-    public static TestOutcome AsTestOutcome(this TestEvent e)
+    public static TestOutcome AsTestOutcome(this ITestEvent e)
     {
         if (e.IsFailed || e.IsError)
             return TestOutcome.Failed;

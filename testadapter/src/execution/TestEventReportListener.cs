@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 
+using Api;
+
 using Core.Events;
 using Core.Extensions;
 using Core.Reporting;
@@ -16,6 +18,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using Utilities;
+
+using static Api.ITestEvent.EventType;
 
 using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
@@ -41,24 +45,24 @@ internal sealed class TestEventReportListener : ITestEventListener
     {
     }
 
-    public void PublishEvent(TestEvent e)
+    public void PublishEvent(ITestEvent testEvent)
     {
-        switch (e.Type)
+        switch (testEvent.Type)
         {
-            case TestEvent.TYPE.TESTSUITE_BEFORE:
+            case SuiteBefore:
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName} Processing...");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName} Processing...");
                 break;
 
-            case TestEvent.TYPE.TESTCASE_BEFORE:
+            case TestBefore:
             {
-                var testCase = FindTestCase(e);
+                var testCase = FindTestCase(testEvent);
                 if (testCase == null)
                 {
                     // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
-                    if (FindParameterizedTestCase(e))
+                    if (FindParameterizedTestCase(testEvent))
                         return;
-                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case Id: {e.Id}");
+                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_BEFORE: cant find test case Id: {testEvent.Id}");
                     return;
                 }
 
@@ -68,27 +72,27 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case TestEvent.TYPE.TESTCASE_AFTER:
+            case TestAfter:
             {
-                var testCase = FindTestCase(e);
+                var testCase = FindTestCase(testEvent);
                 if (testCase == null)
                 {
                     // check is the event just the parent of parameterized tests we do ignore it because all children will be executed
-                    if (FindParameterizedTestCase(e))
+                    if (FindParameterizedTestCase(testEvent))
                         return;
-                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {e.FullyQualifiedName}");
+                    Framework.SendMessage(TestMessageLevel.Error, $"TESTCASE_AFTER: cant find test case {testEvent.FullyQualifiedName}");
                     return;
                 }
 
                 var testResult = new TestResult(testCase)
                 {
                     DisplayName = IdeType == Ide.DotNet ? testCase.FullyQualifiedName : testCase.DisplayName,
-                    Outcome = e.AsTestOutcome(),
+                    Outcome = testEvent.AsTestOutcome(),
                     EndTime = DateTimeOffset.Now,
-                    Duration = e.ElapsedInMs
+                    Duration = testEvent.ElapsedInMs
                 };
 
-                e.Reports.ForEach(report => AddTestReport(report, testResult));
+                (testEvent as TestEvent)?.Reports.ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} {testResult.Outcome}");
@@ -98,18 +102,17 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case TestEvent.TYPE.TESTSUITE_AFTER:
+            case SuiteAfter:
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {e.FullyQualifiedName}: {e.AsTestOutcome()}\n");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName}: {testEvent.AsTestOutcome()}\n");
                 break;
 
-            case TestEvent.TYPE.INIT:
+            case Init:
                 break;
-            case TestEvent.TYPE.STOP:
+            case Stop:
                 break;
         }
     }
-
 
 // ReSharper disable once UnusedMethodReturnValue.Local
     private TestResult AddTestReport(TestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch
@@ -262,10 +265,9 @@ internal sealed class TestEventReportListener : ITestEventListener
         return testResult;
     }
 
-
-    private TestCase? FindTestCase(TestEvent e)
+    private TestCase? FindTestCase(ITestEvent e)
         => TestCases.FirstOrDefault(t => e.Id.Equals(t.Id));
 
-    private bool FindParameterizedTestCase(TestEvent e)
+    private bool FindParameterizedTestCase(ITestEvent e)
         => TestCases.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
 }

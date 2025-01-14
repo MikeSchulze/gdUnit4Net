@@ -5,8 +5,6 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
 
-using Core.Events;
-
 using Newtonsoft.Json;
 
 internal class TestAdapterReporter : ITestEventListener
@@ -45,11 +43,11 @@ internal class TestAdapterReporter : ITestEventListener
 
     public bool IsFailed { get; set; }
 
-    public void PublishEvent(TestEvent e)
+    public void PublishEvent(ITestEvent testEvent)
     {
-        if (e.IsFailed || e.IsError)
+        if (testEvent.IsFailed || testEvent.IsError)
             IsFailed = true;
-        var json = JsonConvert.SerializeObject(e);
+        var json = JsonConvert.SerializeObject(testEvent);
         writer!.WriteLine($"GdUnitTestEvent:{json}");
     }
 }
