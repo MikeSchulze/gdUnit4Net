@@ -52,7 +52,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         if (string.IsNullOrEmpty(message))
             return;
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        Logger.LogError($"{message}");
+        Logger.LogInfo($"{message}");
     };
 
     private EventHandler ExitHandler => (sender, _) =>
