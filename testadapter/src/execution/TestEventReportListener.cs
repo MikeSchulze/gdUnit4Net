@@ -3,6 +3,7 @@ namespace GdUnit4.TestAdapter.Execution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 
 using Core.Events;
 using Core.Extensions;
@@ -24,12 +25,15 @@ internal sealed class TestEventReportListener : ITestEventListener
     {
         Framework = framework;
         TestCases = testCases;
-        DetailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeDetector.Detect(Framework));
+        DetailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeType);
+        framework.SendMessage(TestMessageLevel.Informational, $"Detected IDE {IdeType}");
     }
 
     private IFrameworkHandle Framework { get; }
     private IReadOnlyList<TestCase> TestCases { get; }
     private bool DetailedOutput { get; }
+
+    private Ide IdeType => IdeDetector.Detect(Framework);
     public int CompletedTests { get; set; }
     public bool IsFailed { get; set; }
 
@@ -60,7 +64,7 @@ internal sealed class TestEventReportListener : ITestEventListener
 
                 Framework.RecordStart(testCase);
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} Processing...");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} Processing...");
                 break;
             }
 
@@ -78,7 +82,7 @@ internal sealed class TestEventReportListener : ITestEventListener
 
                 var testResult = new TestResult(testCase)
                 {
-                    DisplayName = testCase.DisplayName,
+                    DisplayName = IdeType == Ide.DotNet ? testCase.FullyQualifiedName : testCase.DisplayName,
                     Outcome = e.AsTestOutcome(),
                     EndTime = DateTimeOffset.Now,
                     Duration = e.ElapsedInMs
@@ -87,7 +91,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                 e.Reports.ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.DisplayName} {testResult.Outcome}");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} {testResult.Outcome}");
                 Framework.RecordResult(testResult);
                 Framework.RecordEnd(testCase, testResult.Outcome);
                 CompletedTests += 1;
@@ -230,8 +234,8 @@ internal sealed class TestEventReportListener : ITestEventListener
         {
             case TestReport.ReportType.STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
-                Framework.SendMessage(TestMessageLevel.Informational, "Standard Output:");
-                foreach (var message in normalizedMessage.Split("\n")) Framework.SendMessage(TestMessageLevel.Informational, $"stdout:    {message}");
+                foreach (var message in normalizedMessage.Split("\n"))
+                    Framework.SendMessage(TestMessageLevel.Informational, HtmlEncoder.Default.Encode($"  {message}"));
                 break;
 
             case TestReport.ReportType.WARN:
