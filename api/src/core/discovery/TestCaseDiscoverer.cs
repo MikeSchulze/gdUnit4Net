@@ -9,8 +9,18 @@ using Api;
 
 using Execution;
 
+/// <summary>
+///     Discovers test cases in assemblies by scanning for test attributes and analyzing debug information.
+/// </summary>
 internal static class TestCaseDiscoverer
 {
+    /// <summary>
+    ///     Discovers all test cases in a test assembly.
+    /// </summary>
+    /// <param name="settings">Test engine settings.</param>
+    /// <param name="logger">Logger for discovery process information.</param>
+    /// <param name="testAssembly">Path to the test assembly to scan.</param>
+    /// <returns>List of discovered test case descriptors.</returns>
     public static List<TestCaseDescriptor> Discover(TestEngineSettings settings, ITestEngineLogger logger, string testAssembly)
     {
         logger.LogInfo($"Discover tests from assembly: {testAssembly}");
@@ -66,8 +76,8 @@ internal static class TestCaseDiscoverer
                     FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, attr),
                     SimpleName = TestCase.BuildDisplayName(mi.Name, attr, index, mi.GetCustomAttributes().Count() > 1),
                     AttributeIndex = index,
-                    LineNumber = navData.Line,
-                    CodeFilePath = navData.Source,
+                    LineNumber = navData.LineNumber,
+                    CodeFilePath = navData.CodeFilePath,
                     RequireRunningGodotEngine = requireEngineMode || attr is GodotTestCaseAttribute
                 };
             })

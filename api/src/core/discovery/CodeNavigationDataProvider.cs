@@ -6,14 +6,19 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
+/// <summary>
+///     Provides source code navigation information for test methods by using debug information from PDB files.
+/// </summary>
 internal sealed class CodeNavigationDataProvider : IDisposable
 {
-    //  private readonly Assembly assembly;
     private readonly DiaSession diaSession;
     private bool disposed;
 
+    /// <summary>
+    ///     Initializes a new instance of the CodeNavigationDataProvider.
+    /// </summary>
+    /// <param name="assemblyPath">Path to the test assembly containing PDB debug information.</param>
     public CodeNavigationDataProvider(string assemblyPath) =>
-        // assembly = Assembly.LoadFrom(assemblyPath);
         diaSession = new DiaSession(assemblyPath);
 
     public void Dispose()
@@ -26,14 +31,19 @@ internal sealed class CodeNavigationDataProvider : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Gets source code navigation information for a test method.
+    /// </summary>
+    /// <param name="mi">The method to get navigation data for.</param>
+    /// <returns>Navigation information including source file and line number.</returns>
     public CodeNavigation GetNavigationData(MethodInfo mi)
     {
         var navigationData = TryGetNavigationDataForMethod(mi.DeclaringType!.FullName!, mi)
                              ?? TryGetNavigationDataForAsyncMethod(mi);
         return new CodeNavigation
         {
-            Line = navigationData?.MinLineNumber ?? -1,
-            Source = navigationData?.FileName,
+            LineNumber = navigationData?.MinLineNumber ?? -1,
+            CodeFilePath = navigationData?.FileName,
             Method = mi
         };
     }
@@ -64,20 +74,37 @@ internal sealed class CodeNavigationDataProvider : IDisposable
             .GetProperty("StateMachineType")?
             .GetValue(stateMachineAttribute) as Type ?? null;
 
-
+    /// <summary>
+    ///     Value type representing source code navigation information for a test method.
+    /// </summary>
     public readonly struct CodeNavigation
     {
+        /// <summary>
+        ///     The method this navigation data refers to.
+        /// </summary>
         public required MethodInfo Method { get; init; }
-        public required int Line { get; init; }
-        public required string? Source { get; init; }
-        public readonly bool IsValid => Source != null;
+
+        /// <summary>
+        ///     The line number in the source file where the method is defined.
+        /// </summary>
+        public required int LineNumber { get; init; }
+
+        /// <summary>
+        ///     The source code file path containing the method.
+        /// </summary>
+        public required string? CodeFilePath { get; init; }
+
+        /// <summary>
+        ///     Indicates if this navigation data contains valid source information.
+        /// </summary>
+        public readonly bool IsValid => CodeFilePath != null;
 
         public override string ToString()
             => $"""
                 CodeNavigation:
                   Name: '{Method.Name}'
-                  Line: {Line}
-                  Source: '{Source}';
+                  Line: {LineNumber}
+                  CodeFilePath: '{CodeFilePath}';
                 """;
     }
 }

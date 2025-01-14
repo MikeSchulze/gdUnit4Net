@@ -45,8 +45,8 @@ public class CodeNavigationDataProviderTest
         AssertThat(navData).IsEqual(new CodeNavigationDataProvider.CodeNavigation
         {
             Method = mi,
-            Line = expectedLine,
-            Source = source
+            LineNumber = expectedLine,
+            CodeFilePath = source
         });
     }
 }
