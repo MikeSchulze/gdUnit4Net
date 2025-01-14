@@ -16,13 +16,27 @@ using Execution;
 
 using Environment = System.Environment;
 
+/// <summary>
+///     Test runner implementation that executes tests in a separate Godot runtime process.
+///     Handles process management, IPC, and test execution coordination with the Godot engine.
+/// </summary>
 internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 {
+    /// <summary>
+    ///     Directory name for temporary test runner files.
+    /// </summary>
     private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
+
     private readonly TestEngineSettings settings;
 
     private Process? process;
 
+    /// <summary>
+    ///     Initializes a new instance of the GodotRuntimeTestRunner.
+    /// </summary>
+    /// <param name="logger">The test engine logger for diagnostic output.</param>
+    /// <param name="debuggerFramework">Framework for debugging support.</param>
+    /// <param name="settings">Test engine configuration settings.</param>
     internal GodotRuntimeTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
         : base(new GodotRuntimeExecutor(logger), logger, settings)
     {
@@ -33,7 +47,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     private object ProcessLock { get; } = new();
     private IDebuggerFramework DebuggerFramework { get; }
 
-
+    /// <summary>
+    ///     Gets the path to the Godot executable from environment variables.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when Godot executable path is not configured or found.</exception>
     private static string GodotBin
     {
         get

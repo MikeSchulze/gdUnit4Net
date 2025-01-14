@@ -14,8 +14,17 @@ using Events;
 
 using Newtonsoft.Json;
 
+/// <summary>
+///     Base implementation of a test runner that manages test execution lifecycle and command processing.
+/// </summary>
 public class BaseTestRunner : ITestRunner
 {
+    /// <summary>
+    ///     Initializes a new instance of the BaseTestRunner.
+    /// </summary>
+    /// <param name="executor">The command executor for test operations.</param>
+    /// <param name="logger">The test engine logger for diagnostic output.</param>
+    /// <param name="settings">Test engine configuration settings.</param>
     protected BaseTestRunner(ICommandExecutor executor, ITestEngineLogger logger, TestEngineSettings settings)
     {
         Executor = executor;
