@@ -1,5 +1,7 @@
 ﻿namespace GdUnit4.Core.Runners;
 
+using Api;
+
 using Godot;
 
 public class GodotLogger : ITestEngineLogger

@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
+using Api;
+
 using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -29,7 +31,7 @@ using TestCaseDescriptor = Core.Discovery.TestCaseDescriptor;
 public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 {
 #pragma warning disable CA1859
-    private ITestEngineLogger Log { get; set; } = null!;
+    private ITestEngineLogger Logger { get; set; } = null!;
 #pragma warning restore CA1859
     internal static Version MinRequiredEngineVersion { get; } = new("4.4.0");
 
@@ -42,11 +44,11 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     {
         try
         {
-            Log = new Logger(logger);
+            Logger = new Logger(logger);
             if (ITestEngine.EngineVersion() < MinRequiredEngineVersion)
             {
-                Log.LogError($"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
-                Log.LogError("Abort the test discovery.");
+                Logger.LogError($"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
+                Logger.LogError("Abort the test discovery.");
                 return;
             }
 
@@ -56,8 +58,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 CaptureStdOut = settings.CaptureStdOut,
                 Parameters = settings.Parameters
             };
-            var testEngine = ITestEngine.GetInstance(engineSettings, Log);
-            Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
+            var testEngine = ITestEngine.GetInstance(engineSettings, Logger);
+            Logger.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
 
             var filteredAssembles = FilterWithoutTestAdapter(sources);
 
@@ -72,7 +74,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 }
                 catch (Exception e)
                 {
-                    Log.LogError($"Error discovering tests for assembly {assemblyPath}: {e}");
+                    Logger.LogError($"Error discovering tests for assembly {assemblyPath}: {e}");
                 }
         }
         catch (Exception e)

@@ -7,6 +7,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Api;
+
 using Commands;
 
 using Events;
@@ -26,7 +28,6 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     public void Dispose()
     {
     }
-
 
     public bool IsFailed { get; set; }
 

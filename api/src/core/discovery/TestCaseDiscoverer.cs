@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using Api;
+
 using Execution;
 
 internal static class TestCaseDiscoverer

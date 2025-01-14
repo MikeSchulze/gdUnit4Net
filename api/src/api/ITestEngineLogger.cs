@@ -1,4 +1,4 @@
-﻿namespace GdUnit4;
+﻿namespace GdUnit4.Api;
 
 /// <summary>
 ///     Abstract base class for test engine logging functionality.

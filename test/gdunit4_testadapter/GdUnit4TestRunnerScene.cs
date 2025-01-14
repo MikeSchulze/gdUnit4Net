@@ -6,6 +6,8 @@ namespace GdUnit4.TestRunner;
 
 using System;
 
+using Api;
+
 using Core.Runners;
 
 using Godot;

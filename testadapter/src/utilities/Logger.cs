@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 
+using Api;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 /// <summary>
