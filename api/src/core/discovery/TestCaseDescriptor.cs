@@ -13,6 +13,7 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     public required string ManagedMethod { get; init; }
     public required Guid Id { get; init; }
     public required int LineNumber { get; init; }
+    public required string? CodeFilePath { get; init; }
     public required int AttributeIndex { get; init; }
     public required bool RequireRunningGodotEngine { get; init; }
 

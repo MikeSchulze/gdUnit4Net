@@ -2,8 +2,10 @@ namespace GdUnit4.Tests.Core;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Api;
@@ -31,7 +33,6 @@ using TestCase = GdUnit4.Core.Execution.TestCase;
 
 [RequireGodotRuntime]
 [TestSuite]
-#pragma warning disable CA1001 // Types that own disposable fields should be disposable
 public class ExecutorTest : ITestEventListener
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
 {
@@ -41,11 +42,9 @@ public class ExecutorTest : ITestEventListener
 #pragma warning restore CS0649
     private Executor executor = null!;
     private List<TestEvent> CollectedEvents { get; } = new();
-
-
+    private static CodeNavigationDataProvider? NavigationDataProvider { get; set; }
     public bool IsFailed { get; set; }
     public int CompletedTests { get; set; }
-
 
     void IDisposable.Dispose()
     {
@@ -69,6 +68,29 @@ public class ExecutorTest : ITestEventListener
     }
 
     [Before]
+    public static void ClassSetup()
+    {
+        var assembly = typeof(ExecutorTest).Assembly;
+        var location = assembly.ManifestModule.FullyQualifiedName;
+
+        // Fallback approach if needed
+        if (location == "<Unknown>" || !File.Exists(location))
+        {
+            // Try to find the DLL in the execution directory
+            var assemblyName = assembly.GetName().Name;
+            var executionPath = AppDomain.CurrentDomain.BaseDirectory;
+            location = Path.Combine(executionPath, $"{assemblyName}.dll");
+        }
+
+
+        NavigationDataProvider = new CodeNavigationDataProvider(location);
+    }
+
+    [After]
+    public static void ClassCleanup()
+        => NavigationDataProvider?.Dispose();
+
+    [Before]
     public void Before()
     {
         executor = new Executor();
@@ -83,7 +105,7 @@ public class ExecutorTest : ITestEventListener
     public void TeardownTest()
         => ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, true);
 
-    private async Task<List<TestEvent>> ExecuteTestSuite<T>()
+    private async Task<List<TestEvent>> ExecuteTestSuite<T>(bool reportOrphans = true)
     {
         var type = typeof(T);
         var testSuiteName = type.Name;
@@ -94,7 +116,7 @@ public class ExecutorTest : ITestEventListener
         var testSuiteNode = LoadTestSuiteNode(type);
 
         CollectedEvents.Clear();
-        var response = await new ExecuteTestSuiteCommand(testSuiteNode, false, false).Execute(this);
+        var response = await new ExecuteTestSuiteCommand(testSuiteNode, false, reportOrphans).Execute(this);
         AssertThat(response.StatusCode).IsEqual(HttpStatusCode.OK);
 
         if (verbose)
@@ -144,7 +166,8 @@ public class ExecutorTest : ITestEventListener
 
     private static List<ITuple> ExpectedTestCase(string suiteName, string testName, List<object[]> testCaseParams)
     {
-        var expectedEvents = new List<ITuple> { Tuple(TESTCASE_BEFORE, suiteName, testName, 0) };
+        //var expectedEvents = new List<ITuple> { Tuple(TESTCASE_BEFORE, suiteName, testName, 0) };
+        var expectedEvents = new List<ITuple>();
         foreach (var testCaseParam in testCaseParams)
         {
             var testCaseName = TestCase.BuildDisplayName(testName, new TestCaseAttribute(testCaseParam));
@@ -152,16 +175,15 @@ public class ExecutorTest : ITestEventListener
             expectedEvents.Add(Tuple(TESTCASE_AFTER, suiteName, testCaseName, 0));
         }
 
-        expectedEvents.Add(Tuple(TESTCASE_AFTER, suiteName, testName, 0));
+        // expectedEvents.Add(Tuple(TESTCASE_AFTER, suiteName, testName, 0));
         return expectedEvents;
     }
-
 
     private static TestSuiteNode LoadTestSuiteNode(Type testSuiteType)
     {
         ITestEngineLogger logger = new GodotLogger();
-        var assemblyLocation = testSuiteType.Assembly.Location;
-        var tests = TestCaseDiscoverer.DiscoverTests(logger, assemblyLocation, testSuiteType).ToList();
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var tests = TestCaseDiscoverer.DiscoverTests(logger, NavigationDataProvider!, assemblyLocation, testSuiteType).ToList();
         var first = tests.First();
 
         var assemblyNode = new TestAssemblyNode
@@ -195,7 +217,6 @@ public class ExecutorTest : ITestEventListener
         assemblyNode.Suites.Add(testSuiteNode);
         return testSuiteNode;
     }
-
 
     [GodotTestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
     public async Task ExecuteSuccess()
@@ -515,9 +536,9 @@ public class ExecutorTest : ITestEventListener
                     new(WARN, 0, """
                                  WARNING:
                                      Detected <2> orphan nodes during test setup stage!
-                                     Check SetupTest:26 and TearDownTest:34 for unfreed instances!
+                                     Check SetupTest:27 and TearDownTest:35 for unfreed instances!
                                  """),
-                    new(WARN, 39, """
+                    new(WARN, 41, """
                                   WARNING:
                                       Detected <3> orphan nodes during test execution!
                                   """)
@@ -530,13 +551,13 @@ public class ExecutorTest : ITestEventListener
                     new(WARN, 0, """
                                  WARNING:
                                      Detected <2> orphan nodes during test setup stage!
-                                     Check SetupTest:26 and TearDownTest:34 for unfreed instances!
+                                     Check SetupTest:27 and TearDownTest:35 for unfreed instances!
                                  """),
-                    new(WARN, 48, """
+                    new(WARN, 50, """
                                   WARNING:
                                       Detected <4> orphan nodes during test execution!
                                   """),
-                    new(FAILURE, 54, """
+                    new(FAILURE, 55, """
                                      Expecting be empty:
                                       but is
                                          "TestCase2"
@@ -549,7 +570,7 @@ public class ExecutorTest : ITestEventListener
                 new(WARN, 0, """
                              WARNING:
                                  Detected <1> orphan nodes during test suite setup stage!
-                                 Check SetupSuite:15 and TearDownSuite:22 for unfreed instances!
+                                 Check SetupSuite:16 and TearDownSuite:23 for unfreed instances!
                              """)
             })
         );
@@ -560,7 +581,7 @@ public class ExecutorTest : ITestEventListener
     {
         // simulate test suite execution with disabled orphan detection
         ProjectSettings.SetSetting(GdUnit4Settings.REPORT_ORPHANS, false);
-        var events = await ExecuteTestSuite<TestSuiteFailAndOrphansDetected>();
+        var events = await ExecuteTestSuite<TestSuiteFailAndOrphansDetected>(false);
 
         AssertTestCaseNames(events)
             .ContainsExactly(ExpectedEvents("TestSuiteFailAndOrphansDetected", "TestCase1", "TestCase2"));
@@ -592,7 +613,7 @@ public class ExecutorTest : ITestEventListener
             // ends with failure
             Tuple(TESTCASE_AFTER, "TestCase2", new List<TestReport>
             {
-                new(FAILURE, 54, """
+                new(FAILURE, 55, """
                                  Expecting be empty:
                                   but is
                                      "TestCase2"
@@ -665,7 +686,7 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTSUITE_BEFORE, "Before", new List<TestReport>()),
             // reports a test interruption due to a timeout
             Tuple(TESTCASE_BEFORE, "TestCase1", new List<TestReport>()),
-            Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport> { new(INTERRUPTED, 31, "The execution has timed out after 1s.") }
+            Tuple(TESTCASE_AFTER, "TestCase1", new List<TestReport> { new(INTERRUPTED, 32, "The execution has timed out after 1s.") }
             ),
 
             // reports a test failure
@@ -687,7 +708,7 @@ public class ExecutorTest : ITestEventListener
             Tuple(TESTCASE_BEFORE, "TestCase4", new List<TestReport>()),
             Tuple(TESTCASE_AFTER, "TestCase4", new List<TestReport>
                 {
-                    new(FAILURE, 55, """
+                    new(FAILURE, 56, """
                                      Invalid method signature found at: TestCase4.
                                       You must return a <Task> for an asynchronously specified method.
                                      """)
@@ -706,7 +727,7 @@ public class ExecutorTest : ITestEventListener
         var events = await ExecuteTestSuite<TestSuiteParameterizedTests>();
 
         var suiteName = "TestSuiteParameterizedTests";
-        var expectedEvents = new List<ITuple> { Tuple(TESTSUITE_BEFORE, suiteName, "Before", 4) };
+        var expectedEvents = new List<ITuple> { Tuple(TESTSUITE_BEFORE, suiteName, "Before", 9) };
         expectedEvents.AddRange(ExpectedTestCase(suiteName, "ParameterizedBoolValue", new List<object[]>
         {
             new object[] { 0, false },
@@ -730,26 +751,26 @@ public class ExecutorTest : ITestEventListener
 
         AssertEventStates(events).Contains(
             Tuple(TESTSUITE_BEFORE, "Before", true, false, false, false),
-            Tuple(TESTCASE_BEFORE, "ParameterizedBoolValue", true, false, false, false),
+            //Tuple(TESTCASE_BEFORE, "ParameterizedBoolValue", true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(0, false)), true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute(1, true)), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute()), true, false, false, false),
-            Tuple(TESTCASE_BEFORE, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
+            //Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedBoolValue", new TestCaseAttribute()), true, false, false, false),
+            //Tuple(TESTCASE_BEFORE, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(1, 2, 3, 6)), true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(3, 4, 5, 12)), true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute(6, 7, 8, 21)), true, false, false, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
+            //Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValues", new TestCaseAttribute()), true, false, false, false),
             // a test with failing test cases
-            Tuple(TESTCASE_BEFORE, "ParameterizedIntValuesFail", true, false, false, false),
+            //Tuple(TESTCASE_BEFORE, "ParameterizedIntValuesFail", true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(1, 2, 3, 6)), true, false, false, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(3, 4, 5, 11)), false, false, true, false),
             Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(6, 7, 8, 22)), false, false, true, false),
-            Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute()), false, false, true, false),
+            //Tuple(TESTCASE_AFTER, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute()), false, false, true, false),
             // the single parameterized test
-            Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest", true, false, false, false),
-            Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest(True)", true, false, false, false),
-            Tuple(TESTCASE_AFTER, "ParameterizedSingleTest(True)", true, false, false, false),
-            Tuple(TESTCASE_AFTER, "ParameterizedSingleTest", true, false, false, false),
+            //Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest", true, false, false, false),
+            Tuple(TESTCASE_BEFORE, "ParameterizedSingleTest (True)", true, false, false, false),
+            Tuple(TESTCASE_AFTER, "ParameterizedSingleTest (True)", true, false, false, false),
+            //Tuple(TESTCASE_AFTER, "ParameterizedSingleTest", true, false, false, false),
             // test suite is failing
             Tuple(TESTSUITE_AFTER, "After", false, false, true, false)
         );

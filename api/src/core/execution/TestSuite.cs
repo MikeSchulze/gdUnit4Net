@@ -69,7 +69,7 @@ internal sealed class TestSuite : IDisposable
             .Select(mi =>
             {
                 var lineNumber = syntaxTree != null ? GdUnitTestSuiteBuilder.TestCaseLineNumber(syntaxTree, mi.Name) : -1;
-                return new TestCase(Guid.Empty, mi, lineNumber);
+                return new TestCase(Guid.Empty, mi, lineNumber, 0);
             })
             .ToList();
 
@@ -80,7 +80,7 @@ internal sealed class TestSuite : IDisposable
             .Join(includedTests,
                 m => m.Name,
                 test => test.ManagedMethod,
-                (mi, test) => new TestCase(test.Id, mi, test.LineNumber))
+                (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
             .ToList();
 
 

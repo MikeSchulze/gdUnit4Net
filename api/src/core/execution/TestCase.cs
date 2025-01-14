@@ -9,12 +9,13 @@ using Extensions;
 
 internal sealed class TestCase
 {
-    public TestCase(Guid id, MethodInfo methodInfo, int lineNumber)
+    public TestCase(Guid id, MethodInfo methodInfo, int lineNumber, int attributeIndex)
     {
         Id = id;
         MethodInfo = methodInfo;
         Line = lineNumber;
         Parameters = InitialParameters();
+        TestCaseAttribute = TestCaseAttributes[attributeIndex];
     }
 
     public string Name => MethodInfo.Name;
@@ -27,12 +28,12 @@ internal sealed class TestCase
         private set;
     }
 
-    public IEnumerable<TestCaseAttribute> TestCaseAttributes
-        => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter);
+    public List<TestCaseAttribute> TestCaseAttributes
+        => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter).ToList();
 
     private Func<TestCaseAttribute, bool> TestParametersFilter { get; } = _ => true;
 
-    public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
+    public TestCaseAttribute TestCaseAttribute { get; init; }
 
     internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
@@ -53,7 +54,7 @@ internal sealed class TestCase
         set;
     }
 
-    public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
+    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : Parameters.SelectMany(ResolveParam).ToArray();
 
     private IEnumerable<object> ResolveParam(object input)
     {

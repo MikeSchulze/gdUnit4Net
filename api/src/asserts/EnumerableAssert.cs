@@ -306,7 +306,8 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         };
     }
 
-    private static Func<TValue?, bool> IsEquals(TValue? c) => e => Comparable.IsEqual(c, e).Valid;
+    // TODO replace reference equal with Comparable.IsEqual
+    private static Func<TValue?, bool> IsEquals(TValue? c) => e => c.UnboxVariant() == e.UnboxVariant(); //Comparable.IsEqual(c, e).Valid;
 
     private static Func<TValue?, bool> IsSame(TValue? c) => e => AssertBase<TValue>.IsSame(c, e);
 

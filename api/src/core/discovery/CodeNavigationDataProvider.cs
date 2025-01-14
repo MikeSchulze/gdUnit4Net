@@ -1,4 +1,4 @@
-namespace GdUnit4.TestAdapter.Discovery;
+namespace GdUnit4.Core.Discovery;
 
 using System;
 using System.Linq;
@@ -8,15 +8,13 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 internal sealed class CodeNavigationDataProvider : IDisposable
 {
-    private readonly Assembly assembly;
+    //  private readonly Assembly assembly;
     private readonly DiaSession diaSession;
     private bool disposed;
 
-    public CodeNavigationDataProvider(string assemblyPath)
-    {
-        assembly = Assembly.LoadFrom(assemblyPath);
+    public CodeNavigationDataProvider(string assemblyPath) =>
+        // assembly = Assembly.LoadFrom(assemblyPath);
         diaSession = new DiaSession(assemblyPath);
-    }
 
     public void Dispose()
     {
@@ -28,10 +26,9 @@ internal sealed class CodeNavigationDataProvider : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public CodeNavigation GetNavigationData(string managedType, string managedMethod)
+    public CodeNavigation GetNavigationData(MethodInfo mi)
     {
-        var mi = GetMethodInfo(managedType, managedMethod);
-        var navigationData = TryGetNavigationDataForMethod(managedType, mi)
+        var navigationData = TryGetNavigationDataForMethod(mi.DeclaringType.FullName, mi)
                              ?? TryGetNavigationDataForAsyncMethod(mi);
         return new CodeNavigation
         {
@@ -40,9 +37,6 @@ internal sealed class CodeNavigationDataProvider : IDisposable
             Method = mi
         };
     }
-
-    private MethodInfo GetMethodInfo(string managedType, string managedMethod) =>
-        assembly.GetType(managedType)!.GetMethod(managedMethod)!;
 
     private DiaNavigationData? TryGetNavigationDataForMethod(string className, MethodInfo methodInfo)
     {
@@ -81,9 +75,9 @@ internal sealed class CodeNavigationDataProvider : IDisposable
         public override string ToString()
             => $"""
                 CodeNavigation:
-                  Name: {Method.Name}
+                  Name: '{Method.Name}'
                   Line: {Line}
-                  Source: {Source}"";
+                  Source: '{Source}';
                 """;
     }
 }

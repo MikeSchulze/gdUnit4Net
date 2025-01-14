@@ -16,8 +16,10 @@ internal static class TestCaseDiscoverer
         var assembly = Assembly.LoadFrom(testAssembly);
         var testSuites = assembly.GetTypes().Where(IsTestSuite).ToList();
 
+        using var codeNavigationProvider = new CodeNavigationDataProvider(testAssembly);
+
         var testCases = testSuites
-            .SelectMany(type => DiscoverTests(logger, testAssembly, type))
+            .SelectMany(type => DiscoverTests(logger, codeNavigationProvider, testAssembly, type))
             .ToList();
 
         logger.LogInfo(testCases.Count == 0
@@ -27,14 +29,14 @@ internal static class TestCaseDiscoverer
         return testCases;
     }
 
-    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger logger, string testAssembly, Type type)
+    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger logger, CodeNavigationDataProvider codeNavigationProvider, string testAssembly, Type type)
     {
         var requireEngineMode = type.GetCustomAttributes().Any(attr => attr is RequireGodotRuntimeAttribute);
         var testCases = type.GetMethods()
             .Where(m => m.GetCustomAttributes().Any(attr => attr is TestCaseAttribute))
             .ToList()
             .AsParallel()
-            .SelectMany(mi => DiscoverTestCasesFromMethod(mi, requireEngineMode, testAssembly, type.FullName!))
+            .SelectMany(mi => DiscoverTestCasesFromMethod(mi, codeNavigationProvider, requireEngineMode, testAssembly, type.FullName!))
             .ToList();
 
         logger.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
@@ -42,25 +44,32 @@ internal static class TestCaseDiscoverer
     }
 
     internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(MethodInfo mi,
+        CodeNavigationDataProvider codeNavigationProvider,
         bool requireEngineMode,
         string assemblyPath,
         string className)
         => mi.GetCustomAttributes()
             .Where(attr => attr is TestCaseAttribute)
             .Cast<TestCaseAttribute>()
-            .Select((attr, index) => new TestCaseDescriptor
+            .Select((attr, index) =>
             {
-                Id = Guid.NewGuid(),
-                AssemblyPath = assemblyPath,
-                ManagedType = className,
-                ManagedMethod = mi.Name,
-                FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, attr),
-                SimpleName = TestCase.BuildDisplayName(mi.Name, attr, index, mi.GetCustomAttributes().Count() > 1),
-                AttributeIndex = index,
-                LineNumber = 0,
-                RequireRunningGodotEngine = requireEngineMode || attr is GodotTestCaseAttribute
+                var navData = codeNavigationProvider.GetNavigationData(mi);
+
+                return new TestCaseDescriptor
+                {
+                    Id = Guid.NewGuid(),
+                    AssemblyPath = assemblyPath,
+                    ManagedType = className,
+                    ManagedMethod = mi.Name,
+                    FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, attr),
+                    SimpleName = TestCase.BuildDisplayName(mi.Name, attr, index, mi.GetCustomAttributes().Count() > 1),
+                    AttributeIndex = index,
+                    LineNumber = navData.Line,
+                    CodeFilePath = navData.Source,
+                    RequireRunningGodotEngine = requireEngineMode || attr is GodotTestCaseAttribute
+                };
             })
-            .OrderBy(test => test.ManagedMethod)
+            .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
             .ToList();
 
     private static bool IsTestSuite(Type type) =>

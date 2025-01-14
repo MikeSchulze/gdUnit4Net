@@ -88,7 +88,12 @@ internal class TestEvent : IEquatable<TestEvent>
             Reports = reports ?? new List<TestReport>()
         };
 
-    public override bool Equals(object? obj) => obj is TestEvent other && Equals(other);
+    public override bool Equals(object? obj)
+    {
+        if (obj is TestEvent other)
+            return Equals(other);
+        return false;
+    }
 
 
     internal TestEvent WithStatistic(STATISTIC_KEY key, object value)

@@ -93,7 +93,7 @@ public partial class Executor : RefCounted, IExecutor
             if (!ReportOrphanNodesEnabled)
                 Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             await GodotObjectExtensions.SyncProcessFrame;
-            using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled);
+            using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled, true);
             context.IsCaptureStdOut = runnerConfig.CaptureStdOut;
             await new TestSuiteExecutionStage(testSuite).Execute(context);
         }

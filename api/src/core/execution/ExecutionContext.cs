@@ -17,7 +17,7 @@ internal sealed class ExecutionContext : IDisposable
 {
     private int iteration;
 
-    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode = false)
+    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
         MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
@@ -35,7 +35,8 @@ internal sealed class ExecutionContext : IDisposable
         IsEngineMode = isEngineMode;
     }
 
-    public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+    public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled,
+        context.IsEngineMode)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -43,35 +44,22 @@ internal sealed class ExecutionContext : IDisposable
         CurrentTestCase = context.CurrentTestCase;
         MethodArguments = methodArguments;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
-        IsEngineMode = context.IsEngineMode;
+        //FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, TestCaseName, new TestCaseAttribute(methodArguments));
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+    public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
     {
         context.SubExecutionContexts.Add(this);
-        TestCaseName = TestCase.BuildDisplayName(testCase.Name);
-        //FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
+        TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCase.TestCaseAttribute);
+        // FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
         CurrentTestCase = testCase;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-        IsEngineMode = context.IsEngineMode;
-    }
-
-    public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute)
-        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
-    {
-        context.SubExecutionContexts.Add(this);
-        TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCaseAttribute);
-        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCaseAttribute);
-        CurrentTestCase = testCase;
-        CurrentIteration = 0;
-        IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-        IsEngineMode = context.IsEngineMode;
     }
 
     public bool IsEngineMode { get; set; }

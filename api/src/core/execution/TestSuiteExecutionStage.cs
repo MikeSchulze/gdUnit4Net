@@ -49,8 +49,6 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
                 if (testCase.HasDataPoint)
                     await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase);
-                else if (testCase.IsParameterized)
-                    await RunParameterizedTest(stdoutHook, testCaseContext, testCase);
                 else
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
 
@@ -100,18 +98,6 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         catch (Exception e)
         {
             executionContext.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
-        }
-
-        executionContext.FireAfterTestEvent();
-    }
-
-    private async Task RunParameterizedTest(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase)
-    {
-        executionContext.FireBeforeTestEvent();
-        foreach (var testAttribute in testCase.TestCaseAttributes)
-        {
-            using ExecutionContext testCaseContext = new(executionContext, testCase, testAttribute);
-            await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, testAttribute.Arguments);
         }
 
         executionContext.FireAfterTestEvent();

@@ -26,13 +26,13 @@ public class ExecuteTestSuiteCommand : BaseCommand
         Suite = testSuite;
         IsCaptureStdOut = isCaptureStdOut;
         IsReportOrphanNodesEnabled = isReportOrphanNodesEnabled;
+        IsEngineMode = Suite.Tests.First().RequireRunningGodotEngine;
     }
 
     [JsonProperty] private TestSuiteNode Suite { get; set; } = null!;
-
-
-    private bool IsCaptureStdOut { get; }
-    private bool IsReportOrphanNodesEnabled { get; }
+    [JsonProperty] private bool IsCaptureStdOut { get; set; }
+    [JsonProperty] private bool IsEngineMode { get; set; }
+    [JsonProperty] private bool IsReportOrphanNodesEnabled { get; set; }
 
     public override async Task<Response> Execute(ITestEventListener testEventListener)
     {
@@ -47,12 +47,11 @@ public class ExecuteTestSuiteCommand : BaseCommand
                 if (!IsReportOrphanNodesEnabled)
                     Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
 
-                var isEngineMode = Suite.Tests.First().RequireRunningGodotEngine;
                 using ExecutionContext context = new(
                     testSuite,
                     new[] { testEventListener },
                     IsReportOrphanNodesEnabled,
-                    isEngineMode);
+                    IsEngineMode);
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
                     await GodotObjectExtensions.SyncProcessFrame;
