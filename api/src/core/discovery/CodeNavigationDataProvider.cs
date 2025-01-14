@@ -28,7 +28,7 @@ internal sealed class CodeNavigationDataProvider : IDisposable
 
     public CodeNavigation GetNavigationData(MethodInfo mi)
     {
-        var navigationData = TryGetNavigationDataForMethod(mi.DeclaringType.FullName, mi)
+        var navigationData = TryGetNavigationDataForMethod(mi.DeclaringType!.FullName!, mi)
                              ?? TryGetNavigationDataForAsyncMethod(mi);
         return new CodeNavigation
         {
