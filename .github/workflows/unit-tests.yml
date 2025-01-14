@@ -97,10 +97,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           echo "prebuild projects"
-          dotnet build ./analyzers/gdUnit4Analyzers.csproj
-          dotnet build ./api/gdUnit4Api.csproj
-          dotnet build ./test/gdUnit4Test.csproj
-          dotnet build ./testadapter/gdUnit4TestAdapter.csproj
+          dotnet build
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
