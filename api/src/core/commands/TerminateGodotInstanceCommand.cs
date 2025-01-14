@@ -8,8 +8,22 @@ using Events;
 
 using Godot;
 
+using Newtonsoft.Json;
+
+/// <summary>
+///     Command to safely terminate a running Godot instance.
+/// </summary>
 public class TerminateGodotInstanceCommand : BaseCommand
 {
+    [JsonConstructor]
+    private TerminateGodotInstanceCommand() { }
+
+    /// <summary>
+    ///     Executes the termination command, shutting down the Godot instance.
+    /// </summary>
+    /// <remarks>
+    ///     This command gracefully closes the Godot scene tree and engine.
+    /// </remarks>
     public override Task<Response> Execute(ITestEventListener testEventListener)
     {
         Console.WriteLine("Terminating Godot instance.");

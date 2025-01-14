@@ -16,11 +16,20 @@ using Extensions;
 
 using Newtonsoft.Json;
 
+/// <summary>
+///     Command to execute a test suite with configurable execution options.
+/// </summary>
 public class ExecuteTestSuiteCommand : BaseCommand
 {
     [JsonConstructor]
     private ExecuteTestSuiteCommand() { }
 
+    /// <summary>
+    ///     Initializes a new instance of the ExecuteTestSuiteCommand.
+    /// </summary>
+    /// <param name="testSuite">The test suite to execute</param>
+    /// <param name="isCaptureStdOut">Whether to capture standard output during test execution</param>
+    /// <param name="isReportOrphanNodesEnabled">Whether to report orphaned nodes after test execution</param>
     public ExecuteTestSuiteCommand(TestSuiteNode testSuite, bool isCaptureStdOut, bool isReportOrphanNodesEnabled)
     {
         Suite = testSuite;
