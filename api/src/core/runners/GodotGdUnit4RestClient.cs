@@ -79,7 +79,7 @@ internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStr
     {
         try
         {
-            await Proxy.ConnectAsync(5000);
+            await Proxy.ConnectAsync(10000);
         }
         catch (Exception e)
         {
@@ -93,7 +93,9 @@ internal sealed class GodotGdUnit4RestClient : InOutPipeProxy<NamedPipeClientStr
         try
         {
             // await ExecuteCommand(new TerminateGodotInstanceCommand(), CancellationToken.None);
-            await Proxy.DisposeAsync();
+            // Give server time to process shutdown
+            await Task.Delay(100);
+            await DisposeAsync();
         }
         catch (Exception e)
         {
