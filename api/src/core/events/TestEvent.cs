@@ -5,11 +5,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+using Newtonsoft.Json;
+
 using Reporting;
 
 internal class TestEvent : IEquatable<TestEvent>
 {
     // constructor needs to serialize/deserialize by JsonConvert
+    [JsonConstructor]
     private TestEvent() { }
 
     private TestEvent(TYPE type, string resourcePath, string suiteName, string testName, int totalCount = 0, IDictionary<STATISTIC_KEY, object>? statistics = null,
@@ -36,8 +39,8 @@ internal class TestEvent : IEquatable<TestEvent>
         Reports = new List<TestReport>();
     }
 
-    public IDictionary<STATISTIC_KEY, object> Statistics { get; set; } = new Dictionary<STATISTIC_KEY, object>();
-    public List<TestReport> Reports { get; set; } = new();
+    public IDictionary<STATISTIC_KEY, object> Statistics { get; private init; } = new Dictionary<STATISTIC_KEY, object>();
+    public List<TestReport> Reports { get; private init; } = new();
 
     public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
     public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
@@ -136,9 +139,9 @@ internal class TestEvent : IEquatable<TestEvent>
     private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T defaultValue) =>
         Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : defaultValue;
 #pragma warning restore CA1854
-    public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, {""} ";
+    public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, IsSuccess:{IsSuccess} ";
 
-    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs.Equals(rhs);
+    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs != null && lhs.Equals(rhs);
 
     public static bool operator !=(TestEvent? lhs, TestEvent? rhs) => !(lhs == rhs);
 
