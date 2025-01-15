@@ -3,13 +3,12 @@ namespace GdUnit4.Tests.Core;
 using System;
 using System.Threading.Tasks;
 
-
 // will be ignored because of missing `[TestSuite]` annotation
 // used by executor integration test
 public class TestSuiteAllTestsFailWithExceptions
 {
-
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void ExceptionIsThrownOnSceneInvoke()
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithExceptionTest.tscn");
@@ -26,5 +25,4 @@ public class TestSuiteAllTestsFailWithExceptions
     [TestCase]
     public void ExceptionAtSyncMethod()
         => throw new ArgumentException("outer exception", new ArgumentNullException("inner exception"));
-
 }

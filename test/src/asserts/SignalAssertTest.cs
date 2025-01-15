@@ -25,7 +25,7 @@ public partial class SignalAssertTest
             .IsEmpty();
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task IsEmitted()
     {
         var node = AutoFree(new TestEmitter())!;
@@ -45,7 +45,7 @@ public partial class SignalAssertTest
                     .Replace("$obj", AssertFailures.AsObjectId(node))));
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task IsNoEmitted()
     {
         var node = AddNode(new Node2D());
@@ -66,7 +66,7 @@ public partial class SignalAssertTest
                     .Replace("$obj", AssertFailures.AsObjectId(node))));
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task NodeChangedEmittingSignals()
     {
         var node = AddNode(new Node2D());
@@ -93,7 +93,7 @@ public partial class SignalAssertTest
         await AssertSignal(node).IsEmitted("draw").WithTimeout(200);
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void IsSignalExists()
     {
         var node = AutoFree(new Node2D())!;
@@ -116,7 +116,7 @@ public partial class SignalAssertTest
                 .Replace("$obj", AssertFailures.AsObjectId(node)));
     }
 
-    [GodotTestCase(Timeout = 1000)]
+    [TestCase(Timeout = 1000)]
     public async Task MonitorOnSignal()
     {
         var emitterA = AutoFree(new MyEmitter())!;
@@ -159,7 +159,7 @@ public partial class SignalAssertTest
         await AssertSignal(emitterB).IsEmitted(MyEmitter.SignalName.SignalA).WithTimeout(50);
     }
 
-    [GodotTestCase(Timeout = 1000, Description = "See https://github.com/MikeSchulze/gdUnit4Net/issues/135")]
+    [TestCase(Timeout = 1000, Description = "See https://github.com/MikeSchulze/gdUnit4Net/issues/135")]
     public async Task EmitSignalOnNoneNodeObjects()
     {
         var emitter = AutoFree(new NonNodeEmitter())!;

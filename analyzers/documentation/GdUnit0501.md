@@ -8,13 +8,16 @@
 
 # Problem Description
 
-Test methods that interact with Godot types (such as Node, Scene, or other Godot-derived classes) must use `[GodotTestCase]` instead of `[TestCase]`.
-The `[GodotTestCase]` attribute ensures the test runs in a proper Godot engine environment, which is required for any Godot native functionality.
+Test methods that use Godot functionality (such as Node, Scene, or other Godot types)
+must be annotated with `[RequireGodotRuntime]`. This ensures proper test execution in
+the Godot engine environment.
+
+Add `[RequireGodotRuntime]` to either test method or class level.
 
 ### Error example:
 
 ```csharp
-    [TestCase] // ❌ GdUnit0501: Test method 'VerifyDictionaryTypes' uses Godot native types or calls but is marked with [TestCase]. Use [GodotTestCase] instead when testing Godot functionality.
+    [TestCase] // ❌ GdUnit0501: Test method 'TestWithGodot' uses Godot functionality but is not annotated with '[RequireGodotRuntime]'.
     public void TestWithGodot() 
     {
         var instance = new Node2D()
@@ -24,13 +27,27 @@ The `[GodotTestCase]` attribute ensures the test runs in a proper Godot engine e
 
 ### How to fix:
 
-Replace `[TestCase]` with `[GodotTestCase]` when testing Godot functionality:
+Add `[RequireGodotRuntime]` to method or class level when testing Godot functionality:
 
 ```csharp
-    [GodotTestCase] // ✅ Correct: Uses [GodotTestCase] for Godot runtime tests
-    public void TestDataPointProperty(int a, int b, int expected) 
+    [RequireGodotRuntime] // ✅ Correct: Method level annotation
+    [TestCase]
+    public void TestWithGodot() 
     {
-        var instance = new Node2D()
+        var instance = new Node2D();
         AssertThat(instance).IsNotNull();
+    }
+
+    // OR
+
+    [RequireGodotRuntime] // ✅ Correct: Class level annotation
+    public class MyTestClass
+    {
+        [TestCase]
+        public void TestWithGodot() 
+        {
+            var instance = new Node2D();
+            AssertThat(instance).IsNotNull();
+        }
     }
 ```

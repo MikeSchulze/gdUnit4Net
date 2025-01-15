@@ -49,7 +49,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("GdUnitSceneRunner: The given resource: 'res://src/core/resources/scenes/TestScene.gd' is not a scene.");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void LoadSceneByUid()
     {
         using var runner = ISceneRunner.Load("uid://cn8ucy2rheu0f", true);
@@ -61,8 +61,8 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("GdUnitSceneRunner: Can't load scene by given resource path: 'uid://invalid_uid'. The resource does not exists.");
     }
 
-    [GodotTestCase]
-    public void LoadSceneTSCNFormat()
+    [TestCase]
+    public void LoadSceneTscnFormat()
     {
         using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.tscn", true);
         AssertThat(runner.Scene())
@@ -70,7 +70,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsNotNull();
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void LoadSceneBinaryFormat()
     {
         using var runner = ISceneRunner.Load("res://src/core/resources/scenes/SimpleScene.scn", true);
@@ -80,7 +80,7 @@ public sealed class SceneRunnerCSharpSceneTest
     }
 
 
-    [GodotTestCase]
+    [TestCase]
     public void InitializeSceneBeforeAddingToSceneTree()
     {
         var currentScene = ((PackedScene)ResourceLoader.Load("res://src/core/resources/scenes/TestSceneWithInitialization.tscn")).Instantiate<TestSceneWithInitialization>();
@@ -101,7 +101,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertThat(actualScene.MethodCalls[1]).IsEqual("_Ready");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void GetProperty()
     {
         // try access to a public property
@@ -116,7 +116,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void SetProperty()
     {
         sceneRunner.SetProperty("initial_color", Colors.Red);
@@ -126,7 +126,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .HasMessage("The property '_invalid' not exist on loaded scene.");
     }
 
-    [GodotTestCase]
+    [TestCase]
     public void InvokeSceneMethod()
     {
         AssertString(sceneRunner.Invoke("Add", 10, 12).ToString()).IsEqual("22");
@@ -146,7 +146,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertInt((int)stopwatch.ElapsedMilliseconds).IsBetween(900, 1100);
     }
 
-    [GodotTestCase(Timeout = 2000)]
+    [TestCase(Timeout = 2000)]
     public async Task SimulateFrames()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -167,7 +167,7 @@ public sealed class SceneRunnerCSharpSceneTest
         AssertObject(box1.Color).IsNotEqual(Colors.White);
     }
 
-    [GodotTestCase(Timeout = 1000)]
+    [TestCase(Timeout = 1000)]
     public async Task SimulateFramesWithDelay()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -179,11 +179,11 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // we wait for 10 frames each with a 50ms delay
         await sceneRunner.SimulateFrames(10, 50);
-        // after 10 frame and in sum 500ms is should be changed to red
+        // after 10 frame and in sum 500ms it should be changed to red
         AssertObject(box1.Color).IsEqual(Colors.Red);
     }
 
-    [GodotTestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
+    [TestCase(Description = "Example to test a scene with do a color cycle on box one each 500ms", Timeout = 4000)]
     public async Task RunSceneColorCycle()
     {
         sceneRunner.MaximizeView();
@@ -203,14 +203,14 @@ public sealed class SceneRunnerCSharpSceneTest
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, Colors.Green);
         AssertObject(box1.Color).IsEqual(Colors.Green);
 
-        // AwaitOnSignal must fail after an maximum timeout of 500ms because no signal 'panel_color_change' with given args color=Yellow is emitted
+        // AwaitOnSignal must fail after a maximum timeout of 500ms because no signal 'panel_color_change' with given args color=Yellow is emitted
         await AssertThrown(sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, Colors.Yellow).WithTimeout(700))
             .ContinueWith(result => result.Result?.IsInstanceOf<ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 700ms."));
         // verify the box is still green
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }
 
-    [GodotTestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
+    [TestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
     public async Task RunSceneSimulateKeyPressed()
     {
         // initial no spell is fired
@@ -229,11 +229,11 @@ public sealed class SceneRunnerCSharpSceneTest
         // wait spell is exploded
         await spell.AwaitSignal(Spell.SignalName.SpellExplode, spell).WithTimeout(1100);
 
-        // verify spell is removed when is explode
+        // verify spell is removed when is exploded
         AssertObject(sceneRunner.FindChild("Spell")).IsNull();
     }
 
-    [GodotTestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 20000)]
+    [TestCase(Description = "Example to simulate mouse pressed on buttons", Timeout = 20000)]
     public async Task RunSceneSimulateMouseEvents()
     {
         sceneRunner.MaximizeView();
@@ -302,7 +302,7 @@ public sealed class SceneRunnerCSharpSceneTest
     public async Task AwaitMethodWithTimeFactor()
     {
         sceneRunner.SetTimeFactor(10);
-        // wait until 'ColorCycle()' returns 'black' (using small timeout we expect the method will now processes 10 times faster)
+        // wait until 'ColorCycle()' returns 'black' (using small timeout we expect the method will now process 10 times faster)
         await sceneRunner.AwaitMethod<string>("ColorCycle").IsEqual("black").WithTimeout(300);
 
         // wait for returns 'red' but will never happen and expect is interrupted after 150ms
@@ -310,7 +310,7 @@ public sealed class SceneRunnerCSharpSceneTest
             .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task AwaitSignal()
     {
         var box1 = sceneRunner.GetProperty<ColorRect>("Box1")!;
@@ -323,20 +323,20 @@ public sealed class SceneRunnerCSharpSceneTest
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, new Color(0, 1, 0)); // Green
     }
 
-    [GodotTestCase]
+    [TestCase]
     public async Task DisposeSceneRunner()
     {
-        var sceneRunner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);
+        var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);
         var tree = (SceneTree)Engine.GetMainLoop();
 
-        var currentScene = sceneRunner.Scene();
+        var currentScene = runner.Scene();
         var nodePath = currentScene.GetPath();
         // check scene is loaded and added to the root node
         AssertThat(GodotObject.IsInstanceValid(currentScene)).IsTrue();
         AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNotNull();
 
         await ISceneRunner.SyncProcessFrame;
-        sceneRunner.Dispose();
+        runner.Dispose();
 
         await ISceneRunner.SyncProcessFrame;
         // check scene is freed and removed from the root node

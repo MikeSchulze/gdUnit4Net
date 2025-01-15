@@ -16,8 +16,8 @@ internal static class DiagnosticRules
         public const string DataPointWithMultipleTestCase = "GdUnit0201";
 
         // Godot runtime detection rules at 500
-        public const string RequiresGodotRuntimeId = "GdUnit0500";
-        public const string GodotEngineDiagnosticId = "GdUnit0501";
+        public const string RequiresGodotRuntimeOnClassId = "GdUnit0500";
+        public const string RequiresGodotRuntimeOnMethodId = "GdUnit0501";
     }
 
 
@@ -44,32 +44,38 @@ internal static class DiagnosticRules
 
     internal static class GodotEngine
     {
-        public static readonly DiagnosticDescriptor GodotNativeCallNotAllowed = new(
-            RuleIds.GodotEngineDiagnosticId,
+        public static readonly DiagnosticDescriptor RequiresGodotRuntimeOnMethod = new(
+            RuleIds.RequiresGodotRuntimeOnMethodId,
             "Godot Runtime Required for Test Method",
-            "Test method '{0}' uses Godot native types or calls but is marked with `[TestCase]`. Use `[GodotTestCase]` instead when testing Godot functionality.",
+            "Test method '{0}' uses Godot functionality but is not annotated with `[RequireGodotRuntime]`",
             Categories.AttributeUsage,
             DiagnosticSeverity.Error,
             true,
             """
-            Test methods that interact with Godot types (such as Node, Scene, or other Godot-derived classes) must use `[GodotTestCase]` instead of `[TestCase]`.
-            The `[GodotTestCase]` attribute ensures the test runs in a proper Godot engine environment, which is required for any Godot native functionality.
+            Test methods that use Godot functionality (such as Node, Scene, or other Godot types)
+            must be annotated with `[RequireGodotRuntime]`. This ensures proper test execution in
+            the Godot engine environment.
+
+            Add `[RequireGodotRuntime]` to either test method or class level.
             """,
-            $"{HELP_LINK}/{RuleIds.GodotEngineDiagnosticId}.md",
+            $"{HELP_LINK}/{RuleIds.RequiresGodotRuntimeOnMethodId}.md",
             WellKnownDiagnosticTags.Compiler);
 
-        public static readonly DiagnosticDescriptor RequiresGodotRuntime = new(
-            RuleIds.RequiresGodotRuntimeId,
+        public static readonly DiagnosticDescriptor RequiresGodotRuntimeOnClass = new(
+            RuleIds.RequiresGodotRuntimeOnClassId,
             "Godot Runtime Required for Test Class",
-            "Test class '{0}' uses Godot native types or calls in test hooks but is not marked with `[RequireGodotRuntime]`",
+            "Test class '{0}' uses Godot native types or calls in test hooks but is not annotated with `[RequireGodotRuntime]`",
             Categories.AttributeUsage,
             DiagnosticSeverity.Error,
             true,
             """
-            Test classes that use Godot functionality in test hooks (such as `[Before]`, `[After]`, `[BeforeTest]`, `[AfterTest]`) require a running Godot engine.
-            These test classes must be marked with the `[RequireGodotRuntime]` attribute to ensure proper test execution in the Godot environment.
+            Test classes with hooks (`[Before]`, `[After]`, `[BeforeTest]`, `[AfterTest]`) that use Godot functionality
+            must be annotated with `[RequireGodotRuntime]`. This ensures proper test execution in the
+            Godot engine environment.
+
+            Add `[RequireGodotRuntime]` to the test class level.
             """,
-            $"{HELP_LINK}/{RuleIds.RequiresGodotRuntimeId}.md",
+            $"{HELP_LINK}/{RuleIds.RequiresGodotRuntimeOnClassId}.md",
             WellKnownDiagnosticTags.Compiler);
     }
 }

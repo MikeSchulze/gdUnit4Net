@@ -28,7 +28,8 @@ public class AssertionsTest
             .HasFileLineNumber(27)
             .HasMessage("Test not yet implemented!");
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AssertThatVariants()
     {
         // Godot number Variants
@@ -82,7 +83,8 @@ public class AssertionsTest
         AssertObject(AssertThat(new bool())).IsInstanceOf<IBoolAssert>();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AssertThatEnumerable()
     {
         AssertObject(AssertThat(Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
@@ -94,7 +96,8 @@ public class AssertionsTest
         AssertObject(AssertThat(new Array<int>())).IsInstanceOf<IEnumerableAssert<int>>();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AssertThatDictionary()
     {
         AssertObject(AssertThat(new Dictionary())).IsInstanceOf<IDictionaryAssert<Variant, Variant>>();
@@ -104,14 +107,16 @@ public class AssertionsTest
         AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert<string, object>>();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AutoFreeOnNull()
     {
         var obj = AutoFree((Node)null!);
         AssertThat(obj).IsNull();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AsObjectId()
     {
         var obj1 = new object();
@@ -166,7 +171,8 @@ public class AssertionsTest
         }
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public async Task TestCatchStdOutFromTestRun()
     {
         Console.WriteLine("Console.WriteLine: first message");
