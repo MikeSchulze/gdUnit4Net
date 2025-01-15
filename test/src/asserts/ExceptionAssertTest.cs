@@ -21,7 +21,7 @@ public class ExceptionAssertTest
         return AssertThat(stackFrames?[frame]);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task TestCaseInnerException()
     {
         AssertThat(true).IsTrue();
@@ -52,7 +52,7 @@ public class ExceptionAssertTest
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task TestCaseInnerMethodException()
     {
         await ISceneRunner.SyncProcessFrame;
@@ -94,7 +94,7 @@ public class ExceptionAssertTest
             .Contains("src\\asserts\\ExceptionAssertTest.cs:line 87".Replace('\\', Path.DirectorySeparatorChar));
     }
 
-    [TestCase]
+    [GodotTestCase]
     public async Task TestCaseOuterMethodExceptionAndAwait()
     {
         await ISceneRunner.SyncProcessFrame;

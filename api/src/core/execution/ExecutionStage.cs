@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Exceptions;
@@ -19,11 +18,13 @@ using Monitoring;
 
 using Reporting;
 
-using static Reporting.TestReport;
+using static Api.ITestReport.ReportType;
+
+using Environment = System.Environment;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
-    private readonly GodotExceptionMonitor godotExceptionMonitor = new();
+    private GodotExceptionMonitor? godotExceptionMonitor;
 
     protected ExecutionStage(string name, Type type)
     {
@@ -50,10 +51,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
 
+
     public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
-        if (Method == default)
+        if (Method == null)
         {
             await Task.Run(() => { });
             return;
@@ -64,16 +66,20 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             // if the method is defined asynchronously, the return type must be a Task
             if (IsAsync != IsTask)
             {
-                context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, ExecutionLineNumber(context),
+                context.ReportCollector.Consume(new TestReport(Failure, ExecutionLineNumber(context),
                     $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
                 return;
             }
 
-            if (IsMonitoringOnGodotExceptionsEnabled)
+            if (IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
+            {
+                godotExceptionMonitor = new GodotExceptionMonitor();
                 godotExceptionMonitor.Start();
+            }
+
             await ExecuteStage(context);
-            if (IsMonitoringOnGodotExceptionsEnabled)
-                await godotExceptionMonitor.StopThrow();
+            if (IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
+                await godotExceptionMonitor!.StopThrow();
 
             ValidateForExpectedException(context);
         }
@@ -82,7 +88,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (ValidateForExpectedException(context, e))
                 return;
             if (context.FailureReporting)
-                context.ReportCollector.Consume(new TestReport(ReportType.INTERRUPTED, e.LineNumber, e.Message));
+                context.ReportCollector.Consume(new TestReport(Interrupted, e.LineNumber, e.Message));
         }
         catch (TestFailedException e)
         {
@@ -105,7 +111,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         StageAttribute = stageAttribute;
         IsAsync = method?.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
-        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttribute<GodotExceptionMonitorAttribute>() != null;
+        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
     }
 
 
@@ -146,7 +152,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             var stack = new StackTrace(exception, true);
             var lineNumber = ScanFailureLineNumber(stack);
-            context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
+            context.ReportCollector.Consume(new TestReport(Failure, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
         }
     }
 
@@ -185,16 +191,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private async Task ExecuteStage(ExecutionContext context)
     {
-        using var tokenSource = new CancellationTokenSource();
-        var timeout = TimeSpan.FromMilliseconds(StageAttribute!.Timeout != -1 ? StageAttribute.Timeout : DefaultTimeout);
-        //Godot.GD.PrintS("Execute", StageName);//, context.MethodArguments.Formatted());
-        var obj = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments);
-        var task = obj is Task t ? t : Task.Run(() => { });
-        var completedTask = await Task.WhenAny(task, Task.Delay(timeout, tokenSource.Token));
-        tokenSource.Cancel();
+        var timeout = TimeSpan.FromMilliseconds(StageAttribute?.Timeout ?? DefaultTimeout);
+        var task = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments) as Task ?? Task.CompletedTask;
+        var completedTask = await Task.WhenAny(task, Task.Delay(timeout));
         if (completedTask == task)
-            // Very important in order to propagate exceptions
-            await task;
+            await task; // Propagate exceptions from the original task
         else
             throw new ExecutionTimeoutException($"The execution has timed out after {timeout.Humanize()}.", ExecutionLineNumber(context));
     }

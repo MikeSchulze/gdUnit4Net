@@ -9,14 +9,18 @@ using Extensions;
 
 internal sealed class TestCase
 {
-    public TestCase(MethodInfo methodInfo, int lineNumber)
+    public TestCase(Guid id, MethodInfo methodInfo, int lineNumber, int attributeIndex)
     {
+        Id = id;
         MethodInfo = methodInfo;
         Line = lineNumber;
         Parameters = InitialParameters();
+        TestCaseAttribute = TestCaseAttributes[attributeIndex];
     }
 
     public string Name => MethodInfo.Name;
+
+    public Guid Id { get; }
 
     public int Line
     {
@@ -24,12 +28,12 @@ internal sealed class TestCase
         private set;
     }
 
-    public IEnumerable<TestCaseAttribute> TestCaseAttributes
-        => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter);
+    public List<TestCaseAttribute> TestCaseAttributes
+        => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter).ToList();
 
     private Func<TestCaseAttribute, bool> TestParametersFilter { get; } = _ => true;
 
-    public TestCaseAttribute TestCaseAttribute => MethodInfo.GetCustomAttribute<TestCaseAttribute>()!;
+    public TestCaseAttribute TestCaseAttribute { get; init; }
 
     internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
@@ -50,7 +54,7 @@ internal sealed class TestCase
         set;
     }
 
-    public object[] Arguments => Parameters.SelectMany(ResolveParam).ToArray();
+    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : Parameters.SelectMany(ResolveParam).ToArray();
 
     private IEnumerable<object> ResolveParam(object input)
     {
@@ -70,37 +74,24 @@ internal sealed class TestCase
                 )
             ).ToList();
 
-    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute)
+    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = 0, bool withAttributeIndex = false)
     {
         var name = attribute.TestName ?? testName;
-        if (attribute.Arguments.Length > 0)
-        {
-            var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
-            return $"{name}({parameters})";
-        }
+        if (withAttributeIndex) return $"{name} #{attributeIndex}";
 
-        return name;
+        if (attribute.Arguments.Length <= 0) return name;
+        var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
+        return $"{name} ({parameters})";
     }
 
     internal static string BuildDisplayName(string testName)
         => testName;
 
-    internal static string BuildDisplayName(string testName, params object[] arguments)
+    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute attr)
     {
-        if (arguments.Length > 0)
-        {
-            var parameters = string.Join(", ", arguments.Select(GdUnitExtensions.Formatted));
-            return $"{testName}({parameters})";
-        }
-
-        return testName;
-    }
-
-    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute? attr)
-    {
-        if (attr == null || attr.Arguments.Length == 0)
-            return $"{classNameSpace}.{testName}";
-        var parameterizedTestName = BuildDisplayName(testName, attr);
+        if (attr.Arguments.Length == 0)
+            return $"{classNameSpace}.{attr.TestName ?? testName}";
+        var parameterizedTestName = BuildDisplayName(testName, attr, -1);
         return $"{classNameSpace}.{testName}.{parameterizedTestName}";
     }
 }

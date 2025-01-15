@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Api;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -113,6 +115,7 @@ public class GdUnit4TestDiscovererTest
         mockRunContext.SetupGet(rc => rc.RunSettings)
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
 
+        //var assemblyPath = "D:\\development\\workspace\\gdUnit4Net\\test\\.godot\\mono\\temp\\bin\\Debug\\gdUnit4Test.dll"; //AssemblyPaths.LibraryPath;
         var assemblyPath = AssemblyPaths.LibraryPath;
         Console.WriteLine($"AssemblyPaths.LibraryPath: '{AssemblyPaths.LibraryPath}'");
         Assert.IsTrue(File.Exists(AssemblyPaths.LibraryPath), $"Can find the test assembly: '{AssemblyPaths.LibraryPath}'");

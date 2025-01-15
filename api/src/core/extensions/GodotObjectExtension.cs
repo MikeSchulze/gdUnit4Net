@@ -18,7 +18,7 @@ using Array = Godot.Collections.Array;
 /// </summary>
 internal static class GodotObjectExtensions
 {
-    private static SceneTree Instance =>
+    internal static SceneTree Instance =>
         Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("SceneTree is not initialized");
 
     /// <summary>

@@ -3,12 +3,12 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 
-using Discovery;
+using Api;
 
 using Microsoft.TestPlatform.AdapterUtilities;
-using Microsoft.TestPlatform.AdapterUtilities.ManagedNameUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -31,7 +31,7 @@ using TestCaseDescriptor = Core.Discovery.TestCaseDescriptor;
 public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
 {
 #pragma warning disable CA1859
-    private ITestEngineLogger Log { get; set; } = null!;
+    private ITestEngineLogger Logger { get; set; } = null!;
 #pragma warning restore CA1859
     internal static Version MinRequiredEngineVersion { get; } = new("4.4.0");
 
@@ -44,39 +44,37 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     {
         try
         {
-            Log = new Logger(logger);
+            Logger = new Logger(logger);
             if (ITestEngine.EngineVersion() < MinRequiredEngineVersion)
             {
-                Log.LogError($"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
-                Log.LogError("Abort the test discovery.");
+                Logger.LogError($"Wrong gdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
+                Logger.LogError("Abort the test discovery.");
                 return;
             }
 
-            var settings = GetGdUnit4Settings(discoveryContext);
+            var settings = GdUnit4SettingsProvider.LoadSettings(discoveryContext);
             var engineSettings = new TestEngineSettings
             {
                 CaptureStdOut = settings.CaptureStdOut,
                 Parameters = settings.Parameters
             };
-            var testEngine = ITestEngine.GetInstance(engineSettings, Log);
-            Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
+            var testEngine = ITestEngine.GetInstance(engineSettings, Logger);
+            Logger.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
 
             var filteredAssembles = FilterWithoutTestAdapter(sources);
 
             foreach (var assemblyPath in filteredAssembles)
                 try
                 {
-                    using var codeNavigationProvider = new CodeNavigationDataProvider(assemblyPath);
-
                     testEngine.Discover(assemblyPath)
-                        .ConvertAll(testCase => BuildTestCase(testCase, codeNavigationProvider, settings))
+                        .ConvertAll(testCase => BuildTestCase(testCase, settings))
                         .OrderBy(t => t.FullyQualifiedName)
                         .ToList()
                         .ForEach(discoverySink.SendTestCase);
                 }
                 catch (Exception e)
                 {
-                    Log.LogError($"Error discovering tests in {assemblyPath}: {e}");
+                    Logger.LogError($"Error discovering tests for assembly {assemblyPath}: {e}");
                 }
         }
         catch (Exception e)
@@ -85,49 +83,45 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
     }
 
-    private TestCase BuildTestCase(TestCaseDescriptor descriptor, CodeNavigationDataProvider navDataProvider, GdUnit4Settings settings)
+    private TestCase BuildTestCase(TestCaseDescriptor descriptor, GdUnit4Settings settings)
     {
-        var navData = navDataProvider.GetNavigationData(descriptor.ManagedType, descriptor.ManagedMethod);
-        if (!navData.IsValid)
-            Log.LogInfo(
-                $"Can't collect code navigation data for {descriptor.ManagedType}:{descriptor.ManagedMethod}    GetNavigationData -> {navData.Source}:{navData.Line}");
-
         TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), descriptor.AssemblyPath)
         {
             Id = descriptor.Id,
             DisplayName = GetDisplayName(descriptor, settings),
-            CodeFilePath = navData.Source,
-            LineNumber = navData.Line
+            CodeFilePath = descriptor.CodeFilePath,
+            LineNumber = descriptor.LineNumber
         };
         testCase.SetPropertyValue(TestCaseNameProperty, descriptor.FullyQualifiedName);
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
+        testCase.SetPropertyValue(ManagedMethodAttributeIndexProperty, descriptor.AttributeIndex);
+        testCase.SetPropertyValue(RequireRunningGodotEngineProperty, descriptor.RequireRunningGodotEngine);
 
-        ManagedNameHelper.GetManagedName(navData.Method, out _, out _, out var hierarchyValues);
-        ManagedNameParser.ParseManagedMethodName(descriptor.ManagedMethod, out var methodName, out _, out _);
-        if (hierarchyValues.Length > 0)
-        {
-            hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = null;
-            hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = methodName;
-            testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
-        }
+        var parts = SplitByNamespace(descriptor.ManagedType);
+        var hierarchyValues = new string[HierarchyConstants.Levels.TotalLevelCount];
+        hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = Path.GetFileNameWithoutExtension(descriptor.AssemblyPath);
+        hierarchyValues[HierarchyConstants.Levels.NamespaceIndex] = parts.namespaceName;
+        hierarchyValues[HierarchyConstants.Levels.ClassIndex] = parts.className;
+        hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = descriptor.ManagedMethod;
+        testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
 
         return testCase;
     }
 
-    private static GdUnit4Settings GetGdUnit4Settings(IDiscoveryContext discoveryContext)
+    private static (string namespaceName, string className) SplitByNamespace(string managedType)
     {
-        //var runConfiguration = XmlRunSettingsUtilities.GetRunConfigurationNode(discoveryContext.RunSettings?.SettingsXml);
-        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(RunSettingsXmlNode) as GdUnit4SettingsProvider;
-        var gdUnitSettings = gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
-        return gdUnitSettings;
+        var parts = managedType.Split('.');
+        var namespaceName = parts.Length == 1 ? "" : string.Join(".", parts.Take(parts.Length - 1));
+        var className = parts.Last();
+        return (namespaceName, className);
     }
 
     private static string GetDisplayName(TestCaseDescriptor input, GdUnit4Settings gdUnitSettings)
         => gdUnitSettings.DisplayName switch
         {
             DisplayNameOptions.SimpleName => input.SimpleName,
-            DisplayNameOptions.FullyQualifiedName => input.FullyQualifiedName,
+            DisplayNameOptions.FullyQualifiedName => input.FullyQualifiedName.Substring(input.FullyQualifiedName.LastIndexOf('.') + 1),
             _ => input.ManagedMethod
         };
 

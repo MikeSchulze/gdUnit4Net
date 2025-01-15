@@ -10,6 +10,8 @@ using Hooks;
 
 using Reporting;
 
+using static Api.ITestReport.ReportType;
+
 internal sealed class TestSuiteExecutionStage : IExecutionStage
 {
     public TestSuiteExecutionStage(TestSuite testSuite)
@@ -49,8 +51,6 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
                 if (testCase.HasDataPoint)
                     await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase);
-                else if (testCase.IsParameterized)
-                    await RunParameterizedTest(stdoutHook, testCaseContext, testCase);
                 else
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments);
 
@@ -85,7 +85,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     if (!executionContext.IsExpectingToFailWithException(e))
                         executionContext.ReportCollector.Consume(
                             new TestReport(
-                                TestReport.ReportType.INTERRUPTED,
+                                Interrupted,
                                 executionContext.CurrentTestCase?.Line ?? -1,
                                 e.Message,
                                 e.StackTrace));
@@ -99,19 +99,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         }
         catch (Exception e)
         {
-            executionContext.ReportCollector.Consume(new TestReport(TestReport.ReportType.FAILURE, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
-        }
-
-        executionContext.FireAfterTestEvent();
-    }
-
-    private async Task RunParameterizedTest(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase)
-    {
-        executionContext.FireBeforeTestEvent();
-        foreach (var testAttribute in testCase.TestCaseAttributes)
-        {
-            using ExecutionContext testCaseContext = new(executionContext, testCase, testAttribute);
-            await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, testAttribute.Arguments);
+            executionContext.ReportCollector.Consume(new TestReport(Failure, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
         }
 
         executionContext.FireAfterTestEvent();
@@ -137,7 +125,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             var stdoutMessage = stdoutHook?.GetCapturedOutput();
             if (!string.IsNullOrEmpty(stdoutMessage))
             {
-                executionContext.ReportCollector.PushFront(new TestReport(TestReport.ReportType.STDOUT,
+                executionContext.ReportCollector.PushFront(new TestReport(Stdout,
                     executionContext.CurrentTestCase?.Line ?? 0, stdoutMessage));
                 // and finally redirect to the console because it was fully captured
                 Console.WriteLine(stdoutMessage);

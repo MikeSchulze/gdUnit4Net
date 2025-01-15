@@ -2,8 +2,9 @@ namespace GdUnit4.Core.Reporting;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
+using Api;
 
 using Execution.Exceptions;
 
@@ -11,25 +12,10 @@ using Extensions;
 
 using Newtonsoft.Json;
 
-internal sealed class TestReport : IEquatable<TestReport>
+internal sealed class TestReport : ITestReport, IEquatable<TestReport>
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    [Flags]
-    public enum ReportType
-    {
-        SUCCESS,
-        WARN,
-        FAILURE,
-        ORPHAN,
-        TERMINATED,
-        INTERRUPTED,
-        ABORT,
-        SKIPPED,
-        STDOUT
-    }
-
     [JsonConstructor]
-    public TestReport(ReportType type, int lineNumber, string message, string? stackTrace = null)
+    public TestReport(ITestReport.ReportType type, int lineNumber, string message, string? stackTrace = null)
     {
         Type = type;
         LineNumber = lineNumber;
@@ -39,27 +25,13 @@ internal sealed class TestReport : IEquatable<TestReport>
 
     public TestReport(TestFailedException e)
     {
-        Type = ReportType.FAILURE;
+        Type = ITestReport.ReportType.Failure;
         LineNumber = e.LineNumber;
         Message = e.Message;
         StackTrace = e.StackTrace;
     }
 
-    public ReportType Type { get; }
-
-    public int LineNumber { get; }
-
-    public string Message { get; }
-
-    public string? StackTrace { get; set; }
-
-    private static IEnumerable<ReportType> ErrorTypes => new[] { ReportType.TERMINATED, ReportType.INTERRUPTED, ReportType.ABORT };
-
-    public bool IsError => ErrorTypes.Contains(Type);
-
-    public bool IsFailure => Type == ReportType.FAILURE;
-
-    public bool IsWarning => Type == ReportType.WARN;
+    private static IEnumerable<ITestReport.ReportType> ErrorTypes => new[] { ITestReport.ReportType.Terminated, ITestReport.ReportType.Interrupted, ITestReport.ReportType.Abort };
 
     public bool Equals(TestReport? other)
         => other is not null
@@ -69,6 +41,22 @@ internal sealed class TestReport : IEquatable<TestReport>
            && IsError == other.IsError
            && IsFailure == other.IsFailure
            && IsWarning == other.IsWarning;
+
+    public ITestReport.ReportType Type { get; }
+
+    public int LineNumber { get; }
+
+    public string Message { get; }
+
+    public string? StackTrace { get; set; }
+
+    public bool IsError => ErrorTypes.Contains(Type);
+
+    public bool IsFailure => Type == ITestReport.ReportType.Failure;
+
+    public bool IsWarning => Type == ITestReport.ReportType.Warning;
+
+    public bool Equals(ITestReport? other) => throw new NotImplementedException();
 
     public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
 
@@ -82,7 +70,7 @@ internal sealed class TestReport : IEquatable<TestReport>
 
     public TestReport Deserialize(IDictionary<string, object> serialized)
     {
-        var type = (ReportType)Enum.Parse(typeof(ReportType), (string)serialized["type"]);
+        var type = (ITestReport.ReportType)Enum.Parse(typeof(ITestReport.ReportType), (string)serialized["type"]);
         var lineNumber = (int)serialized["line_number"];
         var message = (string)serialized["message"];
         return new TestReport(type, lineNumber, message);

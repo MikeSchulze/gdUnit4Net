@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 using Api;
 
-using Events;
-
 using Extensions;
 
 using Godot;
@@ -93,7 +91,7 @@ public partial class Executor : RefCounted, IExecutor
             if (!ReportOrphanNodesEnabled)
                 Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
             await GodotObjectExtensions.SyncProcessFrame;
-            using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled);
+            using ExecutionContext context = new(testSuite, eventListeners, ReportOrphanNodesEnabled, true);
             context.IsCaptureStdOut = runnerConfig.CaptureStdOut;
             await new TestSuiteExecutionStage(testSuite).Execute(context);
         }
@@ -121,11 +119,14 @@ public partial class Executor : RefCounted, IExecutor
             set => throw new NotImplementedException();
         }
 
-        public void PublishEvent(TestEvent testEvent)
+        public int CompletedTests { get; set; }
+
+        public void PublishEvent(ITestEvent e)
         {
+            var testEvent = (e as TestEvent)!;
             Godot.Collections.Dictionary<string, Variant> data = new()
             {
-                { "type", testEvent.Type.ToVariant() },
+                { "type", e.Type.ToVariant() },
                 { "resource_path", testEvent.ResourcePath.ToVariant() },
                 { "suite_name", testEvent.SuiteName.ToVariant() },
                 { "test_name", testEvent.TestName.ToVariant() },
@@ -133,9 +134,9 @@ public partial class Executor : RefCounted, IExecutor
                 { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
             };
 
-            if (testEvent.Reports.Count > 0)
+            if (e.Reports.Count > 0)
             {
-                var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
+                var serializedReports = e.Reports.Select(report => report.Serialize()).ToGodotArray();
                 data.Add("reports", serializedReports);
             }
 

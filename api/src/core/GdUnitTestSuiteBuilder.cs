@@ -225,7 +225,7 @@ public static class GdUnitTestSuiteBuilder
         }
     }
 
-    private static Type? FindTypeOnAssembly(string clazz)
+    internal static Type? FindTypeOnAssembly(string clazz)
     {
         if (ClazzCache.TryGetValue(clazz, out var onAssembly))
             return onAssembly;

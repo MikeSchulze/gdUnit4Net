@@ -48,7 +48,7 @@ public class UtilsTest
         AssertThat(Directory.Exists(tempDir)).IsFalse();
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void GodotErrorAsString()
     {
         AssertThat(ErrorAsString(Error.Bug)).IsEqual("Bug");

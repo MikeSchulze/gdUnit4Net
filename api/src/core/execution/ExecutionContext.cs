@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-using Events;
+using Api;
 
 using Monitoring;
 
@@ -17,10 +17,10 @@ internal sealed class ExecutionContext : IDisposable
 {
     private int iteration;
 
-    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled)
+    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
-        MemoryPool = new MemoryPool(reportOrphanNodesEnabled);
+        MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
         Stopwatch = new Stopwatch();
         Stopwatch.Start();
 
@@ -32,9 +32,11 @@ internal sealed class ExecutionContext : IDisposable
         SubExecutionContexts = new List<ExecutionContext>();
         Disposables = new List<IDisposable>();
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
+        IsEngineMode = isEngineMode;
     }
 
-    public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+    public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled,
+        context.IsEngineMode)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -42,33 +44,25 @@ internal sealed class ExecutionContext : IDisposable
         CurrentTestCase = context.CurrentTestCase;
         MethodArguments = methodArguments;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
+        //FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, TestCaseName, new TestCaseAttribute(methodArguments));
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
+    public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
     {
         context.SubExecutionContexts.Add(this);
-        TestCaseName = TestCase.BuildDisplayName(testCase.Name);
-        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
+        TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCase.TestCaseAttribute);
+        // FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, null);
         CurrentTestCase = testCase;
-        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count() == 1
+        CurrentIteration = CurrentTestCase?.TestCaseAttributes.Count == 1
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase, TestCaseAttribute testCaseAttribute)
-        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled)
-    {
-        context.SubExecutionContexts.Add(this);
-        TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCaseAttribute);
-        FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCaseAttribute);
-        CurrentTestCase = testCase;
-        CurrentIteration = 0;
-        IsSkipped = CurrentTestCase?.IsSkipped ?? false;
-    }
+    public bool IsEngineMode { get; set; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 
@@ -160,7 +154,7 @@ internal sealed class ExecutionContext : IDisposable
         get;
     }
 
-    private IEnumerable<TestReport> CollectReports => ReportCollector.Reports;
+    private List<ITestReport> CollectReports => ReportCollector.Reports;
 
     private int SkippedCount => SubExecutionContexts.Count(context => context.IsSkipped);
 
@@ -227,12 +221,12 @@ internal sealed class ExecutionContext : IDisposable
 
     public void FireBeforeTestEvent() =>
         FireTestEvent(TestEvent
-            .BeforeTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
+            .BeforeTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public void FireAfterTestEvent() =>
         FireTestEvent(TestEvent
-            .AfterTest(TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
+            .AfterTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public static void RegisterDisposable(IDisposable disposable) =>

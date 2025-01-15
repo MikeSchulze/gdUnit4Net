@@ -129,7 +129,7 @@ public class DictionaryAssertTest
         }
     };
 
-    [TestCase]
+    [GodotTestCase]
     public void VerifyDictionaryTypes()
     {
         AssertThat(new Hashtable()).IsEmpty();
@@ -222,7 +222,7 @@ public class DictionaryAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsEqualGodotDictionary()
     {
         var current = new Dictionary();
@@ -308,7 +308,7 @@ public class DictionaryAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotEqualGodotDictionary()
     {
         var current = new Dictionary
@@ -334,7 +334,7 @@ public class DictionaryAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNull()
     {
         AssertThat((Hashtable?)null).IsNull();
@@ -350,7 +350,7 @@ public class DictionaryAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotNull()
     {
         AssertThat(new Hashtable()).IsNotNull();
@@ -362,7 +362,7 @@ public class DictionaryAssertTest
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsEmpty()
     {
         AssertThat(new Hashtable()).IsEmpty();
@@ -477,10 +477,10 @@ public class DictionaryAssertTest
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [TestCase(0, TestName = "IDictionary")]
-    [TestCase(1, TestName = "IDictionary<string, int>")]
-    [TestCase(2, TestName = "GodotDictionary")]
-    [TestCase(3, TestName = "GodotDictionary<string, int>")]
+    [GodotTestCase(0, TestName = "IDictionary")]
+    [GodotTestCase(1, TestName = "IDictionary<string, int>")]
+    [GodotTestCase(2, TestName = "GodotDictionary")]
+    [GodotTestCase(3, TestName = "GodotDictionary<string, int>")]
     public void ContainsSameKeys(int dataPointIndex)
     {
         dynamic current = TestDataPointKeys[dataPointIndex];
@@ -558,10 +558,10 @@ public class DictionaryAssertTest
     }
 
 
-    [TestCase(0, TestName = "IDictionary")]
-    [TestCase(1, TestName = "IDictionary<string, int>")]
-    [TestCase(2, TestName = "GodotDictionary")]
-    [TestCase(3, TestName = "GodotDictionary<string, int>")]
+    [GodotTestCase(0, TestName = "IDictionary")]
+    [GodotTestCase(1, TestName = "IDictionary<string, int>")]
+    [GodotTestCase(2, TestName = "GodotDictionary")]
+    [GodotTestCase(3, TestName = "GodotDictionary<string, int>")]
     public void NotContainsSameKeys(int dataPointIndex)
     {
         dynamic current = TestDataPointKeys[dataPointIndex];
@@ -622,11 +622,11 @@ public class DictionaryAssertTest
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [TestCase(0, TestName = "Hashtable")]
-    [TestCase(1, TestName = "Dictionary<string, object>")]
-    [TestCase(2, TestName = "SortedDictionary<string, object>")]
-    [TestCase(3, TestName = "GodotDictionary<string, Godot.Variant>")]
-    [TestCase(4, TestName = "GodotDictionary")]
+    [GodotTestCase(0, TestName = "Hashtable")]
+    [GodotTestCase(1, TestName = "Dictionary<string, object>")]
+    [GodotTestCase(2, TestName = "SortedDictionary<string, object>")]
+    [GodotTestCase(3, TestName = "GodotDictionary<string, Godot.Variant>")]
+    [GodotTestCase(4, TestName = "GodotDictionary")]
     public void ContainsSameKeyValue(int dataPointIndex)
     {
         var dataPoint = TestDataPointA[dataPointIndex] as object[];
@@ -654,11 +654,11 @@ public class DictionaryAssertTest
                         """.Replace("$obj1", AssertFailures.AsObjectId(notSame)));
     }
 
-    [TestCase(0, TestName = "Hashtable")]
-    [TestCase(1, TestName = "Dictionary<string, long>")]
-    [TestCase(2, TestName = "SortedDictionary<string, long>")]
-    [TestCase(3, TestName = "GodotCollectionsDictionary")]
-    [TestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
+    [GodotTestCase(0, TestName = "Hashtable")]
+    [GodotTestCase(1, TestName = "Dictionary<string, long>")]
+    [GodotTestCase(2, TestName = "SortedDictionary<string, long>")]
+    [GodotTestCase(3, TestName = "GodotCollectionsDictionary")]
+    [GodotTestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
     public void IsSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointB[dataPointIndex] as object[];
@@ -676,11 +676,11 @@ public class DictionaryAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Hashtable")]
-    [TestCase(1, TestName = "Dictionary<string, long>")]
-    [TestCase(2, TestName = "SortedDictionary<string, long>")]
-    [TestCase(3, TestName = "GodotCollectionsDictionary")]
-    [TestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
+    [GodotTestCase(0, TestName = "Hashtable")]
+    [GodotTestCase(1, TestName = "Dictionary<string, long>")]
+    [GodotTestCase(2, TestName = "SortedDictionary<string, long>")]
+    [GodotTestCase(3, TestName = "GodotCollectionsDictionary")]
+    [GodotTestCase(4, TestName = "GodotCollectionsDictionary<string, long>")]
     public void IsNotSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointB[dataPointIndex] as object[];

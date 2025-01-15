@@ -14,7 +14,7 @@ Methods decorated with DataPoint attribute can only have one TestCase attribute.
 
 ```csharp
     [TestCase]
-    [TestCase] // GdUnit0201 error: Method 'TestDataPointProperty' cannot have multiple TestCase attributes when DataPoint attribute is present
+    [TestCase] // ❌ GdUnit0201: Method 'TestDataPointProperty' cannot have multiple TestCase attributes when DataPoint attribute is present
     [DataPoint(nameof(ArrayDataPointProperty))]
     public void TestDataPointProperty(int a, int b, int expected) 
     {
@@ -27,7 +27,7 @@ Methods decorated with DataPoint attribute can only have one TestCase attribute.
 Use only one TestCase attribute with DataPoint:
 
 ```csharp
-    [TestCase] // ✓ Correct: Single TestCase with DataPoint
+    [TestCase] // ✅ Correct: Single TestCase with DataPoint
     [DataPoint(nameof(ArrayDataPointProperty))]
     public void TestDataPointProperty(int a, int b, int expected) 
     {

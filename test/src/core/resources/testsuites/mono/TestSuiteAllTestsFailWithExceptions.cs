@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 public class TestSuiteAllTestsFailWithExceptions
 {
 
-    [TestCase]
+    [GodotTestCase]
     public void ExceptionIsThrownOnSceneInvoke()
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithExceptionTest.tscn");

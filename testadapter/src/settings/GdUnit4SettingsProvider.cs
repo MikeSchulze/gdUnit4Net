@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 [SettingsName(GdUnit4Settings.RunSettingsXmlNode)]
 // ReSharper disable once ClassNeverInstantiated.Global
-public class GdUnit4SettingsProvider : ISettingsProvider
+internal sealed class GdUnit4SettingsProvider : ISettingsProvider
 {
     private XmlSerializer Serializer { get; } = new(typeof(GdUnit4Settings));
 
@@ -29,5 +29,11 @@ public class GdUnit4SettingsProvider : ISettingsProvider
         {
             Console.WriteLine($"Loading GdUnit4 Adapter settings failed! {e}");
         }
+    }
+
+    public static GdUnit4Settings LoadSettings(IDiscoveryContext discoveryContext)
+    {
+        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        return gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
     }
 }

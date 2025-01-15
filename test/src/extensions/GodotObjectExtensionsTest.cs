@@ -9,7 +9,7 @@ using static Assertions;
 [TestSuite]
 public class GodotObjectExtensionsTest
 {
-    [TestCase]
+    [GodotTestCase]
     public void ToGodotDictionary()
     {
         var result = new System.Collections.Generic.Dictionary<string, object>
@@ -25,7 +25,7 @@ public class GodotObjectExtensionsTest
         AssertThat(result.ToGodotDictionary()).IsEqual(expected);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void ToGodotDictionaryNestedDictionary()
     {
         var result = new System.Collections.Generic.Dictionary<string, object>

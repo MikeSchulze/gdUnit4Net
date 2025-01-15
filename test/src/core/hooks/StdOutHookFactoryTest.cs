@@ -12,6 +12,7 @@ using static Assertions;
 
 using Environment = System.Environment;
 
+[RequireGodotRuntime]
 [TestSuite]
 public class StdOutHookFactoryTest
 {

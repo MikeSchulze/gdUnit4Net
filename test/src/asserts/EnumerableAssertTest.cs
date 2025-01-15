@@ -17,9 +17,9 @@ using Array = System.Array;
 public partial class EnumerableAssertTest
 {
     // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
-    public static readonly object[] TestDataPointEmptyArrays = { Array.Empty<object>(), new List<object>(), new Godot.Collections.Array(), new Array<RefCounted>() };
+    private static readonly object[] TestDataPointEmptyArrays = { Array.Empty<object>(), new List<object>(), new Godot.Collections.Array(), new Array<RefCounted>() };
 
-    public static readonly object[] TestDataPointStringValues =
+    private static readonly object[] TestDataPointStringValues =
     {
         new object[] { new[] { "a", "b", "c", "a" }, new[] { "a", "b", "c", "a" }, "X" }, new object[]
         {
@@ -135,10 +135,10 @@ public partial class EnumerableAssertTest
         }
     };
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void IsNull(int dataIndex)
     {
         dynamic current = TestDataPointEmptyArrays[dataIndex];
@@ -155,10 +155,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void IsNotNull(int dataIndex)
     {
         dynamic current = TestDataPointEmptyArrays[dataIndex];
@@ -171,7 +171,7 @@ public partial class EnumerableAssertTest
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsEqual()
     {
         AssertArray(Array.Empty<object>()).IsEqual(Array.Empty<object>());
@@ -249,7 +249,7 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsEqualIgnoringCase()
     {
         AssertArray(new[] { "this", "is", "a", "message" })
@@ -339,7 +339,7 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotEqual()
     {
         AssertArray<int>(null).IsNotEqual(new[] { 1, 2, 3, 4, 5 });
@@ -426,7 +426,7 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void IsNotEqualIgnoringCase()
     {
         AssertArray(null).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
@@ -470,7 +470,7 @@ public partial class EnumerableAssertTest
             "an",
             "Message"
         });
-        // should fail because the array contains same elements ignoring case sensitive
+        // should fail because the array contains same elements ignoring case-sensitive
         AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
                 .IsNotEqualIgnoringCase(new[] { "This", "is", "a", "Message" }))
             .IsInstanceOf<TestFailedException>()
@@ -483,10 +483,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void IsEmpty(int dataIndex)
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
@@ -504,10 +504,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void IsNotEmpty(int dataIndex)
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
@@ -527,10 +527,10 @@ public partial class EnumerableAssertTest
     }
 
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void HasSize(int dataIndex)
     {
         dynamic? expected = TestDataPointStringValues[dataIndex] as object[];
@@ -553,10 +553,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -565,7 +565,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).Contains(obj1);
@@ -599,10 +599,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -611,7 +611,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).Contains(obj1);
@@ -655,10 +655,10 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsExactlyOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -667,7 +667,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).ContainsExactly(obj1, obj2, obj3, obj4);
@@ -722,10 +722,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsExactlyOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -734,7 +734,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).ContainsExactly(obj1, obj2, obj3, obj4);
@@ -806,10 +806,10 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsExactlyInAnyOrderOnString(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -818,7 +818,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsExactlyInAnyOrder(current);
         AssertArray(current).ContainsExactlyInAnyOrder(obj1, obj2, obj3, obj4);
@@ -835,7 +835,7 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsExactlyInAnyOrder(new string[] { obj4, obj2, obj3, obj1 });
         }
 
-        // should fail because is contains not exactly the same elements in any order
+        // should fail because it contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -848,7 +848,7 @@ public partial class EnumerableAssertTest
                          but could not find elements:
                             ["X"]
                         """);
-        //should fail because is contains not all elements
+        //should fail because it contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -863,10 +863,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsExactlyInAnyOrderOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -875,7 +875,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsExactlyInAnyOrder(current);
         AssertArray(current).ContainsExactlyInAnyOrder(obj1, obj2, obj3, obj4);
@@ -897,7 +897,7 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsExactlyInAnyOrder(new object[] { obj4, obj2, obj3, obj1 });
         }
 
-        // should fail because is contains not exactly the same elements in any order
+        // should fail because it contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -915,7 +915,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj3", AssertFailures.AsObjectId(obj3))
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4))
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
-        //should fail because is contains not all elements
+        //should fail because it contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -936,10 +936,10 @@ public partial class EnumerableAssertTest
     }
 
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsSameExactlyInAnyOrderOnString(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -948,7 +948,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsSameExactlyInAnyOrder(current);
         AssertArray(current).ContainsSameExactlyInAnyOrder(obj1, obj2, obj3, obj4);
@@ -965,7 +965,7 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsSameExactlyInAnyOrder(new string[] { obj4, obj2, obj3, obj1 });
         }
 
-        // should fail because is contains not exactly the same elements in any order
+        // should fail because it contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -978,7 +978,7 @@ public partial class EnumerableAssertTest
                          but could not find elements:
                             ["X"]
                         """);
-        //should fail because is contains not all elements
+        //should fail because it contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -993,10 +993,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsSameExactlyInAnyOrderOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1005,7 +1005,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsSameExactlyInAnyOrder(current);
         AssertArray(current).ContainsSameExactlyInAnyOrder(obj1, obj2, obj3, obj4);
@@ -1027,7 +1027,7 @@ public partial class EnumerableAssertTest
             AssertArray(current).ContainsSameExactlyInAnyOrder(new object[] { obj4, obj2, obj3, obj1 });
         }
 
-        // should fail because is contains not exactly the same elements in any order
+        // should fail because it contains not exactly the same elements in any order
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -1045,7 +1045,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj3", AssertFailures.AsObjectId(obj3))
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4))
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
-        //should fail because is contains not all elements
+        //should fail because it contains not all elements
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
@@ -1068,13 +1068,13 @@ public partial class EnumerableAssertTest
     [TestCase]
     public void Fluent()
         => AssertArray(Array.Empty<int>())
-            .Contains(Array.Empty<int>())
-            .ContainsExactly(Array.Empty<int>())
+            .Contains()
+            .ContainsExactly()
             .HasSize(0)
             .IsEmpty()
             .IsNotNull();
 
-    [TestCase]
+    [GodotTestCase]
     public void Extract()
     {
         // try to extract on base types
@@ -1107,7 +1107,7 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void ExtractV()
     {
         // single extract
@@ -1137,7 +1137,7 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void ExtractVChained()
     {
         var root_a = new TestObj("root_a", null);
@@ -1159,7 +1159,7 @@ public partial class EnumerableAssertTest
             );
     }
 
-    [TestCase]
+    [GodotTestCase]
     public void ExtractChained()
     {
         var root_a = new TestObj("root_a", null);
@@ -1187,7 +1187,7 @@ public partial class EnumerableAssertTest
             .Extract("NotExistMethod")
             .ContainsExactly("n.a.");
 
-    [TestCase]
+    [GodotTestCase]
     public void ExtractVManyArgs()
         => AssertArray(new object[] { new TestObj("A", 10), new TestObj("B", "foo", "bar"), new TestObj("C", 11, 42) })
             .ExtractV(
@@ -1218,25 +1218,25 @@ public partial class EnumerableAssertTest
     [TestCase]
     public void InterruptIsFailure()
     {
-        // we disable failure reporting until we simulate an failure
+        // we disable failure reporting until we simulate a failure
         if (ExecutionContext.Current != null)
             ExecutionContext.Current.FailureReporting = false;
         // try to fail
         AssertArray(Array.Empty<object>()).IsNotEmpty();
 
-        // expect this line will never called because of the test is interrupted by a failing assert
+        // expect this line will never call because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void IsSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointStringValues[dataPointIndex] as object[];
         dynamic current = dataPoint![0];
-        dynamic other = dataPoint![1];
+        dynamic other = dataPoint[1];
         AssertArray(current).IsSame(current);
 
         AssertThrown(() => AssertArray(current).IsSame(other))
@@ -1250,15 +1250,15 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void IsNotSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointStringValues[dataPointIndex] as object[];
         dynamic current = dataPoint![0];
-        dynamic other = dataPoint![1];
+        dynamic other = dataPoint[1];
         AssertArray(current).IsNotSame(other);
 
         AssertThrown(() => AssertArray(current).IsNotSame(current))
@@ -1269,10 +1269,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsSameOnString(int dataPointIndex)
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1281,7 +1281,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsSame(obj1);
         AssertArray(current).ContainsSame(obj2);
@@ -1303,10 +1303,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsSameOnObjects(int dataPointIndex)
     {
         var testData = TestDataPointObjectValues[dataPointIndex] as object[];
@@ -1315,7 +1315,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).ContainsSame(obj1);
         AssertArray(current).ContainsSame(obj2);
@@ -1342,10 +1342,10 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [TestCase(0, TestName = "Array")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void ContainsSameExactlyOnString(int dataPointIndex)
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1354,7 +1354,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).ContainsSameExactly(obj1, obj2, obj3, obj4);
@@ -1398,10 +1398,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void ContainsSameExactlyOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1410,7 +1410,7 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         // test against only one element
         AssertArray(current).ContainsSameExactly(obj1, obj2, obj3, obj4);
@@ -1483,26 +1483,24 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void NotContainsOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
         var obj1 = current[0];
         var obj2 = current[1];
-        var obj3 = current[2];
-        var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).NotContains(obj5);
         AssertArray(current).NotContains(obj5, obj5);
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1503)
+            .HasFileLineNumber(1501)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1513,7 +1511,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1514)
+            .HasFileLineNumber(1512)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1524,10 +1522,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void NotContainsOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1536,13 +1534,13 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).NotContains(obj5);
         AssertArray(current).NotContains(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1543)
+            .HasFileLineNumber(1541)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1558,7 +1556,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1559)
+            .HasFileLineNumber(1557)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1574,26 +1572,24 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [TestCase(0, TestName = "Array<string>")]
-    [TestCase(1, TestName = "List<string>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<string>")]
+    [GodotTestCase(0, TestName = "Array<string>")]
+    [GodotTestCase(1, TestName = "List<string>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<string>")]
     public void NotContainsSameOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
         dynamic current = testData![0];
         var obj1 = current[0];
         var obj2 = current[1];
-        var obj3 = current[2];
-        var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).NotContainsSame(obj5);
         AssertArray(current).NotContainsSame(obj5, obj5);
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1594)
+            .HasFileLineNumber(1590)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1604,7 +1600,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1605)
+            .HasFileLineNumber(1601)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1615,10 +1611,10 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [TestCase(0, TestName = "Array<object>")]
-    [TestCase(1, TestName = "List<object>")]
-    [TestCase(2, TestName = "GodotArray")]
-    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [GodotTestCase(0, TestName = "Array<object>")]
+    [GodotTestCase(1, TestName = "List<object>")]
+    [GodotTestCase(2, TestName = "GodotArray")]
+    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
     public void NotContainsSameOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1627,13 +1623,13 @@ public partial class EnumerableAssertTest
         var obj2 = current[1];
         var obj3 = current[2];
         var obj4 = current[3];
-        dynamic obj5 = testData![2];
+        dynamic obj5 = testData[2];
 
         AssertArray(current).NotContainsSame(obj5);
         AssertArray(current).NotContainsSame(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1634)
+            .HasFileLineNumber(1630)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1649,7 +1645,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1650)
+            .HasFileLineNumber(1646)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1665,11 +1661,14 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
+    // ReSharper disable once PartialTypeWithSinglePart
+    // ReSharper disable MemberCanBePrivate.Local
+    // ReSharper disable UnusedMember.Local
     private sealed partial class TestObj : RefCounted
     {
+        private readonly string name;
         private readonly object? value;
         private readonly object? x;
-        private string name;
 
         public TestObj(string name, object? value, object? x = null)
         {

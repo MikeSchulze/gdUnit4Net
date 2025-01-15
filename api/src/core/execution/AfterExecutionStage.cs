@@ -8,6 +8,8 @@ using Asserts;
 
 using Reporting;
 
+using static Api.ITestReport.ReportType;
+
 internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
 {
     public AfterExecutionStage(TestSuite testSuite) : base("After", testSuite.Instance.GetType())
@@ -21,7 +23,7 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
         Utils.ClearTempDir();
         await context.MemoryPool.Gc();
         if (context.MemoryPool.OrphanCount > 0)
-            context.ReportCollector.PushFront(new TestReport(TestReport.ReportType.WARN, 0, ReportOrphans(context)));
+            context.ReportCollector.PushFront(new TestReport(Warning, 0, ReportOrphans(context)));
         context.FireAfterEvent();
     }
 

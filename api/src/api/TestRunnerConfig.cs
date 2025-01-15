@@ -29,7 +29,6 @@ public class TestRunnerConfig
     /// </summary>
     public Dictionary<string, IEnumerable<TestCaseConfig>> Included { get; set; } = new();
 
-
     /// <summary>
     ///     Holds test run properties to control the test execution
     /// </summary>

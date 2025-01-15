@@ -12,6 +12,7 @@ using Godot;
 
 using static Assertions;
 
+[RequireGodotRuntime]
 [TestSuite]
 public class SceneRunnerGDScriptSceneTest
 {
