@@ -76,7 +76,8 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     var timeout = executionContext.GetExecutionTimeout(testAttribute);
                     await foreach (var dataPointValues in DataPointValueProvider.GetDataAsync(testCase, timeout).ConfigureAwait(false))
                     {
-                        using ExecutionContext testCaseContext = new(executionContext, testCase, testCase.TestCaseAttributes);
+                        var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
+                        using ExecutionContext testCaseContext = new(executionContext, displayName);
                         await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues);
                     }
                 }
@@ -93,7 +94,8 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             else
                 foreach (var dataPointValues in DataPointValueProvider.GetData(testCase))
                 {
-                    using ExecutionContext testCaseContext = new(executionContext, testCase, testCase.TestCaseAttributes);
+                    var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
+                    using ExecutionContext testCaseContext = new(executionContext, displayName);
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues);
                 }
         }

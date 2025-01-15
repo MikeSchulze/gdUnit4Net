@@ -1,8 +1,11 @@
 namespace GdUnit4.Tests.Core;
 
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using static Assertions;
+
 using static Utils;
 
 [TestSuite]
@@ -71,4 +74,25 @@ public sealed class ExampleTestSuite
     [TestCase(true)]
     public void ParameterizedSingleTest(bool value)
         => AssertThat(value).IsTrue();
+
+
+    [TestCase]
+    [IgnoreUntil(Description = "This is an example of ignored test")]
+    public void SkippedTestCase()
+        => Console.WriteLine("SkippedTestCase");
+
+    [TestCase]
+    [DataPoint(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider))]
+    public void TestWithDataPointProperty(int a, int b, int expected)
+        => AssertThat(a + b).IsEqual(expected);
+
+    private class TestDataProvider
+    {
+        public static IEnumerable<object[]> GetTestData()
+        {
+            yield return new object[] { 1, 2, 3 };
+            yield return new object[] { 5, 5, 10 };
+            yield return new object[] { -1, 1, 0 };
+        }
+    }
 }

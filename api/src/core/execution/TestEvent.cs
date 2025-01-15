@@ -84,6 +84,8 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
     public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
 
+    public string? DisplayName { get; set; }
+
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
         new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount);
 
@@ -117,6 +119,12 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     internal TestEvent WithFullyQualifiedName(string name)
     {
         FullyQualifiedName = name;
+        return this;
+    }
+
+    internal TestEvent WithDisplayName(string? name)
+    {
+        DisplayName = name;
         return this;
     }
 
