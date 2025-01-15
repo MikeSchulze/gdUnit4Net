@@ -78,7 +78,7 @@ internal static class TestCaseDiscoverer
                     AttributeIndex = index,
                     LineNumber = navData.LineNumber,
                     CodeFilePath = navData.CodeFilePath,
-                    RequireRunningGodotEngine = requireEngineMode || attr is GodotTestCaseAttribute
+                    RequireRunningGodotEngine = requireEngineMode || mi.GetCustomAttributes().Any(attribute => attribute is RequireGodotRuntimeAttribute)
                 };
             })
             .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")

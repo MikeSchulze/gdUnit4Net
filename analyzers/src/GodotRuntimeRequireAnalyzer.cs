@@ -42,8 +42,8 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
-            GodotEngine.RequiresGodotRuntime,
-            GodotEngine.GodotNativeCallNotAllowed
+            GodotEngine.RequiresGodotRuntimeOnClass,
+            GodotEngine.RequiresGodotRuntimeOnMethod
         );
 
     public override void Initialize(AnalysisContext context)
@@ -63,12 +63,11 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         {
             if (context.Operation is not IMethodBodyOperation methodBody)
                 return;
-            var methodSymbol = methodBody.SemanticModel?.GetDeclaredSymbol(methodBody.Syntax) as IMethodSymbol;
-            if (methodSymbol == null)
+            if (methodBody.SemanticModel?.GetDeclaredSymbol(methodBody.Syntax) is not IMethodSymbol methodSymbol)
                 return;
 
-            // Skip analysis if class has RequireGodotRuntime attribute
-            if (HasGodotRuntimeAttribute(methodSymbol.ContainingType))
+            // Skip analysis if class has set RequireGodotRuntime attribute set on class or method level
+            if (HasGodotRuntimeAttributeAtClassLevel(methodSymbol.ContainingType) || HasGodotRuntimeAttributeAtMethodLevel(methodSymbol))
                 return;
 
             if (!HasTestCaseAttribute(methodSymbol))
@@ -100,7 +99,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
                 return;
 
             // Skip analysis if class has RequireGodotRuntime attribute
-            if (HasGodotRuntimeAttribute(methodSymbol.ContainingType))
+            if (HasGodotRuntimeAttributeAtClassLevel(methodSymbol.ContainingType))
                 return;
 
             if (!IsTestHook(methodSymbol))
@@ -120,7 +119,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     private static void ReportClassDiagnostic(in OperationAnalysisContext context, INamedTypeSymbol classSymbol)
     {
         var diagnostic = Diagnostic.Create(
-            GodotEngine.RequiresGodotRuntime,
+            GodotEngine.RequiresGodotRuntimeOnClass,
             classSymbol.Locations[0],
             classSymbol.Name);
         context.ReportDiagnostic(diagnostic);
@@ -129,7 +128,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     private static void ReportMethodDiagnostic(in OperationAnalysisContext context, IMethodSymbol methodSymbol)
     {
         var diagnostic = Diagnostic.Create(
-            GodotEngine.GodotNativeCallNotAllowed,
+            GodotEngine.RequiresGodotRuntimeOnMethod,
             methodSymbol.Locations[0],
             methodSymbol.Name);
         context.ReportDiagnostic(diagnostic);
@@ -140,8 +139,12 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         => method.GetAttributes()
             .Any(attr => TestHookAttributes.Contains(attr.AttributeClass?.ToDisplayString()));
 
-    private static bool HasGodotRuntimeAttribute(INamedTypeSymbol classSymbol)
+    private static bool HasGodotRuntimeAttributeAtClassLevel(INamedTypeSymbol classSymbol)
         => classSymbol.GetAttributes()
+            .Any(attr => attr.AttributeClass?.ToDisplayString() == RequireGodotRuntimeAttribute);
+
+    private static bool HasGodotRuntimeAttributeAtMethodLevel(IMethodSymbol methodSymbol)
+        => methodSymbol.GetAttributes()
             .Any(attr => attr.AttributeClass?.ToDisplayString() == RequireGodotRuntimeAttribute);
 
     private static bool HasTestCaseAttribute(IMethodSymbol methodSymbol)

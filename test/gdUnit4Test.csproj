@@ -32,7 +32,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
     <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
     <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj"/>
-    <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc4">
+    <PackageReference Include="gdUnit4.analyzers" Version="$(GdUnitAnalyzersVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

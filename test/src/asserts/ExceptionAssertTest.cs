@@ -21,50 +21,52 @@ public class ExceptionAssertTest
         return AssertThat(stackFrames?[frame]);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public async Task TestCaseInnerException()
     {
         AssertThat(true).IsTrue();
         var assertion = AssertThrown(() => AssertThat(true).IsFalse())
-            .HasFileLineNumber(28)
+            .HasFileLineNumber(29)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
         AssertStackTrace(assertion, 1)
             .Contains("   at GdUnit4.Tests.Asserts.ExceptionAssertTest.TestCaseInnerException()")
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 28".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 29".Replace('\\', Path.DirectorySeparatorChar));
         AssertThrown(()
                 => AssertThat(true)
                     .IsFalse())
-            .HasFileLineNumber(35)
+            .HasFileLineNumber(36)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
         // do a context switch
         await DoWait(100);
         AssertThrown(()
                 => AssertThat(true)
                     .IsFalse())
-            .HasFileLineNumber(42)
+            .HasFileLineNumber(43)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
         // do a Godot frame context switch
         await ISceneRunner.SyncProcessFrame;
         AssertThrown(()
                 => AssertThat(true)
                     .IsFalse())
-            .HasFileLineNumber(49)
+            .HasFileLineNumber(50)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public async Task TestCaseInnerMethodException()
     {
         await ISceneRunner.SyncProcessFrame;
         // we want to collect the stack trace inclusive sub method calls and this failure line number
         // https://github.com/MikeSchulze/gdUnit4Net/issues/49
         var assertion = AssertThrown(() => AssertInner(0, true, true))
-            .HasFileLineNumber(73)
+            .HasFileLineNumber(75)
             .HasFileName("src/asserts/ExceptionAssertTest.cs");
         AssertStackTrace(assertion, 0)
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 73".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 75".Replace('\\', Path.DirectorySeparatorChar));
         AssertStackTrace(assertion, 1)
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 61".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 63".Replace('\\', Path.DirectorySeparatorChar));
 
         static void AssertInner(int val, bool isEven, bool isOdd)
         {
@@ -85,27 +87,28 @@ public class ExceptionAssertTest
     public void TestCaseOuterMethodException()
     {
         var assertion = AssertThrown(() => DoAssert(0, true, true))
-            .HasFileLineNumber(81) as ExceptionAssert<Exception>;
+            .HasFileLineNumber(83) as ExceptionAssert<Exception>;
         AssertStackTrace(assertion, 0)
             .Contains("   at GdUnit4.Tests.Asserts.ExceptionAssertTest.DoAssert(Int32 val, Boolean isEven, Boolean isOdd)")
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 81".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 83".Replace('\\', Path.DirectorySeparatorChar));
         AssertStackTrace(assertion, 2)
             .Contains("at GdUnit4.Tests.Asserts.ExceptionAssertTest.TestCaseOuterMethodException()")
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 87".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 89".Replace('\\', Path.DirectorySeparatorChar));
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public async Task TestCaseOuterMethodExceptionAndAwait()
     {
         await ISceneRunner.SyncProcessFrame;
         var assertion = AssertThrown(() => DoAssert(0, true, true))
-            .HasFileLineNumber(81)
+            .HasFileLineNumber(83)
             .HasFileName("src/asserts/ExceptionAssertTest.cs") as ExceptionAssert<Exception>;
         AssertStackTrace(assertion, 0)
             .Contains("   at GdUnit4.Tests.Asserts.ExceptionAssertTest.DoAssert(Int32 val, Boolean isEven, Boolean isOdd)")
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 81".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 83".Replace('\\', Path.DirectorySeparatorChar));
         AssertStackTrace(assertion, 2)
             .Contains("at GdUnit4.Tests.Asserts.ExceptionAssertTest.TestCaseOuterMethodExceptionAndAwait()")
-            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 101".Replace('\\', Path.DirectorySeparatorChar));
+            .Contains("src\\asserts\\ExceptionAssertTest.cs:line 104".Replace('\\', Path.DirectorySeparatorChar));
     }
 }

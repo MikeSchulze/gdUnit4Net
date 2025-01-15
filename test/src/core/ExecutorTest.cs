@@ -211,7 +211,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
         return testSuiteNode;
     }
 
-    [GodotTestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
+    [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]
     public async Task ExecuteSuccess()
     {
         var events = await ExecuteTestSuite<TestSuiteAllStagesSuccess>();
@@ -246,7 +246,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "Verifies report a failure on stage 'Before'.")]
+    [TestCase(Description = "Verifies report a failure on stage 'Before'.")]
     public async Task ExecuteFailureOnStageBefore()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnStageBefore>();
@@ -284,7 +284,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 12, "failed on Before()") }));
     }
 
-    [GodotTestCase(Description = "Verifies report a failure on stage 'After'.")]
+    [TestCase(Description = "Verifies report a failure on stage 'After'.")]
     public async Task ExecuteFailureOnStageAfter()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnStageAfter>();
@@ -322,7 +322,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 16, "failed on After()") }));
     }
 
-    [GodotTestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
+    [TestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
     public async Task ExecuteFailureOnStageBeforeTest()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnStageBeforeTest>();
@@ -359,7 +359,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "Verifies report a failure on stage 'AfterTest'.")]
+    [TestCase(Description = "Verifies report a failure on stage 'AfterTest'.")]
     public async Task ExecuteFailureOnStageAfterTest()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnStageAfterTest>();
@@ -396,7 +396,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "Verifies a failure is reports for a single test case.")]
+    [TestCase(Description = "Verifies a failure is reports for a single test case.")]
     public async Task ExecuteFailureOnTestCase1()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnTestCase1>();
@@ -440,7 +440,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "Verifies multiple failures are report's for different stages.")]
+    [TestCase(Description = "Verifies multiple failures are report's for different stages.")]
     public async Task ExecuteFailureOnMultiStages()
     {
         var events = await ExecuteTestSuite<TestSuiteFailOnMultiStages>();
@@ -487,7 +487,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 16, "failed on After()") }));
     }
 
-    [GodotTestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
+    [TestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
     public async Task ExecuteFailureOrphanNodesDetected()
     {
         var events = await ExecuteTestSuite<TestSuiteFailAndOrphansDetected>();
@@ -529,9 +529,9 @@ public class ExecutorTest : ITestEventListener, IDisposable
                     new(Warning, 0, """
                                     WARNING:
                                         Detected <2> orphan nodes during test setup stage!
-                                        Check SetupTest:27 and TearDownTest:35 for unfreed instances!
+                                        Check SetupTest:38 and TearDownTest:46 for unfreed instances!
                                     """),
-                    new(Warning, 41, """
+                    new(Warning, 52, """
                                      WARNING:
                                          Detected <3> orphan nodes during test execution!
                                      """)
@@ -544,13 +544,13 @@ public class ExecutorTest : ITestEventListener, IDisposable
                     new(Warning, 0, """
                                     WARNING:
                                         Detected <2> orphan nodes during test setup stage!
-                                        Check SetupTest:27 and TearDownTest:35 for unfreed instances!
+                                        Check SetupTest:38 and TearDownTest:46 for unfreed instances!
                                     """),
-                    new(Warning, 50, """
+                    new(Warning, 61, """
                                      WARNING:
                                          Detected <4> orphan nodes during test execution!
                                      """),
-                    new(Failure, 55, """
+                    new(Failure, 66, """
                                      Expecting be empty:
                                       but is
                                          "TestCase2"
@@ -563,13 +563,13 @@ public class ExecutorTest : ITestEventListener, IDisposable
                 new(Warning, 0, """
                                 WARNING:
                                     Detected <1> orphan nodes during test suite setup stage!
-                                    Check SetupSuite:16 and TearDownSuite:23 for unfreed instances!
+                                    Check SetupSuite:27 and TearDownSuite:34 for unfreed instances!
                                 """)
             })
         );
     }
 
-    [GodotTestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
+    [TestCase(Description = "GD-62: Execution must ignore detect orphan nodes if is disabled.")]
     public async Task ExecuteFailureOrphanNodesDetectionDisabled()
     {
         // simulate test suite execution with disabled orphan detection
@@ -606,7 +606,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             // ends with failure
             Tuple(TestAfter, "TestCase2", new List<TestReport>
             {
-                new(Failure, 55, """
+                new(Failure, 66, """
                                  Expecting be empty:
                                   but is
                                      "TestCase2"
@@ -615,7 +615,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "GD-66: The execution must be aborted by a test timeout.")]
+    [TestCase(Description = "GD-66: The execution must be aborted by a test timeout.")]
     public async Task ExecuteAbortOnTimeOut()
     {
         var events = await ExecuteTestSuite<TestSuiteAbortOnTestTimeout>();
@@ -714,7 +714,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
-    [GodotTestCase(Description = "Tests is all parameterized tests case executed.")]
+    [TestCase(Description = "Tests is all parameterized tests case executed.")]
     public async Task ExecuteParameterizedTest()
     {
         var events = await ExecuteTestSuite<TestSuiteParameterizedTests>();
@@ -794,7 +794,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
         );
     }
 
-    [GodotTestCase(Description = "Verifies the exceptions are catches the right message as failure.")]
+    [TestCase(Description = "Verifies the exceptions are catches the right message as failure.")]
     public async Task ExecuteTestWithExceptions()
     {
         var events = await ExecuteTestSuite<TestSuiteAllTestsFailWithExceptions>();
@@ -835,13 +835,13 @@ public class ExecutorTest : ITestEventListener, IDisposable
             }),
             Tuple(TestAfter, "ExceptionAtAsyncMethod", new List<TestReport>
             {
-                new(Failure, 24, """
+                new(Failure, 23, """
                                  outer exception
                                  """)
             }),
             Tuple(TestAfter, "ExceptionAtSyncMethod", new List<TestReport>
             {
-                new(Failure, 28, """
+                new(Failure, 27, """
                                  outer exception
                                  """)
             }),

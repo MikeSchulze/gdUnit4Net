@@ -47,7 +47,8 @@ public class GdUnitTestSuiteBuilderTest
         => AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/TestSuiteWithFileScopedNamespace.cs"))
             .IsEqual(typeof(TestSuiteWithFileScopedNamespace));
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void FindMethodLineOutOfRange()
     {
         var classPath = ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
@@ -57,7 +58,8 @@ public class GdUnitTestSuiteBuilderTest
             .StartsWithMessage("Specified argument was out of the range of valid values.");
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void FindMethodNoMethodFound()
     {
         var classPath = ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
@@ -65,7 +67,8 @@ public class GdUnitTestSuiteBuilderTest
         AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 9)).IsNull();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void FindMethodFound()
     {
         var classPath = ProjectSettings.GlobalizePath("res://src/core/resources/sources/TestPerson.cs");
@@ -79,7 +82,8 @@ public class GdUnitTestSuiteBuilderTest
         AssertString(GdUnitTestSuiteBuilder.FindMethod(classPath, 23)).IsEqual("FullName3");
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void CreateTestSuite()
     {
         var tmp = CreateTempDir("build-test-suite-test");
@@ -100,7 +104,8 @@ public class GdUnitTestSuiteBuilderTest
         AssertThat(File.ReadAllText(testSuite, Encoding.UTF8)).IsEqual(UpdatedTestSuite(sourceClass));
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void CreateTestSuiteNoMethodFound()
     {
         var tmp = CreateTempDir("build-test-suite-test");
@@ -114,7 +119,8 @@ public class GdUnitTestSuiteBuilderTest
             .EndsWith("TestPerson.cs:4.");
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void CreateTestSuiteNoNamespace()
     {
         var tmp = CreateTempDir("build-test-suite-test");
@@ -128,7 +134,8 @@ public class GdUnitTestSuiteBuilderTest
         AssertThat((int)dictionary["line"]).IsEqual(16);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void CreateTestSuiteWithNamespace()
     {
         var tmp = CreateTempDir("build-test-suite-test");
@@ -143,7 +150,8 @@ public class GdUnitTestSuiteBuilderTest
     }
 
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void CreateTestSuiteTestCaseAlreadyExists()
     {
         var tmp = CreateTempDir("build-test-suite-test");
@@ -224,7 +232,8 @@ public class GdUnitTestSuiteBuilderTest
             """.Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r", string.Empty);
 
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void LoadTestSuite()
     {
         var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("src/core/ExampleTestSuite.cs"));

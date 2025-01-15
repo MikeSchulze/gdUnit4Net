@@ -135,10 +135,11 @@ public partial class EnumerableAssertTest
         }
     };
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void IsNull(int dataIndex)
     {
         dynamic current = TestDataPointEmptyArrays[dataIndex];
@@ -147,7 +148,7 @@ public partial class EnumerableAssertTest
         // should fail because the current is not null
         AssertThrown(() => AssertArray(current).IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(148)
+            .HasFileLineNumber(149)
             .HasMessage("""
                         Expecting be <Null>:
                          but is
@@ -155,10 +156,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void IsNotNull(int dataIndex)
     {
         dynamic current = TestDataPointEmptyArrays[dataIndex];
@@ -167,11 +169,12 @@ public partial class EnumerableAssertTest
         // should fail because the current is null
         AssertThrown(() => AssertArray(null).IsNotNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(168)
+            .HasFileLineNumber(170)
             .HasMessage("Expecting be NOT <Null>:");
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsEqual()
     {
         AssertArray(Array.Empty<object>()).IsEqual(Array.Empty<object>());
@@ -208,7 +211,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(new[] { 1, 2, 4, 5 }).IsEqual(new[] { 1, 2, 3, 4, 2, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(209)
+            .HasFileLineNumber(212)
             .HasMessage("""
                         Expecting be equal:
                             [1, 2, 3, 4, 2, 5]
@@ -231,7 +234,7 @@ public partial class EnumerableAssertTest
                 5
             }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(218)
+            .HasFileLineNumber(221)
             .HasMessage("""
                         Expecting be equal:
                             [1, 2, 3, 4, 2, 5]
@@ -240,7 +243,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray<object>(null).IsEqual(Array.Empty<object>()))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(241)
+            .HasFileLineNumber(244)
             .HasMessage("""
                         Expecting be equal:
                             <Empty>
@@ -249,7 +252,8 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsEqualIgnoringCase()
     {
         AssertArray(new[] { "this", "is", "a", "message" })
@@ -300,7 +304,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
                 .IsEqualIgnoringCase(new[] { "This", "is", "an", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(300)
+            .HasFileLineNumber(304)
             .HasMessage("""
                         Expecting be equal (ignoring case):
                             ["This", "is", "an", "Message"]
@@ -339,7 +343,8 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsNotEqual()
     {
         AssertArray<int>(null).IsNotEqual(new[] { 1, 2, 3, 4, 5 });
@@ -395,7 +400,7 @@ public partial class EnumerableAssertTest
         // should fail because the array  contains same elements
         AssertThrown(() => AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual(new[] { 1, 2, 3, 4, 5 }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(396)
+            .HasFileLineNumber(401)
             .HasMessage("""
                         Expecting be NOT equal:
                             [1, 2, 3, 4, 5]
@@ -426,7 +431,8 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsNotEqualIgnoringCase()
     {
         AssertArray(null).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
@@ -474,7 +480,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
                 .IsNotEqualIgnoringCase(new[] { "This", "is", "a", "Message" }))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(474)
+            .HasFileLineNumber(480)
             .HasMessage("""
                         Expecting be NOT equal (ignoring case):
                             ["This", "is", "a", "Message"]
@@ -483,10 +489,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void IsEmpty(int dataIndex)
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
@@ -497,17 +504,18 @@ public partial class EnumerableAssertTest
         // should fail because the array is not empty it has a size of one
         AssertThrown(() => AssertArray(filled).IsEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(498)
+            .HasFileLineNumber(505)
             .HasMessage("""
                         Expecting be empty:
                          but has size '4'
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void IsNotEmpty(int dataIndex)
     {
         dynamic empty = TestDataPointEmptyArrays[dataIndex];
@@ -519,7 +527,7 @@ public partial class EnumerableAssertTest
         // should fail because the array is empty
         AssertThrown(() => AssertArray(empty).IsNotEmpty())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(520)
+            .HasFileLineNumber(528)
             .HasMessage("""
                         Expecting being NOT empty:
                          but is empty
@@ -527,10 +535,11 @@ public partial class EnumerableAssertTest
     }
 
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void HasSize(int dataIndex)
     {
         dynamic? expected = TestDataPointStringValues[dataIndex] as object[];
@@ -540,7 +549,7 @@ public partial class EnumerableAssertTest
         // should fail because the array has a size of 4
         AssertThrown(() => AssertArray(current).HasSize(5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(541)
+            .HasFileLineNumber(550)
             .HasMessage("""
                         Expecting size:
                             '5' but is '4'
@@ -553,10 +562,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -576,7 +586,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).Contains(current);
         AssertThrown(() => AssertArray(current).Contains(obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(577)
+            .HasFileLineNumber(587)
             .HasMessage("""
                         Expecting contains elements:
                             ["a", "b", "c", "a"]
@@ -588,7 +598,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).Contains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(589)
+            .HasFileLineNumber(599)
             .HasMessage("""
                         Expecting contains elements:
                             ["a", "b", "c", "a"]
@@ -599,10 +609,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -622,7 +633,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).Contains(current);
         AssertThrown(() => AssertArray(current).Contains(obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(623)
+            .HasFileLineNumber(634)
             .HasMessage("""
                 Expecting contains elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -639,7 +650,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).Contains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(640)
+            .HasFileLineNumber(651)
             .HasMessage("""
                 Expecting contains elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -655,10 +666,11 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsExactlyOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -675,7 +687,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsExactly(current);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(676)
+            .HasFileLineNumber(688)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -686,7 +698,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(687)
+            .HasFileLineNumber(699)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -697,7 +709,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(698)
+            .HasFileLineNumber(710)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -710,7 +722,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj3, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(711)
+            .HasFileLineNumber(723)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -722,10 +734,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsExactlyOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -741,7 +754,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsExactly(current);
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(742)
+            .HasFileLineNumber(755)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -756,7 +769,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(757)
+            .HasFileLineNumber(770)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -771,7 +784,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(772)
+            .HasFileLineNumber(785)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -789,7 +802,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).ContainsExactly(obj1, obj3, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(790)
+            .HasFileLineNumber(803)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -806,10 +819,11 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsExactlyInAnyOrderOnString(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -839,7 +853,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(839)
+            .HasFileLineNumber(853)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -852,7 +866,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(852)
+            .HasFileLineNumber(866)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -863,10 +877,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsExactlyInAnyOrderOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -901,7 +916,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(901)
+            .HasFileLineNumber(916)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -919,7 +934,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(919)
+            .HasFileLineNumber(934)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -936,10 +951,11 @@ public partial class EnumerableAssertTest
     }
 
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsSameExactlyInAnyOrderOnString(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -969,7 +985,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(969)
+            .HasFileLineNumber(985)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -982,7 +998,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(982)
+            .HasFileLineNumber(998)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -993,10 +1009,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsSameExactlyInAnyOrderOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1031,7 +1048,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj5, obj3, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1031)
+            .HasFileLineNumber(1048)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1049,7 +1066,7 @@ public partial class EnumerableAssertTest
         AssertThrown(() => AssertArray(current)
                 .ContainsSameExactlyInAnyOrder(obj1, obj2, obj4))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1049)
+            .HasFileLineNumber(1066)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1074,7 +1091,8 @@ public partial class EnumerableAssertTest
             .IsEmpty()
             .IsNotNull();
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void Extract()
     {
         // try to extract on base types
@@ -1096,7 +1114,7 @@ public partial class EnumerableAssertTest
         // must fail we can't extract from a null instance
         AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1097)
+            .HasFileLineNumber(1115)
             .HasMessage("""
                         Expecting contains exactly elements:
                             <Null>
@@ -1107,7 +1125,8 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void ExtractV()
     {
         // single extract
@@ -1126,7 +1145,7 @@ public partial class EnumerableAssertTest
                 .ExtractV(Extr("GetName"), Extr("GetValue"), Extr("GetX"))
                 .ContainsExactly(Tuple("A", 10, null)))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1125)
+            .HasFileLineNumber(1144)
             .HasMessage("""
                         Expecting contains exactly elements:
                             <Null>
@@ -1137,7 +1156,8 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void ExtractVChained()
     {
         var root_a = new TestObj("root_a", null);
@@ -1159,7 +1179,8 @@ public partial class EnumerableAssertTest
             );
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void ExtractChained()
     {
         var root_a = new TestObj("root_a", null);
@@ -1187,7 +1208,8 @@ public partial class EnumerableAssertTest
             .Extract("NotExistMethod")
             .ContainsExactly("n.a.");
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void ExtractVManyArgs()
         => AssertArray(new object[] { new TestObj("A", 10), new TestObj("B", "foo", "bar"), new TestObj("C", 11, 42) })
             .ExtractV(
@@ -1212,7 +1234,7 @@ public partial class EnumerableAssertTest
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1211)
+            .HasFileLineNumber(1233)
             .HasMessage("Custom failure message");
 
     [TestCase]
@@ -1228,10 +1250,11 @@ public partial class EnumerableAssertTest
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void IsSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1241,7 +1264,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).IsSame(other))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1242)
+            .HasFileLineNumber(1265)
             .HasMessage("""
                         Expecting be same:
                             ["a", "b", "c", "a"]
@@ -1250,10 +1273,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void IsNotSame(int dataPointIndex)
     {
         var dataPoint = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1263,16 +1287,17 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).IsNotSame(current))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1264)
+            .HasFileLineNumber(1288)
             .HasMessage("""
                         Expecting be NOT same: ["a", "b", "c", "a"]
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsSameOnString(int dataPointIndex)
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1292,7 +1317,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 'xxx' and 'yyy'
         AssertThrown(() => AssertArray(current).ContainsSame(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1293)
+            .HasFileLineNumber(1318)
             .HasMessage("""
                         Expecting contains elements:
                             ["a", "b", "c", "a"]
@@ -1303,10 +1328,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsSameOnObjects(int dataPointIndex)
     {
         var testData = TestDataPointObjectValues[dataPointIndex] as object[];
@@ -1326,7 +1352,7 @@ public partial class EnumerableAssertTest
         // should fail because the array not contains 'obj5'
         AssertThrown(() => AssertArray(current).ContainsSame(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1327)
+            .HasFileLineNumber(1353)
             .HasMessage("""
                 Expecting contains elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1342,10 +1368,11 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [GodotTestCase(0, TestName = "Array")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void ContainsSameExactlyOnString(int dataPointIndex)
     {
         var testData = TestDataPointStringValues[dataPointIndex] as object[];
@@ -1362,7 +1389,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).ContainsSameExactly(current);
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1363)
+            .HasFileLineNumber(1390)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -1374,7 +1401,7 @@ public partial class EnumerableAssertTest
 
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1375)
+            .HasFileLineNumber(1402)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -1385,7 +1412,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1386)
+            .HasFileLineNumber(1413)
             .HasMessage("""
                         Expecting contains exactly elements:
                             ["a", "b", "c", "a"]
@@ -1398,10 +1425,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void ContainsSameExactlyOnObjects(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1418,7 +1446,7 @@ public partial class EnumerableAssertTest
         // when compare by reference equal obj1 != obj4
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2, obj3, obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1419)
+            .HasFileLineNumber(1447)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1435,7 +1463,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1436)
+            .HasFileLineNumber(1464)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1450,7 +1478,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj2))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1451)
+            .HasFileLineNumber(1479)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1465,7 +1493,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj4", AssertFailures.AsObjectId(obj4)));
         AssertThrown(() => AssertArray(current).ContainsSameExactly(obj1, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1466)
+            .HasFileLineNumber(1494)
             .HasMessage("""
                 Expecting contains exactly elements:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1483,10 +1511,11 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void NotContainsOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -1500,7 +1529,7 @@ public partial class EnumerableAssertTest
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1501)
+            .HasFileLineNumber(1530)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1511,7 +1540,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1512)
+            .HasFileLineNumber(1541)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1522,10 +1551,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void NotContainsOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1540,7 +1570,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).NotContains(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContains(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1541)
+            .HasFileLineNumber(1571)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1556,7 +1586,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContains(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1557)
+            .HasFileLineNumber(1587)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1572,10 +1602,11 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
-    [GodotTestCase(0, TestName = "Array<string>")]
-    [GodotTestCase(1, TestName = "List<string>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<string>")]
+    [TestCase(0, TestName = "Array<string>")]
+    [TestCase(1, TestName = "List<string>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<string>")]
+    [RequireGodotRuntime]
     public void NotContainsSameOnStrings(int testDataIndex)
     {
         var testData = TestDataPointStringValues[testDataIndex] as object[];
@@ -1589,7 +1620,7 @@ public partial class EnumerableAssertTest
         // we find `a` twice because is string equal
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1590)
+            .HasFileLineNumber(1621)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1600,7 +1631,7 @@ public partial class EnumerableAssertTest
                         """);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1601)
+            .HasFileLineNumber(1632)
             .HasMessage("""
                         Expecting:
                             ["a", "b", "c", "a"]
@@ -1611,10 +1642,11 @@ public partial class EnumerableAssertTest
                         """);
     }
 
-    [GodotTestCase(0, TestName = "Array<object>")]
-    [GodotTestCase(1, TestName = "List<object>")]
-    [GodotTestCase(2, TestName = "GodotArray")]
-    [GodotTestCase(3, TestName = "GodotArray<RefCount>")]
+    [TestCase(0, TestName = "Array<object>")]
+    [TestCase(1, TestName = "List<object>")]
+    [TestCase(2, TestName = "GodotArray")]
+    [TestCase(3, TestName = "GodotArray<RefCount>")]
+    [RequireGodotRuntime]
     public void NotContainsSameOnObject(int testDataIndex)
     {
         var testData = TestDataPointObjectValues[testDataIndex] as object[];
@@ -1629,7 +1661,7 @@ public partial class EnumerableAssertTest
         AssertArray(current).NotContainsSame(obj5, obj5);
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1630)
+            .HasFileLineNumber(1662)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]
@@ -1645,7 +1677,7 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
         AssertThrown(() => AssertArray(current).NotContainsSame(obj1, obj2, obj5))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(1646)
+            .HasFileLineNumber(1678)
             .HasMessage("""
                 Expecting:
                     [$obj1, $obj2, $obj3, $obj4]

@@ -19,7 +19,8 @@ public class VectorAssertTest
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US", true);
 
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void AssertThatMapsToVectorAssert()
     {
         AssertObject(AssertThat(Vector2.One)).IsInstanceOf<IVectorAssert<Vector2>>();
@@ -30,7 +31,8 @@ public class VectorAssertTest
         AssertObject(AssertThat(Vector4I.One)).IsInstanceOf<IVectorAssert<Vector4I>>();
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsBetween()
     {
         AssertThat(Vector2.Zero).IsBetween(Vector2.Zero, Vector2.One);
@@ -53,7 +55,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsEqual()
     {
         AssertThat(Vector2.One).IsEqual(Vector2.One);
@@ -68,7 +71,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsNotEqual()
     {
         AssertThat(Vector2.One).IsNotEqual(Vector2.Inf);
@@ -83,7 +87,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsEqualApprox()
     {
         AssertThat(Vector2.One).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f));
@@ -109,7 +114,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsGreater()
     {
         AssertThat(Vector2.Inf).IsGreater(Vector2.One);
@@ -130,7 +136,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsGreaterEqual()
     {
         AssertThat(Vector2.Inf).IsGreaterEqual(Vector2.One);
@@ -153,7 +160,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsLess()
     {
         AssertThat(Vector2.One).IsLess(Vector2.Inf);
@@ -174,7 +182,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsLessForAllVectorTypes()
     {
         AssertThat(Vector2.One).IsLess(Vector2.Inf);
@@ -185,7 +194,8 @@ public class VectorAssertTest
         AssertThat(Vector4I.One).IsLess(Vector4I.MaxValue);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsLessEqual()
     {
         AssertThat(Vector2.One).IsLessEqual(Vector2.Inf);
@@ -207,7 +217,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void IsNotBetween()
     {
         AssertThat(new Vector2(1f, 1.0002f)).IsNotBetween(Vector2.Zero, Vector2.One);
@@ -222,7 +233,8 @@ public class VectorAssertTest
                         """);
     }
 
-    [GodotTestCase]
+    [TestCase]
+    [RequireGodotRuntime]
     public void OverrideFailureMessage() =>
         AssertThrown(() => AssertThat(Vector2.One).OverrideFailureMessage("Custom Error").IsEqual(Vector2.Zero))
             .HasMessage("Custom Error");

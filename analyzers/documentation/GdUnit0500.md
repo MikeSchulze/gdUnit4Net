@@ -8,8 +8,11 @@
 
 # Problem Description
 
-Test classes that use Godot functionality in test hooks (such as `[Before]`, `[After]`, `[BeforeTest]`, `[AfterTest]`) require a running Godot engine.
-These test classes must be marked with the `[RequireGodotRuntime]` attribute to ensure proper test execution in the Godot environment.
+Test classes with hooks (`[Before]`, `[After]`, `[BeforeTest]`, `[AfterTest]`) that use Godot functionality
+must be annotated with `[RequireGodotRuntime]`. This ensures proper test execution in the
+Godot engine environment.
+
+Add `[RequireGodotRuntime]` to the test class level.
 
 ### Error example:
 

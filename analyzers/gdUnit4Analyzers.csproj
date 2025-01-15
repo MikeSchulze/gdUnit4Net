@@ -40,14 +40,14 @@
     <ReportAnalyzer>true</ReportAnalyzer>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
-  
+
   <!-- Packaging -->
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net/analyzers</PackageProjectUrl>
     <PackageId>gdUnit4.analyzers</PackageId>
-    <PackageVersion>$(GdUnit4AnalyzersVersion)</PackageVersion>
+    <PackageVersion>$(GdUnitAnalyzersVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
