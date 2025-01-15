@@ -6,6 +6,8 @@ using Asserts;
 
 using Reporting;
 
+using static Api.ITestReport.ReportType;
+
 internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 {
     public TestCaseExecutionStage(string name, TestCase testCase, TestCaseAttribute stageAttribute) : base(name, testCase.MethodInfo, stageAttribute)
@@ -20,7 +22,7 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 
         await context.MemoryPool.Gc();
         if (context.MemoryPool.OrphanCount > 0)
-            context.ReportCollector.PushFront(new TestReport(TestReport.ReportType.WARN, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
+            context.ReportCollector.PushFront(new TestReport(Warning, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
     }
 
     private static string ReportOrphans(ExecutionContext context) =>

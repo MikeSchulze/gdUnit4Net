@@ -10,6 +10,8 @@ using Reporting;
 
 using Signals;
 
+using static Api.ITestReport.ReportType;
+
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
 {
     public AfterTestExecutionStage(TestSuite testSuite) : base("AfterTest", testSuite.Instance.GetType())
@@ -26,7 +28,7 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
             await base.Execute(context);
             await context.MemoryPool.Gc();
             if (context.MemoryPool.OrphanCount > 0)
-                context.ReportCollector.PushFront(new TestReport(TestReport.ReportType.WARN, 0, ReportOrphans(context)));
+                context.ReportCollector.PushFront(new TestReport(Warning, 0, ReportOrphans(context)));
         }
 
         context.FireAfterTestEvent();

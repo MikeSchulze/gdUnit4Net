@@ -7,7 +7,7 @@ using System.Security.Principal;
 
 using Newtonsoft.Json;
 
-internal class TestAdapterReporter : ITestEventListener
+internal class TestAdapterReporter : ITestEventListener, IDisposable
 {
     public const string PipeName = "gdunit4-event-pipe";
     private readonly NamedPipeClientStream client;
@@ -31,8 +31,6 @@ internal class TestAdapterReporter : ITestEventListener
             }
     }
 
-    public int CompletedTests { get; set; }
-
     public void Dispose()
     {
         Console.WriteLine("GdUnit4.TestAdapterReporter: Disconnecting from GdUnit4 test report server.");
@@ -40,6 +38,8 @@ internal class TestAdapterReporter : ITestEventListener
         writer?.Dispose();
         client.Dispose();
     }
+
+    public int CompletedTests { get; set; }
 
     public bool IsFailed { get; set; }
 

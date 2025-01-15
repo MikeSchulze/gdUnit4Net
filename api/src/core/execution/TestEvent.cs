@@ -1,4 +1,4 @@
-namespace GdUnit4.Core.Events;
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 
     private TestEvent(ITestEvent.EventType eventType, string resourcePath, string suiteName, string testName, int totalCount = 0,
         IDictionary<STATISTIC_KEY, object>? statistics = null,
-        IEnumerable<TestReport>? reports = null)
+        IEnumerable<ITestReport>? reports = null)
     {
         Type = eventType;
         ResourcePath = resourcePath;
@@ -28,7 +28,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         TestName = testName;
         Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>();
         Statistics[STATISTIC_KEY.TOTAL_COUNT] = totalCount;
-        Reports = reports?.ToList() ?? new List<TestReport>();
+        Reports = reports?.ToList() ?? new List<ITestReport>();
         FullyQualifiedName = "";
     }
 
@@ -41,12 +41,11 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         TestName = testName;
         Statistics = new Dictionary<STATISTIC_KEY, object>();
         Statistics[STATISTIC_KEY.TOTAL_COUNT] = 0;
-        Reports = new List<TestReport>();
+        Reports = new List<ITestReport>();
         FullyQualifiedName = "";
     }
 
     public IDictionary<STATISTIC_KEY, object> Statistics { get; private init; } = new Dictionary<STATISTIC_KEY, object>();
-    public List<TestReport> Reports { get; private init; } = new();
 
     public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
     public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
@@ -74,6 +73,9 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
             other.FailedCount,
             other.OrphanCount));
 
+    [JsonProperty]
+    [JsonConverter(typeof(TestReportListConverter))]
+    public List<ITestReport> Reports { get; private init; } = new();
 
     public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
     public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
@@ -85,18 +87,18 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
         new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount);
 
-    public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<TestReport> reports) =>
+    public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
         new(ITestEvent.EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
 
     public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
         new(ITestEvent.EventType.TestBefore, id, resourcePath, suiteName, testName);
 
     public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
-        List<TestReport>? reports = null) =>
+        List<ITestReport>? reports = null) =>
         new(ITestEvent.EventType.TestAfter, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
-            Reports = reports ?? new List<TestReport>()
+            Reports = reports ?? new List<ITestReport>()
         };
 
     public override bool Equals(object? obj)
@@ -105,7 +107,6 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
             return Equals(other);
         return false;
     }
-
 
     internal TestEvent WithStatistic(STATISTIC_KEY key, object value)
     {
@@ -119,7 +120,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         return this;
     }
 
-    internal TestEvent WithReport(TestReport report)
+    internal TestEvent WithReport(ITestReport report)
     {
         Reports.Add(report);
         return this;
@@ -191,4 +192,18 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     public string TestName { get; set; }
     public string FullyQualifiedName { get; set; }
     public string ResourcePath { get; set; }
+}
+
+public class TestReportListConverter : JsonConverter<List<ITestReport>>
+{
+    public override List<ITestReport> ReadJson(JsonReader reader, Type objectType, List<ITestReport> existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        var reports = serializer.Deserialize<List<TestReport>>(reader);
+        return reports?.Cast<ITestReport>().ToList() ?? new List<ITestReport>();
+    }
+
+    public override void WriteJson(JsonWriter writer, List<ITestReport> value, JsonSerializer serializer)
+    {
+        serializer.Serialize(writer, value?.Cast<TestReport>().ToList());
+    }
 }

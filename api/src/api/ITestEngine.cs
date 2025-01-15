@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 using Core;
 using Core.Discovery;
-using Core.Events;
 
 /// <summary>
 ///     Interface for the GdUnit4 test engine responsible for discovering and executing tests.

@@ -1,6 +1,7 @@
 ﻿namespace GdUnit4.Api;
 
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 ///     Defines the core identification properties of a test event.
@@ -61,4 +62,10 @@ public interface ITestEvent
     ///     Gets the elapsed time of the test execution.
     /// </summary>
     TimeSpan ElapsedInMs { get; }
+
+    /// <summary>
+    ///     Gets the collection of reports associated with the test event.
+    ///     Each report provides details about various aspects of the test's execution.
+    /// </summary>
+    List<ITestReport> Reports { get; }
 }

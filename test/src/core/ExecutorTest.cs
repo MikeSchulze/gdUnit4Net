@@ -14,7 +14,6 @@ using GdUnit4.Asserts;
 using GdUnit4.Core;
 using GdUnit4.Core.Commands;
 using GdUnit4.Core.Discovery;
-using GdUnit4.Core.Events;
 using GdUnit4.Core.Execution;
 using GdUnit4.Core.Extensions;
 using GdUnit4.Core.Reporting;
@@ -27,8 +26,7 @@ using Resources;
 using static Assertions;
 
 using static Api.ITestEvent.EventType;
-
-using static GdUnit4.Core.Reporting.TestReport.ReportType;
+using static Api.ITestReport.ReportType;
 
 using TestCase = GdUnit4.Core.Execution.TestCase;
 
@@ -41,12 +39,13 @@ public class ExecutorTest : ITestEventListener, IDisposable
     // enable to verbose debug event
     private readonly bool verbose;
 #pragma warning restore CS0649
-    private Executor executor = null!;
+    private Executor? executor;
     private List<ITestEvent> CollectedEvents { get; } = new();
     private static CodeNavigationDataProvider? NavigationDataProvider { get; set; }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
+        NavigationDataProvider?.Dispose();
         executor?.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -62,7 +61,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Console.WriteLine("-------------------------------");
             Console.WriteLine($"Event Type: {testEvent.Type}, SuiteName: {e.SuiteName}, TestName: {e.TestName}, Statistics: {e.Statistics}");
             Console.WriteLine($"ErrorCount: {e.ErrorCount}, FailedCount: {e.FailedCount}, OrphanCount: {e.OrphanCount}");
-            var reports = new List<TestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
+            var reports = new List<ITestReport>(e.Reports).ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
             if (verbose)
                 reports.ForEach(r => Console.WriteLine($"Reports -> {r}"));
         }
@@ -71,7 +70,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
     }
 
     [Before]
-    public static void ClassSetup()
+    public void ClassSetup()
     {
         var assembly = typeof(ExecutorTest).Assembly;
         var location = assembly.ManifestModule.FullyQualifiedName;
@@ -85,17 +84,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             location = Path.Combine(executionPath, $"{assemblyName}.dll");
         }
 
-
         NavigationDataProvider = new CodeNavigationDataProvider(location);
-    }
-
-    [After]
-    public static void ClassCleanup()
-        => NavigationDataProvider?.Dispose();
-
-    [Before]
-    public void Before()
-    {
         executor = new Executor();
         executor.AddTestEventListener(this);
     }
@@ -154,9 +143,9 @@ public class ExecutorTest : ITestEventListener, IDisposable
         var extractedEvents = events.ConvertAll(@event =>
         {
             var e = (@event as TestEvent)!;
-            var reports = new List<TestReport>(e.Reports)
+            var reports = new List<ITestReport>(e.Reports)
                 // we exclude standard out reports
-                .FindAll(r => r.Type != STDOUT)
+                .FindAll(r => r.Type != Stdout)
                 .ConvertAll(r => new TestReport(r.Type, r.LineNumber, r.Message.RichTextNormalize()));
             return new
             {
@@ -165,7 +154,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
                 Reports = reports
             };
         });
-        return AssertArray(extractedEvents).ExtractV(Extr("EventType"), Extr("TestName"), Extr("Reports"));
+        return AssertArray(extractedEvents).ExtractV(Extr("Type"), Extr("TestName"), Extr("Reports"));
     }
 
     private static List<ITuple> ExpectedTestCase(string suiteName, string testName, List<object[]> testCaseParams)
@@ -292,7 +281,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestAfter, "TestCase1", new List<TestReport>()),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
             Tuple(TestAfter, "TestCase2", new List<TestReport>()),
-            Tuple(SuiteAfter, "After", new List<TestReport> { new(FAILURE, 12, "failed on Before()") }));
+            Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 12, "failed on Before()") }));
     }
 
     [GodotTestCase(Description = "Verifies report a failure on stage 'After'.")]
@@ -330,7 +319,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestAfter, "TestCase1", new List<TestReport>()),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
             Tuple(TestAfter, "TestCase2", new List<TestReport>()),
-            Tuple(SuiteAfter, "After", new List<TestReport> { new(FAILURE, 16, "failed on After()") }));
+            Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 16, "failed on After()") }));
     }
 
     [GodotTestCase(Description = "Verifies report a failure on stage 'BeforeTest'.")]
@@ -364,9 +353,9 @@ public class ExecutorTest : ITestEventListener, IDisposable
         AssertReports(events).ContainsExactly(
             Tuple(SuiteBefore, "Before", new List<TestReport>()),
             Tuple(TestBefore, "TestCase1", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(FAILURE, 20, "failed on BeforeTest()") }),
+            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(Failure, 20, "failed on BeforeTest()") }),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(FAILURE, 20, "failed on BeforeTest()") }),
+            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(Failure, 20, "failed on BeforeTest()") }),
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
@@ -401,9 +390,9 @@ public class ExecutorTest : ITestEventListener, IDisposable
         AssertReports(events).ContainsExactly(
             Tuple(SuiteBefore, "Before", new List<TestReport>()),
             Tuple(TestBefore, "TestCase1", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(FAILURE, 24, "failed on AfterTest()") }),
+            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(Failure, 24, "failed on AfterTest()") }),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(FAILURE, 24, "failed on AfterTest()") }),
+            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(Failure, 24, "failed on AfterTest()") }),
             Tuple(SuiteAfter, "After", new List<TestReport>()));
     }
 
@@ -439,7 +428,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestBefore, "TestCase1", new List<TestReport>()),
             Tuple(TestAfter, "TestCase1", new List<TestReport>
             {
-                new(FAILURE, 27, """
+                new(Failure, 27, """
                                  Expecting be equal:
                                      "TestCase1"
                                   but is
@@ -486,16 +475,16 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestBefore, "TestCase1", new List<TestReport>()),
             Tuple(TestAfter, "TestCase1", new List<TestReport>
             {
-                new(FAILURE, 20, "failed on BeforeTest()"),
-                new(FAILURE, 28, """
+                new(Failure, 20, "failed on BeforeTest()"),
+                new(Failure, 28, """
                                  Expecting be empty:
                                   but is
                                      "TestCase1"
                                  """)
             }),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(FAILURE, 20, "failed on BeforeTest()") }),
-            Tuple(SuiteAfter, "After", new List<TestReport> { new(FAILURE, 16, "failed on After()") }));
+            Tuple(TestAfter, "TestCase2", new List<TestReport> { new(Failure, 20, "failed on BeforeTest()") }),
+            Tuple(SuiteAfter, "After", new List<TestReport> { new(Failure, 16, "failed on After()") }));
     }
 
     [GodotTestCase(Description = "GD-63: Execution must detect orphan nodes in the different test stages.")]
@@ -537,31 +526,31 @@ public class ExecutorTest : ITestEventListener, IDisposable
             // ends with warnings
             Tuple(TestAfter, "TestCase1", new List<TestReport>
                 {
-                    new(WARN, 0, """
-                                 WARNING:
-                                     Detected <2> orphan nodes during test setup stage!
-                                     Check SetupTest:27 and TearDownTest:35 for unfreed instances!
-                                 """),
-                    new(WARN, 41, """
-                                  WARNING:
-                                      Detected <3> orphan nodes during test execution!
-                                  """)
+                    new(Warning, 0, """
+                                    WARNING:
+                                        Detected <2> orphan nodes during test setup stage!
+                                        Check SetupTest:27 and TearDownTest:35 for unfreed instances!
+                                    """),
+                    new(Warning, 41, """
+                                     WARNING:
+                                         Detected <3> orphan nodes during test execution!
+                                     """)
                 }
             ),
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
             // ends with failure and warnings
             Tuple(TestAfter, "TestCase2", new List<TestReport>
                 {
-                    new(WARN, 0, """
-                                 WARNING:
-                                     Detected <2> orphan nodes during test setup stage!
-                                     Check SetupTest:27 and TearDownTest:35 for unfreed instances!
-                                 """),
-                    new(WARN, 50, """
-                                  WARNING:
-                                      Detected <4> orphan nodes during test execution!
-                                  """),
-                    new(FAILURE, 55, """
+                    new(Warning, 0, """
+                                    WARNING:
+                                        Detected <2> orphan nodes during test setup stage!
+                                        Check SetupTest:27 and TearDownTest:35 for unfreed instances!
+                                    """),
+                    new(Warning, 50, """
+                                     WARNING:
+                                         Detected <4> orphan nodes during test execution!
+                                     """),
+                    new(Failure, 55, """
                                      Expecting be empty:
                                       but is
                                          "TestCase2"
@@ -571,11 +560,11 @@ public class ExecutorTest : ITestEventListener, IDisposable
             // and one orphan detected at stage 'After'
             Tuple(SuiteAfter, "After", new List<TestReport>
             {
-                new(WARN, 0, """
-                             WARNING:
-                                 Detected <1> orphan nodes during test suite setup stage!
-                                 Check SetupSuite:16 and TearDownSuite:23 for unfreed instances!
-                             """)
+                new(Warning, 0, """
+                                WARNING:
+                                    Detected <1> orphan nodes during test suite setup stage!
+                                    Check SetupSuite:16 and TearDownSuite:23 for unfreed instances!
+                                """)
             })
         );
     }
@@ -617,7 +606,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             // ends with failure
             Tuple(TestAfter, "TestCase2", new List<TestReport>
             {
-                new(FAILURE, 55, """
+                new(Failure, 55, """
                                  Expecting be empty:
                                   but is
                                      "TestCase2"
@@ -690,14 +679,14 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteBefore, "Before", new List<TestReport>()),
             // reports a test interruption due to a timeout
             Tuple(TestBefore, "TestCase1", new List<TestReport>()),
-            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(INTERRUPTED, 32, "The execution has timed out after 1s.") }
+            Tuple(TestAfter, "TestCase1", new List<TestReport> { new(Interrupted, 32, "The execution has timed out after 1s.") }
             ),
 
             // reports a test failure
             Tuple(TestBefore, "TestCase2", new List<TestReport>()),
             Tuple(TestAfter, "TestCase2", new List<TestReport>
                 {
-                    new(FAILURE, 43, """
+                    new(Failure, 43, """
                                      Expecting be equal:
                                          'False' but is 'True'
                                      """)
@@ -712,7 +701,7 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestBefore, "TestCase4", new List<TestReport>()),
             Tuple(TestAfter, "TestCase4", new List<TestReport>
                 {
-                    new(FAILURE, 56, """
+                    new(Failure, 56, """
                                      Invalid method signature found at: TestCase4.
                                       You must return a <Task> for an asynchronously specified method.
                                      """)
@@ -789,14 +778,14 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(TestAfter, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(1, 2, 3, 6)), new List<TestReport>()),
             Tuple(TestAfter, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(3, 4, 5, 11)), new List<TestReport>
             {
-                new(FAILURE, 25, """
+                new(Failure, 25, """
                                  Expecting be equal:
                                      '11' but is '12'
                                  """)
             }),
             Tuple(TestAfter, TestCase.BuildDisplayName("ParameterizedIntValuesFail", new TestCaseAttribute(6, 7, 8, 22)), new List<TestReport>
             {
-                new(FAILURE, 25, """
+                new(Failure, 25, """
                                  Expecting be equal:
                                      '22' but is '21'
                                  """)
@@ -840,19 +829,19 @@ public class ExecutorTest : ITestEventListener, IDisposable
             Tuple(SuiteBefore, "Before", new List<TestReport>()),
             Tuple(TestAfter, "ExceptionIsThrownOnSceneInvoke", new List<TestReport>
             {
-                new(FAILURE, 14, """
+                new(Failure, 14, """
                                  Test Exception
                                  """)
             }),
             Tuple(TestAfter, "ExceptionAtAsyncMethod", new List<TestReport>
             {
-                new(FAILURE, 24, """
+                new(Failure, 24, """
                                  outer exception
                                  """)
             }),
             Tuple(TestAfter, "ExceptionAtSyncMethod", new List<TestReport>
             {
-                new(FAILURE, 28, """
+                new(Failure, 28, """
                                  outer exception
                                  """)
             }),

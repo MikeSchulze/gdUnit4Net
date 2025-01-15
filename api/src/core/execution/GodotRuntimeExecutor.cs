@@ -11,13 +11,13 @@ using Api;
 
 using Commands;
 
-using Events;
-
 using Newtonsoft.Json;
 
 using Reporting;
 
 using Runners;
+
+using static Api.ITestReport.ReportType;
 
 /// <summary>
 ///     Implements a command executor that communicates with the Godot runtime through named pipes.
@@ -93,7 +93,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                         var testCanceledEvent = TestEvent
                             .AfterTest(lastTestEvent.Id, lastTestEvent.ResourcePath, lastTestEvent.SuiteName, lastTestEvent.TestName)
                             .WithStatistic(TestEvent.STATISTIC_KEY.ERRORS, 1)
-                            .WithReport(new TestReport(TestReport.ReportType.INTERRUPTED, 0, response.Payload));
+                            .WithReport(new TestReport(Interrupted, 0, response.Payload));
                         testEventListener.PublishEvent(testCanceledEvent);
                         return response;
                 }

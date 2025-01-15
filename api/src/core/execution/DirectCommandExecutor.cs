@@ -8,8 +8,6 @@ using Api;
 
 using Commands;
 
-using Events;
-
 /// <summary>
 ///     Implements a direct command executor that executes commands without additional runtime overhead.
 ///     Used for direct test execution without interprocess communication.

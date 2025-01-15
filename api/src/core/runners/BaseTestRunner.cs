@@ -10,8 +10,6 @@ using Api;
 
 using Commands;
 
-using Events;
-
 using Newtonsoft.Json;
 
 /// <summary>

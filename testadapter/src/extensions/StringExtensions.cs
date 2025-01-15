@@ -4,7 +4,9 @@ using System;
 using System.Linq;
 using System.Text;
 
-using Core.Reporting;
+using Api;
+
+using static Api.ITestReport.ReportType;
 
 internal static class StringExtensions
 {
@@ -16,7 +18,7 @@ internal static class StringExtensions
         return indent + str.Replace("\n", "\n" + indent);
     }
 
-    public static string FormatMessageColored(this string message, TestReport.ReportType reportType)
+    public static string FormatMessageColored(this string message, ITestReport.ReportType reportType)
     {
         const string ANSI_RESET = "\u001b[0m";
         const string ANSI_BLUE = "\u001b[34m";
@@ -29,12 +31,12 @@ internal static class StringExtensions
         // Header line (always visible)
         switch (reportType)
         {
-            case TestReport.ReportType.STDOUT:
+            case Stdout:
                 sb.AppendLine($"{ANSI_BLUE}{ANSI_BOLD}Standard Output: {ANSI_ITALIC}{ANSI_RESET}");
                 sb.AppendLine($"{ANSI_BLUE}──────────────────────────────────────────{ANSI_RESET}");
 
                 break;
-            case TestReport.ReportType.WARN:
+            case Warning:
                 sb.AppendLine($"{ANSI_YELLOW}{ANSI_BOLD}Warning:{ANSI_ITALIC}{ANSI_RESET}");
 
                 break;

@@ -10,8 +10,6 @@ using System.Threading;
 
 using Api;
 
-using Events;
-
 using Execution;
 
 using Environment = System.Environment;

@@ -12,8 +12,6 @@ using Api;
 
 using Discovery;
 
-using Events;
-
 using Extensions;
 
 using Runners;

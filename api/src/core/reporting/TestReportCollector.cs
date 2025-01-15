@@ -3,19 +3,21 @@ namespace GdUnit4.Core.Reporting;
 using System.Collections.Generic;
 using System.Linq;
 
+using Api;
+
 internal sealed class TestReportCollector
 {
-    public List<TestReport> Reports { get; } = new();
+    public List<ITestReport> Reports { get; } = new();
 
-    public IEnumerable<TestReport> Failures => Reports.Where(r => r.IsFailure);
+    public IEnumerable<ITestReport> Failures => Reports.Where(r => r.IsFailure);
 
-    public IEnumerable<TestReport> Errors => Reports.Where(r => r.IsError);
+    public IEnumerable<ITestReport> Errors => Reports.Where(r => r.IsError);
 
-    public IEnumerable<TestReport> Warnings => Reports.Where(r => r.IsWarning);
+    public IEnumerable<ITestReport> Warnings => Reports.Where(r => r.IsWarning);
 
-    public void Consume(TestReport report) => Reports.Add(report);
+    public void Consume(ITestReport report) => Reports.Add(report);
 
-    public void PushFront(TestReport report) => Reports.Insert(0, report);
+    public void PushFront(ITestReport report) => Reports.Insert(0, report);
 
     public void Clear() => Reports.Clear();
 }

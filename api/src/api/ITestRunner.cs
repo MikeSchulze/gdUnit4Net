@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-using Core.Events;
-
 /// <summary>
 ///     Defines a test runner interface for executing GdUnit4 test suites.
 /// </summary>

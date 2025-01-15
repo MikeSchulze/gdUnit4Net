@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 using Api;
 
-using Events;
-
 using Extensions;
 
 using Godot;
@@ -136,9 +134,9 @@ public partial class Executor : RefCounted, IExecutor
                 { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
             };
 
-            if (testEvent.Reports.Count > 0)
+            if (e.Reports.Count > 0)
             {
-                var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
+                var serializedReports = e.Reports.Select(report => report.Serialize()).ToGodotArray();
                 data.Add("reports", serializedReports);
             }
 

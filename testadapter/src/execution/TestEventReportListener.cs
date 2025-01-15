@@ -7,9 +7,7 @@ using System.Text.Encodings.Web;
 
 using Api;
 
-using Core.Events;
 using Core.Extensions;
-using Core.Reporting;
 
 using Extensions;
 
@@ -20,6 +18,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using Utilities;
 
 using static Api.ITestEvent.EventType;
+using static Api.ITestReport.ReportType;
 
 using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
 
@@ -40,10 +39,6 @@ internal sealed class TestEventReportListener : ITestEventListener
     private Ide IdeType => IdeDetector.Detect(Framework);
     public int CompletedTests { get; set; }
     public bool IsFailed { get; set; }
-
-    public void Dispose()
-    {
-    }
 
     public void PublishEvent(ITestEvent testEvent)
     {
@@ -92,7 +87,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                     Duration = testEvent.ElapsedInMs
                 };
 
-                (testEvent as TestEvent)?.Reports.ForEach(report => AddTestReport(report, testResult));
+                testEvent.Reports.ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} {testResult.Outcome}");
@@ -114,8 +109,12 @@ internal sealed class TestEventReportListener : ITestEventListener
         }
     }
 
+    public void Dispose()
+    {
+    }
+
 // ReSharper disable once UnusedMethodReturnValue.Local
-    private TestResult AddTestReport(TestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch
+    private TestResult AddTestReport(ITestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch
     {
         Ide.JetBrainsRider => AddRiderTestReport(report, testResult),
         Ide.VisualStudio => AddVisualStudio2022TestReport(report, testResult),
@@ -124,30 +123,30 @@ internal sealed class TestEventReportListener : ITestEventListener
         _ => AddDefaultTestReport(report, testResult)
     };
 
-    private TestResult AddRiderTestReport(TestReport report, TestResult testResult)
+    private TestResult AddRiderTestReport(ITestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
         switch (report.Type)
         {
-            case TestReport.ReportType.STDOUT:
+            case Stdout:
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 break;
 
-            case TestReport.ReportType.WARN:
-            case TestReport.ReportType.ORPHAN:
+            case Warning:
+            case Orphan:
                 normalizedMessage = normalizedMessage.Replace("WARNING:\n", "");
                 testResult.ErrorMessage = "Warning Detected!";
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.AdditionalInfoCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 Framework.SendMessage(TestMessageLevel.Warning, $"Warning:\n{normalizedMessage.Indent()}");
                 break;
-            case TestReport.ReportType.SUCCESS:
+            case Success:
                 break;
-            case TestReport.ReportType.FAILURE:
-            case TestReport.ReportType.TERMINATED:
-            case TestReport.ReportType.INTERRUPTED:
-            case TestReport.ReportType.ABORT:
+            case Failure:
+            case Terminated:
+            case Interrupted:
+            case Abort:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -158,19 +157,19 @@ internal sealed class TestEventReportListener : ITestEventListener
         return testResult;
     }
 
-    private TestResult AddVisualStudio2022TestReport(TestReport report, TestResult testResult)
+    private TestResult AddVisualStudio2022TestReport(ITestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
         switch (report.Type)
         {
-            case TestReport.ReportType.STDOUT:
+            case Stdout:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
-            case TestReport.ReportType.WARN:
-            case TestReport.ReportType.ORPHAN:
+            case Warning:
+            case Orphan:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 normalizedMessage = normalizedMessage.Replace("WARNING:", "Warning:");
@@ -178,12 +177,12 @@ internal sealed class TestEventReportListener : ITestEventListener
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
 
-            case TestReport.ReportType.SUCCESS:
+            case Success:
                 break;
-            case TestReport.ReportType.FAILURE:
-            case TestReport.ReportType.TERMINATED:
-            case TestReport.ReportType.INTERRUPTED:
-            case TestReport.ReportType.ABORT:
+            case Failure:
+            case Terminated:
+            case Interrupted:
+            case Abort:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -194,31 +193,31 @@ internal sealed class TestEventReportListener : ITestEventListener
         return testResult;
     }
 
-    private TestResult AddVisualStudioCodeTestReport(TestReport report, TestResult testResult)
+    private TestResult AddVisualStudioCodeTestReport(ITestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd();
 
         switch (report.Type)
         {
-            case TestReport.ReportType.STDOUT:
+            case Stdout:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
-            case TestReport.ReportType.WARN:
-            case TestReport.ReportType.ORPHAN:
+            case Warning:
+            case Orphan:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:")}");
                 break;
-            case TestReport.ReportType.SUCCESS:
+            case Success:
                 break;
-            case TestReport.ReportType.FAILURE:
-            case TestReport.ReportType.TERMINATED:
-            case TestReport.ReportType.INTERRUPTED:
-            case TestReport.ReportType.ABORT:
+            case Failure:
+            case Terminated:
+            case Interrupted:
+            case Abort:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -229,32 +228,32 @@ internal sealed class TestEventReportListener : ITestEventListener
         return testResult;
     }
 
-    private TestResult AddDefaultTestReport(TestReport report, TestResult testResult)
+    private TestResult AddDefaultTestReport(ITestReport report, TestResult testResult)
     {
         var normalizedMessage = report.Message.RichTextNormalize().TrimEnd().Replace("WARNING:", "Warning:").Replace("ERROR:", "Error:");
 
         switch (report.Type)
         {
-            case TestReport.ReportType.STDOUT:
+            case Stdout:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 foreach (var message in normalizedMessage.Split("\n"))
                     Framework.SendMessage(TestMessageLevel.Informational, HtmlEncoder.Default.Encode($"    {message}"));
                 break;
 
-            case TestReport.ReportType.WARN:
-            case TestReport.ReportType.ORPHAN:
+            case Warning:
+            case Orphan:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
-            case TestReport.ReportType.SUCCESS:
+            case Success:
                 break;
-            case TestReport.ReportType.FAILURE:
-            case TestReport.ReportType.TERMINATED:
-            case TestReport.ReportType.INTERRUPTED:
-            case TestReport.ReportType.ABORT:
+            case Failure:
+            case Terminated:
+            case Interrupted:
+            case Abort:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;

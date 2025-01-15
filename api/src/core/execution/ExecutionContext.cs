@@ -9,8 +9,6 @@ using System.Threading;
 
 using Api;
 
-using Events;
-
 using Monitoring;
 
 using Reporting;
@@ -156,7 +154,7 @@ internal sealed class ExecutionContext : IDisposable
         get;
     }
 
-    private List<TestReport> CollectReports => ReportCollector.Reports;
+    private List<ITestReport> CollectReports => ReportCollector.Reports;
 
     private int SkippedCount => SubExecutionContexts.Count(context => context.IsSkipped);
 

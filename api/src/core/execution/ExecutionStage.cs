@@ -18,7 +18,7 @@ using Monitoring;
 
 using Reporting;
 
-using static Reporting.TestReport;
+using static Api.ITestReport.ReportType;
 
 using Environment = System.Environment;
 
@@ -66,7 +66,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             // if the method is defined asynchronously, the return type must be a Task
             if (IsAsync != IsTask)
             {
-                context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, ExecutionLineNumber(context),
+                context.ReportCollector.Consume(new TestReport(Failure, ExecutionLineNumber(context),
                     $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
                 return;
             }
@@ -88,7 +88,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (ValidateForExpectedException(context, e))
                 return;
             if (context.FailureReporting)
-                context.ReportCollector.Consume(new TestReport(ReportType.INTERRUPTED, e.LineNumber, e.Message));
+                context.ReportCollector.Consume(new TestReport(Interrupted, e.LineNumber, e.Message));
         }
         catch (TestFailedException e)
         {
@@ -152,7 +152,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             var stack = new StackTrace(exception, true);
             var lineNumber = ScanFailureLineNumber(stack);
-            context.ReportCollector.Consume(new TestReport(ReportType.FAILURE, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
+            context.ReportCollector.Consume(new TestReport(Failure, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
         }
     }
 
