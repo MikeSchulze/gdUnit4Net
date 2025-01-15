@@ -63,7 +63,7 @@ internal sealed class TestEventReportListener : ITestEventListener
 
                 Framework.RecordStart(testCase);
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} Processing...");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testEvent.FullyQualifiedName} Processing...");
                 break;
             }
 
@@ -86,11 +86,14 @@ internal sealed class TestEventReportListener : ITestEventListener
                     EndTime = DateTimeOffset.Now,
                     Duration = testEvent.ElapsedInMs
                 };
+                // Set dynamic driven test name (DataPointAttribute)
+                if (testEvent.DisplayName != null)
+                    testResult.DisplayName = testEvent.DisplayName;
 
                 testEvent.Reports.ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
-                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testCase.FullyQualifiedName} {testResult.Outcome}");
+                    Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testEvent.FullyQualifiedName} {testResult.Outcome}");
                 Framework.RecordResult(testResult);
                 Framework.RecordEnd(testCase, testResult.Outcome);
                 CompletedTests += 1;

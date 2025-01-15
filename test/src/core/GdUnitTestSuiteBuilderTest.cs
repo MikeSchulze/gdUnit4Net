@@ -242,22 +242,25 @@ public class GdUnitTestSuiteBuilderTest
         AssertThat(testSuite.GetChildren())
             .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("ParameterizedTests"))
             .ContainsExactly(
-                Tuple("TestFoo", 36, new List<string>()),
-                Tuple("TestBar", 44, new List<string>()),
-                Tuple("Waiting", 48, new List<string>()),
-                Tuple("Customized", 52, new List<string>()),
-                Tuple("TestCaseArguments", 58, new List<string>
+                Tuple("TestFoo", 39, new List<string>()),
+                Tuple("TestBar", 47, new List<string>()),
+                Tuple("Waiting", 51, new List<string>()),
+                Tuple("Customized", 55, new List<string>()),
+                Tuple("TestCaseArguments", 61, new List<string>
                 {
                     "TestCaseArguments (1, 2, 3, 6)",
                     "TestCaseArguments (3, 4, 5, 12)",
                     "TestCaseArguments (6, 7, 8, 21)"
                 }),
-                Tuple("TestCasesWithCustomTestName", 64, new List<string>
+                Tuple("TestCasesWithCustomTestName", 67, new List<string>
                 {
                     "TestCaseA (1, 2, 3, 6)",
                     "TestCaseB (3, 4, 5, 12)",
                     "TestCaseC (6, 7, 8, 21)"
                 }),
-                Tuple("ParameterizedSingleTest", 72, new List<string> { "ParameterizedSingleTest (True)" }));
+                Tuple("ParameterizedSingleTest", 75, new List<string> { "ParameterizedSingleTest (True)" }),
+                Tuple("SkippedTestCase", 81, new List<string>()),
+                Tuple("TestWithDataPointProperty", 86, new List<string>())
+            );
     }
 }

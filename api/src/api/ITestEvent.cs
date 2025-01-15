@@ -31,7 +31,15 @@ public interface ITestEvent
     /// </summary>
     Guid Id { get; }
 
-    string FullyQualifiedName { get; set; }
+    /// <summary>
+    ///     The full qualified test name, used for console logging.
+    /// </summary>
+    string FullyQualifiedName { get; }
+
+    /// <summary>
+    ///     The test display name. Used for data driven test e.g. DataPointAttribute
+    /// </summary>
+    string? DisplayName { get; }
 
     /// <summary>
     ///     Gets whether the test failed.
