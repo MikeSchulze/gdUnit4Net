@@ -94,10 +94,22 @@ public class ExecuteTestSuiteCommand : BaseCommand
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
+            //  if (assembly.Location != assemblyName)
+            //    continue;
             var type = assembly.GetType(clazz);
-            if (type != null) return type;
+            if (type != null)
+                return type;
         }
 
-        return Assembly.Load(assemblyPath).GetType(clazz) ?? throw new InvalidOperationException($"Could not find type {clazz} on assembly {assemblyPath}");
+        try
+        {
+            var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyPath));
+            return assembly.GetType(clazz)!;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to resolve type '{clazz}': {ex.Message}");
+            throw new InvalidOperationException($"Could not find type {clazz} on assembly {assemblyPath}");
+        }
     }
 }
