@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 
 using Api;
@@ -21,6 +20,9 @@ using GdUnit4.Core.Runners;
 
 using Godot;
 
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+
 using Resources;
 
 using static Assertions;
@@ -28,6 +30,7 @@ using static Assertions;
 using static Api.ITestEvent.EventType;
 using static Api.ITestReport.ReportType;
 
+using Environment = System.Environment;
 using TestCase = GdUnit4.Core.Execution.TestCase;
 
 [RequireGodotRuntime]
@@ -41,11 +44,9 @@ public class ExecutorTest : ITestEventListener, IDisposable
 #pragma warning restore CS0649
     private Executor? executor;
     private List<ITestEvent> CollectedEvents { get; } = new();
-    private static CodeNavigationDataProvider? NavigationDataProvider { get; set; }
 
     public void Dispose()
     {
-        NavigationDataProvider?.Dispose();
         executor?.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -72,19 +73,6 @@ public class ExecutorTest : ITestEventListener, IDisposable
     [Before]
     public void ClassSetup()
     {
-        var assembly = typeof(ExecutorTest).Assembly;
-        var location = assembly.ManifestModule.FullyQualifiedName;
-
-        // Fallback approach if needed
-        if (location == "<Unknown>" || !File.Exists(location))
-        {
-            // Try to find the DLL in the execution directory
-            var assemblyName = assembly.GetName().Name;
-            var executionPath = AppDomain.CurrentDomain.BaseDirectory;
-            location = Path.Combine(executionPath, $"{assemblyName}.dll");
-        }
-
-        NavigationDataProvider = new CodeNavigationDataProvider(location);
         executor = new Executor();
         executor.AddTestEventListener(this);
     }
@@ -175,8 +163,17 @@ public class ExecutorTest : ITestEventListener, IDisposable
     private static TestSuiteNode LoadTestSuiteNode(Type testSuiteType)
     {
         ITestEngineLogger logger = new GodotLogger();
-        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var tests = TestCaseDiscoverer.DiscoverTests(logger, NavigationDataProvider!, assemblyLocation, testSuiteType).ToList();
+
+        var assemblyPath = LookupAssemblyDirectory();
+        var readerParameters = new ReaderParameters
+        {
+            ReadSymbols = true,
+            SymbolReaderProvider = new PortablePdbReaderProvider()
+        };
+        using var assemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
+        var typeDefinition = assemblyDefinition.MainModule.Types
+            .FirstOrDefault(t => t.FullName == testSuiteType.FullName)!;
+        var tests = TestCaseDiscoverer.DiscoverTests(logger, assemblyPath, typeDefinition).ToList();
         var first = tests.First();
 
         var assemblyNode = new TestAssemblyNode
@@ -209,6 +206,31 @@ public class ExecutorTest : ITestEventListener, IDisposable
         testSuiteNode.Tests.AddRange(testCaseNodes);
         assemblyNode.Suites.Add(testSuiteNode);
         return testSuiteNode;
+    }
+
+    private static string LookupAssemblyDirectory()
+    {
+        var module = typeof(ExecutorTest).Module;
+        var assemblyFullName = module.Assembly.ManifestModule.ScopeName;
+
+        var currentDir = new DirectoryInfo(Environment.CurrentDirectory);
+        while (currentDir != null)
+        {
+            try
+            {
+                var files = Directory.GetFiles(currentDir.FullName, assemblyFullName, SearchOption.AllDirectories);
+                if (files.Length > 0)
+                    return files[0];
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Skip directories we can't access
+            }
+
+            currentDir = currentDir.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not find assembly '{assemblyFullName}' in any directory");
     }
 
     [TestCase(Description = "Verifies the complete test suite ends with success and no failures are reported.")]

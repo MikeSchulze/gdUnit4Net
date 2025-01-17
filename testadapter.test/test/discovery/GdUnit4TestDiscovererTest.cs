@@ -43,6 +43,26 @@ public class GdUnit4TestDiscovererTest
         """;
 
     [TestMethod]
+    public void DiscoverDoNotLoadTestAssembly()
+    {
+        var frameworkHandle = new Mock<IFrameworkHandle>();
+        // Setup the mock to capture discovered tests
+        var mockDiscoverySink = new Mock<ITestCaseDiscoverySink>();
+        // Setup mock RunContext with RunSettings
+        var mockRunContext = new Mock<IRunContext>();
+        mockRunContext.SetupGet(rc => rc.RunSettings)
+            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
+
+        // Check initial state
+        var assemblyPath = AssemblyPaths.LibraryPath;
+        Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded initially");
+
+        // Check discovery process
+        new GdUnit4TestDiscoverer().DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
+        Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded after DiscoverTests execution");
+    }
+
+    [TestMethod]
     public void DiscoverOnNoTestAssembly()
     {
         var frameworkHandle = new Mock<IFrameworkHandle>();
@@ -123,8 +143,7 @@ public class GdUnit4TestDiscovererTest
         discoverer.DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
         // Verify SendTestCase was never called
-        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(13));
-        Assert.AreEqual(13, discoveredTests.Count, "Should discover any tests from the assembly");
+        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(15));
 
         // Verify log messages
         // @formatter:off
@@ -133,9 +152,9 @@ public class GdUnit4TestDiscovererTest
             {
                 $"Informational: Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
                 $"Informational: Discover tests from assembly: {assemblyPath}",
-                "Informational: Discover:  TestSuite Examples.ExampleTest with 4 TestCases found.",
+                "Informational: Discover:  TestSuite Examples.ExampleTest with 6 TestCases found.",
                 "Informational: Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 9 TestCases found.",
-                "Informational: Discover tests done, 2 TestSuites and total 13 Tests found."
+                "Informational: Discover tests done, 2 TestSuites and total 15 Tests found."
             },
             logMessages,
             "Log messages don't match expected messages"
@@ -146,14 +165,27 @@ public class GdUnit4TestDiscovererTest
         );
 
         // Verify discovered tests
-        Assert.AreEqual(13, discoveredTests.Count, "Should discover any tests from assembly");
-        // Verify all properties exemplary for one test
+        Assert.AreEqual(15, discoveredTests.Count, "Should discover any tests from assembly");
+        // Verify properties exemplary
         AssertTestCase(discoveredTests,
             "Examples.ExampleTest.Success",
             "Success",
             assemblyPath,
             @"example\test\ExampleTest.cs",
             14);
+        // multi testcase attribute usage
+        AssertTestCase(discoveredTests,
+            "Examples.ExampleTest.DataRows.TestA (0, 1, 2)",
+            "TestA #0",
+            assemblyPath,
+            @"example\test\ExampleTest.cs",
+            31);
+        AssertTestCase(discoveredTests,
+            "Examples.ExampleTest.DataRows.TestB (1, 2, 3)",
+            "TestB #1",
+            assemblyPath,
+            @"example\test\ExampleTest.cs",
+            31);
     }
 
     private void AssertTestCase(IEnumerable<TestCase> tests, string fullyQualifiedName, string displayName, string source, string codeFilePath, int lineNumber)
@@ -170,4 +202,9 @@ public class GdUnit4TestDiscovererTest
         StringAssert.EndsWith(actualPath, expectedPath);
         Assert.AreEqual(lineNumber, test.LineNumber);
     }
+
+    private static bool IsAssemblyLoaded(string assemblyPath)
+        => AppDomain.CurrentDomain
+            .GetAssemblies()
+            .Any(a => a.Location == assemblyPath);
 }

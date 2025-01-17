@@ -83,7 +83,6 @@ internal sealed class TestSuite : IDisposable
                 (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
             .ToList();
 
-
     /// <summary>
     ///     filters test by given list, if primitiveFilter is set we do simply filter by test name ignoring the arguments
     ///     TODO: the primitiveFilter is just a temporary workaround to run selective c# tests from Godot Editor

@@ -24,4 +24,9 @@ public class ExampleTest
     [TestCase]
     [DataPoint(nameof(ArrayDataPointMethod))]
     public void WithArrayDataPointMethod(int a, int b, int expected) => AssertThat(a + b).IsEqual(expected);
+
+
+    [TestCase(0, 1, 2, TestName = "TestA")]
+    [TestCase(1, 2, 3, TestName = "TestB", Description = "foo ")]
+    public void DataRows(int a, int b, int c) => AssertBool(true).IsTrue();
 }
