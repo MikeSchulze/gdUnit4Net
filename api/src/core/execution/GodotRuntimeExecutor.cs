@@ -50,7 +50,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            // await ExecuteCommand(new TerminateGodotInstanceCommand(), CancellationToken.None);
+            await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None);
             // Give server time to process shutdown
             await Task.Delay(100);
             await DisposeAsync();
@@ -113,4 +113,11 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
             Payload = ""
         };
     }
+}
+
+internal class NoInteractTestEventListener : ITestEventListener
+{
+    public bool IsFailed { get; set; }
+    public int CompletedTests { get; set; }
+    public void PublishEvent(ITestEvent testEvent) { }
 }

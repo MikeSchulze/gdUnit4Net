@@ -16,7 +16,7 @@ using Newtonsoft.Json;
 public class TerminateGodotInstanceCommand : BaseCommand
 {
     [JsonConstructor]
-    private TerminateGodotInstanceCommand() { }
+    public TerminateGodotInstanceCommand() { }
 
     /// <summary>
     ///     Executes the termination command, shutting down the Godot instance.
