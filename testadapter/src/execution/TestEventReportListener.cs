@@ -81,7 +81,7 @@ internal sealed class TestEventReportListener : ITestEventListener
 
                 var testResult = new TestResult(testCase)
                 {
-                    DisplayName = IdeType == Ide.DotNet ? testCase.FullyQualifiedName : testCase.DisplayName,
+                    DisplayName = IdeType is Ide.DotNet or Ide.Unknown ? testCase.FullyQualifiedName : testCase.DisplayName,
                     Outcome = testEvent.AsTestOutcome(),
                     EndTime = DateTimeOffset.Now,
                     Duration = testEvent.ElapsedInMs

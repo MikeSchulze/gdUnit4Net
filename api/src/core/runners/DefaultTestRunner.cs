@@ -1,5 +1,8 @@
 ﻿namespace GdUnit4.Core.Runners;
 
+using System.Collections.Generic;
+using System.Threading;
+
 using Api;
 
 using Execution;
@@ -17,5 +20,11 @@ public sealed class DefaultTestRunner : BaseTestRunner
     internal DefaultTestRunner(ITestEngineLogger logger, TestEngineSettings settings)
         : base(new DirectCommandExecutor(), logger, settings)
     {
+    }
+
+    public new void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
+    {
+        Logger.LogInfo("======== Running GdUnit4 Default Test Runner ========");
+        base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
     }
 }

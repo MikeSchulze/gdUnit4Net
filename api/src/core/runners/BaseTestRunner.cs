@@ -64,7 +64,6 @@ public class BaseTestRunner : ITestRunner
                         var response = await Executor.ExecuteCommand(new ExecuteTestSuiteCommand(testSuite, Settings.CaptureStdOut, true), eventListener, token);
                         ValidateResponse(response);
                     }
-
                     await Executor.StopAsync();
                 }
                 catch (TimeoutException)

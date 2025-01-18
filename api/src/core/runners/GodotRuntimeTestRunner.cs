@@ -69,14 +69,14 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         if (string.IsNullOrEmpty(message))
             return;
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        Logger.LogInfo($"{message}");
+        Logger.LogInfo($":: {message}");
     };
 
-    private EventHandler ExitHandler => (sender, _) =>
+    private EventHandler ExitHandler(string source = "") => (sender, _) =>
     {
         Console.Out.Flush();
         if (sender is Process p)
-            Logger.LogInfo($"Godot ends with exit code: {p.ExitCode}");
+            Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
     };
 
     public override void Cancel()
@@ -86,7 +86,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         {
             process?.Kill(true);
             process?.WaitForExit(1000);
-            CloseProcess();
+            CloseProcess(process);
         }
     }
 
@@ -94,7 +94,11 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         lock (ProcessLock)
         {
-            InitRuntimeEnvironment();
+            if (!InitRuntimeEnvironment())
+                return;
+
+            Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
+
             var processStartInfo =
                 new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments(settings))
                 {
@@ -115,7 +119,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 process = new Process { StartInfo = processStartInfo };
                 process.EnableRaisingEvents = true;
                 process.ErrorDataReceived += StdErrorProcessor;
-                process.Exited += ExitHandler;
+                process.Exited += ExitHandler("GdUnit4 Godot Runtime Test Runner");
                 process.Start();
                 process.BeginErrorReadLine();
                 process.BeginOutputReadLine();
@@ -125,30 +129,50 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
-            if (!process.WaitForExit(1000)) // 30 second timeout
-                process.Kill();
-            CloseProcess();
+            process.WaitForExit(2000);
+            // wait until the process has finished
+            var waitRetry = 0;
+            while (!process.HasExited && waitRetry++ < 10)
+                Thread.Sleep(100);
+            // If the process not finished until 10 retries, we kill it manually
+            if (!process.HasExited)
+            {
+                Logger.LogInfo("GdUnit4 Godot Runtime Test Runner is not terminated, force process kill.");
+                process.Kill(true);
+            }
+
+            CloseProcess(process);
         }
     }
 
-    private void CloseProcess()
+    private void CloseProcess(Process? processToClose)
     {
-        if (process == null)
+        if (processToClose == null)
             return;
-        //process.CancelErrorRead();
-        //process.CancelOutputRead();
-        process.ErrorDataReceived -= StdErrorProcessor;
-        process.Exited -= ExitHandler;
-        process.Dispose();
-        process = null;
+        try
+        {
+            processToClose.CancelErrorRead();
+            processToClose.CancelOutputRead();
+            processToClose.ErrorDataReceived -= StdErrorProcessor;
+            processToClose.Exited -= ExitHandler();
+            processToClose.Dispose();
+        }
+        catch (Exception)
+        {
+            // ignore
+        }
+        finally
+        {
+            process = null;
+        }
     }
 
-    private void InitRuntimeEnvironment() =>
+    private bool InitRuntimeEnvironment() =>
         InstallTestRunnerClasses();
 
-
-    private void InstallTestRunnerClasses()
+    private bool InstallTestRunnerClasses()
     {
+        var workingDirectory = Environment.CurrentDirectory;
         var destinationFolderPath = Path.Combine(Environment.CurrentDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
             Directory.CreateDirectory(destinationFolderPath);
@@ -156,33 +180,32 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         var sceneRunnerSource = Path.Combine(destinationFolderPath, "GdUnit4TestRunnerScene.cs");
         // check if the scene runner already installed
         if (File.Exists(sceneRunnerSource))
-            return;
+            return true;
 
-        Logger.LogInfo($"Installing GdUnit4 TestRunner at {destinationFolderPath}...");
+        Logger.LogInfo("======== Installing GdUnit4 Godot Runtime Test Runner ========");
 
         var assembly = Assembly.GetExecutingAssembly();
         using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerSceneTemplate.cs");
         using var reader = new StreamReader(stream!);
         var content = reader.ReadToEnd();
         content = content.Replace("GdUnit4TestRunnerSceneTemplate", "GdUnit4TestRunnerScene");
-        File.WriteAllText(sceneRunnerSource, content);
-        /*
-        // compile the scene
+        File.WriteAllText(sceneRunnerSource, content, Encoding.UTF8);
+
         try
         {
-            Logger.LogInfo($"Compile GdUnit4 TestRunner at {destinationFolderPath}...");
-            var processStartInfo = new ProcessStartInfo($"{GodotBin}", @"--path . --headless --build-solutions --quit-after 1000")
+            // recompile the project
+            var processStartInfo = new ProcessStartInfo($"{GodotBin}", @"--path . --headless --build-solutions --quit-after 100")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = false,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Normal,
-                WorkingDirectory = @$"{WorkingDirectory}"
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = workingDirectory
             };
 
-            Logger.LogInfo($"Run Rebuild ... {GodotBin} {processStartInfo.Arguments} at {WorkingDirectory}");
+            Logger.LogInfo($"Run Rebuild Godot Project ... {GodotBin} {processStartInfo.Arguments}");
             using var compileProcess = new Process();
             compileProcess.StartInfo = processStartInfo;
             compileProcess.EnableRaisingEvents = true;
@@ -192,33 +215,42 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 if (string.IsNullOrEmpty(message))
                     return;
 
-                Logger.LogInfo($"{message}");
+                Logger.LogInfo($".. {message}");
             };
-            compileProcess.ErrorDataReceived += (_, args) =>
+            compileProcess.ErrorDataReceived += StdErrorProcessor;
+            compileProcess.Exited += ExitHandler("Rebuild Godot Project");
+            if (!compileProcess.Start())
             {
-                var message = args.Data?.Trim();
-                if (string.IsNullOrEmpty(message))
-                    return;
+                Logger.LogError(@"Rebuild Godot Project fails on process start, exit ..");
+                return false;
+            }
 
-                Logger.LogError($"{message}");
-            };
-            //compileProcess.Exited += ExitHandler;
-            compileProcess.Start();
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
+            compileProcess.WaitForExit(5000);
 
-            if (!compileProcess.WaitForExit(5000)) // 5 second timeout
+            // The compile project can take a while, and we need to wait it is finises
+            var waitRetry = 0;
+            while (!compileProcess.HasExited && waitRetry++ < 200)
+                Thread.Sleep(100);
+            // If the process not finished until 200 retries, we kill it manually
+            if (!compileProcess.HasExited)
+            {
+                Logger.LogInfo("Rebuild Godot Project is not correct terminated, force kill process now.");
                 compileProcess.Kill(true);
+            }
 
-            Logger.LogInfo($"GdUnit4 TestRunner successfully installed: {compileProcess.ExitCode}");
+            var isSuccess = compileProcess.ExitCode == 0;
+            CloseProcess(compileProcess);
+            return isSuccess;
         }
         catch (Exception e)
         {
-            Logger.LogError(@$"Install GdUnit4 `TestRunner` fails with: {e.Message}");
+            Logger.LogError($"Install GdUnit4 `TestRunner` fails with: {e.Message}\n {e.StackTrace}");
+            return false;
         }
-        */
     }
 
-    private string BuildGodotArguments(TestEngineSettings testEngineSettings)
+    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
         => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
 }
