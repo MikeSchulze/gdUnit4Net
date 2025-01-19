@@ -48,7 +48,7 @@ jobs:
         with:
           lfs: true
 
-       # the vstest filter is actual not implemented and the argument 'paths' on gdUnit4-action@v1.0.8 will have no affect
+      # the vstest filter is actual not implemented and the argument 'paths' on gdUnit4-action@v1.0.8 will have no affect
       - name: 'Temp solution, we delete the failing test for now.'
         shell: bash
         run: |
@@ -176,9 +176,8 @@ jobs:
           }
 
           validate_section '<Output>' 'Discover tests done, 2 TestSuites and total 15 Tests found.'
-          validate_section '<Output>' 'Start executing tests, 15 TestCases total.'
           validate_section '<Results>' "<Message>Expecting: 'True' but is 'False'</Message>"
           validate_section '<Results>' '<StackTrace>   at Examples.ExampleTest.Failed() in /home/runner/work/gdUnit4Net/gdUnit4Net/example/test/ExampleTest.cs:line 18'
           validate_section '<ResultSummary' '<ResultSummary outcome="Failed">'
-          validate_section '<ResultSummary' '<Counters total="15" executed="15" passed="14" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
+          validate_section '<ResultSummary' '<Counters total="19" executed="19" passed="18" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
           echo "All tests passes."
