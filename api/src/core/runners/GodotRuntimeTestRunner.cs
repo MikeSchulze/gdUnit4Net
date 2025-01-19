@@ -183,6 +183,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             return true;
 
         Logger.LogInfo("======== Installing GdUnit4 Godot Runtime Test Runner ========");
+        Logger.LogInfo($"Installing GdUnit4TestRunnerScene at {destinationFolderPath}");
 
         var assembly = Assembly.GetExecutingAssembly();
         using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerSceneTemplate.cs");
@@ -205,6 +206,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 WorkingDirectory = workingDirectory
             };
 
+            Logger.LogInfo($"Working dir {workingDirectory}");
             Logger.LogInfo($"Run Rebuild Godot Project ... {GodotBin} {processStartInfo.Arguments}");
             using var compileProcess = new Process();
             compileProcess.StartInfo = processStartInfo;
