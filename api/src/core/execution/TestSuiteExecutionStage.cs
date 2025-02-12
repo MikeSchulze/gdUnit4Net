@@ -83,7 +83,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 }
                 catch (AsyncDataPointCanceledException e)
                 {
-                    if (!executionContext.IsExpectingToFailWithException(e))
+                    if (!executionContext.IsExpectingToFailWithException(e, testCase.MethodInfo))
                         executionContext.ReportCollector.Consume(
                             new TestReport(
                                 Interrupted,
