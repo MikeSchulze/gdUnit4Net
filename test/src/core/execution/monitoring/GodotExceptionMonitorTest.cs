@@ -1,19 +1,58 @@
 ﻿namespace GdUnit4.Tests.Core.Execution.Monitoring;
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Api;
+
+using GdUnit4.Core.Execution;
 using GdUnit4.Core.Execution.Exceptions;
 
 using Godot;
+
+using static Assertions;
 
 [TestSuite]
 [RequireGodotRuntime]
 public partial class GodotExceptionMonitorTest
 {
     [TestCase]
+    public void IsExceptionMonitorIsEnabledOnBeforeStage()
+    {
+        var stage = new BeforeExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        // no [Before] hock is set
+        AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
+    }
+
+    [TestCase]
+    public void IsExceptionMonitorIsEnabledOnAfterStage()
+    {
+        var stage = new AfterExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        // no [After] hock is set
+        AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
+    }
+
+    [TestCase]
+    public void IsExceptionMonitorIsEnabledOnBeforeTestStage()
+    {
+        var stage = new BeforeTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        // no [BeforeTest] hock is set
+        AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
+    }
+
+    [TestCase]
+    public void IsExceptionMonitorIsEnabledOnAfterTestStage()
+    {
+        var stage = new AfterTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        // no [AfterTest] hock is set
+        AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
+    }
+
+
+    [TestCase]
     [ThrowsException(typeof(InvalidOperationException), "TestNode '_Ready' failed.",
-        "/src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 63)]
+        "/src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 102)]
     public void CatchExceptionOnAddingNodeToSceneTree()
     {
         var sceneTree = (SceneTree)Engine.GetMainLoop();
@@ -51,7 +90,7 @@ public partial class GodotExceptionMonitorTest
 
     [TestCase]
     [ThrowsException(typeof(TestFailedException), "Testing Godot PushError",
-        "src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 55)]
+        "src/core/execution/monitoring/GodotExceptionMonitorTest.cs", 94)]
     public void PushErrorAsTestFailure() => GD.PushError("Testing Godot PushError");
 
 

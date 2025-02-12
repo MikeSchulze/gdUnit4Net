@@ -49,7 +49,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private TestStageAttribute? StageAttribute { get; set; }
 
-    private bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
+    internal bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
 
 
     public virtual async Task Execute(ExecutionContext context)
@@ -111,15 +111,17 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         StageAttribute = stageAttribute;
         IsAsync = method?.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
         IsTask = method?.ReturnType.IsEquivalentTo(typeof(Task)) ?? false;
-        IsMonitoringOnGodotExceptionsEnabled = method?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
+        var isClassMonitored = method?.DeclaringType?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
+        var isMethodMonitored = method?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
+        IsMonitoringOnGodotExceptionsEnabled = isClassMonitored || isMethodMonitored;
     }
 
 
-    private static bool ValidateForExpectedException(ExecutionContext context, Exception? e = null)
+    private bool ValidateForExpectedException(ExecutionContext context, Exception? e = null)
     {
         try
         {
-            if (context.IsExpectingToFailWithException(e))
+            if (context.IsExpectingToFailWithException(e, Method))
                 return true;
         }
         catch (TestFailedException e2)
@@ -131,7 +133,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         return false;
     }
 
-    private static void ReportAsFailure(ExecutionContext context, TestFailedException e)
+    private void ReportAsFailure(ExecutionContext context, TestFailedException e)
     {
         if (ValidateForExpectedException(context, e)) return;
 
@@ -139,7 +141,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             context.ReportCollector.Consume(new TestReport(e));
     }
 
-    private static void ReportUnexpectedException(ExecutionContext context, Exception exception)
+    private void ReportUnexpectedException(ExecutionContext context, Exception exception)
     {
         if (exception is TargetInvocationException)
         {

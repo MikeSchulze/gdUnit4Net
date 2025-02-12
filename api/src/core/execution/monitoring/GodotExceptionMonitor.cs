@@ -134,7 +134,7 @@ public class GodotExceptionMonitor
     private static bool IsSceneProcessingMethod(string methodName, Type declaringType)
     {
         // Check for common Godot processing methods
-        if (methodName is "_Process" or "_PhysicsProcess" or "_Input" or "_UnhandledInput" or "_Ready")
+        if (methodName is "_Process" or "_PhysicsProcess" or "_Input" or "_UnhandledInput" or "_Ready" or "InvokeGodotClassMethod")
             // Check if the declaring type is or inherits from Node
             return typeof(Node).IsAssignableFrom(declaringType) || typeof(RefCounted).IsAssignableFrom(declaringType);
         return false;

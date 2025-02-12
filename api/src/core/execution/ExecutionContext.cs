@@ -196,9 +196,9 @@ internal sealed class ExecutionContext : IDisposable
         Stopwatch.Stop();
     }
 
-    public bool IsExpectingToFailWithException(Exception? exception)
+    public bool IsExpectingToFailWithException(Exception? exception, MethodInfo? mi)
     {
-        var attribute = CurrentTestCase?.MethodInfo.GetCustomAttribute<ThrowsExceptionAttribute>();
+        var attribute = mi?.GetCustomAttribute<ThrowsExceptionAttribute>();
         if (attribute == null)
             return false;
 
