@@ -73,3 +73,29 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         throw new TestFailedException(CurrentFailureMessage, lineNumber);
     }
 }
+
+public static class SignalAssertExtensions
+{
+    public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
+    {
+        using var timeoutCts = new CancellationTokenSource();
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
+        try
+        {
+            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
+            var completedTask = await Task.WhenAny(task, timeoutTask);
+            if (completedTask == task)
+                return await task.ConfigureAwait(false);
+
+            var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
+            if (data is CancellationTokenSource cancelToken)
+                cancelToken.Cancel();
+            return await task.ConfigureAwait(false);
+        }
+        finally
+        {
+            timeoutCts.Cancel();
+            linkedCts.Cancel();
+        }
+    }
+}

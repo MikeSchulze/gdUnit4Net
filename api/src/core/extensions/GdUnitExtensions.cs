@@ -8,11 +8,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Asserts;
-
-using Execution.Exceptions;
 
 using Godot;
 using Godot.Collections;
@@ -117,60 +114,10 @@ internal static partial class GdUnitExtensions
 
     internal static string RichTextNormalize(this string? input) => RegexTextNormalize().Replace(input?.UnixFormat() ?? "", string.Empty);
 
-    private static int GetWithTimeoutLineNumber()
+    internal static int GetWithTimeoutLineNumber()
     {
         var saveStackTrace = new StackTrace(true);
         return saveStackTrace.FrameCount > 4 ? saveStackTrace.GetFrame(4)!.GetFileLineNumber() : -1;
-    }
-
-    public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
-    {
-        using var timeoutCts = new CancellationTokenSource();
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
-        try
-        {
-            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask);
-            if (completedTask == task)
-                return await task.ConfigureAwait(false);
-
-            var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-            if (data is CancellationTokenSource cancelToken)
-                cancelToken.Cancel();
-            return await task.ConfigureAwait(false);
-        }
-        finally
-        {
-            timeoutCts.Cancel();
-            linkedCts.Cancel();
-        }
-    }
-
-    public static async Task WithTimeout(this Task task, int timeoutMillis)
-    {
-        using var timeoutCts = new CancellationTokenSource();
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
-        try
-        {
-            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask);
-            if (completedTask != task)
-            {
-                // if a signal task token registered we need to be cancel first
-                var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-                if (data is CancellationTokenSource cancelToken)
-                    cancelToken.Cancel();
-                var lineNumber = GetWithTimeoutLineNumber();
-                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
-            }
-
-            await task; // Propagate any exceptions from the task
-        }
-        finally
-        {
-            timeoutCts.Cancel();
-            linkedCts.Cancel();
-        }
     }
 
     [GeneratedRegex("\\[/?(b|color).*?\\]")]

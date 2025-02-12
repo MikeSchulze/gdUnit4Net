@@ -1,9 +1,11 @@
 namespace GdUnit4;
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Core;
+using Core.Execution.Exceptions;
 using Core.Extensions;
 
 using Godot;
@@ -322,4 +324,34 @@ public interface ISceneRunner : IDisposable
     /// <param name="owned">If owned is true, only descendants with a valid owner node are checked.</param>
     /// <returns>The node if found or Null</returns>
     public Node FindChild(string name, bool recursive = true, bool owned = false);
+}
+
+public static class SceneRunnerExtensions
+{
+    public static async Task WithTimeout(this Task task, int timeoutMillis)
+    {
+        using var timeoutCts = new CancellationTokenSource();
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
+        try
+        {
+            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
+            var completedTask = await Task.WhenAny(task, timeoutTask);
+            if (completedTask != task)
+            {
+                // if a signal task token registered we need to be cancel first
+                var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
+                if (data is CancellationTokenSource cancelToken)
+                    cancelToken.Cancel();
+                var lineNumber = GdUnitExtensions.GetWithTimeoutLineNumber();
+                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
+            }
+
+            await task; // Propagate any exceptions from the task
+        }
+        finally
+        {
+            timeoutCts.Cancel();
+            linkedCts.Cancel();
+        }
+    }
 }
