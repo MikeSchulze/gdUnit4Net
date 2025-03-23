@@ -49,17 +49,24 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     ///     Gets the path to the Godot executable from environment variables.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when Godot executable path is not configured or found.</exception>
-    private static string GodotBin
+    private string GodotBin
     {
         get
         {
             var godotPath = Environment.GetEnvironmentVariable("GODOT_BIN");
             if (string.IsNullOrEmpty(godotPath))
-                throw new InvalidOperationException(
-                    "Godot runtime is not configured. The environment variable 'GODOT_BIN' is not set or empty. Please set it to the Godot executable path.");
-            if (!File.Exists(godotPath))
-                throw new InvalidOperationException($"The Godot executable was not found at path: {godotPath}");
-            return godotPath;
+            {
+                var message = "Godot runtime is not configured. The environment variable 'GODOT_BIN' is not set or empty. Please set it to the Godot executable path.";
+                Logger.LogError(message);
+                throw new InvalidOperationException(message);
+            }
+
+            if (File.Exists(godotPath))
+                return godotPath;
+
+            var errorMessage = $"The Godot executable was not found at path: {godotPath}";
+            Logger.LogError(errorMessage);
+            throw new InvalidOperationException(errorMessage);
         }
     }
 
@@ -100,7 +107,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
 
             var processStartInfo =
-                new ProcessStartInfo(@$"{GodotBin}", BuildGodotArguments(settings))
+                new ProcessStartInfo(GodotBin, BuildGodotArguments(settings))
                 {
                     StandardOutputEncoding = Encoding.Default,
                     RedirectStandardOutput = true,

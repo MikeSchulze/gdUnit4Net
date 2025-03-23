@@ -55,9 +55,9 @@ public sealed class ExampleTestSuite
     public void TestFooBar()
         => AssertBool(true).IsEqual(true);
 
-    [TestCase(1, 2, 3, 6)]
-    [TestCase(3, 4, 5, 12)]
-    [TestCase(6, 7, 8, 21)]
+    [TestCase(1, 2, 3, 6, TestName = "TestCaseA")]
+    [TestCase(3, 4, 5, 12, TestName = "TestCaseB")]
+    [TestCase(6, 7, 8, 21, TestName = "TestCaseC")]
     public void TestCaseArguments(int a, int b, int c, int expect)
         => AssertThat(a + b + c).IsEqual(expect);
 
@@ -86,7 +86,7 @@ public sealed class ExampleTestSuite
     public void TestWithDataPointProperty(int a, int b, int expected)
         => AssertThat(a + b).IsEqual(expected);
 
-    private class TestDataProvider
+    private sealed class TestDataProvider
     {
         public static IEnumerable<object[]> GetTestData()
         {

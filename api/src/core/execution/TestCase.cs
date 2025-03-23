@@ -74,24 +74,21 @@ internal sealed class TestCase
                 )
             ).ToList();
 
-    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = 0, bool withAttributeIndex = false)
+    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = -1)
     {
         var name = attribute.TestName ?? testName;
-        if (withAttributeIndex) return $"{name} #{attributeIndex}";
+        if (attributeIndex == -1)
+            return name;
 
-        if (attribute.Arguments.Length <= 0) return name;
-        var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted));
-        return $"{name} ({parameters})";
+        var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted)).Replace(".", ",");
+        return $"{name}:{attributeIndex} ({parameters})";
     }
-
-    internal static string BuildDisplayName(string testName)
-        => testName;
 
     internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute attr)
     {
         if (attr.Arguments.Length == 0)
             return $"{classNameSpace}.{attr.TestName ?? testName}";
-        var parameterizedTestName = BuildDisplayName(testName, attr, -1);
+        var parameterizedTestName = BuildDisplayName(testName, attr);
         return $"{classNameSpace}.{testName}.{parameterizedTestName}";
     }
 }

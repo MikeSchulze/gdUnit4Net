@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-
-using Execution;
 
 using Godot;
 
@@ -178,52 +175,6 @@ public static class GdUnitTestSuiteBuilder
     private static BaseNamespaceDeclarationSyntax? ParseNameSpaceSyntax(CompilationUnitSyntax root) =>
         root.Members.OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax ??
         root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
-
-    public static CsNode? Load(string classPath)
-    {
-        if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
-        {
-            Console.Error.WriteLine($"Parse Error: Class `{classPath}` does not exist.");
-            return null;
-        }
-
-        try
-        {
-            var code = File.ReadAllText(classPath);
-            var syntaxTree = CSharpSyntaxTree.ParseText(code).WithFilePath(classPath).GetCompilationUnitRoot();
-            var classDefinition = ParseClassDefinition(syntaxTree);
-            var type = FindTypeOnAssembly(classDefinition.ClassName);
-            return type!.GetMethods()
-                .Where(mi => mi.IsDefined(typeof(TestCaseAttribute)))
-                .Select(mi =>
-                {
-                    var lineNumber = TestCaseLineNumber(syntaxTree, mi.Name);
-                    // collect testcase if multiple TestCaseAttribute exists
-                    var attributes = mi.GetCustomAttributes(typeof(TestCaseAttribute))
-                        .Cast<TestCaseAttribute>()
-                        .ToList();
-                    var testCases = attributes
-                        .Where(attr => attr.Arguments.Length != 0)
-                        .Select(attr => TestCase.BuildDisplayName(mi.Name, attr))
-                        .ToList();
-                    // create test
-                    var testName = attributes.Count == 1 ? attributes.First().TestName ?? mi.Name : mi.Name;
-                    return new CsNode(testName, classPath, lineNumber, testCases);
-                })
-                .Aggregate(new CsNode(classDefinition.Name, classPath), (acc, node) =>
-                {
-                    acc.AddChild(node);
-                    return acc;
-                });
-        }
-#pragma warning disable CS0168
-        catch (Exception e)
-        {
-#pragma warning restore CS0168
-            // ignore exception
-            return null;
-        }
-    }
 
     internal static Type? FindTypeOnAssembly(string clazz)
     {

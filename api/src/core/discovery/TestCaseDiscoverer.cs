@@ -2,21 +2,32 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Api;
 
-using Execution;
+using Godot;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+
+using Runners;
 
 /// <summary>
 ///     Discovers test cases in assemblies by scanning for test attributes and analyzing debug information.
 /// </summary>
 internal static class TestCaseDiscoverer
 {
+#pragma warning disable CA1859
+    private static readonly ITestEngineLogger Logger = new GodotLogger();
+#pragma warning restore CA1859
+
+    // Static cache for assembly locations and names
+    private static readonly Dictionary<string, ISet<string>> AssemblyLocationCache = new();
+    private static string? cachedAssemblyName;
+
     /// <summary>
     ///     Discovers all test cases in a test assembly.
     /// </summary>
@@ -67,6 +78,14 @@ internal static class TestCaseDiscoverer
     {
         try
         {
+            if (definition.DebugInformation?.SequencePoints == null)
+                return new CodeNavigation
+                {
+                    LineNumber = -1,
+                    CodeFilePath = "unknown",
+                    MethodName = definition.Name
+                };
+
             var debugInfo = GetDebugInfo(definition);
 
             return new CodeNavigation
@@ -117,29 +136,34 @@ internal static class TestCaseDiscoverer
         bool requireEngineMode,
         string assemblyPath,
         string className)
-        => mi.CustomAttributes
+    {
+        var attributes = mi.CustomAttributes
             .Where(IsAttribute<TestCaseAttribute>)
+            .ToList();
+        var hasMultipleAttributes = attributes.Count > 1;
+
+        return attributes
             .Select((attr, index) =>
             {
                 var navData = GetNavigationDataOrDefault(mi);
                 var testCaseAttribute = CreateTestCaseAttribute(attr);
 
                 return new TestCaseDescriptor
-                {
-                    Id = Guid.NewGuid(),
-                    AssemblyPath = assemblyPath,
-                    ManagedType = className,
-                    ManagedMethod = mi.Name,
-                    FullyQualifiedName = TestCase.BuildFullyQualifiedName(className, mi.Name, testCaseAttribute),
-                    SimpleName = TestCase.BuildDisplayName(mi.Name, testCaseAttribute, index, mi.CustomAttributes.Count > 1),
-                    AttributeIndex = index,
-                    LineNumber = navData.LineNumber,
-                    CodeFilePath = navData.CodeFilePath,
-                    RequireRunningGodotEngine = requireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>)
-                };
+                    {
+                        Id = Guid.NewGuid(),
+                        AssemblyPath = assemblyPath,
+                        ManagedType = className,
+                        ManagedMethod = mi.Name,
+                        AttributeIndex = index,
+                        LineNumber = navData.LineNumber,
+                        CodeFilePath = navData.CodeFilePath,
+                        RequireRunningGodotEngine = requireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>)
+                    }
+                    .Build(testCaseAttribute, hasMultipleAttributes);
             })
             .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
             .ToList();
+    }
 
     private static TestCaseAttribute CreateTestCaseAttribute(CustomAttribute attribute)
     {
@@ -193,4 +217,129 @@ internal static class TestCaseDiscoverer
         && type.CustomAttributes.Any(attr => attr.AttributeType.Name == "TestSuiteAttribute")
         && type.FullName != null
         && !type.FullName.StartsWith("Microsoft.VisualStudio.TestTools");
+
+
+    public static List<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
+    {
+        ArgumentNullException.ThrowIfNull(sourceScript);
+
+        try
+        {
+            var fullScriptPath = Path.GetFullPath(ProjectSettings.GlobalizePath(sourceScript.ResourcePath));
+            var className = Path.GetFileNameWithoutExtension(fullScriptPath);
+            Logger.LogInfo($"Discovering tests from test suite: {className}");
+
+            foreach (var assemblyPath in TestAssemblyLocations())
+            {
+                Logger.LogInfo($"lookup {assemblyPath}");
+                // Create a custom resolver that can handle GodotSharp
+                var resolver = new DefaultAssemblyResolver();
+                resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
+
+                // Create reader parameters with the custom resolver
+                var readerParameters = new ReaderParameters
+                {
+                    ReadSymbols = true,
+                    SymbolReaderProvider = new PortablePdbReaderProvider(),
+                    AssemblyResolver = resolver,
+                    ReadingMode = ReadingMode.Deferred // Use deferred loading to avoid resolving references right away
+                };
+
+                // lookup for class in the assembly
+                using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
+                var testSuite = assembly?.MainModule.Types
+                    .FirstOrDefault(definition => definition.Name == className && HasSourceFilePath(definition, fullScriptPath));
+
+                // No suite found, try next assembly
+                if (assembly == null || testSuite == null)
+                    continue;
+
+                return DiscoverTests(Logger, assembly.MainModule.FileName, testSuite).ToList();
+            }
+
+            Logger.LogWarning($"Could not find assembly or test suite for {className}");
+            return new List<TestCaseDescriptor>();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Error discovering tests: {e.Message}\n{e.StackTrace}");
+            return new List<TestCaseDescriptor>();
+        }
+    }
+
+    // Initializes and caches potential assembly locations
+    private static ISet<string> TestAssemblyLocations()
+    {
+        lock (AssemblyLocationCache)
+        {
+            if (AssemblyLocationCache.Count != 0)
+                return AssemblyLocationCache.TryGetValue(TestAssemblyName(), out var locations)
+                    ? locations
+                    : new HashSet<string>();
+
+            var assemblyName = TestAssemblyName();
+            var assemblyPaths = FindAllAssemblyPaths(Logger, assemblyName);
+            AssemblyLocationCache[assemblyName] = assemblyPaths;
+
+            Logger.LogInfo($"Initialized {assemblyPaths.Count} assembly locations for {assemblyName}");
+            return assemblyPaths;
+        }
+    }
+
+    private static HashSet<string> FindAllAssemblyPaths(ITestEngineLogger logger, string assemblyName)
+    {
+        // Normalize path
+        var projectDir = Path.GetFullPath(ProjectSettings.GlobalizePath("res://"));
+        var assemblyDirs = new HashSet<string>
+        {
+            // Godot 4.x build directories
+            Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "Debug"),
+            Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "Release"),
+            Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "ExportDebug"),
+            Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "ExportRelease")
+        };
+
+        var assemblyLocations = new HashSet<string>();
+        foreach (var dir in assemblyDirs.Where(Directory.Exists))
+        {
+            // Check for assembly with project/specified name
+            var specificAssembly = Path.Combine(dir, $"{assemblyName}.dll");
+            if (!File.Exists(specificAssembly))
+                continue;
+            assemblyLocations.Add(specificAssembly);
+            logger.LogInfo($"Found named assembly: {specificAssembly}");
+
+            // Check for other assemblies in the directory
+            /*
+            foreach (var file in Directory.GetFiles(dir, "*.dll"))
+                if (!assemblyLocations.Contains(file))
+                {
+                    assemblyLocations.Add(file);
+                    logger.LogInfo($"Found additional assembly: {file}");
+                }
+                */
+        }
+
+        return assemblyLocations;
+    }
+
+    // Gets the assembly name from project settings with caching
+    private static string TestAssemblyName()
+    {
+        if (cachedAssemblyName != null)
+            return cachedAssemblyName;
+
+        var projectName = ProjectSettings.GetSetting("application/config/name").AsString();
+        var assemblyName = ProjectSettings.GetSetting("dotnet/project/assembly_name").AsString();
+
+        cachedAssemblyName = string.IsNullOrEmpty(assemblyName) ? projectName : assemblyName;
+        return cachedAssemblyName;
+    }
+
+    private static bool HasSourceFilePath(TypeDefinition type, string sourceScriptPath)
+        => type.Methods.Any(method =>
+        {
+            var navData = GetNavigationDataOrDefault(method);
+            return navData.CodeFilePath == sourceScriptPath;
+        });
 }

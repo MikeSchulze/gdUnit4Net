@@ -101,37 +101,37 @@ public partial class EnumerableAssertTest
         {
             new Godot.Collections.Array
             {
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted()
+                new RDUniform { Binding = 0 },
+                new RDUniform { Binding = 1 },
+                new RDUniform { Binding = 2 },
+                new RDUniform { Binding = 3 }
             },
             new Godot.Collections.Array
             {
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted()
+                new RDUniform { Binding = 0 },
+                new RDUniform { Binding = 1 },
+                new RDUniform { Binding = 2 },
+                new RDUniform { Binding = 3 }
             },
-            new RefCounted()
+            new RDUniform { Binding = 10 }
         },
         new object[]
         {
             new Array<GodotObject>
             {
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted()
+                new RDUniform { Binding = 0 },
+                new RDUniform { Binding = 1 },
+                new RDUniform { Binding = 2 },
+                new RDUniform { Binding = 3 }
             },
             new Array<GodotObject>
             {
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted(),
-                new RefCounted()
+                new RDUniform { Binding = 0 },
+                new RDUniform { Binding = 1 },
+                new RDUniform { Binding = 2 },
+                new RDUniform { Binding = 3 }
             },
-            new RefCounted()
+            new RDUniform { Binding = 10 }
         }
     };
 

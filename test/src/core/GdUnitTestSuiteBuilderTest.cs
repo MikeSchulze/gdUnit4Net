@@ -1,6 +1,5 @@
 namespace GdUnit4.Tests.Core;
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -230,37 +229,4 @@ public class GdUnitTestSuiteBuilderTest
             	}
             }
             """.Replace("${sourceClazzPath}", $"\"{sourceClass}\"").Replace("\r", string.Empty);
-
-
-    [TestCase]
-    [RequireGodotRuntime]
-    public void LoadTestSuite()
-    {
-        var testSuite = AutoFree(GdUnitTestSuiteBuilder.Load("src/core/ExampleTestSuite.cs"));
-        AssertThat(testSuite).IsNotNull();
-        AssertThat(testSuite!.Name).IsEqual("ExampleTestSuite");
-        AssertThat(testSuite.GetChildren())
-            .ExtractV(Extr("Name"), Extr("LineNumber"), Extr("ParameterizedTests"))
-            .ContainsExactly(
-                Tuple("TestFoo", 39, new List<string>()),
-                Tuple("TestBar", 47, new List<string>()),
-                Tuple("Waiting", 51, new List<string>()),
-                Tuple("Customized", 55, new List<string>()),
-                Tuple("TestCaseArguments", 61, new List<string>
-                {
-                    "TestCaseArguments (1, 2, 3, 6)",
-                    "TestCaseArguments (3, 4, 5, 12)",
-                    "TestCaseArguments (6, 7, 8, 21)"
-                }),
-                Tuple("TestCasesWithCustomTestName", 67, new List<string>
-                {
-                    "TestCaseA (1, 2, 3, 6)",
-                    "TestCaseB (3, 4, 5, 12)",
-                    "TestCaseC (6, 7, 8, 21)"
-                }),
-                Tuple("ParameterizedSingleTest", 75, new List<string> { "ParameterizedSingleTest (True)" }),
-                Tuple("SkippedTestCase", 81, new List<string>()),
-                Tuple("TestWithDataPointProperty", 86, new List<string>())
-            );
-    }
 }
