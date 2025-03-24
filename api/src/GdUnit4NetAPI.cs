@@ -26,9 +26,9 @@ public partial class GdUnit4NetAPI : RefCounted
         return result.ToGodotDictionary();
     }
 
-    public static bool IsTestSuite(string classPath)
+    public static bool IsTestSuite(CSharpScript script)
     {
-        var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(classPath), true);
+        var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(script.ResourcePath), true);
         return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
     }
 

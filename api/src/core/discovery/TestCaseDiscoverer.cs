@@ -60,7 +60,7 @@ internal static class TestCaseDiscoverer
         return testCases;
     }
 
-    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger logger, string testAssembly, TypeDefinition type)
+    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger? logger, string testAssembly, TypeDefinition type)
     {
         var requireEngineMode = type.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
         var testCases = type.Methods
@@ -70,7 +70,7 @@ internal static class TestCaseDiscoverer
             .SelectMany(mi => DiscoverTestCasesFromMethod(mi, requireEngineMode, testAssembly, type.FullName))
             .ToList();
 
-        logger.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
+        logger?.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
         return testCases;
     }
 
@@ -227,11 +227,9 @@ internal static class TestCaseDiscoverer
         {
             var fullScriptPath = Path.GetFullPath(ProjectSettings.GlobalizePath(sourceScript.ResourcePath));
             var className = Path.GetFileNameWithoutExtension(fullScriptPath);
-            Logger.LogInfo($"Discovering tests from test suite: {className}");
 
             foreach (var assemblyPath in TestAssemblyLocations())
             {
-                Logger.LogInfo($"lookup {assemblyPath}");
                 // Create a custom resolver that can handle GodotSharp
                 var resolver = new DefaultAssemblyResolver();
                 resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
@@ -254,10 +252,10 @@ internal static class TestCaseDiscoverer
                 if (assembly == null || testSuite == null)
                     continue;
 
-                return DiscoverTests(Logger, assembly.MainModule.FileName, testSuite).ToList();
+                return DiscoverTests(null, assembly.MainModule.FileName, testSuite).ToList();
             }
 
-            Logger.LogWarning($"Could not find assembly or test suite for {className}");
+            Logger.LogWarning($"Could not find assembly or test suite for {className} at {fullScriptPath}");
             return new List<TestCaseDescriptor>();
         }
         catch (Exception e)
