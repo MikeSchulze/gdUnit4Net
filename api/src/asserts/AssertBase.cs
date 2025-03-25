@@ -57,7 +57,7 @@ public abstract class AssertBase<TValue> : IAssertBase<TValue>
         throw new TestFailedException(failureMessage);
     }
 
-    protected static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
+    internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
     {
         var left = lKey.UnboxVariant();
         var right = rKey.UnboxVariant();

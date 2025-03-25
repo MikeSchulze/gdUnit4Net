@@ -2,6 +2,8 @@
 
 using System;
 
+using Execution;
+
 using Newtonsoft.Json;
 
 /// <summary>
@@ -12,12 +14,12 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     /// <summary>
     ///     Simple display name of the test case.
     /// </summary>
-    public required string SimpleName { get; init; }
+    public string SimpleName { get; set; } = string.Empty;
 
     /// <summary>
     ///     Fully qualified name including class path and test parameters.
     /// </summary>
-    public required string FullyQualifiedName { get; init; }
+    public string FullyQualifiedName { get; set; } = string.Empty;
 
     /// <summary>
     ///     Path to the assembly containing this test case.
@@ -75,6 +77,15 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
                RequireRunningGodotEngine == other.RequireRunningGodotEngine;
     }
 
+    public TestCaseDescriptor Build(TestCaseAttribute testCaseAttribute, bool hasMultipleAttributes)
+    {
+        SimpleName = TestCase.BuildDisplayName(ManagedMethod, testCaseAttribute, hasMultipleAttributes ? AttributeIndex : -1);
+        FullyQualifiedName = hasMultipleAttributes
+            ? $"{ManagedType}.{ManagedMethod}.{SimpleName}"
+            : $"{ManagedType}.{SimpleName}";
+        return this;
+    }
+
     public override bool Equals(object? obj)
     {
         if (obj is null) return false;
@@ -85,8 +96,6 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
-        hashCode.Add(SimpleName);
-        hashCode.Add(FullyQualifiedName);
         hashCode.Add(AssemblyPath);
         hashCode.Add(ManagedType);
         hashCode.Add(ManagedMethod);

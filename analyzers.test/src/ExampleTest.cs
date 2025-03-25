@@ -50,7 +50,7 @@ public class ExampleTest
     public static string GetDisplayName(MethodInfo methodInfo, object[] data)
         => $"{methodInfo.Name} with {data[0]} + {data[1]} = {data[2]}";
 
-    private class TestDataProvider
+    private sealed class TestDataProvider
     {
         public static IEnumerable<object[]> GetTestData()
         {

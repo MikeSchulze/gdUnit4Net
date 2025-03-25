@@ -1,5 +1,7 @@
 ﻿namespace GdUnit4.Api;
 
+using System.Runtime.CompilerServices;
+
 /// <summary>
 ///     Abstract base class for test engine logging functionality.
 ///     Provides standardized logging methods for different severity levels
@@ -39,17 +41,20 @@ public interface ITestEngineLogger
     ///     Logs an informational message.
     /// </summary>
     /// <param name="message">The informational message to log.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void LogInfo(string message) => SendMessage(Level.Informational, message);
 
     /// <summary>
     ///     Logs a warning message.
     /// </summary>
     /// <param name="message">The warning message to log.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void LogWarning(string message) => SendMessage(Level.Warning, message);
 
     /// <summary>
     ///     Logs an error message.
     /// </summary>
     /// <param name="message">The error message to log.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void LogError(string message) => SendMessage(Level.Error, message);
 }

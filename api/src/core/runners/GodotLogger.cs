@@ -4,7 +4,7 @@ using Api;
 
 using Godot;
 
-public class GodotLogger : ITestEngineLogger
+public sealed class GodotLogger : ITestEngineLogger
 {
     public void SendMessage(ITestEngineLogger.Level level, string message)
     {

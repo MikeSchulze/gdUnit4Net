@@ -1,6 +1,5 @@
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -195,7 +194,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         // Create list once to avoid multiple enumerations
         var notFound = expectedList.Where(expectedItem =>
                 Current?.Any(currentItem =>
-                    (referenceEquals ? IsSame(expectedItem) : IsEquals(expectedItem)).Invoke(currentItem)
+                    referenceEquals ? expectedItem.IsSame(currentItem) : expectedItem.IsEquals(currentItem)
                 ) != true // This pattern maintains the original null handling
         ).ToList();
 
@@ -245,7 +244,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var found = Current?
             .Where(currentItem =>
                 expectedList.Any(expectedItem =>
-                    (referenceEquals ? IsSame(currentItem) : IsEquals(currentItem)).Invoke(expectedItem))
+                    referenceEquals ? currentItem.IsSame(expectedItem) : currentItem.IsEquals(expectedItem))
             )
             .ToList() ?? new List<TValue?>();
 
@@ -263,9 +262,9 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var rr = expected?.ToArray() ?? System.Array.Empty<TValue?>();
 
         var notExpected = ll.Where(left =>
-            !rr.Any(e => (referenceEquals ? IsSame(left) : IsEquals(left)).Invoke(e))).ToList();
+            !rr.Any(e => referenceEquals ? left.IsSame(e) : left.IsEquals(e))).ToList();
         var notFound = rr.Where(right =>
-            !ll.Any(e => (referenceEquals ? IsSame(right) : IsEquals(right)).Invoke(e))).ToList();
+            !ll.Any(e => referenceEquals ? right.IsSame(e) : right.IsEquals(e))).ToList();
 
         return new ArrayDiff
         {
@@ -288,14 +287,28 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         for (var i = 0; i < ll.Length; i++)
         {
             var left = ll[i];
-            if (i >= rr.Length || !(referenceEquals ? IsSame(left) : IsEquals(left)).Invoke(rr[i]))
+            if (i >= rr.Length)
+            {
+                notExpected.Add(left);
+                continue;
+            }
+
+            var right = rr[i];
+            if (!(referenceEquals ? left.IsSame(right) : left.IsEquals(right)))
                 notExpected.Add(left);
         }
 
         for (var i = 0; i < rr.Length; i++)
         {
             var right = rr[i];
-            if (i >= ll.Length || !(referenceEquals ? IsSame(right) : IsEquals(right)).Invoke(ll[i]))
+            if (i >= ll.Length)
+            {
+                notFound.Add(right);
+                continue;
+            }
+
+            var left = ll[i];
+            if (!(referenceEquals ? right.IsSame(left) : right.IsEquals(left)))
                 notFound.Add(right);
         }
 
@@ -306,14 +319,17 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         };
     }
 
-    // TODO replace reference equal with Comparable.IsEqual
-    private static Func<TValue?, bool> IsEquals(TValue? c) => e => c.UnboxVariant() == e.UnboxVariant(); //Comparable.IsEqual(c, e).Valid;
-
-    private static Func<TValue?, bool> IsSame(TValue? c) => e => AssertBase<TValue>.IsSame(c, e);
 
     private class ArrayDiff
     {
-        public List<TValue?> NotExpected { get; set; } = new();
-        public List<TValue?> NotFound { get; set; } = new();
+        public List<TValue?> NotExpected { get; init; } = new();
+        public List<TValue?> NotFound { get; init; } = new();
     }
+}
+
+internal static class CompareExtensions
+{
+    internal static bool IsEquals<T>(this T? c, T? e) => Comparable.IsEqual(c, e).Valid;
+
+    internal static bool IsSame<T>(this T? c, T? e) => AssertBase<T>.IsSame(c, e);
 }

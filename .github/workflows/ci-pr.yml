@@ -94,11 +94,11 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        godot-version: ['4.2', '4.2.1', '4.2.2', '4.3']
-        godot-status: ['stable']
-        include:
-          - godot-version: '4.4'
-            godot-status: 'dev3'
+        godot-version: [ '4.2', '4.2.1', '4.2.2', '4.3', '4.4' ]
+        godot-status: [ 'stable' ]
+      #  include:
+      #    - godot-version: '4.4'
+      #      godot-status: 'dev3'
 
 
     name: "🐧 Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
@@ -112,7 +112,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [analyzer-test, test-adapter-test, unit-tests]
+    needs: [ analyzer-test, test-adapter-test, unit-tests ]
     steps:
       - run: exit 1
         if: >-

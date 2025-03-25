@@ -175,14 +175,14 @@ public class GdUnit4TestDiscovererTest
             14);
         // multi testcase attribute usage
         AssertTestCase(discoveredTests,
-            "Examples.ExampleTest.DataRows.TestA (0, 1, 2)",
-            "TestA #0",
+            "Examples.ExampleTest.DataRows.TestA:0 (0, 1, 2)",
+            "TestA:0 (0, 1, 2)",
             assemblyPath,
             @"example\test\ExampleTest.cs",
             31);
         AssertTestCase(discoveredTests,
-            "Examples.ExampleTest.DataRows.TestB (1, 2, 3)",
-            "TestB #1",
+            "Examples.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
+            "TestB:1 (1, 2, 3)",
             assemblyPath,
             @"example\test\ExampleTest.cs",
             31);

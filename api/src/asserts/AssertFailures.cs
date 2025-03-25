@@ -68,8 +68,10 @@ public static class AssertFailures
         return $"[color={color}]{pairs}[/color]";
     }
 
+#pragma warning disable CA1859
     private static string FormatDictionary(IDictionary<Variant, Variant> dict, string color)
     {
+#pragma warning restore CA1859
         if (dict.Keys.Count == 0)
             return $"[color={color}]<Empty>[/color]";
 

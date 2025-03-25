@@ -1,10 +1,11 @@
 namespace GdUnit4;
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 using Core;
-using Core.Execution;
+using Core.Discovery;
 using Core.Extensions;
 
 using Godot;
@@ -25,16 +26,14 @@ public partial class GdUnit4NetAPI : RefCounted
         return result.ToGodotDictionary();
     }
 
-    public static bool IsTestSuite(string classPath)
+    public static bool IsTestSuite(CSharpScript script)
     {
-        var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(classPath), true);
+        var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(script.ResourcePath), true);
         return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
     }
 
-    public static CsNode? ParseTestSuite(string classPath) => GdUnitTestSuiteBuilder.Load(NormalizedPath(classPath));
-
-    public static RefCounted Executor(Node listener) =>
-        (RefCounted)new Executor().AddGdTestEventListener(listener);
+    public static List<TestCaseDescriptor> DiscoverTestsFromScript(CSharpScript sourceScript) =>
+        TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript);
 
     private static string NormalizedPath(string path) =>
         path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
