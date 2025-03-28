@@ -55,7 +55,7 @@ jobs:
           rm -rf ./example/test/ExampleTest.cs
 
       - name: 'Test Example via gdunit-action - Godot_${{ inputs.godot-version }}-${{ inputs.godot-status }}-net'
-        uses: MikeSchulze/gdUnit4-action@v1.1.5
+        uses: MikeSchulze/gdUnit4-action@v1
         with:
           godot-version: ${{ inputs.godot-version }}
           godot-status: ${{ inputs.godot-status }}
