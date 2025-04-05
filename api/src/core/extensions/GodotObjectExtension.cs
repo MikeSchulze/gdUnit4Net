@@ -16,7 +16,7 @@ using Array = Godot.Collections.Array;
 /// <summary>
 ///     An extension to compare C# Objects and Godot Objects by unboxing Variants.
 /// </summary>
-internal static class GodotObjectExtensions
+public static class GodotObjectExtensions
 {
     internal static SceneTree Instance =>
         Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("SceneTree is not initialized");

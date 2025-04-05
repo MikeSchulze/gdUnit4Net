@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 
 using Api;
@@ -45,9 +44,7 @@ public class ExecuteTestSuiteCommand : BaseCommand
     {
         try
         {
-            var tests = Suite.Tests;
-            var type = FindTypeOnAssembly(Suite.AssemblyPath, Suite.ManagedType);
-            var testSuite = new TestSuite(type, tests);
+            var testSuite = new TestSuite(Suite);
 
             try
             {
@@ -87,29 +84,6 @@ public class ExecuteTestSuiteCommand : BaseCommand
                 StatusCode = HttpStatusCode.InternalServerError,
                 Payload = JsonConvert.SerializeObject(ex)
             };
-        }
-    }
-
-    private static Type FindTypeOnAssembly(string assemblyPath, string clazz)
-    {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            //  if (assembly.Location != assemblyName)
-            //    continue;
-            var type = assembly.GetType(clazz);
-            if (type != null)
-                return type;
-        }
-
-        try
-        {
-            var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyPath));
-            return assembly.GetType(clazz)!;
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Failed to resolve type '{clazz}': {ex.Message}");
-            throw new InvalidOperationException($"Could not find type {clazz} on assembly {assemblyPath}");
         }
     }
 }

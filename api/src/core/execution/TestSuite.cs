@@ -11,15 +11,22 @@ internal sealed class TestSuite : IDisposable
 {
     private readonly Lazy<IEnumerable<TestCase>> testCases;
 
-    public TestSuite(Type type, List<TestCaseNode> tests)
+    internal TestSuite(Type type, List<TestCaseNode> tests, string sourceFile)
     {
         Instance = Activator.CreateInstance(type)
                    ?? throw new InvalidOperationException($"Cannot create an instance of '{type.FullName}' because it does not have a public parameterless constructor.");
 
         Name = type.Name;
-        ResourcePath = "Invalid";
+        ResourcePath = sourceFile;
         // we do lazy loading to only load test case one times
         testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, tests));
+    }
+
+    public TestSuite(TestSuiteNode suite) : this(
+        FindTypeOnAssembly(suite.AssemblyPath, suite.ManagedType),
+        suite.Tests,
+        suite.SourceFile)
+    {
     }
 
     public int TestCaseCount => TestCases.Count();
@@ -50,4 +57,27 @@ internal sealed class TestSuite : IDisposable
                 test => test.ManagedMethod,
                 (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
             .ToList();
+
+    private static Type FindTypeOnAssembly(string assemblyPath, string clazz)
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            //  if (assembly.Location != assemblyName)
+            //    continue;
+            var type = assembly.GetType(clazz);
+            if (type != null)
+                return type;
+        }
+
+        try
+        {
+            var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyPath));
+            return assembly.GetType(clazz)!;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to resolve type '{clazz}': {ex.Message}");
+            throw new InvalidOperationException($"Could not find type {clazz} on assembly {assemblyPath}");
+        }
+    }
 }

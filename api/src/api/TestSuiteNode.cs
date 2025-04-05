@@ -9,7 +9,7 @@ public record TestSuiteNode : TestNode
     /// </summary>
     public required string ManagedType { get; init; }
 
-
     public required List<TestCaseNode> Tests { get; init; } = new();
     public required string AssemblyPath { get; set; }
+    public required string SourceFile { get; init; }
 }

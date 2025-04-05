@@ -12,11 +12,17 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
     <NoWarn>NU1605</NoWarn>
+    <!-- Prevent MSTest adapter from being discovered -->
+    <VSTestTestAdapterPath>none</VSTestTestAdapterPath>
+    <TestFramework>GdUnit4</TestFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
-    <PackageReference Include="gdUnit4.api" Version="4.4.0-rc8"/>
-    <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0-rc3"/>
+    <!-- Add the MSTest adapter but set it to private to prevent conflicts -->
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
+    <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" PrivateAssets="all"/>
+    <PackageReference Include="gdUnit4.api" Version="4.4.0-rc12"/>
+    <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0-rc4"/>
     <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc5">
       <PrivateAssets>none</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

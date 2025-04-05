@@ -158,7 +158,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 #pragma warning restore CA1854
     public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, IsSuccess:{IsSuccess} ";
 
-    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs != null && lhs.Equals(rhs);
+    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs?.Equals(rhs) ?? ReferenceEquals(rhs, null);
 
     public static bool operator !=(TestEvent? lhs, TestEvent? rhs) => !(lhs == rhs);
 
