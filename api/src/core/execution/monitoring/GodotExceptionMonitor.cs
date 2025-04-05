@@ -15,8 +15,6 @@ using Extensions;
 
 using Godot;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using FileAccess = System.IO.FileAccess;
 
 public class GodotExceptionMonitor
@@ -24,9 +22,9 @@ public class GodotExceptionMonitor
     // Types of exceptions that should be ignored during test execution
     private static readonly HashSet<Type> IgnoredExceptionTypes = new()
     {
-        typeof(TestFailedException),
-        typeof(AssertFailedException),
-        typeof(UnitTestAssertException)
+        typeof(TestFailedException)
+        //typeof(AssertFailedException),
+        //typeof(UnitTestAssertException)
     };
 
     private static readonly List<Exception> CaughtExceptions = new();

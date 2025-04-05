@@ -100,11 +100,14 @@ public static class GodotVariantExtensions
     internal static Variant ToVariant(this GodotObject? obj)
         => Variant.From(obj);
 
-    internal static Variant ToVariant(this object? obj)
+    internal static Variant ToVariant(this object? obj) => obj switch
     {
-        if (obj == null)
-            return new Variant();
-        return Type.GetTypeCode(obj.GetType()) switch
+        Dictionary v => v,
+        Godot.Collections.Dictionary<Variant, Variant> v => v,
+        Array v => v,
+        Array<Variant> v => v,
+        null => new Variant(),
+        _ => Type.GetTypeCode(obj.GetType()) switch
         {
             TypeCode.Empty => new Variant(),
             TypeCode.String => Variant.CreateFrom((string)obj),
@@ -125,8 +128,8 @@ public static class GodotVariantExtensions
             TypeCode.DBNull => ToVariantByType(obj),
             TypeCode.DateTime => ToVariantByType(obj),
             _ => ToVariantByType(obj)
-        };
-    }
+        }
+    };
 
     private static Variant ToVariantByType(object obj)
     {

@@ -279,7 +279,7 @@ internal static class TestCaseDiscoverer
             var assemblyPaths = FindAllAssemblyPaths(Logger, assemblyName);
             AssemblyLocationCache[assemblyName] = assemblyPaths;
 
-            Logger.LogInfo($"Initialized {assemblyPaths.Count} assembly locations for {assemblyName}");
+            Logger.LogInfo($"Initialized {assemblyPaths.Count} test assembly locations {string.Join(",", assemblyPaths.ToList())}");
             return assemblyPaths;
         }
     }

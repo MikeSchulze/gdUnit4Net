@@ -20,7 +20,7 @@ public partial class GodotExceptionMonitorTest
     [TestCase]
     public void IsExceptionMonitorIsEnabledOnBeforeStage()
     {
-        var stage = new BeforeExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        var stage = new BeforeExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>(), ""));
         // no [Before] hock is set
         AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
     }
@@ -28,7 +28,7 @@ public partial class GodotExceptionMonitorTest
     [TestCase]
     public void IsExceptionMonitorIsEnabledOnAfterStage()
     {
-        var stage = new AfterExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        var stage = new AfterExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>(), ""));
         // no [After] hock is set
         AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
     }
@@ -36,7 +36,7 @@ public partial class GodotExceptionMonitorTest
     [TestCase]
     public void IsExceptionMonitorIsEnabledOnBeforeTestStage()
     {
-        var stage = new BeforeTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        var stage = new BeforeTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>(), ""));
         // no [BeforeTest] hock is set
         AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
     }
@@ -44,7 +44,7 @@ public partial class GodotExceptionMonitorTest
     [TestCase]
     public void IsExceptionMonitorIsEnabledOnAfterTestStage()
     {
-        var stage = new AfterTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>()));
+        var stage = new AfterTestExecutionStage(new TestSuite(typeof(GodotExceptionMonitorTest), new List<TestCaseNode>(), ""));
         // no [AfterTest] hock is set
         AssertBool(stage.IsMonitoringOnGodotExceptionsEnabled).IsFalse();
     }

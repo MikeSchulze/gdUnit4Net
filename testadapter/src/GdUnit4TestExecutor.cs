@@ -192,6 +192,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
                             ParentId = assembly.Id,
                             ManagedType = ManagedType,
                             AssemblyPath = assembly.AssemblyPath,
+                            SourceFile = t.CodeFilePath ?? "Unknown",
                             Tests = new List<TestCaseNode>()
                         };
 

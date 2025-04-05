@@ -18,7 +18,9 @@ public interface ITestEvent
         SuiteBefore,
         SuiteAfter,
         TestBefore,
-        TestAfter
+        TestAfter,
+        DiscoverStart,
+        DiscoverEnd
     }
 
     /// <summary>
