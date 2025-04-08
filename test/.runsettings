@@ -52,5 +52,11 @@
         <!-- When set to true, standard output (stdout) from test cases is captured
                  and included in the test result. This can be useful for debugging. -->
         <CaptureStdOut>true</CaptureStdOut>
+
+        <!-- The maximum duration allowed for a Godot project compilation process in milliseconds.
+                         After this timeout period expires, the compilation process is forcefully terminated.
+                         For large or complex Godot projects, you may need to increase this value.
+                         Default: 20000 (20 seconds) -->
+        <CompileProcessTimeout>20000</CompileProcessTimeout>
     </GdUnit4>
 </RunSettings>

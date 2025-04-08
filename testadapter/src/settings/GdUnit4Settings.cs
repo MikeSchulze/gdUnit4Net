@@ -44,6 +44,16 @@ public class GdUnit4Settings : TestRunSettings
     /// </summary>
     public bool CaptureStdOut { get; set; }
 
+    /// <summary>
+    ///     The maximum duration allowed for a compilation process in milliseconds.
+    /// </summary>
+    /// <remarks>
+    ///     After this timeout period expires, the compilation process is forcefully terminated.
+    ///     Default value is 20000 milliseconds (20 seconds)
+    ///     Set to a higher value for projects that require more compilation time.
+    /// </remarks>
+    public int CompileProcessTimeout { get; init; } = 20000;
+
     public override XmlElement ToXml()
     {
         using var stringWriter = new StringWriter();

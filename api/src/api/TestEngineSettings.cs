@@ -12,7 +12,8 @@
 ///     Parameters = "--verbose",
 ///     CaptureStdOut = true,
 ///     MaxCpuCount = 4,
-///     SessionTimeout = 60000  // 1 minute timeout
+///     SessionTimeout = 60000  // 1 minute timeout,
+///     CompileProcessTimeout = 20000  // 20 seconds timeout for compilation
 /// };
 /// </code>
 /// </remarks>
@@ -55,4 +56,15 @@ public sealed class TestEngineSettings
     ///     Set to a higher value for test suites that require more time to complete.
     /// </remarks>
     public int SessionTimeout { get; init; } = 30000;
+
+
+    /// <summary>
+    ///     The maximum duration allowed for a compilation process in milliseconds.
+    /// </summary>
+    /// <remarks>
+    ///     After this timeout period expires, the compilation process is forcefully terminated.
+    ///     Default value is 20000 milliseconds (20 seconds)
+    ///     Set to a higher value for projects that require more compilation time.
+    /// </remarks>
+    public int CompileProcessTimeout { get; init; } = 20000;
 }
