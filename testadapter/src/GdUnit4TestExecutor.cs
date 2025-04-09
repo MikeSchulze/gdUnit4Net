@@ -86,7 +86,8 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             MaxCpuCount = Math.Max(1, runConfiguration.MaxCpuCount),
             SessionTimeout = (int)(runConfiguration.TestSessionTimeout == 0
                 ? DEFAULT_SESSION_TIMEOUT
-                : runConfiguration.TestSessionTimeout)
+                : runConfiguration.TestSessionTimeout),
+            CompileProcessTimeout = settings.CompileProcessTimeout
         };
 
         testEngine = ITestEngine.GetInstance(engineSettings, Log);

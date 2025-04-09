@@ -23,10 +23,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <summary>
     ///     Directory name for temporary test runner files.
     /// </summary>
-    private const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
+    internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
 
     private readonly TestEngineSettings settings;
-
     private Process? process;
 
     /// <summary>
@@ -83,7 +82,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         Console.Out.Flush();
         if (sender is Process p)
-            Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
+            if (p.ExitCode == 0)
+                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
+            else
+                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
     };
 
     public override void Cancel()
@@ -175,12 +177,11 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     }
 
     private bool InitRuntimeEnvironment() =>
-        InstallTestRunnerClasses();
+        InstallTestRunnerClasses(Environment.CurrentDirectory, GodotBin);
 
-    private bool InstallTestRunnerClasses()
+    internal bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
     {
-        var workingDirectory = Environment.CurrentDirectory;
-        var destinationFolderPath = Path.Combine(Environment.CurrentDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
+        var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
             Directory.CreateDirectory(destinationFolderPath);
 
@@ -202,7 +203,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             // recompile the project
-            var processStartInfo = new ProcessStartInfo($"{GodotBin}", @"--path . --headless --build-solutions --quit-after 100")
+            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . --headless --build-solutions --quit-after 1000")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -214,7 +215,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             };
 
             Logger.LogInfo($"Working dir {workingDirectory}");
-            Logger.LogInfo($"Run Rebuild Godot Project ... {GodotBin} {processStartInfo.Arguments}");
+            Logger.LogInfo($"Run Rebuild Godot Project ... {godotBinary} {processStartInfo.Arguments}");
             using var compileProcess = new Process();
             compileProcess.StartInfo = processStartInfo;
             compileProcess.EnableRaisingEvents = true;
@@ -231,32 +232,88 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             if (!compileProcess.Start())
             {
                 Logger.LogError(@"Rebuild Godot Project fails on process start, exit ..");
+                CleanupRunnerOnFailure(sceneRunnerSource);
                 return false;
             }
 
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
-            compileProcess.WaitForExit(5000);
+            compileProcess.WaitForExit(100);
 
-            // The compile project can take a while, and we need to wait it is finises
+
+            // The compile project can take a while, and we need to wait until it finishes
+            // Calculate how many iterations we need based on the compile process timeout
+            const int checkIntervalMs = 100; // Check every 100ms
+            var maxRetries = settings.CompileProcessTimeout / checkIntervalMs;
+
             var waitRetry = 0;
-            while (!compileProcess.HasExited && waitRetry++ < 200)
-                Thread.Sleep(100);
-            // If the process not finished until 200 retries, we kill it manually
+            while (!compileProcess.HasExited && waitRetry++ < maxRetries)
+                Thread.Sleep(checkIntervalMs);
+
+            // If the process has not finished within the timeout period, we kill it manually
             if (!compileProcess.HasExited)
             {
-                Logger.LogInfo("Rebuild Godot Project is not correct terminated, force kill process now.");
+                Logger.LogError($"""
+                                 ╔═══════════════════════ Godot compilation TIMEOUT ═════════════════════════════════════════════════════════════════════╗
+
+                                   Godot project compilation did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.
+
+                                   Possible reasons:
+                                   - Your Godot project may be large or complex, requiring more time to compile
+                                   - Your system may be under heavy load or has limited resources
+                                   - There might be a compilation issue causing Godot to hang
+
+                                   ACTION REQUIRED:
+                                   To increase the compilation timeout, set the 'CompileProcessTimeout' property in your GdUnit4 settings.
+
+                                   Add or modify the following in your .runsettings file:
+                                   <GdUnit4>
+                                       <CompileProcessTimeout>60000</CompileProcessTimeout>  <!-- 60 seconds -->
+                                   </GdUnit4>
+
+                                   The process will now be forcefully terminated, which may result in incomplete compilation.
+
+                                 ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+                                 """);
+
                 compileProcess.Kill(true);
+                CleanupRunnerOnFailure(sceneRunnerSource);
             }
 
             var isSuccess = compileProcess.ExitCode == 0;
+            if (!isSuccess)
+                CleanupRunnerOnFailure(sceneRunnerSource);
+
             CloseProcess(compileProcess);
             return isSuccess;
         }
         catch (Exception e)
         {
             Logger.LogError($"Install GdUnit4 `TestRunner` fails with: {e.Message}\n {e.StackTrace}");
+            CleanupRunnerOnFailure(sceneRunnerSource);
             return false;
+        }
+    }
+
+    /// <summary>
+    ///     Cleans up the installed runner file when compilation fails to ensure
+    ///     a fresh installation on the next run.
+    /// </summary>
+    /// <param name="runnerFilePath">Path to the runner file to remove</param>
+    private void CleanupRunnerOnFailure(string runnerFilePath)
+    {
+        try
+        {
+            if (File.Exists(runnerFilePath))
+            {
+                Logger.LogInfo($"Cleaning up runner file at {runnerFilePath} due to compilation failure");
+                File.Delete(runnerFilePath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Failed to clean up runner file: {ex.Message}");
+            // We don't want to throw here as this is just cleanup
         }
     }
 
