@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 
 using Api;
 
@@ -164,7 +165,8 @@ public class GodotRuntimeTestRunnerTest
 
         // Verify timeout error was logged
         VerifyLoggerError("Godot compilation TIMEOUT");
-        VerifyLoggerError("Rebuild Godot Project ends with exit code: -1");
+        var errorCode = Environment.OSVersion.Platform == PlatformID.Win32NT ? -1 : 137;
+        VerifyLoggerError($"Rebuild Godot Project ends with exit code: {errorCode}");
 
         // Verify the runner file was cleaned up after timeout
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -348,16 +350,52 @@ public class GodotRuntimeTestRunnerTest
     /// <summary>
     ///     Verify that logger.LogInfo was called with a message containing the specified text
     /// </summary>
-    private void VerifyLoggerInfo(string expectedText) =>
-        LoggerMock.Verify(l => l.LogInfo(It.Is<string>(s =>
-            s.Contains(expectedText))), Times.AtLeastOnce());
+    private void VerifyLoggerInfo(string expectedText)
+    {
+        try
+        {
+            LoggerMock.Verify(l => l.LogInfo(It.Is<string>(s => s.Contains(expectedText))), Times.AtLeastOnce());
+        }
+        catch (MockException)
+        {
+            // Capture all invocations to provide context
+            var invocations = LoggerMock.Invocations
+                .Where(i => i.Method.Name == "LogInfo")
+                .Select(i => i.Arguments[0]?.ToString() ?? "null")
+                .ToList();
+
+            var message = $"Expected log message containing '{expectedText}' was not found.\n\n" +
+                          $"Actual LogInfo calls ({invocations.Count}):\n" +
+                          string.Join("\n", invocations.Select((msg, i) => $"  {i + 1}. {msg}"));
+
+            AssertBool(true).OverrideFailureMessage(message).IsFalse();
+        }
+    }
 
     /// <summary>
     ///     Verify that logger.LogError was called with a message containing the specified text
     /// </summary>
-    private void VerifyLoggerError(string expectedText) =>
-        LoggerMock.Verify(l => l.LogError(It.Is<string>(s =>
-            s.Contains(expectedText))), Times.AtLeastOnce());
+    private void VerifyLoggerError(string expectedText)
+    {
+        try
+        {
+            LoggerMock.Verify(l => l.LogError(It.Is<string>(s => s.Contains(expectedText))), Times.AtLeastOnce());
+        }
+        catch (MockException)
+        {
+            // Capture all invocations to provide context
+            var invocations = LoggerMock.Invocations
+                .Where(i => i.Method.Name == "LogError")
+                .Select(i => i.Arguments[0]?.ToString() ?? "null")
+                .ToList();
+
+            var message = $"Expected error message containing '{expectedText}' was not found.\n\n" +
+                          $"Actual LogError calls ({invocations.Count}):\n" +
+                          string.Join("\n", invocations.Select((msg, i) => $"  {i + 1}. {msg}"));
+
+            AssertBool(true).OverrideFailureMessage(message).IsFalse();
+        }
+    }
 
     #endregion
 }
