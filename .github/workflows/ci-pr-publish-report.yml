@@ -65,6 +65,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: 'false'
           fail-on-empty: 'false'
+          use-actions-summary: 'false'
 
 
       # publish Run gdUnit4-action results
@@ -87,6 +88,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: 'false'
           fail-on-empty: 'false'
+          use-actions-summary: 'false'
 
       # publish API Tests results
       - name: Download API tests artifacts
@@ -108,3 +110,4 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: 'false'
           fail-on-empty: 'false'
+          use-actions-summary: 'false'
