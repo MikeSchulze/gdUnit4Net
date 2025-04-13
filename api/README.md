@@ -20,13 +20,24 @@ gdUnit4.api is the C# package to enable GdUnit4 to run/write unit tests in C#.
 * **Scene runner:** for simulating different kinds of inputs and actions, such as mouse clicks and keyboard inputs<br>
   For example, you can simulate mouse clicks and keyboard inputs by calling the appropriate methods on the runner instance. Additionally, you can wait for a specific signal to be
   emitted by the scene, or you can wait for a specific function to return a certain value.
-* **GdUnit4.Analyzer:** is a Roslyn-based analyzer package designed to enhance the development experience when writing tests with GdUnit4. It provides compile-time validation for
-  GdUnit4
-  test attributes and helps developers catch configuration errors early in the development process.
+* **Integration with Test Adapter:** Works seamlessly with the [gdUnit4.test.adapter](../testadapter/README.md) for running tests in Visual Studio, VS Code, and JetBrains Rider
+
+## Installation
+
+You can install the GdUnit4 API by adding it as a package reference to your project:
+
+```xml
+<PackageReference Include="gdUnit4.api" Version="4.4.0"/>
+```
+
+## Related Packages
+
+* [gdUnit4.test.adapter](../testadapter/README.md) - Run your tests in Visual Studio, VS Code, and JetBrains Rider
+* [gdUnit4.analyzers](../analyzers/README.md) - Add compile-time validation for your test code
 
 ## Short Example
 
-```
+```csharp
 namespace GdUnit4.Tests
 {
     using static Assertions;
@@ -43,6 +54,10 @@ namespace GdUnit4.Tests
  }
 ```
 
+## Documentation
+
+For more information, check out the [complete API documentation](https://mikeschulze.github.io/gdUnit4/).
+
 ---
 
 ### You are welcome to
@@ -55,4 +70,6 @@ namespace GdUnit4.Tests
 
 ---
 
-## Sponsors
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.

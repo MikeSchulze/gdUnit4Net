@@ -36,13 +36,6 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     /// </summary>
     private const int DEFAULT_SESSION_TIMEOUT = 600000;
 
-    // Test properties supported for filtering
-    private readonly Dictionary<string, TestProperty> supportedProperties = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
-        ["Name"] = TestCaseProperties.DisplayName
-    };
-
     private IFrameworkHandle? fh;
     private ITestEngine? testEngine;
 
@@ -97,16 +90,11 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             : $"Set test session timeout to: {TimeSpan.FromMilliseconds(engineSettings.SessionTimeout)}");
 
         //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
-        // ReSharper disable once UnusedVariable
-        var filterExpression = runContext.GetTestCaseFilter(supportedProperties.Keys, propertyName =>
-        {
-            supportedProperties.TryGetValue(propertyName, out var testProperty);
-            return testProperty;
-        });
 
         try
         {
             SetupRunnerEnvironment(runContext, frameworkHandle);
+            testCases = new TestCaseFilter(runContext, Log).Execute(testCases);
             var testsByAssembly = ToGdUnitTestNodes(testCases);
             var testEventListener = new TestEventReportListener(frameworkHandle, testCases);
             var debuggerFramework = GetDebuggerFramework(frameworkHandle);

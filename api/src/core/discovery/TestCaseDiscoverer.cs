@@ -8,6 +8,10 @@ using System.Runtime.CompilerServices;
 
 using Api;
 
+using Attributes;
+
+using core.attributes;
+
 using Godot;
 
 using Mono.Cecil;
@@ -63,11 +67,14 @@ internal static class TestCaseDiscoverer
     internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger? logger, string testAssembly, TypeDefinition type)
     {
         var requireEngineMode = type.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
+        var typeCategories = GetCategories(type);
+        var typeTraits = GetTraits(type);
+
         var testCases = type.Methods
             .Where(m => m.CustomAttributes.Any(IsAttribute<TestCaseAttribute>))
             .ToList()
             .AsParallel()
-            .SelectMany(mi => DiscoverTestCasesFromMethod(mi, requireEngineMode, testAssembly, type.FullName))
+            .SelectMany(mi => DiscoverTestCasesFromMethod(logger, mi, testAssembly, requireEngineMode, type.FullName, typeCategories, typeTraits))
             .ToList();
 
         logger?.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
@@ -132,15 +139,23 @@ internal static class TestCaseDiscoverer
     }
 
     internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(
+        ITestEngineLogger? logger,
         MethodDefinition mi,
-        bool requireEngineMode,
         string assemblyPath,
-        string className)
+        bool classRequireEngineMode,
+        string className,
+        List<string> classCategories,
+        Dictionary<string, List<string>> classTraits)
     {
         var attributes = mi.CustomAttributes
             .Where(IsAttribute<TestCaseAttribute>)
             .ToList();
         var hasMultipleAttributes = attributes.Count > 1;
+        var requireRunningGodotEngine = classRequireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
+        var methodCategories = GetCategories(mi);
+        var methodTraits = GetTraits(mi);
+        var allCategories = classCategories.Concat(methodCategories).Distinct().ToList();
+        var allTraits = CombineTraits(classTraits, methodTraits);
 
         return attributes
             .Select((attr, index) =>
@@ -157,12 +172,92 @@ internal static class TestCaseDiscoverer
                         AttributeIndex = index,
                         LineNumber = navData.LineNumber,
                         CodeFilePath = navData.CodeFilePath,
-                        RequireRunningGodotEngine = requireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>)
+                        RequireRunningGodotEngine = requireRunningGodotEngine,
+                        Categories = allCategories,
+                        Traits = allTraits
                     }
                     .Build(testCaseAttribute, hasMultipleAttributes);
             })
             .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
             .ToList();
+    }
+
+    /// <summary>
+    ///     Extracts category information from a type or method definition.
+    /// </summary>
+    /// <param name="definition">The type or method definition to check for category attributes.</param>
+    /// <returns>A list of categories.</returns>
+    private static List<string> GetCategories(ICustomAttributeProvider definition)
+    {
+        var categories = new List<string>();
+
+        var testCategoryAttributes = definition.CustomAttributes
+            .Where(IsAttribute<TestCategoryAttribute>)
+            .ToList();
+
+        foreach (var attr in testCategoryAttributes)
+            if (attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string category)
+                categories.Add(category);
+
+        return categories;
+    }
+
+    /// <summary>
+    ///     Extracts trait information from a type or method definition.
+    /// </summary>
+    /// <param name="definition">The type or method definition to check for trait attributes.</param>
+    /// <returns>A dictionary of trait names and their values.</returns>
+    private static Dictionary<string, List<string>> GetTraits(ICustomAttributeProvider definition)
+    {
+        var traits = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        var traitAttributes = definition.CustomAttributes
+            .Where(IsAttribute<TraitAttribute>)
+            .ToList();
+
+        foreach (var attr in traitAttributes)
+            if (attr.ConstructorArguments.Count >= 2 &&
+                attr.ConstructorArguments[0].Value is string traitName &&
+                attr.ConstructorArguments[1].Value is string traitValue)
+            {
+                if (!traits.TryGetValue(traitName, out var values))
+                {
+                    values = new List<string>();
+                    traits[traitName] = values;
+                }
+
+                if (!values.Contains(traitValue)) values.Add(traitValue);
+            }
+
+        return traits;
+    }
+
+    /// <summary>
+    ///     Combines two trait dictionaries.
+    /// </summary>
+    /// <param name="first">The first dictionary of traits.</param>
+    /// <param name="second">The second dictionary of traits.</param>
+    /// <returns>A combined dictionary of traits.</returns>
+    private static Dictionary<string, List<string>> CombineTraits(
+        Dictionary<string, List<string>> first,
+        Dictionary<string, List<string>> second)
+    {
+        var result = new Dictionary<string, List<string>>(first, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var trait in second)
+        {
+            if (!result.TryGetValue(trait.Key, out var values))
+            {
+                values = new List<string>();
+                result[trait.Key] = values;
+            }
+
+            foreach (var value in trait.Value)
+                if (!values.Contains(value))
+                    values.Add(value);
+        }
+
+        return result;
     }
 
     private static TestCaseAttribute CreateTestCaseAttribute(CustomAttribute attribute)
