@@ -14,6 +14,22 @@
 
 This project provides an API and a VS test adapter to run your Godot C# test in Visual Studio (Code) and JetBrains Rider.
 
+
+<div style="border: 2px solid #FFD700; background-color: #545454; padding: 15px; border-radius: 8px; margin: 20px 0;">
+  <table>
+    <tr>
+      <td style="vertical-align: top; padding-right: 10px; font-size: 32px;">
+        ⚠️
+      </td>
+      <td>
+        <strong style="color: #FFD700; font-size: 18px; animation: blinker 1s linear infinite;">ADVICE</strong><br>
+        The documentation references version 4.4.0, which is not yet officially released. 
+This is intentional as these changes will be part of the upcoming 4.4.0 release.
+      </td>
+    </tr>
+  </table>
+</div>
+
 ### Main Features
 
 * Writing, executing and debugging tests
