@@ -3,12 +3,10 @@ namespace GdUnit4.TestAdapter;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 
 using Api;
 
-using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -83,7 +81,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         }
     }
 
-    private TestCase BuildTestCase(TestCaseDescriptor descriptor, GdUnit4Settings settings)
+    internal static TestCase BuildTestCase(TestCaseDescriptor descriptor, GdUnit4Settings settings)
     {
         TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), descriptor.AssemblyPath)
         {
@@ -92,30 +90,12 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             CodeFilePath = descriptor.CodeFilePath,
             LineNumber = descriptor.LineNumber
         };
-        testCase.SetPropertyValue(TestCaseNameProperty, descriptor.FullyQualifiedName);
-        testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
-        testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
-        testCase.SetPropertyValue(ManagedMethodAttributeIndexProperty, descriptor.AttributeIndex);
-        testCase.SetPropertyValue(RequireRunningGodotEngineProperty, descriptor.RequireRunningGodotEngine);
 
-        var parts = SplitByNamespace(descriptor.ManagedType);
-        var hierarchyValues = new string[HierarchyConstants.Levels.TotalLevelCount];
-        hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = Path.GetFileNameWithoutExtension(descriptor.AssemblyPath);
-        hierarchyValues[HierarchyConstants.Levels.NamespaceIndex] = parts.namespaceName;
-        hierarchyValues[HierarchyConstants.Levels.ClassIndex] = parts.className;
-        hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = descriptor.ManagedMethod;
-        testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
+        testCase.SetPropertyValues(descriptor);
 
         return testCase;
     }
 
-    private static (string namespaceName, string className) SplitByNamespace(string managedType)
-    {
-        var parts = managedType.Split('.');
-        var namespaceName = parts.Length == 1 ? "" : string.Join(".", parts.Take(parts.Length - 1));
-        var className = parts.Last();
-        return (namespaceName, className);
-    }
 
     private static string GetDisplayName(TestCaseDescriptor input, GdUnit4Settings gdUnitSettings)
         => gdUnitSettings.DisplayName switch

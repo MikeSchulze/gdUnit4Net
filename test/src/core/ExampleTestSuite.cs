@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using GdUnit4.core.attributes;
+using GdUnit4.Core.Attributes;
+
 using static Assertions;
 
 using static Utils;
@@ -36,6 +39,8 @@ public sealed class ExampleTestSuite
     }
 
     [TestCase]
+    [TestCategory("CategoryA")]
+    [Trait("Category", "Foo")]
     public void TestFoo()
     {
 #pragma warning disable IDE0022 // Use expression body for method

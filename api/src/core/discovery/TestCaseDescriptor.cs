@@ -1,6 +1,8 @@
 ﻿namespace GdUnit4.Core.Discovery;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Execution;
 
@@ -61,20 +63,37 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     /// </summary>
     public required bool RequireRunningGodotEngine { get; init; }
 
+    /// <summary>
+    ///     Gets or sets the list of categories associated with this test case.
+    ///     Categories are set by the TestCategory attributes.
+    /// </summary>
+    public List<string> Categories { get; init; } = new();
+
+    /// <summary>
+    ///     Gets or sets the collection of traits associated with this test case.
+    ///     Each trait is a name-value pair that can be used for filtering and reporting.
+    /// </summary>
+    public Dictionary<string, List<string>> Traits { get; init; } = new();
+
+    // ReSharper disable once UsageOfDefaultStructEquality
     public bool Equals(TestCaseDescriptor? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
 
-        return SimpleName == other.SimpleName &&
-               FullyQualifiedName == other.FullyQualifiedName &&
-               AssemblyPath == other.AssemblyPath &&
-               ManagedType == other.ManagedType &&
-               ManagedMethod == other.ManagedMethod &&
-               Id == other.Id &&
-               LineNumber == other.LineNumber &&
-               AttributeIndex == other.AttributeIndex &&
-               RequireRunningGodotEngine == other.RequireRunningGodotEngine;
+        return SimpleName == other.SimpleName
+               && FullyQualifiedName == other.FullyQualifiedName
+               && AssemblyPath == other.AssemblyPath
+               && ManagedType == other.ManagedType
+               && ManagedMethod == other.ManagedMethod
+               && Id == other.Id
+               && LineNumber == other.LineNumber
+               && AttributeIndex == other.AttributeIndex
+               && RequireRunningGodotEngine == other.RequireRunningGodotEngine
+               && Categories.SequenceEqual(other.Categories)
+               && Traits.Count == other.Traits.Count
+               && Traits.Keys.All(key =>
+                   other.Traits.ContainsKey(key) && Traits[key].SequenceEqual(other.Traits[key]));
     }
 
     public TestCaseDescriptor Build(TestCaseAttribute testCaseAttribute, bool hasMultipleAttributes)
@@ -103,6 +122,8 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
         hashCode.Add(LineNumber);
         hashCode.Add(AttributeIndex);
         hashCode.Add(RequireRunningGodotEngine);
+        hashCode.Add(Categories.Count);
+        hashCode.Add(Traits.Count);
         return hashCode.ToHashCode();
     }
 
