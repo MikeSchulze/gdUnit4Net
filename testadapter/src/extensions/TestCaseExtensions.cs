@@ -25,9 +25,19 @@ internal static class TestCaseExtensions
         TestPropertyAttributes.Hidden,
         typeof(TestCase));
 
-    internal static readonly TestProperty ManagedTypeProperty = TestProperty.Register(
+    internal static readonly TestProperty ClassProperty = TestProperty.Register(
         "TestCase.Class",
         "Class",
+        string.Empty,
+        "holds the test suite class name",
+        typeof(string),
+        o => !string.IsNullOrWhiteSpace(o as string),
+        TestPropertyAttributes.Hidden,
+        typeof(TestCase));
+
+    internal static readonly TestProperty ManagedTypeProperty = TestProperty.Register(
+        ManagedNameConstants.ManagedTypePropertyId,
+        ManagedNameConstants.ManagedTypeLabel,
         string.Empty,
         "holds the test suite class name",
         typeof(string),
@@ -92,7 +102,7 @@ internal static class TestCaseExtensions
         [TestCaseProperties.DisplayName.Label] = TestCaseProperties.DisplayName,
         [TestCaseProperties.FullyQualifiedName.Label] = TestCaseProperties.FullyQualifiedName,
         [NamespaceProperty.Label] = NamespaceProperty,
-        [ManagedTypeProperty.Label] = ManagedTypeProperty,
+        [ClassProperty.Label] = ClassProperty,
         [ManagedMethodProperty.Label] = ManagedMethodProperty,
         [ManagedMethodAttributeIndexProperty.Label] = ManagedMethodAttributeIndexProperty,
         [RequireRunningGodotEngineProperty.Label] = RequireRunningGodotEngineProperty,
@@ -113,6 +123,7 @@ internal static class TestCaseExtensions
         hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = descriptor.ManagedMethod;
         testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
         testCase.SetPropertyValue(NamespaceProperty, parts.namespaceName);
+        testCase.SetPropertyValue(ClassProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
         //testCase.SetPropertyValue(TestCaseProperties.DisplayName, descriptor.ManagedMethod);

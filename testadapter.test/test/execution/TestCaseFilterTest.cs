@@ -158,7 +158,7 @@ public class TestCaseFilterTest
         var provider = TestCaseExtensions.GetPropertyProvider();
 
         Assert.AreEqual(TestCaseExtensions.NamespaceProperty, provider.Invoke("Namespace"));
-        Assert.AreEqual(TestCaseExtensions.ManagedTypeProperty, provider.Invoke("Class"));
+        Assert.AreEqual(TestCaseExtensions.ClassProperty, provider.Invoke("Class"));
         Assert.AreEqual(TestCaseProperties.DisplayName, provider.Invoke("Name"));
         Assert.AreEqual(TestCaseProperties.FullyQualifiedName, provider.Invoke("FullyQualifiedName"));
         Assert.AreEqual(TestCaseExtensions.RequireRunningGodotEngineProperty, provider.Invoke("RequireRunningGodotEngine"));
