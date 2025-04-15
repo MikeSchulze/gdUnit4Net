@@ -16,7 +16,6 @@
   "omnisharp.enableEditorConfigSupport": true,
   "omnisharp.enableMsBuildLoadProjectsOnDemand": false,
   "omnisharp.maxFindSymbolsItems": 3000,
-  "omnisharp.organizeImportsOnFormat": true,
   "omnisharp.useModernNet": true,
   "dotnet.unitTests.runSettingsPath": "./test/.runsettings",
   "cSpell.words": [
@@ -45,5 +44,6 @@
     "tscn",
     "Unconfigured",
     "Xbutton"
-  ]
+  ],
+  "dotnet.formatting.organizeImportsOnFormat": true
 }
