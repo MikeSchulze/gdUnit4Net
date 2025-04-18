@@ -47,6 +47,7 @@ internal sealed class TestEventReportListener : ITestEventListener
             case SuiteBefore:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName} Processing...");
+                ReportSuiteFailure(testEvent, "[Before]");
                 break;
 
             case TestBefore:
@@ -103,12 +104,42 @@ internal sealed class TestEventReportListener : ITestEventListener
             case SuiteAfter:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName}: {testEvent.AsTestOutcome()}\n");
+                ReportSuiteFailure(testEvent, "[After]");
                 break;
 
             case Init:
                 break;
             case Stop:
                 break;
+        }
+    }
+
+    private void ReportSuiteFailure(ITestEvent testEvent, string displayName)
+    {
+        try
+        {
+            if (!IsEventFailed(testEvent))
+                return;
+            FindChildTestCases(testEvent)
+                .ForEach(testCase =>
+                {
+                    var testResult = new TestResult(testCase)
+                    {
+                        DisplayName = $"{displayName}.{testCase.DisplayName}",
+                        Outcome = testEvent.AsTestOutcome(),
+                        EndTime = DateTimeOffset.Now
+                    };
+
+                    testEvent.Reports.ForEach(report => AddTestReport(report, testResult));
+
+                    Framework.RecordStart(testCase);
+                    Framework.RecordResult(testResult);
+                    Framework.RecordEnd(testCase, testResult.Outcome);
+                });
+        }
+        catch (Exception e)
+        {
+            Framework.SendMessage(TestMessageLevel.Error, $"{e.Message}\n{e.StackTrace}");
         }
     }
 
@@ -272,4 +303,10 @@ internal sealed class TestEventReportListener : ITestEventListener
 
     private bool FindParameterizedTestCase(ITestEvent e)
         => TestCases.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
+
+    private List<TestCase> FindChildTestCases(ITestEvent e)
+        => TestCases.Where(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal)).ToList();
+
+    private static bool IsEventFailed(ITestEvent e)
+        => e.Reports.Count > 0;
 }
