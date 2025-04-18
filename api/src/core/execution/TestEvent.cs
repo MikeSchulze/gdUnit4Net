@@ -86,8 +86,8 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 
     public string? DisplayName { get; set; }
 
-    public static TestEvent Before(string resourcePath, string suiteName, int totalCount) =>
-        new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount);
+    public static TestEvent Before(string resourcePath, string suiteName, int totalCount, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
+        new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount, statistics, reports);
 
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
         new(ITestEvent.EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
