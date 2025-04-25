@@ -20,7 +20,21 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeBefore()
     {
-        var testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100);
+        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        {
+            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
+            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
+            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
+            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
+            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
+            { TestEvent.STATISTIC_KEY.FAILED, true },
+            { TestEvent.STATISTIC_KEY.ERRORS, false },
+            { TestEvent.STATISTIC_KEY.WARNINGS, false },
+            { TestEvent.STATISTIC_KEY.SKIPPED, true }
+        };
+
+        List<ITestReport> reports = new() { new TestReport(Failure, 42, "test failed") };
+        var testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100, statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);

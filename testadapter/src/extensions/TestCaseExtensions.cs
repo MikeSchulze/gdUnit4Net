@@ -157,19 +157,16 @@ internal static class TestCaseExtensions
             ? testCase.GetPropertyValue(testProperty)
             : testCase.GetPropertyTraits(propertyName);
 
-    private static object? GetPropertyTraits(this TestCase testCase, string propertyName)
+    private static string[]? GetPropertyTraits(this TestCase testCase, string propertyName)
     {
-        if (testCase.Traits.Any() && propertyName.StartsWith("Trait.", StringComparison.OrdinalIgnoreCase))
-        {
-            var traitName = propertyName.Substring("Trait.".Length);
+        if (!testCase.Traits.Any() || !propertyName.StartsWith("Trait.", StringComparison.OrdinalIgnoreCase))
+            return null;
+        var traitName = propertyName.Substring("Trait.".Length);
 
-            return testCase.Traits
-                .Where(t => string.Equals(t.Name, traitName, StringComparison.OrdinalIgnoreCase))
-                .Select(t => t.Value)
-                .ToArray();
-        }
-
-        return null;
+        return testCase.Traits
+            .Where(t => string.Equals(t.Name, traitName, StringComparison.OrdinalIgnoreCase))
+            .Select(t => t.Value)
+            .ToArray();
     }
 
     private static (string namespaceName, string className) SplitByNamespace(string managedType)

@@ -10,9 +10,10 @@ internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
 
     public override async Task Execute(ExecutionContext context)
     {
-        context.FireBeforeEvent();
         context.MemoryPool.SetActive(StageName, true);
         await base.Execute(context);
+        context.FireBeforeEvent();
+        context.ReportCollector.Clear();
         context.MemoryPool.StopMonitoring();
     }
 }

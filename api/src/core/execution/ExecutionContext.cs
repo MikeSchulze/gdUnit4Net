@@ -230,7 +230,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public void FireBeforeEvent() =>
         FireTestEvent(TestEvent
-            .Before(TestSuite.ResourcePath, TestSuite.Name, TestSuite.TestCaseCount)
+            .Before(TestSuite.ResourcePath, TestSuite.Name, TestSuite.TestCaseCount, BuildStatistics(0), CollectReports)
             .WithFullyQualifiedName(FullyQualifiedName));
 
     public void FireAfterEvent() =>
