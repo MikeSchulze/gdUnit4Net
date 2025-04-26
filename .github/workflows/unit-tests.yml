@@ -93,11 +93,13 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: "Compile C#"
+      - name: "Compile"
         if: ${{ !cancelled() }}
         run: |
           echo "prebuild projects"
-          dotnet build
+          dotnet build Api
+          dotnet build Analyzers
+          dotnet build Api.Test
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}

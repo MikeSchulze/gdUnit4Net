@@ -13,7 +13,7 @@ public class UtilsTest
 {
     [TestMethod]
     public void ProjectDirectory()
-        => Assert.IsTrue(GetProjectDirectory.EndsWith("testadapter.test"));
+        => Assert.IsTrue(GetProjectDirectory.EndsWith("TestAdapter.Test"));
 
     [TestMethod]
     public void UserDataDirectory()

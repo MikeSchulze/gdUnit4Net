@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Testadapter/GdUnit4TestAdapter.csproj"/>
+    <ProjectReference Include="../TestAdapter/GdUnit4TestAdapter.csproj"/>
   </ItemGroup>
 
 

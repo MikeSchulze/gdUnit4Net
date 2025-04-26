@@ -105,7 +105,7 @@ public class GodotRuntimeTestRunnerTest
 
         // Verify logger was called with success messages
         VerifyLoggerInfo("Installing GdUnit4 Godot Runtime Test Runner");
-        VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo("Rebuild Project ends with exit code: 0");
 
         // Verify the runner file was created in the correct location
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -133,7 +133,7 @@ public class GodotRuntimeTestRunnerTest
 
         // Verify success messages were logged
         VerifyLoggerInfo("Installing GdUnit4 Godot Runtime Test Runner");
-        VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo("Rebuild Project ends with exit code: 0");
 
         // Verify the runner file was created and not cleaned up
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -166,7 +166,7 @@ public class GodotRuntimeTestRunnerTest
         // Verify timeout error was logged
         VerifyLoggerError("Godot compilation TIMEOUT");
         var errorCode = Environment.OSVersion.Platform == PlatformID.Win32NT ? -1 : 137;
-        VerifyLoggerError($"Rebuild Godot Project ends with exit code: {errorCode}");
+        VerifyLoggerError($"Rebuild Project ends with exit code: {errorCode}");
 
         // Verify the runner file was cleaned up after timeout
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -193,7 +193,7 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on compilation failure").IsFalse();
 
         // Verify error message was logged
-        VerifyLoggerError("Rebuild Godot Project ends with exit code: 1");
+        VerifyLoggerError("Rebuild Project ends with exit code: 1");
 
         // Verify the runner file was cleaned up after failure
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");

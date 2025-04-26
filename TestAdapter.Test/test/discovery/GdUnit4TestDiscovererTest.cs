@@ -59,6 +59,7 @@ public class GdUnit4TestDiscovererTest
 
         // Check discovery process
         new GdUnit4TestDiscoverer().DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
+        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(15));
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded after DiscoverTests execution");
     }
 
@@ -171,20 +172,20 @@ public class GdUnit4TestDiscovererTest
             "Examples.ExampleTest.Success",
             "Success",
             assemblyPath,
-            @"example\test\ExampleTest.cs",
+            @"Example\test\ExampleTest.cs",
             14);
         // multi testcase attribute usage
         AssertTestCase(discoveredTests,
             "Examples.ExampleTest.DataRows.TestA:0 (0, 1, 2)",
             "TestA:0 (0, 1, 2)",
             assemblyPath,
-            @"example\test\ExampleTest.cs",
+            @"Example\test\ExampleTest.cs",
             31);
         AssertTestCase(discoveredTests,
             "Examples.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
             "TestB:1 (1, 2, 3)",
             assemblyPath,
-            @"example\test\ExampleTest.cs",
+            @"Example\test\ExampleTest.cs",
             31);
     }
 

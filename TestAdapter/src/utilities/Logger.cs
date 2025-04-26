@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using Api;
 
@@ -34,6 +35,7 @@ public class Logger : ITestEngineLogger
     /// </summary>
     /// <param name="level">The severity level of the message</param>
     /// <param name="message">The message to log</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SendMessage(ITestEngineLogger.Level level, string message)
     {
         if (LevelMap.TryGetValue(level, out var testLogLevel))

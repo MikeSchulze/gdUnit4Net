@@ -15,8 +15,8 @@ public partial class VerifyDocumentationTest
 {
     private static readonly string ProjectRoot = Directory.GetCurrentDirectory()
         .Split(Path.DirectorySeparatorChar)
-        .TakeWhile(dir => dir != "analyzers.test")
-        .Concat(new[] { "analyzers" })
+        .TakeWhile(dir => dir != "Analyzers.Test")
+        .Concat(new[] { "Analyzers" })
         .Aggregate(Path.Combine);
 
     [TestMethod]
@@ -61,7 +61,7 @@ public partial class VerifyDocumentationTest
 
     private static void CheckDocumentationFile(DiagnosticDescriptor descriptor)
     {
-        var docLink = descriptor.HelpLinkUri.Replace("https://github.com/MikeSchulze/gdUnit4Net/tree/master/analyzers/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
+        var docLink = descriptor.HelpLinkUri.Replace("https://github.com/MikeSchulze/gdUnit4Net/tree/master/Analyzers/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
         var docPath = Path.Combine(Path.DirectorySeparatorChar.ToString(), ProjectRoot, docLink);
         Assert.IsTrue(File.Exists(docPath), $"Documentation file not found: {docPath}\nExpected documentation for rule {descriptor.Id}");
 

@@ -177,9 +177,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     }
 
     private bool InitRuntimeEnvironment() =>
-        InstallTestRunnerClasses(Environment.CurrentDirectory, GodotBin);
+        InstallTestRunnerClasses(Environment.CurrentDirectory, "dotnet");
 
-    internal bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
+    internal bool InstallTestRunnerClasses(string workingDirectory, string program)
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
@@ -203,19 +203,19 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             // recompile the project
-            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . --headless --build-solutions --quit-after 1000")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                RedirectStandardInput = false,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = workingDirectory
-            };
+            var processStartInfo = new ProcessStartInfo(program, "build")
+                //var processStartInfo = new ProcessStartInfo($"{godotBinary}", $"--path {workingDirectory} --headless --build-solutions --quit-after 1000")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = false,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    WorkingDirectory = workingDirectory
+                };
 
-            Logger.LogInfo($"Working dir {workingDirectory}");
-            Logger.LogInfo($"Run Rebuild Godot Project ... {godotBinary} {processStartInfo.Arguments}");
+            Logger.LogInfo("Rebuild Project ...");
             using var compileProcess = new Process();
             compileProcess.StartInfo = processStartInfo;
             compileProcess.EnableRaisingEvents = true;
@@ -228,10 +228,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 Logger.LogInfo($".. {message}");
             };
             compileProcess.ErrorDataReceived += StdErrorProcessor;
-            compileProcess.Exited += ExitHandler("Rebuild Godot Project");
+            compileProcess.Exited += ExitHandler("Rebuild Project");
             if (!compileProcess.Start())
             {
-                Logger.LogError(@"Rebuild Godot Project fails on process start, exit ..");
+                Logger.LogError(@"Rebuild Project fails on process start, exit ..");
                 CleanupRunnerOnFailure(sceneRunnerSource);
                 return false;
             }
