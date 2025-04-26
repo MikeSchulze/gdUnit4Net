@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../PackageVersions.props"/>
+
+  <PropertyGroup>
+    <Title>gdUnit4 TestAdapter</Title>
+    <Version>$(GdUnitTestAdapterVersion)</Version>
+    <Description>
+      GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
+    </Description>
+    <Copyright>© 2025 Mike Schulze</Copyright>
+    <Authors>Mike Schulze</Authors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+    <LangVersion>11.0</LangVersion>
+    <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
+    <OutputType>Library</OutputType>
+    <OutputPath>./nupkg</OutputPath>
+    <Nullable>enable</Nullable>
+    <NullableReferenceTypes>true</NullableReferenceTypes>
+    <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DebugType>portable</DebugType>
+    <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
+    <IsGodotToolsProject>true</IsGodotToolsProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net</PackageProjectUrl>
+    <PackageId>gdUnit4.test.adapter</PackageId>
+    <PackageVersion>$(GdUnitTestAdapterVersion)</PackageVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/ReleaseNotes.txt"))</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>Godot;Test;Testing;UnitTest;GdUnit4;Utility;Utilities</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/MikeSchulze/gdUnit4Net</RepositoryUrl>
+    <!-- ingnore dependency warnings to pre release version of gdunit.api -->
+    <NoWarn>NU5104</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
+    <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <ProjectReference Include="..\Api\GdUnit4Api.csproj"/>
+
+    <None Include="README.md" Pack="true" PackagePath="/"/>
+    <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
+    <None Include="../LICENSE" Pack="true" PackagePath="/"/>
+    <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
+    <None Include="../icon.png" Pack="true" PackagePath="/"/>
+  </ItemGroup>
+
+</Project>

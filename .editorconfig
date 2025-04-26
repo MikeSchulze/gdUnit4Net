@@ -127,7 +127,7 @@ dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
 # File header preferences
 # file_header_template = <copyright file="{fileName}" company="PROJECT-AUTHOR">\n© PROJECT-AUTHOR\n</copyright>
 # If you use StyleCop, you'll need to disable SA1636: File header copyright text should match.
-# dotnet_diagnostic.SA1636.severity = none
+dotnet_diagnostic.SA1633.severity = none
 # Undocumented
 dotnet_style_operator_placement_when_wrapping = end_of_line:warning
 csharp_style_prefer_null_check_over_type_check = true:warning
@@ -191,6 +191,14 @@ dotnet_diagnostic.IDE0058.severity = suggestion
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 dotnet_diagnostic.IDE0059.severity = suggestion
 
+
+##########################################
+# Test suite rules
+##########################################
+# Exclude test files from certain rules
+[**/*Test.cs]
+dotnet_diagnostic.CA1515.severity = none
+
 ##########################################
 # Formatting Rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
@@ -205,6 +213,8 @@ dotnet_separate_import_directive_groups = false
 # Dotnet namespace options
 dotnet_style_namespace_match_folder = true:suggestion
 dotnet_diagnostic.IDE0130.severity = suggestion
+# Disable requirement for qualified using directives
+dotnet_diagnostic.SA1135.severity = none
 
 # C# formatting rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/formatting-rules#c-formatting-rules
