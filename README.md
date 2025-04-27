@@ -45,7 +45,7 @@ There are three packages available in this project:
 
 * **[gdUnit4.api](api/README.md)** - The core package to enable writing and running unit tests in C#.
 * **[gdUnit4.test.adapter](testadapter/README.md)** - The test adapter to integrate GdUnit4 with Visual Studio Test Platform.
-* **[gdUnit4.analyzers](analyzers/README.md)** - A Roslyn-based analyzer that provides compile-time validation for GdUnit4 test attributes.
+* **[gdUnit4.analyzers](Analyzers/README.md)** - A Roslyn-based analyzer that provides compile-time validation for GdUnit4 test attributes.
 
 ## gdunit4.api
 
@@ -58,7 +58,7 @@ powerful [test filtering capabilities](testadapter/TestFilterGuide.md) for selec
 
 ## gdUnit4.analyzers
 
-For compile-time validation of your test code, check out the [gdUnit4.analyzers README](analyzers/README.md).
+For compile-time validation of your test code, check out the [gdUnit4.analyzers README](Analyzers/README.md).
 
 ### Example Project
 
