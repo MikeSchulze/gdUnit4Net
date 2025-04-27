@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="gdUnit4ApiTest"
+config/name="GdUnit4ApiTest"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

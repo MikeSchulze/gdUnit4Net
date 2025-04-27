@@ -11,7 +11,7 @@
     <RootNamespace>GdUnit4.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>gdUnit4ApiTest</AssemblyName>
+    <AssemblyName>GdUnit4ApiTest</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
