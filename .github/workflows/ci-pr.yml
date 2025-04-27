@@ -32,7 +32,7 @@ jobs:
       - name: "Build"
         if: ${{ !cancelled() }}
         run: |
-          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./Api/GdUnit4Api.csproj
           dotnet build ./Analyzers/GdUnit4Analyzers.csproj
           dotnet build ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj
 
@@ -68,7 +68,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           dotnet build ./example/exampleProject.csproj
-          dotnet build ./api/gdUnit4Api.csproj
+          dotnet build ./Api/GdUnit4Api.csproj
           dotnet build ./testadapter/gdUnit4TestAdapter.csproj
           dotnet build ./testadapter.test/gdUnit4TestAdapter.Tests.csproj
 

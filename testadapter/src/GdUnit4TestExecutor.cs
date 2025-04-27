@@ -65,7 +65,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
         {
             Log.LogError(
-                $"Wrong gdUnit4Api2, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
+                $"Wrong GdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
             Log.LogError("Abort the test discovery.");
             return;
         }

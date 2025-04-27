@@ -45,7 +45,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             Logger = new Logger(logger);
             if (ITestEngine.EngineVersion() < MinRequiredEngineVersion)
             {
-                Logger.LogError($"Wrong gdUnit4Api2, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
+                Logger.LogError($"Wrong GdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredEngineVersion}'");
                 Logger.LogError("Abort the test discovery.");
                 return;
             }

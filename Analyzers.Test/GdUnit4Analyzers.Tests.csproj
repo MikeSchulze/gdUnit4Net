@@ -20,6 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Analyzers\GdUnit4Analyzers.csproj" />
-    <ProjectReference Include="..\api\gdUnit4Api2.csproj" />
+    <ProjectReference Include="..\Api\GdUnit4Api.csproj" />
   </ItemGroup>
 </Project>

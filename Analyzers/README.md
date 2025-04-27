@@ -39,7 +39,7 @@ The analyzer must be included by referencing the gdUnit4.analyzer package:
 
 ## Related Packages
 
-* [gdUnit4.api](../api/README.md) - The core testing framework
+* [gdUnit4.api](../Api/README.md) - The core testing framework
 * [gdUnit4.test.adapter](../testadapter/README.md) - Run your tests in Visual Studio, VS Code, and JetBrains Rider with filtering support
 
 ## Technical Details

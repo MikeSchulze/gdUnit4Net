@@ -43,13 +43,13 @@ This is intentional as these changes will be part of the upcoming 4.4.0 release.
 
 There are three packages available in this project:
 
-* **[gdUnit4.api](api/README.md)** - The core package to enable writing and running unit tests in C#.
+* **[gdUnit4.api](Api/README.md)** - The core package to enable writing and running unit tests in C#.
 * **[gdUnit4.test.adapter](testadapter/README.md)** - The test adapter to integrate GdUnit4 with Visual Studio Test Platform.
 * **[gdUnit4.analyzers](Analyzers/README.md)** - A Roslyn-based analyzer that provides compile-time validation for GdUnit4 test attributes.
 
 ## gdunit4.api
 
-Checkout the [gdUnit4.api README](api/README.md) to install and use the core testing framework.
+Checkout the [gdUnit4.api README](Api/README.md) to install and use the core testing framework.
 
 ## gdUnit4.test.adapter
 

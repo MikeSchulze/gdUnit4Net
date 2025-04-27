@@ -1,7 +1,7 @@
 rm -rf ./bin
 rm -rf ./obj
-rm -rf ./api/nupkg/*
-rm -rf ./api/obj
+rm -rf ./Api/nupkg/*
+rm -rf ./Api/obj
 
 rm -rf .godot
 
@@ -16,7 +16,7 @@ rm -rf ./testadapter/nupkg/*
 rm -rf ./testadapter/obj
 
 
-dotnet build ./api/gdUnit4Api.csproj
+dotnet build ./Api/GdUnit4Api.csproj
 dotnet build ./testadapter/gdUnit4TestAdapter.csproj
 dotnet restore
 dotnet build
