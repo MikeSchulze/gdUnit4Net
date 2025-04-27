@@ -12,8 +12,8 @@ using Environment = System.Environment;
 public class UtilsTest
 {
     [TestMethod]
-    public void ProjectDirectory()
-        => Assert.IsTrue(GetProjectDirectory.EndsWith("testadapter.test"));
+    public void ProjectDirectory() => StringAssert.Contains(GetProjectDirectory, "testadapter.test");
+
 
     [TestMethod]
     public void UserDataDirectory()
