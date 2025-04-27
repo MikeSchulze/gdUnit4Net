@@ -15,11 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "exampleProject", ".\example
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{F883AD26-E2D9-0064-49F2-B333EF800629}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdUnit4Analyzers2", "Analyzers\GdUnit4Analyzers2.csproj", "{B054CD64-7595-45B2-8489-F8822A984392}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdUnit4Analyzers", "Analyzers\GdUnit4Analyzers.csproj", "{B054CD64-7595-45B2-8489-F8822A984392}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers.Test", "Analyzers.Test", "{CEE4CB6F-82D5-E4EE-AE64-52BA4C2B10C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdUnit4Analyzers.Tests2", "Analyzers.Test\GdUnit4Analyzers.Tests2.csproj", "{9375E5D6-845D-485E-B5DF-3187CC941A42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GdUnit4Analyzers.Tests", "Analyzers.Test\GdUnit4Analyzers.Tests.csproj", "{9375E5D6-845D-485E-B5DF-3187CC941A42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -45,7 +45,7 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net/analyzers</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MikeSchulze/gdUnit4Net/Analyzers</PackageProjectUrl>
     <PackageId>gdUnit4.analyzers</PackageId>
     <PackageVersion>$(GdUnitAnalyzersVersion)</PackageVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -77,7 +77,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="Analyzers/dotnet/cs" Visible="false"/>
     <Content Include="../LICENSE"/>
     <None Include="README.md" Pack="true" PackagePath="/"/>
     <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
