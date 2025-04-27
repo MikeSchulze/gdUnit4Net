@@ -148,14 +148,8 @@ internal sealed class GdUnit4TestEngine : ITestEngine
     {
         var (directExecutorTestSuites, godotExecutorTestSuites) = SplitTestSuitesByRequiredRuntime(testSuiteNodes);
 
-        // Run tests that don't require Godot runtime
-        if (directExecutorTestSuites.Count > 0)
-        {
-            var directRunner = new DefaultTestRunner(Logger, Settings);
-            ActiveTestRunners.Add(directRunner);
-            directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
-            ActiveTestRunners.Remove(directRunner);
-        }
+        // !! Do not switch the execution order, the GodotRuntimeTestRunner must be executed first because it installs the TestRunner Scene for the first time.
+        // To successfully rebuild the project, it is necessary the test assembly is not already loaded in the execution process.
 
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
@@ -164,6 +158,15 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
             ActiveTestRunners.Remove(godotRunner);
+        }
+
+        // Run tests that don't require Godot runtime
+        if (directExecutorTestSuites.Count > 0)
+        {
+            var directRunner = new DefaultTestRunner(Logger, Settings);
+            ActiveTestRunners.Add(directRunner);
+            directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
+            ActiveTestRunners.Remove(directRunner);
         }
     }
 

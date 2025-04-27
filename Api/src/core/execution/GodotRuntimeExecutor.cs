@@ -31,7 +31,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     public GodotRuntimeExecutor(ITestEngineLogger logger)
         : base(new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
-        => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
+    {
+    }
 
     public async Task StartAsync()
     {

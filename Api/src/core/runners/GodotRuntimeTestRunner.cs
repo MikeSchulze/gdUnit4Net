@@ -101,12 +101,12 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
     public new void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
+        Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
         lock (ProcessLock)
         {
             if (!InitRuntimeEnvironment())
                 return;
 
-            Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
 
             var processStartInfo =
                 new ProcessStartInfo(GodotBin, BuildGodotArguments(settings))
@@ -177,9 +177,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     }
 
     private bool InitRuntimeEnvironment() =>
-        InstallTestRunnerClasses(Environment.CurrentDirectory, "dotnet");
+        InstallTestRunnerClasses(Environment.CurrentDirectory, GodotBin);
 
-    internal bool InstallTestRunnerClasses(string workingDirectory, string program)
+    internal bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
@@ -203,17 +203,16 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             // recompile the project
-            var processStartInfo = new ProcessStartInfo(program, "build")
-                //var processStartInfo = new ProcessStartInfo($"{godotBinary}", $"--path {workingDirectory} --headless --build-solutions --quit-after 1000")
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    RedirectStandardInput = false,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = workingDirectory
-                };
+            var processStartInfo = new ProcessStartInfo($"{godotBinary}", "--path . --headless --build-solutions --quit-after 1000")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = false,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = workingDirectory
+            };
 
             Logger.LogInfo("Rebuild Project ...");
             using var compileProcess = new Process();

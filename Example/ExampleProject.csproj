@@ -15,14 +15,12 @@
     <!-- Prevent MSTest adapter from being discovered -->
     <VSTestTestAdapterPath>none</VSTestTestAdapterPath>
     <TestFramework>GdUnit4</TestFramework>
-
-
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
     <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions, but set it to private to prevent conflicts -->
     <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
-    <PackageReference Include="gdUnit4.api" Version="4.4.0-rc13"/>
+    <PackageReference Include="gdUnit4.api" Version="4.4.0-rc15"/>
     <PackageReference Include="gdUnit4.test.adapter" Version="2.1.0-rc5"/>
     <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc5">
       <PrivateAssets>none</PrivateAssets>
