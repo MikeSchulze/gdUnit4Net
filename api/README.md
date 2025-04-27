@@ -33,7 +33,7 @@ You can install the GdUnit4 API by adding it as a package reference to your proj
 ## Related Packages
 
 * [gdUnit4.test.adapter](../testadapter/README.md) - Run your tests in Visual Studio, VS Code, and JetBrains Rider
-* [gdUnit4.analyzers](../analyzers/README.md) - Add compile-time validation for your test code
+* [gdUnit4.analyzers](../Analyzers/README.md) - Add compile-time validation for your test code
 
 ## Short Example
 

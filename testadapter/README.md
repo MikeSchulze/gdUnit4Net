@@ -66,7 +66,7 @@ For detailed information about test filtering capabilities, including syntax, op
 ## Related Packages
 
 * [gdUnit4.api](../api/README.md) - The core testing framework
-* [gdUnit4.analyzers](../analyzers/README.md) - Add compile-time validation for your test code
+* [gdUnit4.analyzers](../Analyzers/README.md) - Add compile-time validation for your test code
 
 ## Documentation
 
