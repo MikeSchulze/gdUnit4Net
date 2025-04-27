@@ -1,5 +1,5 @@
 <Project Sdk="Godot.NET.Sdk">
-  <Import Project="../PackageVersions.props"/>
+  <Import Project="../PackageVersions.props" />
   <PropertyGroup>
     <Version>4.4.0</Version>
     <Copyright>© 2025 Mike Schulze</Copyright>
@@ -11,7 +11,7 @@
     <RootNamespace>GdUnit4.Tests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>gdUnit4Test</AssemblyName>
+    <AssemblyName>gdUnit4ApiTest</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -23,17 +23,17 @@
     <TestFramework>GdUnit4</TestFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)" />
     <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions, but set it to private to prevent conflicts -->
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native" />
     <ProjectReference Include="..\Api\GdUnit4Api.csproj" />
-    <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj"/>
+    <ProjectReference Include="..\testadapter\gdUnit4TestAdapter.csproj" />
     <PackageReference Include="gdUnit4.analyzers" Version="$(GdUnitAnalyzersVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="nuget.config"/>
+    <None Include="nuget.config" />
   </ItemGroup>
 </Project>
