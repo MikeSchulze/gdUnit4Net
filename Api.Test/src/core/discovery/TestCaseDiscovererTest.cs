@@ -260,7 +260,7 @@ public class TestCaseDiscovererTest
     {
         var codeFilePath = ProjectSettings.GlobalizePath("res://src/core/ExampleTestSuite.cs");
         var projectDir = ProjectSettings.GlobalizePath("res://");
-        var assemblyPath = Path.GetFullPath(Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "Debug", "gdUnit4Test.dll"));
+        var assemblyPath = Path.GetFullPath(Path.Combine(projectDir, ".godot", "mono", "temp", "bin", "Debug", "GdUnit4ApiTest.dll"));
         var script = GD.Load<CSharpScript>("res://src/core/ExampleTestSuite.cs");
 
         var tests = TestCaseDiscoverer.DiscoverTestCasesFromScript(script);

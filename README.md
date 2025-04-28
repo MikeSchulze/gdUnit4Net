@@ -4,10 +4,8 @@
 
 <h1 align="center">Supported Godot Versions</h2>
 <p align="center">
-  <img src="https://img.shields.io/badge/Godot-v4.2.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
-  <img src="https://img.shields.io/badge/Godot-v4.2.1-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
-  <img src="https://img.shields.io/badge/Godot-v4.2.2-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
   <img src="https://img.shields.io/badge/Godot-v4.3.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
+  <img src="https://img.shields.io/badge/Godot-v4.4.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
 </p>
 
 ## What is gdUnit4Net
@@ -43,13 +41,13 @@ This is intentional as these changes will be part of the upcoming 4.4.0 release.
 
 There are three packages available in this project:
 
-* **[gdUnit4.api](api/README.md)** - The core package to enable writing and running unit tests in C#.
+* **[gdUnit4.api](Api/README.md)** - The core package to enable writing and running unit tests in C#.
 * **[gdUnit4.test.adapter](testadapter/README.md)** - The test adapter to integrate GdUnit4 with Visual Studio Test Platform.
 * **[gdUnit4.analyzers](Analyzers/README.md)** - A Roslyn-based analyzer that provides compile-time validation for GdUnit4 test attributes.
 
 ## gdunit4.api
 
-Checkout the [gdUnit4.api README](api/README.md) to install and use the core testing framework.
+Checkout the [gdUnit4.api README](Api/README.md) to install and use the core testing framework.
 
 ## gdUnit4.test.adapter
 

@@ -61,14 +61,14 @@ public interface ITestEngine : IDisposable
     ///     Gets the version of the GdUnit4 test engine.
     /// </summary>
     /// <returns>Version information of the engine, or null if the gdUnit4Api is not installed</returns>
-    /// <exception cref="InvalidOperationException">Thrown when gdUnit4Api is not properly installed</exception>
+    /// <exception cref="InvalidOperationException">Thrown when GdUnit4Api is not properly installed</exception>
     /// <remarks>
     ///     The version is retrieved from the assembly containing the GdUnit4TestEngine type.
     ///     This method helps verify correct installation and versioning of the test engine.
     /// </remarks>
     static Version? EngineVersion()
     {
-        var assembly = typeof(GdUnit4TestEngine).Assembly ?? throw new InvalidOperationException("No 'gdUnit4Api' is installed!");
+        var assembly = typeof(GdUnit4TestEngine).Assembly ?? throw new InvalidOperationException("No 'GdUnit4Api' is installed!");
         return assembly.GetName().Version;
     }
 

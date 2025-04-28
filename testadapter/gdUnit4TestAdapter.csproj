@@ -53,7 +53,7 @@
     <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
     <PackageReference Include="coverlet.collector" Version="6.0.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-    <ProjectReference Include="..\api\gdUnit4Api.csproj"/>
+    <ProjectReference Include="..\Api\GdUnit4Api.csproj" />
 
     <None Include="README.md" Pack="true" PackagePath="/"/>
     <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>

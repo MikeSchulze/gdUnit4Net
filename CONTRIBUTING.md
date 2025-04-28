@@ -33,7 +33,7 @@ We follow the <a href='https://docs.github.com/en/get-started/quickstart/github-
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the same <a href='https://github.com/MikeSchulze/gdUnit4Net/blob/master/api/LICENSE' target="_blank">MIT License</a> that covers the project. If you have any concerns, please reach out to the maintainers.
+By contributing to this project, you agree that your contributions will be licensed under the same <a href='https://github.com/MikeSchulze/gdUnit4Net/blob/master/Api/LICENSE' target="_blank">MIT License</a> that covers the project. If you have any concerns, please reach out to the maintainers.
 
 ## Coding Style
 
