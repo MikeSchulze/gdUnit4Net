@@ -75,7 +75,7 @@ jobs:
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         run: |
-          cd TestAdapter.test
+          cd TestAdapter.Test
           dotnet test GdUnit4TestAdapter.Tests.csproj --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
