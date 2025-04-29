@@ -10,11 +10,11 @@ config_version=5
 
 [application]
 
-config/name="exampleProject"
+config/name="ExampleProject"
 config/features=PackedStringArray("4.2.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 run/main_scene="res://src/Menu.tscn"
 
 [dotnet]
 
-project/assembly_name="exampleProject"
+project/assembly_name="ExampleProject"

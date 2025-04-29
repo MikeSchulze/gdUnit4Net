@@ -52,7 +52,7 @@ jobs:
       - name: 'Temp solution, we delete the failing test for now.'
         shell: bash
         run: |
-          rm -rf ./example/test/ExampleTest.cs
+          rm -rf ./Example/test/ExampleTest.cs
 
       - name: 'Test Example via gdunit-action - Godot_${{ inputs.godot-version }}-${{ inputs.godot-status }}-net'
         uses: MikeSchulze/gdUnit4-action@v1
@@ -60,10 +60,10 @@ jobs:
           godot-version: ${{ inputs.godot-version }}
           godot-status: ${{ inputs.godot-status }}
           godot-net: true
-          project_dir: './example/'
+          project_dir: './Example/'
           # the filter actual not works see https://github.com/MikeSchulze/gdUnit4Net/issues/27
           paths: |
-            res://example/test/Api
+            res://Example/test/Api
           timeout: 2
           retries: 3 # We have set the number of repetitions to 3 because Godot mono randomly crashes during C# tests
           publish-report: false
@@ -143,7 +143,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           echo "prebuild the nuget packages"
-          cd ./example
+          cd ./Example
           dotnet restore
           dotnet build
 
@@ -153,8 +153,8 @@ jobs:
         env:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
-          $GODOT_BIN --path ./example --headless --build-solutions --quit-after 20
-          xvfb-run --auto-servernum dotnet test ./example/exampleProject.csproj --no-build --settings ./example/.runsettings-ci || true
+          $GODOT_BIN --path ./Example --headless --build-solutions --quit-after 20
+          xvfb-run --auto-servernum dotnet test ./Example/ExampleProject.csproj --no-build --settings ./Example/.runsettings-ci || true
 
         # Step to validate test results
       - name: Validate Test Results
@@ -164,7 +164,7 @@ jobs:
             local section="$1"
             local expected_content="$2"
 
-            grep -A 50 "$section" ./example/TestResults/test-result.trx | sed -e 's/^[ \t]*//' | tee output.txt >/dev/null
+            grep -A 50 "$section" ./Example/TestResults/test-result.trx | sed -e 's/^[ \t]*//' | tee output.txt >/dev/null
             if grep -qF "$expected_content" output.txt; then
               echo "Test validation passed. The expected text is present in $section."
             else
@@ -178,7 +178,7 @@ jobs:
 
           validate_section '<Output>' 'Discover tests done, 2 TestSuites and total 15 Tests found.'
           validate_section '<Results>' "<Message>Expecting: 'True' but is 'False'</Message>"
-          validate_section '<Results>' '<StackTrace>   at Examples.ExampleTest.Failed() in /home/runner/work/gdUnit4Net/gdUnit4Net/example/test/ExampleTest.cs:line 18'
+          validate_section '<Results>' '<StackTrace>   at Examples.ExampleTest.Failed() in /home/runner/work/gdUnit4Net/gdUnit4Net/Example/test/ExampleTest.cs:line 18'
           validate_section '<ResultSummary' '<ResultSummary outcome="Failed">'
           validate_section '<ResultSummary' '<Counters total="19" executed="19" passed="18" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />'
           echo "All tests passes."

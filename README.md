@@ -90,7 +90,7 @@ public class ExampleTest
 ```
 
 The test run looks like this.
-<p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Net"><img src="https://github.com/MikeSchulze/gdUnit4Net/blob/master/example/assets/TestExplorerRun.png" width="100%"/></p><br/>
+<p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Net"><img src="https://github.com/MikeSchulze/gdUnit4Net/blob/master/Example/assets/TestExplorerRun.png" width="100%"/></p><br/>
 
 ## Documentation
 

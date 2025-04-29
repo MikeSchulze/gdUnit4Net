@@ -67,7 +67,7 @@ jobs:
       - name: "Build"
         if: ${{ !cancelled() }}
         run: |
-          dotnet build ./example/exampleProject.csproj
+          dotnet build ./Example/ExampleProject.csproj
           dotnet build ./Api/GdUnit4Api.csproj
           dotnet build ./TestAdapter/GdUnit4TestAdapter.csproj
           dotnet build ./TestAdapter.Test/GdUnit4TestAdapter.Tests.csproj
