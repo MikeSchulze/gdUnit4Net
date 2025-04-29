@@ -12,7 +12,7 @@ using Environment = System.Environment;
 public class UtilsTest
 {
     [TestMethod]
-    public void ProjectDirectory() => StringAssert.Contains(GetProjectDirectory, "testadapter.test");
+    public void ProjectDirectory() => StringAssert.Contains(GetProjectDirectory, "TestAdapter.Test");
 
 
     [TestMethod]

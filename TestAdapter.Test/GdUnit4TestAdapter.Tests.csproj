@@ -8,7 +8,7 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>GdUnit4.TestAdapter</RootNamespace>
 
-    <AssemblyName>gdUnit4.TestAdapter.Test</AssemblyName>
+    <AssemblyName>GdUnit4.TestAdapter.Test</AssemblyName>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
     <NoWarn>CS8785</NoWarn>
   </PropertyGroup>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../testadapter/gdUnit4TestAdapter.csproj"/>
+    <ProjectReference Include="../TestAdapter/GdUnit4TestAdapter.csproj"/>
   </ItemGroup>
 
 
