@@ -12,12 +12,12 @@ rm -rf ./example/.godot
 rm -rf ./example/gdunit4_testadapter
 
 
-rm -rf ./testadapter/nupkg/*
-rm -rf ./testadapter/obj
+rm -rf ./TestAdapter/nupkg/*
+rm -rf ./TestAdapter/obj
 
 
 dotnet build ./Api/GdUnit4Api.csproj
-dotnet build ./testadapter/gdUnit4TestAdapter.csproj
+dotnet build ./TestAdapter/GdUnit4TestAdapter.csproj
 dotnet restore
 dotnet build
 

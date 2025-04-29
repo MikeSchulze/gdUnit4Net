@@ -42,7 +42,7 @@ This is intentional as these changes will be part of the upcoming 4.4.0 release.
 There are three packages available in this project:
 
 * **[gdUnit4.api](Api/README.md)** - The core package to enable writing and running unit tests in C#.
-* **[gdUnit4.test.adapter](testadapter/README.md)** - The test adapter to integrate GdUnit4 with Visual Studio Test Platform.
+* **[gdUnit4.test.adapter](TestAdapter/README.md)** - The test adapter to integrate GdUnit4 with Visual Studio Test Platform.
 * **[gdUnit4.analyzers](Analyzers/README.md)** - A Roslyn-based analyzer that provides compile-time validation for GdUnit4 test attributes.
 
 ## gdunit4.api
@@ -51,8 +51,8 @@ Checkout the [gdUnit4.api README](Api/README.md) to install and use the core tes
 
 ## gdUnit4.test.adapter
 
-Checkout the [gdUnit4.test.adapter README](testadapter/README.md) to install and use the test adapter. This adapter now supports
-powerful [test filtering capabilities](testadapter/TestFilterGuide.md) for selectively running tests based on specific criteria.
+Checkout the [gdUnit4.test.adapter README](TestAdapter/README.md) to install and use the test adapter. This adapter now supports
+powerful [test filtering capabilities](TestAdapter/TestFilterGuide.md) for selectively running tests based on specific criteria.
 
 ## gdUnit4.analyzers
 
@@ -103,7 +103,7 @@ The test run looks like this.
 </p>
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
-  <a href="testadapter/TestFilterGuide.md">Test Filtering Guide</a>
+  <a href="TestAdapter/TestFilterGuide.md">Test Filtering Guide</a>
 </p>
 
 ### You Are Welcome To

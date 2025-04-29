@@ -15,7 +15,7 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
-    <AssemblyName>gdUnit4.TestAdapter</AssemblyName>
+    <AssemblyName>GdUnit4.TestAdapter</AssemblyName>
     <OutputType>Library</OutputType>
     <OutputPath>./nupkg</OutputPath>
     <Nullable>enable</Nullable>

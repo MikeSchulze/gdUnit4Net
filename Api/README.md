@@ -20,7 +20,7 @@ gdUnit4.api is the C# package to enable GdUnit4 to run/write unit tests in C#.
 * **Scene runner:** for simulating different kinds of inputs and actions, such as mouse clicks and keyboard inputs<br>
   For example, you can simulate mouse clicks and keyboard inputs by calling the appropriate methods on the runner instance. Additionally, you can wait for a specific signal to be
   emitted by the scene, or you can wait for a specific function to return a certain value.
-* **Integration with Test Adapter:** Works seamlessly with the [gdUnit4.test.adapter](../testadapter/README.md) for running tests in Visual Studio, VS Code, and JetBrains Rider
+* **Integration with Test Adapter:** Works seamlessly with the [gdUnit4.test.adapter](../TestAdapter/README.md) for running tests in Visual Studio, VS Code, and JetBrains Rider
 
 ## Installation
 
@@ -32,7 +32,7 @@ You can install the GdUnit4 API by adding it as a package reference to your proj
 
 ## Related Packages
 
-* [gdUnit4.test.adapter](../testadapter/README.md) - Run your tests in Visual Studio, VS Code, and JetBrains Rider
+* [gdUnit4.test.adapter](../TestAdapter/README.md) - Run your tests in Visual Studio, VS Code, and JetBrains Rider
 * [gdUnit4.analyzers](../Analyzers/README.md) - Add compile-time validation for your test code
 
 ## Short Example

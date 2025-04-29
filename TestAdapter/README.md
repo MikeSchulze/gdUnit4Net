@@ -2,7 +2,7 @@
 
 This is the GdUnit4 Test Adapter, designed to facilitate the integration of GdUnit4 with test frameworks supporting the Visual Studio Test Platform.
 
-The GdUnit4.testadapter implements the Microsoft test adapter framework [VSTest](https://github.com/microsoft/vstest?tab=readme-ov-file#vstest).
+The GdUnit4.TestAdapter implements the Microsoft test adapter framework [VSTest](https://github.com/microsoft/vstest?tab=readme-ov-file#vstest).
 
 ## Features
 
