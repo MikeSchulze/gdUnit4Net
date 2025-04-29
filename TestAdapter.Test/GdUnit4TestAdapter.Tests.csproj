@@ -28,7 +28,7 @@
 
 
   <Target Name="GenerateAssemblyPathConstants" BeforeTargets="CoreCompile">
-    <MSBuild Projects="../example/exampleProject.csproj"
+    <MSBuild Projects="../Example/ExampleProject.csproj"
              Targets="GetTargetPath"
              Properties="Configuration=$(Configuration)">
       <Output TaskParameter="TargetOutputs" PropertyName="LibraryOutputPath"/>

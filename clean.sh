@@ -5,11 +5,11 @@ rm -rf ./Api/obj
 
 rm -rf .godot
 
-rm -rf ./test/.godot
-rm -rf ./test/gdunit4_testadapter
+rm -rf ./Api.Test/.godot
+rm -rf ./Api.Test/gdunit4_testadapter
 
-rm -rf ./example/.godot
-rm -rf ./example/gdunit4_testadapter
+rm -rf ./Example/.godot
+rm -rf ./Example/gdunit4_testadapter
 
 
 rm -rf ./TestAdapter/nupkg/*
@@ -22,7 +22,7 @@ dotnet restore
 dotnet build
 
 
-$GODOT_BIN --path ./example --headless --build-solutions --quit-after 20
+$GODOT_BIN --path ./Example --headless --build-solutions --quit-after 20
 # dotnet clean
 # dotnet restore
 # dotnet build

@@ -15,9 +15,9 @@ runs:
         retention-days: 10
         name: artifact_${{ inputs.report-name }}
         path: |
-          ./test/TestResults/**
-          ./test/reports/**
-          ./example/TestResults/**
-          ./example/reports/**
+          ./Api.Test/TestResults/**
+          ./Api.Test/reports/**
+          ./Example/TestResults/**
+          ./Example/reports/**
           /var/lib/systemd/coredump/**
           /var/log/syslog
