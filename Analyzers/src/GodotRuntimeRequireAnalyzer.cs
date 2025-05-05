@@ -273,9 +273,10 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
                     if (InheritsFromGodotType(propRef.Property.Type))
                         return true;
                     break;
+
                 default:
-                    // Other operation types should be handled if they become relevant for Godot type detection
-                    throw new NotImplementedException($"Operation type {operation.GetType().Name} is not handled!");
+                    // Skip other operations
+                    continue;
             }
         }
 
