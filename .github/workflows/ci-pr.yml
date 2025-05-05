@@ -18,6 +18,71 @@ concurrency:
 
 jobs:
 
+  setup-dotnet:
+    name: "🔧 Setup .NET"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 1
+    steps:
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+  compile:
+    name: "🔨 Compile Projects"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "Build Projects"
+        run: |
+          dotnet restore
+          dotnet build
+
+      - name: "Cache Build Output"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+
+  analyzer-style-check:
+    name: "🔍 Code Style Check"
+    needs: compile
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "Restore Build Cache"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+      - name: "Install dotnet-format"
+        run: dotnet tool install -g dotnet-format
+
+      - name: "Check Code Formatting"
+        run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+
+
   analyzer-test:
     name: "🐧 Analyzer Tests"
     runs-on: 'ubuntu-22.04'
