@@ -8,3 +8,36 @@
 /README.md             export-ignore
 
 /test   export-ignore
+
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly declare text files to be normalized and converted to native line endings on checkout
+*.cs text
+*.csproj text
+*.sln text
+*.md text
+*.json text
+*.props text
+*.targets text
+*.yml text
+*.yaml text
+*.xml text
+*.config text
+*.editorconfig text
+
+# Declare files that will always have CRLF line endings on checkout (Windows-specific)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Declare files that will always have LF line endings on checkout (Unix-specific)
+*.sh text eol=lf
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.dll binary
+*.pdb binary
+*.zip binary
