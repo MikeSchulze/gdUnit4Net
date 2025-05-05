@@ -55,9 +55,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-
 
+  # Analyzer jobs
 
   analyzer-style-check:
-    name: "🔍 Code Style Check"
+    name: "🔍 Analyzer Code Style Check"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
@@ -69,6 +70,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: |
@@ -77,35 +79,42 @@ jobs:
           key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: "Install dotnet-format"
+        if: ${{ !cancelled() }}
         run: dotnet tool install -g dotnet-format
 
       - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
         run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
 
-
-  analyzer-test:
-    name: "🐧 Analyzer Tests"
+  analyzer-tests:
+    name: "🧪 Analyzer Tests"
+    needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
-
+    outputs:
+      test_status: ${{ steps.run_tests.outcome }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - name: "Build"
+      - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
-        run: |
-          dotnet build ./Api/GdUnit4Api.csproj
-          dotnet build ./Analyzers/GdUnit4Analyzers.csproj
-          dotnet build ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
+        id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test GdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity normal
+          dotnet test GdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity detailed
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
@@ -114,12 +123,14 @@ jobs:
           retention-days: 10
           name: artifact_analyzer
           path: |
-            ./Analyzers.Test/TestResults/test-result.trx
-            ./Analyzers.Test/TestResults/test-result.html
+            ./TestResults/test-result.trx
+            ./TestResults/test-result.html
 
 
+  # Adapter jobs
   test-adapter-test:
     name: "🐧 TestAdapter Tests"
+    needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
 
@@ -129,13 +140,13 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: "Build"
-        if: ${{ !cancelled() }}
-        run: |
-          dotnet build ./Example/ExampleProject.csproj
-          dotnet build ./Api/GdUnit4Api.csproj
-          dotnet build ./TestAdapter/GdUnit4TestAdapter.csproj
-          dotnet build ./TestAdapter.Test/GdUnit4TestAdapter.Tests.csproj
+      - name: "Restore Build Cache"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -177,7 +188,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [ analyzer-test, test-adapter-test, unit-tests ]
+    needs: [ analyzer-style-check, analyzer-tests, test-adapter-test, unit-tests ]
     steps:
       - run: exit 1
         if: >-
