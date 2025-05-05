@@ -182,6 +182,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
         RoslynAssert.Diagnostics(analyzer, expectedA, source);
+        RoslynAssert.Diagnostics(analyzer, source);
     }
 
     [TestMethod]
