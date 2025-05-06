@@ -1,6 +1,5 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
-using System;
 using System.Globalization;
 using System.Linq;
 
@@ -16,6 +15,8 @@ using static TestSourceBuilder;
 public class GodotRuntimeRequireOnTestCaseAttributeTest
 {
     private readonly GodotRuntimeRequireAnalyzer analyzer = new();
+
+    public TestContext TestContext { get; set; }
 
     [TestMethod]
     public void TestCaseExpressionUsingGodotReference()
@@ -175,7 +176,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
             """);
 
-        Console.WriteLine($"Supported diagnostics: {string.Join(", ", analyzer.SupportedDiagnostics.Select(d => d.Id))}");
+        TestContext.WriteLine($"Supported diagnostics: {string.Join(", ", analyzer.SupportedDiagnostics.Select(d => d.Id))}");
 
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
