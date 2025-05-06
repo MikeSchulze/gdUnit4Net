@@ -142,7 +142,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         catch (Exception e)
 #pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
     }
 
@@ -175,7 +175,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         catch (Exception e)
 #pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
     }
 
@@ -382,7 +382,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         catch (Exception e)
 #pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
 
         // For methods without source (from metadata), continue with current analysis
