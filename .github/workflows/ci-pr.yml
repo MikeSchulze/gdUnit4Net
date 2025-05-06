@@ -54,9 +54,9 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-build-
+            ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
   # Analyzer jobs
 
@@ -104,7 +104,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -146,7 +146,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
