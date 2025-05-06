@@ -85,9 +85,11 @@ jobs:
 
       - name: "Create PR Annotations"
         if: ${{ !cancelled() && steps.format.outcome == 'failure' }}
-        uses: staabm/annotate-pull-request-from-checkstyle@v1
+        uses: ynaderi/any-report-to-github-annotations@v1
         with:
-          file_path: "format-report.json"
+          input-format: phpmd-json
+          input-file: '**/format-report.json'
+
 
   analyzer-tests:
     name: "🧪 Analyzer Tests"
