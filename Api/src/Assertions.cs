@@ -181,6 +181,15 @@ public static class Assertions
     public static IVectorAssert<Vector4> AssertThat(Vector4 current) => new VectorAssert<Vector4>(current);
     public static IVectorAssert<Vector4I> AssertThat(Vector4I current) => new VectorAssert<Vector4I>(current);
 
+    public static IVectorAssert<System.Numerics.Vector2> AssertThat(System.Numerics.Vector2 current)
+        => new VectorAssert<System.Numerics.Vector2>(current);
+
+    public static IVectorAssert<System.Numerics.Vector3> AssertThat(System.Numerics.Vector3 current)
+        => new VectorAssert<System.Numerics.Vector3>(current);
+
+    public static IVectorAssert<System.Numerics.Vector4> AssertThat(System.Numerics.Vector4 current)
+        => new VectorAssert<System.Numerics.Vector4>(current);
+
     /// <summary>
     ///     A dynamic assertion for <see cref="Godot.Variant" /> based on the input type.
     /// </summary>
