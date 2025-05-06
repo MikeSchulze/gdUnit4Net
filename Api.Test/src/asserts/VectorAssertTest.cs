@@ -2,17 +2,57 @@
 
 namespace GdUnit4.Tests.Asserts;
 
+using System.Collections.Generic;
 using System.Globalization;
 
 using GdUnit4.Asserts;
 
 using Godot;
 
+using SystemVector2 = System.Numerics.Vector2;
+using SystemVector3 = System.Numerics.Vector3;
+using SystemVector4 = System.Numerics.Vector4;
+
 using static Assertions;
 
 [TestSuite]
 public class VectorAssertTest
 {
+    private static IEnumerable<object[]> GodotVectorApproximateDataPoints => new[]
+    {
+        // Vector2
+        new object[] { new Vector2(0, 1), new Vector2(0.04f, 0.04f) }, new object[] { new Vector2(3, 3), new Vector2(0.04f, 0.04f) },
+        new object[] { new Vector2(-3, -3), new Vector2(0.04f, 0.04f) },
+        // Vector2I
+        new object[] { new Vector2I(1, 1), new Vector2I(1, 1) }, new object[] { new Vector2I(3, 3), new Vector2I(1, 1) }, new object[] { new Vector2I(-3, -3), new Vector2I(1, 1) },
+        // Vector3
+        new object[] { new Vector3(0, 1, 0), new Vector3(0.04f, 0.04f, 0.04f) }, new object[] { new Vector3(3, 3, 3), new Vector3(0.04f, 0.04f, 0.04f) },
+        new object[] { new Vector3(-3, -3, -3), new Vector3(0.04f, 0.04f, 0.04f) },
+        // Vector3I
+        new object[] { new Vector3I(1, 1, 1), new Vector3I(1, 1, 1) }, new object[] { new Vector3I(3, 3, 3), new Vector3I(1, 1, 1) },
+        new object[] { new Vector3I(-3, -3, -3), new Vector3I(1, 1, 1) },
+        // Vector4
+        new object[] { new Vector4(0, 1, 0, 0), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) }, new object[] { new Vector4(3, 3, 3, 3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) },
+        new object[] { new Vector4(-3, -3, -3, -3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) },
+        // Vector4I
+        new object[] { new Vector4I(0, 1, 0, 0), new Vector4I(1, 1, 1, 1) }, new object[] { new Vector4I(3, 3, 3, 3), new Vector4I(1, 1, 1, 1) },
+        new object[] { new Vector4I(-3, -3, -3, -3), new Vector4I(1, 1, 1, 1) }
+    };
+
+    private static IEnumerable<object[]> SystemVectorApproximateDataPoints => new[]
+    {
+        // System Vector2
+        new object[] { new SystemVector2(0, 1), new SystemVector2(0.04f, 0.04f) }, new object[] { new SystemVector2(3, 3), new SystemVector2(0.04f, 0.04f) },
+        new object[] { new SystemVector2(-3, -3), new SystemVector2(0.04f, 0.04f) },
+        // System Vector3
+        new object[] { new SystemVector3(0, 1, 0), new SystemVector3(0.04f, 0.04f, 0.04f) }, new object[] { new SystemVector3(3, 3, 3), new SystemVector3(0.04f, 0.04f, 0.04f) },
+        new object[] { new SystemVector3(-3, -3, -3), new SystemVector3(0.04f, 0.04f, 0.04f) },
+        // System Vector4
+        new object[] { new SystemVector4(0, 1, 0, 0), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) },
+        new object[] { new SystemVector4(3, 3, 3, 3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) },
+        new object[] { new SystemVector4(-3, -3, -3, -3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) }
+    };
+
     [BeforeTest]
     public void Setup() =>
         // we need for testing assert failure messages to run on 'en-US' locale
@@ -88,30 +128,65 @@ public class VectorAssertTest
     }
 
     [TestCase]
+    [DataPoint(nameof(SystemVectorApproximateDataPoints))]
     [RequireGodotRuntime]
-    public void IsEqualApprox()
+    public void SystemVectorIsEqualApprox(dynamic vector, dynamic epsilon)
     {
-        AssertThat(Vector2.One).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f));
-        AssertThat(new Vector2(0.996f, 0.996f)).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f));
-        AssertThat(new Vector2(1.004f, 1.004f)).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f));
+        AssertThat(vector).IsEqualApprox(vector, epsilon);
+        AssertThat(vector + epsilon).IsEqualApprox(vector, epsilon);
+        AssertThat(vector - epsilon).IsEqualApprox(vector, epsilon);
 
-        // false test
-        AssertThrown(() => AssertThat(new Vector2(1.005f, 1f)).IsEqualApprox(Vector2.One, new Vector2(0.004f, 0.004f)))
+        var lessValue = vector - (epsilon * 2);
+        var greaterValue = vector + (epsilon * 2);
+        var min = vector - epsilon;
+        var max = vector + epsilon;
+        AssertThrown(() => AssertThat(lessValue).IsEqualApprox(vector, epsilon))
             .HasFileLineNumber(ExpectedLineNumber())
-            .HasMessage("""
-                        Expecting:
-                            '(1.005, 1)'
-                         in range between
-                            '(0.996, 0.996)' <> '(1.004, 1.004)'
-                        """);
-        AssertThrown(() => AssertThat(new Vector2(1f, 0.995f)).IsEqualApprox(Vector2.One, new Vector2(0f, 0.004f)))
+            .HasMessage($"""
+                         Expecting:
+                             '{lessValue}'
+                          in range between
+                             '{min}' <> '{max}'
+                         """);
+        AssertThrown(() => AssertThat(greaterValue).IsEqualApprox(vector, epsilon))
             .HasFileLineNumber(ExpectedLineNumber())
-            .HasMessage("""
-                        Expecting:
-                            '(1, 0.995)'
-                         in range between
-                            '(1, 0.996)' <> '(1, 1.004)'
-                        """);
+            .HasMessage($"""
+                         Expecting:
+                             '{greaterValue}'
+                          in range between
+                             '{min}' <> '{max}'
+                         """);
+    }
+
+    [TestCase]
+    [DataPoint(nameof(GodotVectorApproximateDataPoints))]
+    [RequireGodotRuntime]
+    public void GodotVectorIsEqualApprox(dynamic vector, dynamic epsilon)
+    {
+        AssertThat(vector).IsEqualApprox(vector, epsilon);
+        AssertThat(vector + epsilon).IsEqualApprox(vector, epsilon);
+        AssertThat(vector - epsilon).IsEqualApprox(vector, epsilon);
+
+        var lessValue = vector - (epsilon * 2);
+        var greaterValue = vector + (epsilon * 2);
+        var min = vector - epsilon;
+        var max = vector + epsilon;
+        AssertThrown(() => AssertThat(lessValue).IsEqualApprox(vector, epsilon))
+            .HasFileLineNumber(ExpectedLineNumber())
+            .HasMessage($"""
+                         Expecting:
+                             '{lessValue}'
+                          in range between
+                             '{min}' <> '{max}'
+                         """);
+        AssertThrown(() => AssertThat(greaterValue).IsEqualApprox(vector, epsilon))
+            .HasFileLineNumber(ExpectedLineNumber())
+            .HasMessage($"""
+                         Expecting:
+                             '{greaterValue}'
+                          in range between
+                             '{min}' <> '{max}'
+                         """);
     }
 
     [TestCase]

@@ -3,7 +3,13 @@ namespace GdUnit4.Asserts;
 using System;
 using System.Globalization;
 
+using Core.Extensions;
+
 using Godot;
+
+using SystemVector2 = System.Numerics.Vector2;
+using SystemVector3 = System.Numerics.Vector3;
+using SystemVector4 = System.Numerics.Vector4;
 
 public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : IEquatable<TValue>
 {
@@ -23,7 +29,23 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> wh
     public IVectorAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
         var minMax = MinMax(expected, approx);
-        return IsBetween(minMax.Item1, minMax.Item2);
+        var isEqualApproximate = (Current, expected, approx) switch
+        {
+            (SystemVector2 v, SystemVector2 e, SystemVector2 a) => v.IsEqualApprox(e, a),
+            (SystemVector3 v, SystemVector3 e, SystemVector3 a) => v.IsEqualApprox(e, a),
+            (SystemVector4 v, SystemVector4 e, SystemVector4 a) => v.IsEqualApprox(e, a),
+            (Vector2 v, Vector2 e, Vector2 a) => v.IsEqualApprox(e, a),
+            (Vector2I v, Vector2I e, Vector2I a) => v.IsEqualApprox(e, a),
+            (Vector3 v, Vector3 e, Vector3 a) => v.IsEqualApprox(e, a),
+            (Vector3I v, Vector3I e, Vector3I a) => v.IsEqualApprox(e, a),
+            (Vector4 v, Vector4 e, Vector4 a) => v.IsEqualApprox(e, a),
+            (Vector4I v, Vector4I e, Vector4I a) => v.IsEqualApprox(e, a),
+            _ => false
+        };
+        if (!isEqualApproximate)
+            ThrowTestFailureReport(AssertFailures.IsBetween(Current, minMax.Item1, minMax.Item2), Current, minMax.Item1);
+
+        return this;
     }
 
     public IVectorAssert<TValue> IsGreater(TValue expected)
@@ -84,6 +106,12 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> wh
 #pragma warning disable CS8619
     private static (TValue, TValue) MinMax(TValue left, TValue right) => (left, right) switch
     {
+        (SystemVector2 l, SystemVector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (SystemVector3 l, SystemVector3 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
+        (SystemVector4 l, SystemVector4 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
+            (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
         (Vector2 l, Vector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
             (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
         (Vector2I l, Vector2I r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
