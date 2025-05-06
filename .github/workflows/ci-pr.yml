@@ -51,8 +51,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            **/bin
             **/obj
+            **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-build-
@@ -109,8 +109,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            **/bin
             **/obj
+            **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: "Run Unit Tests"
@@ -127,8 +127,8 @@ jobs:
           retention-days: 10
           name: artifact_analyzer
           path: |
-            ./TestResults/test-result.trx
-            ./TestResults/test-result.html
+            ./Analyzers.Test/TestResults/test-result.trx
+            ./Analyzers.Test/TestResults/test-result.html
 
 
   # Adapter jobs
