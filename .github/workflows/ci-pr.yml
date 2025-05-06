@@ -73,15 +73,6 @@ jobs:
           dotnet-version: 8.0.x
           global-json-file: './global.json'
 
-      - name: "Restore Build Cache"
-        if: ${{ !cancelled() }}
-        uses: actions/cache@v4
-        with:
-          path: |
-            **/bin
-            **/obj
-          key: ${{ runner.os }}-build-${{ github.sha }}
-
       - name: "Install dotnet-format"
         if: ${{ !cancelled() }}
         run: dotnet tool install -g dotnet-format
@@ -120,9 +111,9 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test --list-tests
+      # dotnet test --list-tests
           echo "------------------------- run tests ------------------------"
-          dotnet test --no-build --settings .runsettings --verbosity detailed
+          dotnet test --framework net8.0 --no-build --settings .runsettings --verbosity detailed
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
