@@ -52,6 +52,7 @@ jobs:
         with:
           path: |
             **/obj
+            **/bin
             **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
           restore-keys: |
@@ -61,7 +62,7 @@ jobs:
 
   analyzer-style-check:
     name: "🔍 Analyzer Code Style Check"
-    needs: compile
+    needs: setup-dotnet
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
     steps:
@@ -110,6 +111,7 @@ jobs:
         with:
           path: |
             **/obj
+            **/bin
             **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
 
@@ -118,7 +120,7 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test --no-build --settings .runsettings --verbosity normal -p:TargetFramework=net8.0
+          dotnet test --no-build --settings .runsettings --verbosity detailed
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
@@ -143,6 +145,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+          global-json-file: './global.json'
 
       - name: "Restore Build Cache"
         uses: actions/cache@v4
@@ -150,13 +153,14 @@ jobs:
           path: |
             **/bin
             **/obj
+            **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         run: |
           cd TestAdapter.Test
-          dotnet test GdUnit4TestAdapter.Tests.csproj --settings .runsettings --no-build --verbosity normal
+          dotnet test --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
