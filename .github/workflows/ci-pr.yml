@@ -152,7 +152,6 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           cd TestAdapter.Test
-          ls -lsRa .
           dotnet test --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
