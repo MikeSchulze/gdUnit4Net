@@ -193,7 +193,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
             $"Expected analyzer to support exactly these diagnostic IDs: {string.Join(", ", expectedDiagnosticIds)}, " +
             $"but found: {string.Join(", ", actualDiagnosticIds)}");
 
-
+        Assert.IsTrue(false);
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
