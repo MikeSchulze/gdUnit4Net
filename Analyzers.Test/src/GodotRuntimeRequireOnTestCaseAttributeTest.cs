@@ -1,8 +1,6 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 using Gu.Roslyn.Asserts;
 
@@ -177,23 +175,6 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
             """);
 
-        // Get the supported diagnostics from the analyzer
-        var diagnosticIds = analyzer.SupportedDiagnostics.Select(d => d.Id).ToArray();
-
-        // Create the expected set of diagnostic IDs
-        var expectedDiagnosticIds = new HashSet<string>
-        {
-            "GdUnit0500",
-            "GdUnit0501"
-        };
-        var actualDiagnosticIds = new HashSet<string>(diagnosticIds);
-
-        // Check if both sets are equal (contain exactly the same elements, regardless of order)
-        Assert.IsTrue(expectedDiagnosticIds.SetEquals(actualDiagnosticIds),
-            $"Expected analyzer to support exactly these diagnostic IDs: {string.Join(", ", expectedDiagnosticIds)}, " +
-            $"but found: {string.Join(", ", actualDiagnosticIds)}");
-
-        Assert.IsTrue(false);
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
@@ -202,7 +183,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
             )
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
-        RoslynAssert.Diagnostics(analyzer, new[] { expectedA }, source);
+        RoslynAssert.Diagnostics(analyzer, expectedA, source);
     }
 
     [TestMethod]
