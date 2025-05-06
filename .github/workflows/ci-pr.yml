@@ -79,7 +79,15 @@ jobs:
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
-        run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+        id: format
+        continue-on-error: true
+        run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
+
+      - name: "Create PR Annotations"
+        if: ${{ !cancelled() && steps.format.outcome == 'failure' }}
+        uses: staabm/annotate-pull-request-from-checkstyle@v1
+        with:
+          file_path: "format-report.json"
 
   analyzer-tests:
     name: "🧪 Analyzer Tests"
