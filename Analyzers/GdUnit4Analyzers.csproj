@@ -16,7 +16,7 @@
   <!-- Build configuration -->
   <PropertyGroup>
     <RootNamespace>GdUnit4.Analyzers</RootNamespace>
-    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <OutputType>Library</OutputType>
     <OutputPath>./nupkg</OutputPath>
@@ -58,7 +58,6 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IncludeBuildOutput>true</IncludeBuildOutput>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludeAnalyzerInPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <!-- Add version properties to enable analyzer version tracking -->
@@ -78,6 +77,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="Analyzers/dotnet/cs" Visible="false"/>
     <Content Include="../LICENSE"/>
     <None Include="README.md" Pack="true" PackagePath="/"/>
     <None Include="ReleaseNotes.txt" Pack="true" PackagePath="/"/>
@@ -85,10 +85,4 @@
     <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
     <None Include="../icon.png" Pack="true" PackagePath="/"/>
   </ItemGroup>
-
-  <Target Name="IncludeAnalyzerInPackage" DependsOnTargets="Build">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs/$(TargetFramework)"/>
-    </ItemGroup>
-  </Target>
 </Project>
