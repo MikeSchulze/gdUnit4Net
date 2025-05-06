@@ -69,6 +69,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+          global-json-file: './global.json'
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -116,7 +117,7 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test GdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity detailed
+          dotnet test GdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
