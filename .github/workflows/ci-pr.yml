@@ -111,7 +111,7 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test --no-build --settings .runsettings --logger "console;verbosity=detailed"
+          dotnet test --no-build --settings .runsettings --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
@@ -126,7 +126,7 @@ jobs:
 
   # Adapter jobs
   test-adapter-test:
-    name: "🐧 TestAdapter Tests"
+    name: "🧪 TestAdapter Tests"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3

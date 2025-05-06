@@ -15,8 +15,6 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 {
     private readonly GodotRuntimeRequireAnalyzer analyzer = new();
 
-    public TestContext TestContext { get; set; }
-
     [TestMethod]
     public void TestCaseExpressionUsingGodotReference()
     {
