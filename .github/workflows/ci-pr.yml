@@ -139,11 +139,12 @@ jobs:
           global-json-file: './global.json'
 
       - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: |
-            **/bin
             **/obj
+            **/bin
             **/nupkg
           key: ${{ runner.os }}-build-${{ github.sha }}
 
@@ -151,6 +152,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           cd TestAdapter.Test
+          ls -lsRa .
           dotnet test --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
