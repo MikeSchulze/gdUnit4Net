@@ -118,7 +118,6 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test --list-tests
           dotnet test --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
