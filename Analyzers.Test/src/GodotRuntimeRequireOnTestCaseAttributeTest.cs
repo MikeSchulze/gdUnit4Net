@@ -1,5 +1,6 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -176,7 +177,22 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
             """);
 
-        TestContext.WriteLine($"Supported diagnostics: {string.Join(", ", analyzer.SupportedDiagnostics.Select(d => d.Id))}");
+        // Get the supported diagnostics from the analyzer
+        var diagnosticIds = analyzer.SupportedDiagnostics.Select(d => d.Id).ToArray();
+
+        // Create the expected set of diagnostic IDs
+        var expectedDiagnosticIds = new HashSet<string>
+        {
+            "GdUnit0500",
+            "GdUnit0501"
+        };
+        var actualDiagnosticIds = new HashSet<string>(diagnosticIds);
+
+        // Check if both sets are equal (contain exactly the same elements, regardless of order)
+        Assert.IsTrue(expectedDiagnosticIds.SetEquals(actualDiagnosticIds),
+            $"Expected analyzer to support exactly these diagnostic IDs: {string.Join(", ", expectedDiagnosticIds)}, " +
+            $"but found: {string.Join(", ", actualDiagnosticIds)}");
+
 
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
