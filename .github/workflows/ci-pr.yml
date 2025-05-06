@@ -118,7 +118,7 @@ jobs:
         id: run_tests
         run: |
           cd Analyzers.Test
-          dotnet test --settings .runsettings --no-build --verbosity normal
+          dotnet test --settings .runsettings --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
