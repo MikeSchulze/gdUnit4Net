@@ -1,6 +1,8 @@
 ﻿namespace GdUnit4.Analyzers.Test;
 
+using System;
 using System.Globalization;
+using System.Linq;
 
 using Gu.Roslyn.Asserts;
 
@@ -173,6 +175,8 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
             """);
 
+        Console.WriteLine($"Supported diagnostics: {string.Join(", ", analyzer.SupportedDiagnostics.Select(d => d.Id))}");
+
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
@@ -181,7 +185,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
             )
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
-        RoslynAssert.Diagnostics(analyzer, expectedA, source);
+        RoslynAssert.Diagnostics(analyzer, new[] { expectedA }, source);
     }
 
     [TestMethod]
