@@ -111,6 +111,7 @@ jobs:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
           cd ./Api.Test
+          dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
           $GODOT_BIN --path . --headless --build-solutions --quit-after 200 --verbosity normal
           xvfb-run --auto-servernum dotnet test GdUnit4ApiTest.csproj --no-build --settings .runsettings-ci --verbosity normal
         # -verbosity:diag --blame

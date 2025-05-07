@@ -48,7 +48,7 @@
 
     <GdUnit4>
         <!-- Additional Godot runtime parameters-->
-        <CompileProcessTimeout>60000</CompileProcessTimeout>  <!-- 60 seconds -->
+        <CompileProcessTimeout>30000</CompileProcessTimeout>  <!-- 30 seconds -->
 
         <!-- These parameters are crucial for configuring the Godot runtime to work in headless environments, such as those used in automated testing or CI/CD pipelines.-->
         <Parameters>--audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --screen 0 --verbose</Parameters>
