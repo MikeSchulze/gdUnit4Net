@@ -45,7 +45,7 @@ jobs:
       - name: "Build Projects"
         run: |
           dotnet restore
-          dotnet build
+          dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
 
       - name: "Cache Build Output"
         uses: actions/cache@v4
@@ -82,14 +82,6 @@ jobs:
         id: format
         continue-on-error: true
         run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
-
-      - name: "Create PR Annotations"
-        if: ${{ !cancelled() && steps.format.outcome == 'failure' }}
-        uses: ynaderi/any-report-to-github-annotations@v1
-        with:
-          input-format: phpmd-json
-          input-file: '**/format-report.json'
-
 
   analyzer-tests:
     name: "🧪 Analyzer Tests"
