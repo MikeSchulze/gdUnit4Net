@@ -80,7 +80,6 @@ jobs:
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         id: format
-        continue-on-error: true
         run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
 
   analyzer-tests:

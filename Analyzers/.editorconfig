@@ -561,10 +561,6 @@ dotnet_naming_rule.constants_should_be_all_upper.symbols = constants
 dotnet_naming_rule.constants_should_be_all_upper.style = all_upper_style
 dotnet_naming_rule.constants_should_be_all_upper.severity = error
 
-
-# Disable StyleCop SA1507 or configure it
-dotnet_diagnostic.SA1507.severity = warning # Set to 'none' to disable or 'warning'/'error' to enforce
-
 # ReSharper/Rider specific settings for blank lines
 resharper_blank_lines_after_block_statements = 1
 resharper_blank_lines_around_single_line_type = 1
@@ -583,8 +579,7 @@ resharper_blank_lines_between_using_groups = 1
 # Ensure Rider keeps 1 blank line max in declarations
 resharper_keep_blank_lines_in_declarations = 1
 resharper_csharp_keep_blank_lines_in_declarations = 1
-# Make sure this is at warning level to enforce the rule
-dotnet_diagnostic.SA1507.severity = error
+dotnet_diagnostic.SA1507.severity = warning
 
 # ignore trailing commas
 dotnet_diagnostic.SA1413.severity = none

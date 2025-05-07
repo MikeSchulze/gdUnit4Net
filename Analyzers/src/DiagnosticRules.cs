@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Analyzers;
 
 using Microsoft.CodeAnalysis;
@@ -10,6 +13,8 @@ using Microsoft.CodeAnalysis;
 internal static class DiagnosticRules
 {
     private const string HELP_LINK = "https://github.com/MikeSchulze/gdUnit4Net/tree/master/Analyzers/documentation";
+
+
 
     /// <summary>
     ///     Contains the identifiers for GdUnit4 analyzer rules.

@@ -27,3 +27,4 @@ mono_crash.*.json
 gdUnit4Net.sln.DotSettings.user
 test/godot.log
 
+**/format-report.json
