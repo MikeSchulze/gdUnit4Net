@@ -111,10 +111,19 @@ jobs:
           GODOT_BIN: "/home/runner/godot-linux/godot"
         run: |
           cd ./Api.Test
+          # Rebuild the project to ensure compatibility with the specific Godot version being tested
+          # Each Godot version may require different build configurations and references
+          # Style checks are disabled to prevent formatting errors from blocking tests
           dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
+
+          # Launch Godot to properly build the solutions
+          # The headless flag runs without UI, and quit-after ensures it doesn't hang
           $GODOT_BIN --path . --headless --build-solutions --quit-after 200 --verbosity normal
+
+          # Run the actual tests with xvfb (X Virtual FrameBuffer) to support GUI operations in headless environment
+          # Using CI-specific settings file and skipping the build step since we already built above
           xvfb-run --auto-servernum dotnet test GdUnit4ApiTest.csproj --no-build --settings .runsettings-ci --verbosity normal
-        # -verbosity:diag --blame
+          # -verbosity:diag --blame
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
