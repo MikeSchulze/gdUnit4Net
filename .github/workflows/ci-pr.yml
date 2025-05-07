@@ -83,7 +83,7 @@ jobs:
         run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
 
   analyzer-tests:
-    name: "🧪 Analyzer Tests"
+    name: "🧪 Test Analyzers"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
@@ -127,7 +127,7 @@ jobs:
 
   # Adapter jobs
   test-adapter-test:
-    name: "🧪 TestAdapter Tests"
+    name: "🧪 Test TestAdapter"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
@@ -178,7 +178,8 @@ jobs:
       #      godot-status: 'dev3'
 
 
-    name: "🐧 Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    name: "🧪 Test API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    needs: compile
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
