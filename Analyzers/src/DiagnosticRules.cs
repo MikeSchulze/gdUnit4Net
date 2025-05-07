@@ -14,8 +14,6 @@ internal static class DiagnosticRules
 {
     private const string HELP_LINK = "https://github.com/MikeSchulze/gdUnit4Net/tree/master/Analyzers/documentation";
 
-
-
     /// <summary>
     ///     Contains the identifiers for GdUnit4 analyzer rules.
     /// </summary>
