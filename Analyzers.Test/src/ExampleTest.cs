@@ -1,11 +1,13 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [TestClass]
+[SuppressMessage("Style", "IDE0060", Justification = "Required for DynamicData test method pattern")]
 public class ExampleTest
 {
     [TestMethod]
@@ -17,7 +19,6 @@ public class ExampleTest
     public void SingeTestNamed()
     {
     }
-
 
     [TestMethod]
     [DataRow(1, 2, DisplayName = "DataRow1")]
@@ -33,9 +34,8 @@ public class ExampleTest
     {
     }
 
-
     [TestMethod]
-    [DynamicData(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider), DynamicDataSourceType.Method, DynamicDataDisplayName = "GetDisplayName")]
+    [DynamicData(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetDisplayName))]
     public void TestWithDisplayName(int a, int b, int expected)
     {
     }

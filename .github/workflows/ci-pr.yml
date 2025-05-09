@@ -61,7 +61,7 @@ jobs:
   # Analyzer jobs
 
   analyzer-style-check:
-    name: "🔍 Analyzer Code Style Check"
+    name: "🔍 Check Style: Analyzers"
     needs: setup-dotnet
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
@@ -80,10 +80,13 @@ jobs:
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         id: format
-        run: dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
+        run: |
+          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
+          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --report format-report.json
+          ls -ls *.json
 
   analyzer-tests:
-    name: "🧪 Test Analyzers"
+    name: "🧪 Test: Analyzers"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
@@ -127,7 +130,7 @@ jobs:
 
   # Adapter jobs
   test-adapter-test:
-    name: "🧪 Test TestAdapter"
+    name: "🧪 Test: TestAdapter"
     needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
@@ -178,7 +181,7 @@ jobs:
       #      godot-status: 'dev3'
 
 
-    name: "🧪 Test API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
     needs: compile
     uses: ./.github/workflows/unit-tests.yml
     with:

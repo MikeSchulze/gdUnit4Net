@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 using System.Globalization;
 
@@ -65,10 +65,12 @@ public class DataPointAttributeAnalyzerTests
 
         var errorLine = new LinePosition(20, 1);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.DataPoint.MultipleTestCaseAttributes.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.DataPoint.MultipleTestCaseAttributes.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);

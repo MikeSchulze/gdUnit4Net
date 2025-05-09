@@ -1,0 +1,21 @@
+﻿<Project>
+  <PropertyGroup>
+    <!-- Enable built-in .NET code analyzers -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <!-- Use the latest analysis rules -->
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <!-- Enable all categories of analysis rules (Style, Design, Documentation, etc.) -->
+    <AnalysisMode>Recommended</AnalysisMode>
+
+    <!-- Enforce code style rules during build, not just in the IDE -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Convert all warnings to errors for stricter enforcement -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+  </PropertyGroup>
+</Project>
