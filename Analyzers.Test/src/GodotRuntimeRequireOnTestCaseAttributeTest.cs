@@ -84,7 +84,8 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
-                    "TestMethod")).WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
+                    "TestMethod"))
+            .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
     }
