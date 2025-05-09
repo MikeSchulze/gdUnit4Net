@@ -1,10 +1,13 @@
-﻿#nullable enable
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Analyzers;
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -18,17 +21,67 @@ using static DiagnosticRules;
 ///     Analyzer that enforces proper Godot runtime requirements for test classes and methods.
 /// </summary>
 /// <remarks>
-///     This analyzer checks for two scenarios:
-///     <list type="bullet">
-///         <item>Test methods using Godot types must use [GodotTestCase] instead of [TestCase]</item>
-///         <item>Test classes with Godot dependencies in hooks must use [RequireGodotRuntime]</item>
-///     </list>
+///     <para>
+///         This analyzer ensures that tests using Godot functionality are properly annotated with the
+///         appropriate attributes. It performs static code analysis to detect Godot dependencies
+///         and verifies they have the correct runtime context.
+///     </para>
+///     <para>
+///         The analyzer checks for two main scenarios:
+///         <list type="bullet">
+///             <item>
+///                 <description>
+///                     Test methods using Godot types must be annotated with [RequireGodotRuntime]
+///                     to ensure they execute within the Godot runtime environment.
+///                 </description>
+///             </item>
+///             <item>
+///                 <description>
+///                     Test classes with Godot dependencies in their test hook methods (like [Before] or [After])
+///                     must be annotated with [RequireGodotRuntime] at the class level.
+///                 </description>
+///             </item>
+///         </list>
+///     </para>
+///     <para>
+///         The analyzer performs deep dependency analysis by:
+///         <list type="bullet">
+///             <item>Examining method signatures for Godot types</item>
+///             <item>Analyzing method body operations for Godot dependencies</item>
+///             <item>Following method calls to detect transitive Godot dependencies</item>
+///             <item>Checking field and property references for Godot types</item>
+///         </list>
+///     </para>
+///     <para>
+///         When a violation is detected, appropriate diagnostics are reported to guide the developer
+///         on how to fix the issue by adding the required runtime attribute.
+///     </para>
 /// </remarks>
+/// <example>
+///     <code>
+///     // This test method uses Godot types but is missing [RequireGodotRuntime]
+///     [TestCase]
+///     public void TestSceneLoading()
+///     {
+///         var scene = new Godot.PackedScene(); // Will trigger diagnostic
+///         // ...
+///     }
+///
+///     // Correct usage:
+///     [TestCase]
+///     [RequireGodotRuntime]
+///     public void TestSceneLoading()
+///     {
+///         var scene = new Godot.PackedScene(); // No diagnostic
+///         // ...
+///     }
+///     </code>
+/// </example>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly string RequireGodotRuntimeAttribute = "GdUnit4.RequireGodotRuntimeAttribute";
-    private static readonly string TestCaseAttribute = "GdUnit4.TestCaseAttribute";
+    private const string REQUIRE_GODOT_RUNTIME_ATTRIBUTE = "GdUnit4.RequireGodotRuntimeAttribute";
+    private const string TEST_CASE_ATTRIBUTE = "GdUnit4.TestCaseAttribute";
     private static readonly string[] TestHookAttributes = { "GdUnit4.BeforeAttribute", "GdUnit4.AfterAttribute", "GdUnit4.BeforeTestAttribute", "GdUnit4.AfterTestAttribute" };
 
     private static readonly ConcurrentDictionary<string, bool> GodotTypeCache = new();
@@ -36,18 +89,25 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     private static readonly HashSet<string> GodotDependentTypes = new()
     {
         "GdUnit4.ISceneRunner"
+
         // Add any other GdUnit4 types that require Godot runtime
     };
 
-
+    /// <summary>
+    ///     Gets the supported diagnostics.
+    /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
             GodotEngine.RequiresGodotRuntimeOnClass,
-            GodotEngine.RequiresGodotRuntimeOnMethod
-        );
+            GodotEngine.RequiresGodotRuntimeOnMethod);
 
+    /// <summary>
+    ///     Initializes the analyzer with the analysis context.
+    /// </summary>
+    /// <param name="context">The analysis context to initialize.</param>
     public override void Initialize(AnalysisContext context)
     {
+        Debug.Assert(context != null, nameof(context) + " != null");
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeTestMethod, OperationKind.MethodBody);
@@ -78,9 +138,11 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 
             ReportMethodDiagnostic(context, methodSymbol);
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
     }
 
@@ -94,8 +156,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         {
             if (context.Operation is not IMethodBodyOperation methodBody)
                 return;
-            var methodSymbol = methodBody.SemanticModel?.GetDeclaredSymbol(methodBody.Syntax) as IMethodSymbol;
-            if (methodSymbol == null)
+            if (methodBody.SemanticModel?.GetDeclaredSymbol(methodBody.Syntax) is not IMethodSymbol methodSymbol)
                 return;
 
             // Skip analysis if class has RequireGodotRuntime attribute
@@ -110,9 +171,11 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 
             ReportClassDiagnostic(context, methodSymbol.ContainingType);
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
     }
 
@@ -134,24 +197,23 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(diagnostic);
     }
 
-
     private static bool IsTestHook(IMethodSymbol method)
         => method.GetAttributes()
             .Any(attr => TestHookAttributes.Contains(attr.AttributeClass?.ToDisplayString()));
 
     private static bool HasGodotRuntimeAttributeAtClassLevel(INamedTypeSymbol classSymbol)
         => classSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == RequireGodotRuntimeAttribute);
+            .Any(attr => attr.AttributeClass?.ToDisplayString() == REQUIRE_GODOT_RUNTIME_ATTRIBUTE);
 
     private static bool HasGodotRuntimeAttributeAtMethodLevel(IMethodSymbol methodSymbol)
         => methodSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == RequireGodotRuntimeAttribute);
+            .Any(attr => attr.AttributeClass?.ToDisplayString() == REQUIRE_GODOT_RUNTIME_ATTRIBUTE);
 
     private static bool HasTestCaseAttribute(IMethodSymbol methodSymbol)
         => methodSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == TestCaseAttribute);
+            .Any(attr => attr.AttributeClass?.ToDisplayString() == TEST_CASE_ATTRIBUTE);
 
-    private static bool ContainsGodotTypes(IMethodSymbol method, Compilation compilation, SemanticModel semanticModel, HashSet<IMethodSymbol>? visitedMethods = null)
+    private static bool ContainsGodotTypes(IMethodSymbol method, Compilation compilation, SemanticModel semanticModel, HashSet<IMethodSymbol> visitedMethods = null)
     {
         visitedMethods ??= new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         if (!visitedMethods.Add(method))
@@ -199,6 +261,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
             return false;
 
         foreach (var operation in methodOperation.Descendants())
+        {
             switch (operation)
             {
                 case IFieldReferenceOperation fieldRef:
@@ -210,7 +273,12 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
                     if (InheritsFromGodotType(propRef.Property.Type))
                         return true;
                     break;
+
+                default:
+                    // Skip other operations
+                    continue;
             }
+        }
 
         return false;
     }
@@ -231,12 +299,13 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         return fieldOperation != null && ContainsGodotTypesInOperationTree(fieldOperation, semanticModel.Compilation, null);
     }
 
-    private static IOperation? GetMethodOperationTree(SyntaxReference syntaxRef, Compilation compilation, SemanticModel semanticModel)
+#pragma warning disable IDE0060
+    private static IOperation GetMethodOperationTree(SyntaxReference syntaxRef, Compilation compilation, SemanticModel semanticModel)
+#pragma warning restore IDE0060
     {
         var methodSyntax = syntaxRef.GetSyntax() as MethodDeclarationSyntax;
         if (methodSyntax?.Body == null && methodSyntax?.ExpressionBody == null)
             return null;
-
 
         return semanticModel.GetOperation(methodSyntax);
         /*
@@ -251,7 +320,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         }*/
     }
 
-    private static bool ContainsGodotTypesInOperationTree(IOperation operation, Compilation compilation, HashSet<IMethodSymbol>? visitedMethods)
+    private static bool ContainsGodotTypesInOperationTree(IOperation operation, Compilation compilation, HashSet<IMethodSymbol> visitedMethods)
     {
         // Collect all relevant operations first
         var operations = operation.Descendants()
@@ -259,13 +328,15 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
             .ToList();
 
         foreach (var op in operations)
+        {
             if (AnalyzeOperationNode(op, compilation, visitedMethods))
                 return true;
+        }
+
         return false;
     }
 
-
-    private static bool AnalyzeOperationNode(IOperation operation, Compilation compilation, HashSet<IMethodSymbol>? visitedMethods)
+    private static bool AnalyzeOperationNode(IOperation operation, Compilation compilation, HashSet<IMethodSymbol> visitedMethods)
         => operation switch
         {
             ILocalReferenceOperation local => AnalyzeLocalReference(local),
@@ -285,7 +356,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     private static bool AnalyzeObjectCreation(IObjectCreationOperation creation) =>
         InheritsFromGodotType(creation.Type);
 
-    private static bool AnalyzeMethodCall(IInvocationOperation invocation, Compilation compilation, HashSet<IMethodSymbol>? visitedMethods)
+    private static bool AnalyzeMethodCall(IInvocationOperation invocation, Compilation compilation, HashSet<IMethodSymbol> visitedMethods)
     {
         // First check the direct Godot usage
         if (InheritsFromGodotType(invocation.Type))
@@ -307,31 +378,30 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
             // analysis of internal methods
             return ContainsGodotTypes(invocation.TargetMethod, compilation, invocation.SemanticModel!);
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
-            Console.WriteLine(e);
+            Debug.WriteLine(e);
         }
 
         // For methods without source (from metadata), continue with current analysis
         return false;
     }
 
-
-    private static bool AnalyzeExternalMethod(IMethodSymbol method, HashSet<IMethodSymbol>? visitedMethods = null)
+    private static bool AnalyzeExternalMethod(IMethodSymbol method, HashSet<IMethodSymbol> visitedMethods = null)
     {
         // do not analyze standard .net methods
         var ns = method.ToDisplayString();
-        if (ns.StartsWith("System") ||
-            ns.StartsWith("Microsoft") ||
-            ns == "global" ||
-            ns == "<global namespace>")
+        if (ns.StartsWith("System")
+            || ns.StartsWith("Microsoft")
+            || ns == "global"
+            || ns == "<global namespace>")
             return false;
-
 
         visitedMethods ??= new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         if (!visitedMethods.Add(method))
             return false;
-
 
         // Check method attributes
         if (method.GetAttributes().Any(attr => InheritsFromGodotType(attr.AttributeClass)))
@@ -345,10 +415,8 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
         if (method.Parameters.Any(p => InheritsFromGodotType(p.Type)))
             return true;
 
-
         return false;
     }
-
 
     private static bool AnalyzePropertyAccessOperation(IPropertyReferenceOperation property)
     {
@@ -384,12 +452,13 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     private static bool AnalyzeTypeOf(ITypeOfOperation typeOf) =>
         InheritsFromGodotType(typeOf.TypeOperand);
 
-    private static bool InheritsFromGodotType(ITypeSymbol? type)
+    private static bool InheritsFromGodotType(ITypeSymbol type)
     {
         if (type == null)
             return false;
 
         var typeName = type.ToDisplayString();
+
         // Check for GdUnit4 types that require Godot
         if (GodotDependentTypes.Contains(typeName))
             return true;
@@ -400,14 +469,16 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
             while (current != null)
             {
                 var ns = current.ContainingNamespace?.ToDisplayString();
+
                 // Early exits for common namespace patterns
                 if (ns == null)
                     return false;
+
                 // Known non-Godot namespaces
-                if (ns.StartsWith("System") ||
-                    ns.StartsWith("Microsoft") ||
-                    ns == "global" ||
-                    ns == "<global namespace>")
+                if (ns.StartsWith("System")
+                    || ns.StartsWith("Microsoft")
+                    || ns == "global"
+                    || ns == "<global namespace>")
                     return false;
                 if (ns.StartsWith("Godot"))
                     return true;

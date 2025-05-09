@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 using System.Globalization;
 
@@ -34,7 +34,6 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         RoslynAssert.Valid(analyzer, source);
     }
 
-
     [TestMethod]
     public void HookBeforeIsRequireGodotRuntime()
     {
@@ -53,10 +52,12 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
 
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(), "TestClass")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
+                    "TestClass"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -99,10 +100,12 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
 
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(), "TestClass")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
+                    "TestClass"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -145,10 +148,12 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
 
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(), "TestClass")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
+                    "TestClass"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -191,15 +196,16 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
 
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(), "TestClass")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
+                    "TestClass"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
     }
-
 
     [TestMethod]
     public void HookBeforeTestIsRequireGodotRuntimeForProperty()
@@ -219,10 +225,12 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
 
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(), "TestClass")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
+                    "TestClass"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);

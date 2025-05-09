@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 using System.Globalization;
 
@@ -30,15 +30,16 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
     }
-
 
     [TestMethod]
     public void TestCaseExpressionBodyUsingGodotReference()
@@ -52,15 +53,16 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
     }
-
 
     [TestMethod]
     public void TestCaseExpressionBodyUsingGodotProperty()
@@ -77,10 +79,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -114,17 +118,21 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "CaseA")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "CaseA"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
         var expectedB = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "CaseB")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "CaseB"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(29, 12), new LinePosition(29, 12)));
 
         RoslynAssert.Diagnostics(analyzer, new[] { expectedA, expectedB }, source);
@@ -150,10 +158,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
         RoslynAssert.Diagnostics(analyzer, expectedA, source);
@@ -175,10 +185,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", new LinePosition(19, 12), new LinePosition(19, 12)));
 
         RoslynAssert.Diagnostics(analyzer, expectedA, source);
@@ -253,10 +265,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(23, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -282,10 +296,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);
@@ -342,10 +358,12 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var errorLine = new LinePosition(49, 12);
         var expected = ExpectedDiagnostic
-            .Create(DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
-                string.Format(CultureInfo.InvariantCulture,
-                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(), "TestMethod")
-            )
+            .Create(
+                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
+                    "TestMethod"))
             .WithPosition(new FileLinePositionSpan("TestClass.cs", errorLine, errorLine));
 
         RoslynAssert.Diagnostics(analyzer, expected, source);

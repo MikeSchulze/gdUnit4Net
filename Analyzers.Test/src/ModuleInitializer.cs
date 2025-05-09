@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 using System.Runtime.CompilerServices;
 
@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 
 internal static class ModuleInitializer
 {
-    private static readonly MetadataReference[] References =
+    internal static readonly MetadataReference[] References =
     {
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), MetadataReference.CreateFromFile(typeof(TestSuiteAttribute).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(CompilerGeneratedAttribute).Assembly.Location)

@@ -11,6 +11,7 @@
     <AssemblyName>GdUnit4.TestAdapter.Test</AssemblyName>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
     <NoWarn>CS8785</NoWarn>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

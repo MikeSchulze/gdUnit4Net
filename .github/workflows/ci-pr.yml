@@ -18,29 +18,102 @@ concurrency:
 
 jobs:
 
-  analyzer-test:
-    name: "🐧 Analyzer Tests"
+  setup-dotnet:
+    name: "🔧 Setup .NET"
     runs-on: 'ubuntu-22.04'
-    timeout-minutes: 3
-
+    timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+          global-json-file: './global.json'
 
-      - name: "Build"
-        if: ${{ !cancelled() }}
+  compile:
+    name: "🔨 Compile Projects"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          global-json-file: './global.json'
+
+      - name: "Build Projects"
         run: |
-          dotnet build ./Api/GdUnit4Api.csproj
-          dotnet build ./Analyzers/GdUnit4Analyzers.csproj
-          dotnet build ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj
+          dotnet restore
+          dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
+
+      - name: "Cache Build Output"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+
+  # Analyzer jobs
+
+  analyzer-style-check:
+    name: "🔍 Check Style: Analyzers"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          global-json-file: './global.json'
+
+      - name: "Install dotnet-format"
+        if: ${{ !cancelled() }}
+        run: dotnet tool install -g dotnet-format
+
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        id: format
+        run: |
+          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
+
+
+  analyzer-tests:
+    name: "🧪 Test: Analyzers"
+    needs: compile
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          global-json-file: './global.json'
+
+      - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         run: |
           cd Analyzers.Test
-          dotnet test GdUnit4Analyzers.Tests.csproj --settings .runsettings --no-build --verbosity normal
+          dotnet test --no-build --settings .runsettings --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
@@ -53,8 +126,10 @@ jobs:
             ./Analyzers.Test/TestResults/test-result.html
 
 
+  # Adapter jobs
   test-adapter-test:
-    name: "🐧 TestAdapter Tests"
+    name: "🧪 Test: TestAdapter"
+    needs: compile
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
 
@@ -63,20 +138,23 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+          global-json-file: './global.json'
 
-      - name: "Build"
+      - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
-        run: |
-          dotnet build ./Example/ExampleProject.csproj
-          dotnet build ./Api/GdUnit4Api.csproj
-          dotnet build ./TestAdapter/GdUnit4TestAdapter.csproj
-          dotnet build ./TestAdapter.Test/GdUnit4TestAdapter.Tests.csproj
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
         run: |
           cd TestAdapter.Test
-          dotnet test GdUnit4TestAdapter.Tests.csproj --settings .runsettings --no-build --verbosity normal
+          dotnet test --settings .runsettings --no-build --verbosity normal
 
       - name: "Upload Unit Test Reports"
         if: ${{ !cancelled() }}
@@ -101,7 +179,8 @@ jobs:
       #      godot-status: 'dev3'
 
 
-    name: "🐧 Test Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    needs: compile
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
@@ -112,7 +191,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [ analyzer-test, test-adapter-test, unit-tests ]
+    needs: [ analyzer-style-check, analyzer-tests, test-adapter-test, unit-tests ]
     steps:
       - run: exit 1
         if: >-
