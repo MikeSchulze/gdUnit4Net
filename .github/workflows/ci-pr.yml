@@ -81,17 +81,16 @@ jobs:
         if: ${{ !cancelled() }}
         id: format
         run: |
-          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --report format-report.json
-          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --report format-report.json
-          ls -ls *.json
+          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes
+          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes
+
 
   analyzer-tests:
     name: "🧪 Test: Analyzers"
     needs: compile
     runs-on: 'ubuntu-22.04'
-    timeout-minutes: 3
-    outputs:
-      test_status: ${{ steps.run_tests.outcome }}
+    timeout-minutes: 2
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET SDK
@@ -112,7 +111,6 @@ jobs:
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
-        id: run_tests
         run: |
           cd Analyzers.Test
           dotnet test --no-build --settings .runsettings --verbosity normal
