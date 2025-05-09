@@ -4,10 +4,10 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
 
     <!-- Use the latest analysis rules -->
-    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisLevel>8.0</AnalysisLevel>
 
     <!-- Enable all categories of analysis rules (Style, Design, Documentation, etc.) -->
-    <AnalysisMode>Recommended</AnalysisMode>
+    <AnalysisMode>All</AnalysisMode>
 
     <!-- Enforce code style rules during build, not just in the IDE -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -16,6 +16,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
+  </ItemGroup>
 </Project>

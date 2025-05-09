@@ -81,8 +81,8 @@ jobs:
         if: ${{ !cancelled() }}
         id: format
         run: |
-          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes
-          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes
+          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
 
 
   analyzer-tests:

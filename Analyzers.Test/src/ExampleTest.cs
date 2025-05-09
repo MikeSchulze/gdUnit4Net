@@ -10,6 +10,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 [SuppressMessage("Style", "IDE0060", Justification = "Required for DynamicData test method pattern")]
 public class ExampleTest
 {
+    // Display name provider method
+    public static string GetDisplayName(MethodInfo methodInfo, object[] data)
+#pragma warning disable CA1062
+        => $"{methodInfo.Name} with {data[0]} + {data[1]} = {data[2]}";
+#pragma warning restore CA1062
+
     [TestMethod]
     public void SingeTest()
     {
@@ -27,6 +33,7 @@ public class ExampleTest
     public void DataRowTest(int a, int b)
     {
     }
+
 
     [TestMethod]
     [DynamicData(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider), DynamicDataSourceType.Method)]
@@ -46,10 +53,7 @@ public class ExampleTest
     {
     }
 
-    // Display name provider method
-    public static string GetDisplayName(MethodInfo methodInfo, object[] data)
-        => $"{methodInfo.Name} with {data[0]} + {data[1]} = {data[2]}";
-
+#pragma warning disable CA1812
     private sealed class TestDataProvider
     {
         public static IEnumerable<object[]> GetTestData()
@@ -59,4 +63,5 @@ public class ExampleTest
             yield return new object[] { -1, 1, 0 };
         }
     }
+#pragma warning restore CA1812
 }
