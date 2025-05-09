@@ -3,7 +3,6 @@
     <!-- Enable built-in .NET code analyzers -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
 
-    <!-- Use the latest analysis rules -->
     <AnalysisLevel>8.0</AnalysisLevel>
 
     <!-- Enable all categories of analysis rules (Style, Design, Documentation, etc.) -->

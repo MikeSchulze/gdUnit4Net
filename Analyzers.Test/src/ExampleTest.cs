@@ -34,7 +34,6 @@ public class ExampleTest
     {
     }
 
-
     [TestMethod]
     [DynamicData(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider), DynamicDataSourceType.Method)]
     public void TestWithDynamicData(int a, int b, int expected)
