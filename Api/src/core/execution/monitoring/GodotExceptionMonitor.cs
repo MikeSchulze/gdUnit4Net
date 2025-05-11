@@ -193,6 +193,6 @@ public class GodotExceptionMonitor
             GD.PrintErr($"Failed to read log file: {ex.Message}");
         }
 
-        return logEntries.Where(e => e != null).ToList() !;
+        return logEntries.Where(e => e != null).ToList()!;
     }
 }

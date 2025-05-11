@@ -24,7 +24,7 @@ internal static class DebuggerUtils
         if (DebuggerIsActiveMethod == null)
             return false;
 
-        var isDebuggerActive = (godot_bool)DebuggerIsActiveMethod.Invoke(null, null) !;
+        var isDebuggerActive = (godot_bool)DebuggerIsActiveMethod.Invoke(null, null)!;
         return isDebuggerActive.ToBool();
     }
 }

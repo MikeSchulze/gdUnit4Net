@@ -34,7 +34,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         var method = type
             .GetMethods()
             .FirstOrDefault(m => m.IsDefined(typeof(T)));
-        InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>() !);
+        InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>()!);
     }
 
     protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute)
@@ -173,7 +173,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return frame.GetFileLineNumber();
         }
 
-        return stack.FrameCount > 1 ? stack.GetFrame(0) !.GetFileLineNumber() : -1;
+        return stack.FrameCount > 1 ? stack.GetFrame(0)!.GetFileLineNumber() : -1;
     }
 
     internal static string TrimStackTrace(string stackTrace)

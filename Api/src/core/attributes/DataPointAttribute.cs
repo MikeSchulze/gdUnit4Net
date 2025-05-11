@@ -131,5 +131,5 @@ public sealed class DataPointAttribute : Attribute
     ///     Gets the arguments to pass to the data source method.
     ///     Will be null for properties or methods without parameters.
     /// </summary>
-    internal object?[] ? DataPointParameters { get; }
+    internal object?[]? DataPointParameters { get; }
 }
