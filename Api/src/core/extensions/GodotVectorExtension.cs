@@ -6,6 +6,7 @@ namespace GdUnit4.Core.Extensions;
 using Godot;
 
 internal static class GodotVectorExtension
+
 {
     internal static bool IsEqualApprox(this Vector2 vector, Vector2 other, Vector2 approx)
     {
