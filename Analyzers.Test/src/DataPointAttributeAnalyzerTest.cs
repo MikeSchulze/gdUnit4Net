@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static TestSourceBuilder;
 
 [TestClass]
-public class DataPointAttributeAnalyzerTests
+public class DataPointAttributeAnalyzerTest
 {
     private readonly DiagnosticAnalyzer analyzer = new DataPointAttributeAnalyzer();
 
