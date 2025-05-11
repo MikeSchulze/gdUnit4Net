@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using GdUnit4.core.attributes;
 using GdUnit4.Core.Attributes;
 
 using static Assertions;

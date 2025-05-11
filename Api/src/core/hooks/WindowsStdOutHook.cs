@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Hooks;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Hooks;
 
 using System;
 using System.Runtime.InteropServices;
@@ -27,7 +30,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         if (!CreatePipe(out pipeReadHandle, out pipeWriteHandle, IntPtr.Zero, 0))
             throw new InvalidOperationException("Failed to create pipe.");
 
-        readEvent = CreateEvent(IntPtr.Zero, true, false, "");
+        readEvent = CreateEvent(IntPtr.Zero, true, false, string.Empty);
         if (readEvent == IntPtr.Zero)
             throw new InvalidOperationException("Failed to create read event for asynchronous reading.");
     }
@@ -38,7 +41,8 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         stdOutHook.Dispose();
         pipeReadHandle.Dispose();
         pipeWriteHandle.Dispose();
-        if (readEvent == IntPtr.Zero) return;
+        if (readEvent == IntPtr.Zero)
+            return;
         CloseHandle(readEvent);
         readEvent = IntPtr.Zero;
     }
@@ -65,30 +69,37 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     public string GetCapturedOutput() => stdOutHook.GetCapturedOutput();
 
-
     private void ReadPipeOutput()
     {
         var buffer = new byte[4096];
-        var overlapped = new Overlapped { hEvent = readEvent };
+        var overlapped = new Overlapped { HEvent = readEvent };
 
         try
         {
             while (true)
+            {
                 if (ReadFile(pipeReadHandle, buffer, (uint)buffer.Length, out var bytesRead, ref overlapped))
+                {
                     ProcessReadData(buffer, bytesRead);
+                }
                 else
                 {
                     var error = Marshal.GetLastWin32Error();
                     if (error == 997) // ERROR_IO_PENDING
                     {
                         if (WaitForSingleObject(readEvent, 100) == 0) // WAIT_OBJECT_0
+                        {
                             if (GetOverlappedResult(pipeReadHandle, ref overlapped, out bytesRead, false))
                                 ProcessReadData(buffer, bytesRead);
+                        }
                     }
                     else
+                    {
                         // Handle other errors
                         break;
+                    }
                 }
+            }
         }
         catch (ThreadInterruptedException)
         {
@@ -98,7 +109,8 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     private void ProcessReadData(byte[] buffer, uint bytesRead)
     {
-        if (bytesRead > 0) Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
+        if (bytesRead > 0)
+            Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -108,7 +120,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         public IntPtr InternalHigh;
         public int Offset;
         public int OffsetHigh;
-        public IntPtr hEvent;
+        public IntPtr HEvent;
     }
 
 #pragma warning disable SYSLIB1054

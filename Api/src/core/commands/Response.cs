@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Commands;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Commands;
 
 using System.Net;
 
@@ -9,13 +12,12 @@ using System.Net;
 public record Response
 {
     /// <summary>
-    ///     HTTP status code indicating the result of the command execution.
+    ///     Gets hTTP status code indicating the result of the command execution.
     /// </summary>
     public HttpStatusCode StatusCode { get; init; }
 
-
     /// <summary>
-    ///     Optional payload containing command-specific response data.
+    ///     Gets optional payload containing command-specific response data.
     /// </summary>
-    public string Payload { get; init; } = "";
+    public string Payload { get; init; } = string.Empty;
 }

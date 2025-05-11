@@ -20,8 +20,8 @@ public partial class SignalAssertTest
     public void TearDown()
     {
         var signalCollector = GodotSignalCollector.Instance;
-        AssertThat(signalCollector.collectedSignals.Keys)
-            .OverrideFailureMessage($"Found keys: {signalCollector.collectedSignals.Keys.Formatted()}")
+        AssertThat(signalCollector.CollectedSignals.Keys)
+            .OverrideFailureMessage($"Found keys: {signalCollector.CollectedSignals.Keys.Formatted()}")
             .IsEmpty();
     }
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -11,9 +14,11 @@ using SystemVector2 = System.Numerics.Vector2;
 using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
-public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue> where TValue : IEquatable<TValue>
+public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
+    where TValue : IEquatable<TValue>
 {
-    public VectorAssert(TValue current) : base(current)
+    public VectorAssert(TValue current)
+        : base(current)
     {
     }
 

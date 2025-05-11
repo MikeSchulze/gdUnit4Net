@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Hooks;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Hooks;
 
 using System;
 using System.Runtime.InteropServices;
@@ -44,6 +47,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
     {
         StopCapture();
 #pragma warning disable CA1806 // Do ignore method results
+
         // Reset pipe read end blocking mode to its original state
         fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags);
 
@@ -87,8 +91,8 @@ internal sealed class UnixStdOutHook : IStdOutHook
             var buffer = new byte[4096];
             var pollFd = new PollFd
             {
-                fd = pipeHandles[PIPE_READ],
-                events = 0x0001 // POLLIN
+                Fd = pipeHandles[PIPE_READ],
+                Events = 0x0001 // POLLIN
             };
 
             while (isCapturing)
@@ -97,11 +101,14 @@ internal sealed class UnixStdOutHook : IStdOutHook
                 if (ready > 0)
                 {
                     var bytesRead = read(pipeHandles[PIPE_READ], buffer, buffer.Length);
-                    if (bytesRead > 0) ProcessReadData(buffer, (uint)bytesRead);
+                    if (bytesRead > 0)
+                        ProcessReadData(buffer, (uint)bytesRead);
                 }
                 else if (ready < 0)
+                {
                     // Error occurred
                     break;
+                }
             }
         }
         catch (ThreadInterruptedException)
@@ -112,15 +119,16 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
     private void ProcessReadData(byte[] buffer, uint bytesRead)
     {
-        if (bytesRead > 0) Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
+        if (bytesRead > 0)
+            Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct PollFd
     {
-        public int fd;
-        public short events;
-        public short revents;
+        public int Fd;
+        public short Events;
+        public short Revents;
     }
 
 #pragma warning disable SYSLIB1054

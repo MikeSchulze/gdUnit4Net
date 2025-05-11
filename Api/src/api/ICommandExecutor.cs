@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Api;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Api;
 
 using System;
 using System.Threading;
@@ -16,13 +19,13 @@ public interface ICommandExecutor : IAsyncDisposable
     ///     Starts the command executor asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task StartAsync();
+    Task StartAsync();
 
     /// <summary>
     ///     Stops the command executor asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task StopAsync();
+    Task StopAsync();
 
     /// <summary>
     ///     Executes a test command with event handling and cancellation support.
@@ -32,5 +35,6 @@ public interface ICommandExecutor : IAsyncDisposable
     /// <param name="testEventListener">The listener for test events.</param>
     /// <param name="cancellationToken">Token to support cancellation of the operation.</param>
     /// <returns>A task containing the command execution response.</returns>
-    public Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken) where T : BaseCommand;
+    Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken)
+        where T : BaseCommand;
 }

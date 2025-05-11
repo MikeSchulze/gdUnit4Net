@@ -1,8 +1,12 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 public sealed class BoolAssert : AssertBase<bool>, IBoolAssert
 {
-    public BoolAssert(bool current) : base(current)
+    public BoolAssert(bool current)
+        : base(current)
     {
     }
 

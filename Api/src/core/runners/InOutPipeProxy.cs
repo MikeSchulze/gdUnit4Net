@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Runners;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Runners;
 
 using System;
 using System.Buffers.Binary;
@@ -15,7 +18,8 @@ using Commands;
 
 using Newtonsoft.Json;
 
-internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
+internal class InOutPipeProxy<TPipe> : IAsyncDisposable
+    where TPipe : PipeStream
 {
     protected const string PipeName = "gdunit4-message-pipe";
 
@@ -79,7 +83,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 
     protected async Task WriteResponse(Response response) => await WriteAsync(response);
 
-    protected async Task<TCommand> ReadCommand<TCommand>(CancellationToken cancellationToken) where TCommand : BaseCommand
+    protected async Task<TCommand> ReadCommand<TCommand>(CancellationToken cancellationToken)
+        where TCommand : BaseCommand
     {
         var responseLengthBytes = new byte[4];
         await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
@@ -97,7 +102,9 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
         return DeserializeObject<TCommand>(json);
     }
 
-    protected async Task WriteCommand<TCommand>(TCommand command) where TCommand : BaseCommand => await WriteAsync(command);
+    protected async Task WriteCommand<TCommand>(TCommand command)
+        where TCommand : BaseCommand
+        => await WriteAsync(command);
 
     protected async Task WriteAsync<TData>(TData data)
     {
@@ -132,9 +139,7 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
 
     private static TObject DeserializeObject<TObject>(string json)
     {
-        var command = JsonConvert.DeserializeObject<TObject>(json, JsonSettings);
-        if (command == null)
-            throw new JsonSerializationException($"Failed to deserialize command payload:'{json}'");
+        var command = JsonConvert.DeserializeObject<TObject>(json, JsonSettings) ?? throw new JsonSerializationException($"Failed to deserialize command payload:'{json}'");
         return command;
     }
 
@@ -149,10 +154,11 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable where TPipe : PipeStream
             }
             catch (OperationCanceledException)
             {
-                if (!cancellationToken.IsCancellationRequested) throw;
+                if (!cancellationToken.IsCancellationRequested)
+                    throw;
                 break;
             }
 
-        //Console.WriteLine($"{typeof(TPipe)} Read {count} bytes from {totalBytesRead} of {count}, {IsConnected}");
+        // Console.WriteLine($"{typeof(TPipe)} Read {count} bytes from {totalBytesRead} of {count}, {IsConnected}");
     }
 }

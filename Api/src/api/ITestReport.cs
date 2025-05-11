@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Api;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Api;
 
 using System;
 using System.Collections.Generic;
@@ -95,9 +98,9 @@ public interface ITestReport
     /// </summary>
     bool IsWarning { get; }
 
-
     /// <summary>
     ///     Serializes the test report into a dictionary representation containing its properties and values.
     /// </summary>
+    /// <returns></returns>
     IDictionary<string, object> Serialize();
 }

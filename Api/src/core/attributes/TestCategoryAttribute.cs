@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Attributes;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Attributes;
 
 using System;
 
@@ -6,7 +9,7 @@ using System;
 ///     Specifies a category for a test method or class.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class TestCategoryAttribute : Attribute
+public sealed class TestCategoryAttribute : Attribute
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="TestCategoryAttribute" /> class.

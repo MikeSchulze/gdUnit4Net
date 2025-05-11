@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -6,7 +9,8 @@ using Core.Extensions;
 
 public sealed class StringAssert : AssertBase<string>, IStringAssert
 {
-    public StringAssert(string? current) : base(current)
+    public StringAssert(string? current)
+        : base(current)
     {
     }
 
@@ -76,7 +80,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert IsEqualIgnoringCase(string expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -91,7 +95,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert IsNotEqualIgnoringCase(string expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
         return this;

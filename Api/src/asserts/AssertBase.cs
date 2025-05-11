@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using Core.Execution.Exceptions;
@@ -6,11 +9,12 @@ using Core.Extensions;
 public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected AssertBase(TValue? current) => Current = current;
+
     protected TValue? Current { get; }
 
     protected string? CustomFailureMessage { get; private set; }
 
-    protected string CurrentFailureMessage { get; set; } = "";
+    protected string CurrentFailureMessage { get; set; } = string.Empty;
 
     public IAssertBase<TValue> IsEqual(TValue expected)
     {

@@ -1,10 +1,13 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using Core.Extensions;
 
 internal static class Comparable
 {
-    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.Mode compareMode = GodotObjectExtensions.Mode.CaseSensitive, Result? r = null)
+    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.Mode compareMode = GodotObjectExtensions.Mode.CASE_SENSITIVE, Result? r = null)
         => new(left.VariantEquals(right, compareMode), left, right, r);
 
     public class Result
@@ -32,14 +35,15 @@ internal static class Comparable
         }
 
 #pragma warning disable IDE0052 // Remove unread private members
+
         // ReSharper disable all UnusedAutoPropertyAccessor.Local
         private object? Left { get; set; }
 
         private object? Right { get; set; }
 
         private string? PropertyName { get; set; }
-        // ReSharper enable all UnusedAutoPropertyAccessor.Local
 
+        // ReSharper enable all UnusedAutoPropertyAccessor.Local
         private Result? Parent
         {
             get;

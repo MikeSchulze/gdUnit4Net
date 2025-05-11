@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.core.attributes;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Attributes;
 
 using System;
 
@@ -6,7 +9,7 @@ using System;
 ///     Specifies a trait for a test method.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class TraitAttribute : Attribute
+public sealed class TraitAttribute : Attribute
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="TraitAttribute" /> class.

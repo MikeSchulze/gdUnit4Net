@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Api;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Api;
 
 /// <summary>
 ///     Configuration settings for the GdUnit4 test engine.
@@ -20,7 +23,7 @@
 public sealed class TestEngineSettings
 {
     /// <summary>
-    ///     Additional Godot runtime parameters. These are passed to the Godot executable when running tests.
+    ///     Gets additional Godot runtime parameters. These are passed to the Godot executable when running tests.
     /// </summary>
     /// <remarks>
     ///     These parameters are appended to the Godot command line when launching the test process.
@@ -29,7 +32,7 @@ public sealed class TestEngineSettings
     public string? Parameters { get; init; }
 
     /// <summary>
-    ///     Controls whether standard output (stdout) from test cases is captured.
+    ///     Gets a value indicating whether controls whether standard output (stdout) from test cases is captured.
     /// </summary>
     /// <remarks>
     ///     When set to true, stdout is captured and included in the test result.
@@ -39,7 +42,7 @@ public sealed class TestEngineSettings
     public bool CaptureStdOut { get; init; }
 
     /// <summary>
-    ///     Specifies the maximum number of CPU cores to use for parallel test execution.
+    ///     Gets specifies the maximum number of CPU cores to use for parallel test execution.
     /// </summary>
     /// <remarks>
     ///     Controls the degree of test parallelization. A value of 0 or 1 runs tests sequentially.
@@ -48,7 +51,7 @@ public sealed class TestEngineSettings
     public int MaxCpuCount { get; init; }
 
     /// <summary>
-    ///     The maximum duration allowed for a complete test session in milliseconds.
+    ///     Gets the maximum duration allowed for a complete test session in milliseconds.
     /// </summary>
     /// <remarks>
     ///     After this timeout period expires, the test session is forcefully terminated.
@@ -57,9 +60,8 @@ public sealed class TestEngineSettings
     /// </remarks>
     public int SessionTimeout { get; init; } = 30000;
 
-
     /// <summary>
-    ///     The maximum duration allowed for a compilation process in milliseconds.
+    ///     Gets the maximum duration allowed for a compilation process in milliseconds.
     /// </summary>
     /// <remarks>
     ///     After this timeout period expires, the compilation process is forcefully terminated.

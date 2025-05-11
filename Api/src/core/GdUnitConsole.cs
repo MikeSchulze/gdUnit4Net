@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core;
 
 using System;
@@ -64,7 +67,6 @@ internal sealed class GdUnitConsole
         Console.Write("\u001b[0m");
         return this;
     }
-
 
     private GdUnitConsole Underline(bool enable)
     {

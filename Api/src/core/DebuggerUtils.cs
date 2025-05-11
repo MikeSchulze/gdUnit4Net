@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core;
 
 using System.Reflection;
 
@@ -11,7 +14,8 @@ internal static class DebuggerUtils
     static DebuggerUtils()
     {
         var nativeFuncType = typeof(NativeFuncs);
-        DebuggerIsActiveMethod = nativeFuncType.GetMethod("godotsharp_internal_script_debugger_is_active",
+        DebuggerIsActiveMethod = nativeFuncType.GetMethod(
+            "godotsharp_internal_script_debugger_is_active",
             BindingFlags.NonPublic | BindingFlags.Static);
     }
 
@@ -20,7 +24,7 @@ internal static class DebuggerUtils
         if (DebuggerIsActiveMethod == null)
             return false;
 
-        var isDebuggerActive = (godot_bool)DebuggerIsActiveMethod.Invoke(null, null)!;
+        var isDebuggerActive = (godot_bool)DebuggerIsActiveMethod.Invoke(null, null) !;
         return isDebuggerActive.ToBool();
     }
 }
