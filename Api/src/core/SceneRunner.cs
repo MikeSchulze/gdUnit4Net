@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core;
 
 using System;
@@ -15,7 +18,7 @@ using Godot;
 using ExecutionContext = Execution.ExecutionContext;
 
 /// <summary>
-///     A helper to simulate mouse moving form a source to final position
+///     A helper to simulate mouse moving form a source to final position.
 /// </summary>
 public partial class MouseMoveTask : Node, IDisposable
 {
@@ -60,10 +63,10 @@ internal sealed class SceneRunner : ISceneRunner
     private readonly ICollection<Key> keyOnPress = new HashSet<Key>();
     private readonly ICollection<MouseButton> mouseButtonOnPress = new HashSet<MouseButton>();
 
-    public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false) : this(LoadScene(resourcePath), autoFree, verbose)
+    public SceneRunner(string resourcePath, bool autoFree = false, bool verbose = false)
+        : this(LoadScene(resourcePath), autoFree, verbose)
     {
     }
-
 
     public SceneRunner(Node currentScene, bool autoFree = false, bool verbose = false)
     {
@@ -78,10 +81,15 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     private SceneTree SceneTree { get; }
+
     private bool Verbose { get; }
+
     private bool SceneAutoFree { get; }
+
     private double TimeFactor { get; set; }
+
     private int SavedIterationsPerSecond { get; }
+
     private InputEvent? LastInputEvent { get; set; }
 
     private bool IsDisposed { get; set; }
@@ -256,12 +264,14 @@ internal sealed class SceneRunner : ISceneRunner
     public async Task SimulateFrames(uint frames)
     {
         var timeShiftFrames = Math.Max(1, frames / TimeFactor);
-        for (var frame = 0; frame <= timeShiftFrames; frame++) await ISceneRunner.SyncProcessFrame;
+        for (var frame = 0; frame <= timeShiftFrames; frame++)
+            await ISceneRunner.SyncProcessFrame;
     }
 
     public Node Scene() => currentScene;
 
-    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName) where TVariant : notnull
+    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
+        where TVariant : notnull
         => new(currentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
@@ -274,7 +284,6 @@ internal sealed class SceneRunner : ISceneRunner
         await currentScene.AwaitSignal(signal, args);
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
-
 
     public Variant Invoke(string name, params Variant[] args)
         => GodotObjectExtensions.Invoke(currentScene, name, args)
@@ -319,7 +328,8 @@ internal sealed class SceneRunner : ISceneRunner
             return;
         DeactivateTimeFactor();
         ResetInputToDefault();
-        //DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
+
+        // DisplayServer.WindowSetMode(DisplayServer.WindowMode.Minimized);
         SceneTree.Root.RemoveChild(currentScene);
         if (SceneAutoFree && GodotObject.IsInstanceValid(currentScene))
             currentScene.Free();
@@ -341,25 +351,34 @@ internal sealed class SceneRunner : ISceneRunner
     {
         // reset all mouse button to initial state if is need
         foreach (var button in mouseButtonOnPress)
+        {
             if (Input.IsMouseButtonPressed(button))
                 SimulateMouseButtonRelease(button);
+        }
+
         mouseButtonOnPress.Clear();
 
         foreach (var key in keyOnPress)
+        {
             if (Input.IsKeyPressed(key))
                 SimulateKeyRelease(key);
+        }
+
         keyOnPress.Clear();
 
         foreach (var action in actionOnPress)
+        {
             if (Input.IsActionPressed(action))
                 SimulateActionRelease(action);
+        }
+
         actionOnPress.Clear();
 
         Input.FlushBufferedEvents();
     }
 
     /// <summary>
-    ///     copy over current active modifiers
+    ///     copy over current active modifiers.
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputModifiers(InputEventWithModifiers inputEvent)
@@ -374,7 +393,7 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     copy over current active mouse mask and combine with current mask
+    ///     copy over current active mouse mask and combine with current mask.
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputMouseMask(InputEvent inputEvent)
@@ -399,7 +418,7 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     copy over last mouse position if is need
+    ///     copy over last mouse position if is need.
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputMousePosition(InputEvent inputEvent)
@@ -409,7 +428,7 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     for handling read https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html?highlight=inputevent#how-does-it-work
+    ///     for handling read https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html?highlight=inputevent#how-does-it-work.
     /// </summary>
     /// <param name="inputEvent"></param>
     /// <returns></returns>
@@ -475,7 +494,7 @@ internal sealed class SceneRunner : ISceneRunner
     {
         if (!Verbose)
             return;
-        var focusedNode = (currentScene as Control)?.Owner; //.GetFocusOwner();
+        var focusedNode = (currentScene as Control)?.Owner; // .GetFocusOwner();
 
         if (focusedNode != null)
             Console.WriteLine("	focus on {0}", focusedNode);

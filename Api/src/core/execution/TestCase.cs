@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -58,7 +61,8 @@ internal sealed class TestCase
 
     private IEnumerable<object> ResolveParam(object input)
     {
-        if (input is IValueProvider provider) return provider.GetValues();
+        if (input is IValueProvider provider)
+            return provider.GetValues();
         return new[] { input };
     }
 
@@ -70,9 +74,8 @@ internal sealed class TestCase
                     {
                         var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
                         return attr.Constructor.Invoke(arguments);
-                    }
-                )
-            ).ToList();
+                    }))
+            .ToList();
 
     internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = -1)
     {

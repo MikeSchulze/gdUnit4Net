@@ -1,8 +1,11 @@
-﻿namespace GdUnit4.Core.Extensions;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Extensions;
 
 using Godot;
 
-public static class GodotVectorExtension
+internal static class GodotVectorExtension
 {
     internal static bool IsEqualApprox(this Vector2 vector, Vector2 other, Vector2 approx)
     {

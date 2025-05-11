@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Hooks;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Hooks;
 
 using System;
 using System.IO;
@@ -8,7 +11,6 @@ internal sealed class StdOutConsoleHook : IStdOutHook
 {
     private readonly CaptureWriter captureWriter = new();
     private readonly TextWriter originalOutput = Console.Out;
-
 
     public void StartCapture()
     {
@@ -25,7 +27,6 @@ internal sealed class StdOutConsoleHook : IStdOutHook
         captureWriter.Dispose();
         originalOutput.Dispose();
     }
-
 
     private class CaptureWriter : TextWriter
     {

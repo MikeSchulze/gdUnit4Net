@@ -65,6 +65,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
                 try
                 {
                     testEngine.Discover(assemblyPath)
+                        .ToList()
                         .ConvertAll(testCase => BuildTestCase(testCase, settings))
                         .OrderBy(t => t.FullyQualifiedName)
                         .ToList()

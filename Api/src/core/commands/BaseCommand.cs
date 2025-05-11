@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Commands;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Commands;
 
 using System.Threading.Tasks;
 
@@ -22,7 +25,7 @@ public abstract class BaseCommand
     /// <summary>
     ///     Executes the command and returns a response containing the execution result.
     /// </summary>
-    /// <param name="testEventListener">Listener that receives test execution events</param>
-    /// <returns>Response indicating command execution status and result</returns>
+    /// <param name="testEventListener">Listener that receives test execution events.</param>
+    /// <returns>Response indicating command execution status and result.</returns>
     public abstract Task<Response> Execute(ITestEventListener testEventListener);
 }

@@ -1,8 +1,12 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4;
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -22,53 +26,59 @@ using ITuple = Asserts.ITuple;
 using Tuple = Asserts.Tuple;
 
 /// <summary>
-///     A collection of assertions and helpers to verify values
+///     A collection of assertions and helpers to verify values.
 /// </summary>
 public static class Assertions
 {
     /// <summary>
-    ///     An Assertion to verify boolean values
+    ///     An Assertion to verify boolean values.
     /// </summary>
-    /// <param name="current">The current boolean value to verify</param>
-    /// <returns>IBoolAssert</returns>
+    /// <param name="current">The current boolean value to verify.</param>
+    /// <returns>An instance of IBoolAssert for further assertions.</returns>
     public static IBoolAssert AssertBool(bool current) => new BoolAssert(current);
 
     /// <summary>
-    ///     An Assertion to verify string values
+    ///     An Assertion to verify string values.
     /// </summary>
-    /// <param name="current">The current string value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current string value to verify.</param>
+    /// <returns>An instance of IStringAssert for further assertions.</returns>
     public static IStringAssert AssertString(string? current) => new StringAssert(current);
 
     /// <summary>
-    ///     An Assertion to verify integer values
+    ///     An Assertion to verify integer values.
     /// </summary>
-    /// <param name="current">The current integer value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current integer value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<int> AssertInt(int current) => new NumberAssert<int>(current);
 
     /// <summary>
-    ///     An Assertion to verify double values
+    ///     An Assertion to verify double values.
     /// </summary>
-    /// <param name="current">The current double value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current double value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<double> AssertFloat(double current) => new NumberAssert<double>(current);
 
     /// <summary>
-    ///     An Assertion to verify object values
+    ///     An Assertion to verify object values.
     /// </summary>
-    /// <param name="current">The current double value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current double value to verify.</param>
+    /// <returns>An instance of IObjectAssert for further assertions.</returns>
     public static IObjectAssert AssertObject(object? current) => new ObjectAssert(current);
 
     /// <summary>
-    ///     An Assertion to verify array values
+    ///     An Assertion to verify array values.
     /// </summary>
-    /// <param name="current">The current array value to verify</param>
-    /// <returns></returns>
+    /// <typeparam name="TValue">The type of elements in the array.</typeparam>
+    /// <param name="current">The current array value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<TValue?> AssertArray<TValue>(IEnumerable<TValue?>? current)
         => new EnumerableAssert<TValue?>(current);
 
+    /// <summary>
+    ///     An Assertion to verify array values.
+    /// </summary>
+    /// <param name="current">The current array value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<object?> AssertArray(IEnumerable<object?>? current)
         => new EnumerableAssert<object?>(current);
 
@@ -78,68 +88,156 @@ public static class Assertions
     /// <typeparam name="TValue">The type of Godot vector.</typeparam>
     /// <param name="vector">The vector value to verify.</param>
     /// <returns>An instance of IVectorAssert for further assertions.</returns>
-    public static IVectorAssert<TValue> AssertVector<TValue>(TValue vector) where TValue : IEquatable<TValue>
+    public static IVectorAssert<TValue> AssertVector<TValue>(TValue vector)
+        where TValue : IEquatable<TValue>
         => new VectorAssert<TValue>(vector);
 
     /// <summary>
-    ///     An Assertion to verify Godot.Vector2 values
+    ///     An Assertion to verify Godot.Vector2 values.
     /// </summary>
-    /// <param name="current">The current vector2 value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current vector2 value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     [Obsolete("AssertVec2 is deprecated, please use AssertVector instead.")]
     public static IVectorAssert<Vector2> AssertVec2(Vector2 current) => AssertVector(current);
 
     /// <summary>
-    ///     An Assertion to verify Godot.Vector3 values
+    ///     An Assertion to verify Godot.Vector3 values.
     /// </summary>
-    /// <param name="current">The current vector3 value to verify</param>
-    /// <returns></returns>
+    /// <param name="current">The current vector3 value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     [Obsolete("AssertVec3 is deprecated, please use AssertVector instead.")]
     public static IVectorAssert<Vector3> AssertVec3(Vector3 current) => AssertVector(current);
 
     /// <summary>
-    ///     An Assertion used by test generation to notify the test is not yet implemented
+    ///     An Assertion used by test generation to notify the test is not yet implemented.
     /// </summary>
-    /// <returns></returns>
-    public static bool AssertNotYetImplemented() => throw new TestFailedException("Test not yet implemented!");
+    public static void AssertNotYetImplemented() => throw new TestFailedException("Test not yet implemented!");
 
     /// <summary>
-    ///     An Assertion to verify Godot signals
+    ///     An Assertion to verify Godot signals.
     /// </summary>
-    /// <param name="node">The object where is emitting the signal</param>
-    /// <returns></returns>
+    /// <param name="node">The object where is emitting the signal.</param>
+    /// <returns>An instance of ISignalAssert for further assertions.</returns>
     public static ISignalAssert AssertSignal(GodotObject node) => new SignalAssert(node);
 
+    /// <summary>
+    ///     An Assertion to verify string values.
+    /// </summary>
+    /// <param name="current">The current string value to verify.</param>
+    /// <returns>An instance of IStringAssert for further assertions.</returns>
     public static IStringAssert AssertThat(string? current) => new StringAssert(current);
 
+    /// <summary>
+    ///     An Assertion to verify boolean values.
+    /// </summary>
+    /// <param name="current">The current boolean value to verify.</param>
+    /// <returns>An instance of IBoolAssert for further assertions.</returns>
     public static IBoolAssert AssertThat(bool current) => new BoolAssert(current);
 
     /// <summary>
-    ///     numeric asserts
+    ///     An Assertion to verify sbyte values.
     /// </summary>
-    /// <param name="current"></param>
-    /// <returns></returns>
+    /// <param name="current">The current sbyte value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<sbyte> AssertThat(sbyte current) => new NumberAssert<sbyte>(current);
 
+    /// <summary>
+    ///     An Assertion to verify byte values.
+    /// </summary>
+    /// <param name="current">The current byte value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<byte> AssertThat(byte current) => new NumberAssert<byte>(current);
+
+    /// <summary>
+    ///     An Assertion to verify short values.
+    /// </summary>
+    /// <param name="current">The current short value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<short> AssertThat(short current) => new NumberAssert<short>(current);
+
+    /// <summary>
+    ///     An Assertion to verify ushort values.
+    /// </summary>
+    /// <param name="current">The current ushort value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<ushort> AssertThat(ushort current) => new NumberAssert<ushort>(current);
+
+    /// <summary>
+    ///     An Assertion to verify int values.
+    /// </summary>
+    /// <param name="current">The current int value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<int> AssertThat(int current) => new NumberAssert<int>(current);
+
+    /// <summary>
+    ///     An Assertion to verify uint values.
+    /// </summary>
+    /// <param name="current">The current uint value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<uint> AssertThat(uint current) => new NumberAssert<uint>(current);
+
+    /// <summary>
+    ///     An Assertion to verify long values.
+    /// </summary>
+    /// <param name="current">The current long value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<long> AssertThat(long current) => new NumberAssert<long>(current);
+
+    /// <summary>
+    ///     An Assertion to verify ulong values.
+    /// </summary>
+    /// <param name="current">The current ulong value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<ulong> AssertThat(ulong current) => new NumberAssert<ulong>(current);
+
+    /// <summary>
+    ///     An Assertion to verify float values.
+    /// </summary>
+    /// <param name="current">The current float value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<float> AssertThat(float current) => new NumberAssert<float>(current);
+
+    /// <summary>
+    ///     An Assertion to verify double values.
+    /// </summary>
+    /// <param name="current">The current double value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<double> AssertThat(double current) => new NumberAssert<double>(current);
+
+    /// <summary>
+    ///     An Assertion to verify decimal values.
+    /// </summary>
+    /// <param name="current">The current decimal value to verify.</param>
+    /// <returns>An instance of INumberAssert for further assertions.</returns>
     public static INumberAssert<decimal> AssertThat(decimal current) => new NumberAssert<decimal>(current);
 
+    /// <summary>
+    ///     An Assertion to verify dictionary values.
+    /// </summary>
+    /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
+    /// <param name="current">The current dictionary value to verify.</param>
+    /// <returns>An instance of IDictionaryAssert for further assertions.</returns>
     public static IDictionaryAssert<TKey, TValue> AssertThat<TKey, TValue>(IDictionary<TKey, TValue>? current)
         where TKey : notnull
         where TValue : notnull
         => new DictionaryAssert<TKey, TValue>(current);
 
+    /// <summary>
+    ///     An Assertion to verify dictionary values.
+    /// </summary>
+    /// <param name="current">The current dictionary value to verify.</param>
+    /// <returns>An instance of IDictionaryAssert for further assertions.</returns>
     public static IDictionaryAssert<Variant, Variant> AssertThat(Dictionary? current)
         => new DictionaryAssert<Variant, Variant>(current);
 
+    /// <summary>
+    ///     An Assertion to verify dictionary values.
+    /// </summary>
+    /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
+    /// <param name="current">The current dictionary value to verify.</param>
+    /// <returns>An instance of IDictionaryAssert for further assertions.</returns>
     public static IDictionaryAssert<TKey, TValue> AssertThat<[MustBeVariant] TKey, [MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current)
         where TKey : notnull
         where TValue : notnull
@@ -153,18 +251,50 @@ public static class Assertions
     public static IEnumerableAssert<object?> AssertThat(IEnumerable? current)
         => new EnumerableAssert<object?>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <param name="current">The enumerable value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<bool> AssertThat(BitArray? current)
         => new EnumerableAssert<bool>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <typeparam name="TValue">The type of elements in the enumerable.</typeparam>
+    /// <param name="current">The enumerable value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<TValue?> AssertThat<TValue>(IEnumerable<TValue?>? current)
         => new EnumerableAssert<TValue?>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <typeparam name="TValue">The type of elements in the array.</typeparam>
+    /// <param name="current">The array values to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
+    [SuppressMessage(
+        "StyleCop.CSharp.SpacingRules",
+        "SA1011:ClosingSquareBracketsMustBeSpacedCorrectly",
+        Justification = "A closing square bracket within a C# statement is not spaced correctly.")]
     public static IEnumerableAssert<TValue?> AssertThat<TValue>(params TValue?[]? current)
         => new EnumerableAssert<TValue?>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <param name="current">The enumerable value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<Variant> AssertThat(Array? current)
         => new EnumerableAssert<Variant>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all enumerable types.
+    /// </summary>
+    /// <typeparam name="TValue">The type of elements in the array.</typeparam>
+    /// <param name="current">The enumerable value to verify.</param>
+    /// <returns>An instance of IEnumerableAssert for further assertions.</returns>
     public static IEnumerableAssert<TValue?> AssertThat<[MustBeVariant] TValue>(Array<TValue>? current)
         => new EnumerableAssert<TValue?>(current);
 
@@ -175,26 +305,70 @@ public static class Assertions
     /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector2> AssertThat(Vector2 current) => new VectorAssert<Vector2>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector2I> AssertThat(Vector2I current) => new VectorAssert<Vector2I>(current);
+
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector3> AssertThat(Vector3 current) => new VectorAssert<Vector3>(current);
+
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector3I> AssertThat(Vector3I current) => new VectorAssert<Vector3I>(current);
+
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector4> AssertThat(Vector4 current) => new VectorAssert<Vector4>(current);
+
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<Vector4I> AssertThat(Vector4I current) => new VectorAssert<Vector4I>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<System.Numerics.Vector2> AssertThat(System.Numerics.Vector2 current)
         => new VectorAssert<System.Numerics.Vector2>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<System.Numerics.Vector3> AssertThat(System.Numerics.Vector3 current)
         => new VectorAssert<System.Numerics.Vector3>(current);
 
+    /// <summary>
+    ///     The dynamic assertions for all Godot vector types.
+    /// </summary>
+    /// <param name="current">The vector value to verify.</param>
+    /// <returns>An instance of IVectorAssert for further assertions.</returns>
     public static IVectorAssert<System.Numerics.Vector4> AssertThat(System.Numerics.Vector4 current)
         => new VectorAssert<System.Numerics.Vector4>(current);
 
     /// <summary>
-    ///     A dynamic assertion for <see cref="Godot.Variant" /> based on the input type.
+    ///     A dynamic assertion for <see cref="Variant" /> based on the input type.
     /// </summary>
     /// <param name="current">The input value to be asserted.</param>
-    /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
+    /// <returns>A dynamic assertion that provides assertion methods based on the input type.</returns>
     public static dynamic AssertThat(Variant current) => AssertThat(current.UnboxVariant());
 
     /// <summary>
@@ -202,7 +376,7 @@ public static class Assertions
     /// </summary>
     /// <typeparam name="TValue">The type of the input.</typeparam>
     /// <param name="current">The input value to be asserted.</param>
-    /// <returns>A dynamic assert object that provides assertion methods based on the input type.</returns>
+    /// <returns>A dynamic assertion that provides assertion methods based on the input type.</returns>
     public static dynamic AssertThat<TValue>(TValue? current)
     {
         var valueType = typeof(TValue);
@@ -212,7 +386,9 @@ public static class Assertions
             if (valueType.IsGenericType)
             {
                 var assertType = typeof(DictionaryAssert<,>).MakeGenericType(valueType.GenericTypeArguments);
-                return Activator.CreateInstance(assertType, current)!;
+                var instance = Activator.CreateInstance(assertType, current)
+                               ?? throw new InvalidOperationException($"Failed to create instance of {assertType.Name}");
+                return instance;
             }
 
             return DictionaryAssert<object, object?>.From(current as IDictionary);
@@ -223,7 +399,9 @@ public static class Assertions
             if (valueType.IsGenericType)
             {
                 var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType.GenericTypeArguments[0]);
-                return Activator.CreateInstance(assertType, current)!;
+                var instance = Activator.CreateInstance(assertType, current)
+                               ?? throw new InvalidOperationException($"Failed to create instance of {assertType.Name}");
+                return instance;
             }
 
             return AssertThat(current as IEnumerable);
@@ -242,17 +420,27 @@ public static class Assertions
 
     /// <summary>
     ///     An Assertion to verify for expecting exceptions when performing a task.
-    ///     <example>
-    ///         <code>
+    /// </summary>
+    /// <typeparam name="TAction">The type of the task result.</typeparam>
+    /// <param name="task">A task that may throw an exception during execution.</param>
+    /// <returns>
+    ///     A task that resolves to an <see cref="IExceptionAssert" /> if an exception was thrown,
+    ///     or null if the task completed successfully.
+    /// </returns>
+    /// <remarks>
+    ///     This overload accepts a generic Task and captures any exception thrown during execution.
+    /// </remarks>
+    /// <example>
+    ///     <code>
     ///     await AssertThrown(task.WithTimeout(500))
     ///        .ContinueWith(result => result.Result.HasMessage("timed out after 500ms."));
-    /// </code>
-    ///     </example>
-    /// </summary>
-    /// <param name="task">A task where throw possible exceptions</param>
-    /// <returns>a task of <c>IExceptionAssert</c> to await</returns>
+    ///     </code>
+    /// </example>
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Method purpose is to capture and assert on any exception")]
     public static async Task<IExceptionAssert?> AssertThrown<TAction>(Task<TAction> task)
     {
+        ArgumentNullException.ThrowIfNull(task);
+
         try
         {
             await task;
@@ -264,8 +452,27 @@ public static class Assertions
         }
     }
 
+    /// <summary>
+    ///     An Assertion to verify for expecting exceptions when performing a task.
+    /// </summary>
+    /// <param name="task">A task that may throw an exception during execution.</param>
+    /// <returns>
+    ///     A task that resolves to an <see cref="IExceptionAssert" /> if an exception was thrown,
+    ///     or null if the task completed successfully.
+    /// </returns>
+    /// <remarks>
+    ///     This overload accepts a non-generic Task and captures any exception thrown during execution.
+    /// </remarks>
+    /// <example>
+    ///     <code>
+    ///     await AssertThrown(asyncOperation.WithTimeout(500))
+    ///         .ContinueWith(result => result.Result.HasMessage("Operation timed out"));
+    ///     </code>
+    /// </example>
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Method purpose is to capture and assert on any exception")]
     public static async Task<IExceptionAssert?> AssertThrown(Task task)
     {
+        ArgumentNullException.ThrowIfNull(task);
         try
         {
             await task;
@@ -276,15 +483,18 @@ public static class Assertions
             return new ExceptionAssert<Exception>(e);
         }
     }
-
-    #region test_helpers
 
     /// ----------- Helpers -------------------------------------------------------------------------------------------------------
     /// <summary>
-    ///     Adds the Node on actual SceneTree to be processed during test execution.
-    ///     The node is auto freed and can be disabled by set autoFree = false.
+    ///     Adds the Node on the actual SceneTree to be processed during test execution.
+    ///     The node is auto-freed and can be disabled by set autoFree = false.
     /// </summary>
-    public static TNode AddNode<TNode>(TNode node, bool autoFree = true) where TNode : Node
+    /// <typeparam name="TNode">The type of node to add.</typeparam>
+    /// <param name="node">The node to add to the scene tree.</param>
+    /// <param name="autoFree">Whether to automatically free the node after test execution.</param>
+    /// <returns>The added node for method chaining.</returns>
+    public static TNode AddNode<TNode>(TNode node, bool autoFree = true)
+        where TNode : Node
     {
         if (autoFree)
             AutoFree(node);
@@ -294,28 +504,39 @@ public static class Assertions
     }
 
     /// <summary>
-    ///     A little helper to auto freeing your created objects after test execution
+    ///     A little helper to auto-freeing your created objects after test execution.
     /// </summary>
-    public static TValue? AutoFree<TValue>(TValue? obj) where TValue : GodotObject
+    /// <typeparam name="TValue">The type of Godot object to register.</typeparam>
+    /// <param name="obj">The Godot object to register for automatic cleanup.</param>
+    /// <returns>The registered object for method chaining.</returns>
+    public static TValue? AutoFree<TValue>(TValue? obj)
+        where TValue : GodotObject
         => MemoryPool.RegisterForAutoFree(obj);
 
     /// <summary>
-    ///     Builds a tuple by given values
+    ///     Builds a tuple by given values.
     /// </summary>
+    /// <param name="args">The values to include in the tuple.</param>
+    /// <returns>A new tuple containing the specified values.</returns>
     public static ITuple Tuple(params object?[] args) => new Tuple(args);
 
     /// <summary>
-    ///     Builds an extractor by given method name and optional arguments
+    ///     Builds an extractor by given method name and optional arguments.
     /// </summary>
-    public static IValueExtractor Extr(string methodName, params object[] args) => new ValueExtractor(methodName, args);
+    /// <param name="methodName">The name of the method to extract.</param>
+    /// <param name="args">Optional arguments to pass to the method.</param>
+    /// <returns>A value extractor that can be used with assertion methods.</returns>
+    public static IValueExtractor Extr(string methodName, params object[] args)
+    {
+        ArgumentNullException.ThrowIfNull(methodName);
+        return new ValueExtractor(methodName, args);
+    }
 
     /// <summary>
-    ///     Provides the expected line number via compile state.
-    ///     Is primary designed to use on internal test coverage to validate the reported error line is correct.
+    ///     Provides the expected line number via compiler state.
+    ///     Is primarily designed to use on internal test coverage to validate the reported error line is correct.
     /// </summary>
-    /// <param name="lineNumber"></param>
-    /// <returns></returns>
+    /// <param name="lineNumber">The calling line number, automatically provided by the compiler.</param>
+    /// <returns>The adjusted line number for error reporting.</returns>
     internal static int ExpectedLineNumber([CallerLineNumber] int lineNumber = 0) => lineNumber - 1;
-
-    #endregion
 }

@@ -91,7 +91,9 @@ internal sealed class TestEventReportListener : ITestEventListener
                 if (testEvent.DisplayName != null)
                     testResult.DisplayName = testEvent.DisplayName;
 
-                testEvent.Reports.ForEach(report => AddTestReport(report, testResult));
+                testEvent.Reports
+                    .ToList()
+                    .ForEach(report => AddTestReport(report, testResult));
 
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestCase: {testEvent.FullyQualifiedName} {testResult.Outcome}");
@@ -130,7 +132,9 @@ internal sealed class TestEventReportListener : ITestEventListener
                         EndTime = DateTimeOffset.Now
                     };
 
-                    testEvent.Reports.ForEach(report => AddTestReport(report, testResult));
+                    testEvent.Reports
+                        .ToList()
+                        .ForEach(report => AddTestReport(report, testResult));
 
                     Framework.RecordStart(testCase);
                     Framework.RecordResult(testResult);

@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Execution;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.Threading;
@@ -18,12 +21,13 @@ public class DirectCommandExecutor : ICommandExecutor
 
     public Task StopAsync() => Task.CompletedTask;
 
-    ValueTask IAsyncDisposable.DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
 
-    public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken) where T : BaseCommand
+    public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken)
+        where T : BaseCommand
         => await command.Execute(testEventListener);
 }

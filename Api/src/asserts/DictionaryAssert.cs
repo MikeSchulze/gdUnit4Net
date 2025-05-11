@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System.Collections;
@@ -6,13 +9,16 @@ using System.Linq;
 
 using CommandLine;
 
-public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue> where TKey : notnull
+public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
+    where TKey : notnull
 {
-    public DictionaryAssert(IDictionary<TKey, TValue>? current) : base(current)
+    public DictionaryAssert(IDictionary<TKey, TValue>? current)
+        : base(current)
     {
     }
 
-    private DictionaryAssert(IDictionary? current) : base(current)
+    private DictionaryAssert(IDictionary? current)
+        : base(current)
     {
     }
 
@@ -156,7 +162,6 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
             ThrowTestFailureReport(AssertFailures.IsSame(base.Current, expected), base.Current, expected);
         return this;
     }
-
 
     public new IDictionaryAssert<TKey, TValue> OverrideFailureMessage(string message)
         => (IDictionaryAssert<TKey, TValue>)base.OverrideFailureMessage(message);

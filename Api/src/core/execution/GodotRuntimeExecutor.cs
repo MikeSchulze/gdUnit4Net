@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Execution;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Execution;
 
 using System;
 using System.IO.Pipes;
@@ -31,7 +34,9 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     public GodotRuntimeExecutor(ITestEngineLogger logger)
         : base(new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
-        => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
+    {
+        Logger.LogInfo("Starting GodotGdUnit4RestClient.");
+    }
 
     public async Task StartAsync()
     {
@@ -51,6 +56,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         try
         {
             await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None);
+
             // Give server time to process shutdown
             await Task.Delay(100);
             await DisposeAsync();
@@ -62,7 +68,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         }
     }
 
-    public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken) where T : BaseCommand
+    public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken)
+        where T : BaseCommand
     {
         if (!IsConnected)
             throw new InvalidOperationException("Client is not connected");
@@ -72,6 +79,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 
         // commit command
         await WriteCommand(command);
+
         // read incoming data until is command response or canceled
         TestEvent? lastTestEvent = null;
         while (!cancellationToken.IsCancellationRequested)
@@ -110,7 +118,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         return new Response
         {
             StatusCode = HttpStatusCode.InternalServerError,
-            Payload = ""
+            Payload = string.Empty
         };
     }
 }
@@ -118,6 +126,10 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 internal class NoInteractTestEventListener : ITestEventListener
 {
     public bool IsFailed { get; set; }
+
     public int CompletedTests { get; set; }
-    public void PublishEvent(ITestEvent testEvent) { }
+
+    public void PublishEvent(ITestEvent testEvent)
+    {
+    }
 }

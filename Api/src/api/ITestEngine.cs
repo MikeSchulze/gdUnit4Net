@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Api;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Api;
 
 using System;
 using System.Collections.Generic;
@@ -24,9 +27,9 @@ public interface ITestEngine : IDisposable
     /// <summary>
     ///     Creates a new instance of the test engine with specified settings and logger.
     /// </summary>
-    /// <param name="settings">Configuration settings for test execution behavior</param>
-    /// <param name="logger">Logger for capturing test engine diagnostics and operations</param>
-    /// <returns>A new ITestEngine instance configured with the specified settings</returns>
+    /// <param name="settings">Configuration settings for test execution behavior.</param>
+    /// <param name="logger">Logger for capturing test engine diagnostics and operations.</param>
+    /// <returns>A new ITestEngine instance configured with the specified settings.</returns>
     /// <remarks>
     ///     This is the primary factory method for creating test engine instances.
     ///     Each instance maintains its own execution context and state.
@@ -36,35 +39,35 @@ public interface ITestEngine : IDisposable
     /// <summary>
     ///     Discovers test cases in the specified test assembly.
     /// </summary>
-    /// <param name="testAssembly">Full path to the test assembly file to scan</param>
-    /// <returns>List of discovered test case descriptors</returns>
+    /// <param name="testAssembly">Full path to the test assembly file to scan.</param>
+    /// <returns>List of discovered test case descriptors.</returns>
     /// <remarks>
     ///     The discovery process scans the assembly for test cases using reflection.
     ///     Only public test methods decorated with appropriate test attributes are discovered.
     /// </remarks>
-    public List<TestCaseDescriptor> Discover(string testAssembly);
+    IReadOnlyCollection<TestCaseDescriptor> Discover(string testAssembly);
 
     /// <summary>
     ///     Executes the specified test cases asynchronously with debugging support.
     /// </summary>
-    /// <param name="testAssemblyNodes">Collection of test assemblies and their test cases to execute</param>
-    /// <param name="eventListener">Listener that receives test execution progress and results</param>
-    /// <param name="debuggerFramework">Framework providing debugging capabilities during test execution</param>
+    /// <param name="testAssemblyNodes">Collection of test assemblies and their test cases to execute.</param>
+    /// <param name="eventListener">Listener that receives test execution progress and results.</param>
+    /// <param name="debuggerFramework">Framework providing debugging capabilities during test execution.</param>
     /// <remarks>
     ///     Test execution occurs asynchronously with progress reported through the event listener.
     ///     The debugger framework enables debugging of tests during execution.
-    ///     Tests can be cancelled via the Cancel() method.
+    ///     Tests can be canceled via the Cancel() method.
     /// </remarks>
-    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework);
+    void Execute(IReadOnlyCollection<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework);
 
     /// <summary>
     ///     Gets the version of the GdUnit4 test engine.
     /// </summary>
-    /// <returns>Version information of the engine, or null if the gdUnit4Api is not installed</returns>
-    /// <exception cref="InvalidOperationException">Thrown when GdUnit4Api is not properly installed</exception>
+    /// <returns>Version information of the engine, or null if the gdUnit4Api is not installed.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when GdUnit4Api is not properly installed.</exception>
     /// <remarks>
     ///     The version is retrieved from the assembly containing the GdUnit4TestEngine type.
-    ///     This method helps verify correct installation and versioning of the test engine.
+    ///     This method helps verify the correct installation and versioning of the test engine.
     /// </remarks>
     static Version? EngineVersion()
     {
@@ -77,7 +80,7 @@ public interface ITestEngine : IDisposable
     /// </summary>
     /// <remarks>
     ///     This method safely terminates ongoing test execution.
-    ///     Resources are properly cleaned up and in-progress tests are marked as cancelled.
+    ///     Resources are properly cleaned up, and in-progress tests are marked as canceled.
     /// </remarks>
     void Cancel();
 }

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -35,7 +38,8 @@ internal sealed class ExecutionContext : IDisposable
         IsEngineMode = isEngineMode;
     }
 
-    public ExecutionContext(ExecutionContext context, params object?[] methodArguments) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled,
+    public ExecutionContext(ExecutionContext context, params object?[] methodArguments)
+        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled,
         context.IsEngineMode)
     {
         ReportCollector = context.ReportCollector;
@@ -51,7 +55,8 @@ internal sealed class ExecutionContext : IDisposable
     }
 
     // used for dynamic datapoint tests
-    public ExecutionContext(ExecutionContext context, string displayName) : this(context.TestSuite, context.EventListeners,
+    public ExecutionContext(ExecutionContext context, string displayName)
+        : this(context.TestSuite, context.EventListeners,
         context.ReportOrphanNodesEnabled,
         context.IsEngineMode)
     {
@@ -67,7 +72,8 @@ internal sealed class ExecutionContext : IDisposable
         DisplayName = displayName;
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase) : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
+    public ExecutionContext(ExecutionContext context, TestCase testCase)
+        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
     {
         context.SubExecutionContexts.Add(this);
         CurrentTestCase = testCase;
@@ -87,7 +93,9 @@ internal sealed class ExecutionContext : IDisposable
     {
         get;
         set;
-    } = true;
+    }
+
+    = true;
 
     private bool ReportOrphanNodesEnabled
     {
@@ -99,7 +107,6 @@ internal sealed class ExecutionContext : IDisposable
         get;
         set;
     }
-
 
     public MemoryPool MemoryPool
     {
@@ -143,7 +150,9 @@ internal sealed class ExecutionContext : IDisposable
     {
         get;
         set;
-    } = "";
+    }
+
+    = string.Empty;
 
     public object?[] MethodArguments { get; private set; } = Array.Empty<object?>();
 
@@ -191,7 +200,10 @@ internal sealed class ExecutionContext : IDisposable
             {
                 disposable.Dispose();
             }
-            catch (ObjectDisposedException e) { _ = e; }
+            catch (ObjectDisposedException e)
+            {
+                _ = e;
+            }
         });
         Stopwatch.Stop();
     }

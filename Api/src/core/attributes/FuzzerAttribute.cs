@@ -1,4 +1,5 @@
-// ReSharper disable once CheckNamespace
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4;
 
@@ -6,7 +7,7 @@ using System;
 using System.Collections.Generic;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class FuzzerAttribute : Attribute, IValueProvider
+public sealed class FuzzerAttribute : Attribute, IValueProvider
 {
     private int value;
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core;
 
 using Extensions;
@@ -22,8 +25,8 @@ internal static class GdUnit4Settings
     private const string TEST_TIMEOUT = GROUP_TEST + "/test_timeout_seconds";
 
     private const string TEST_LOOKUP_FOLDER = GROUP_TEST + "/test_lookup_folder";
-    //internal const string TEST_SITE_NAMING_CONVENTION = GROUP_TEST + "/test_suite_naming_convention";
 
+    // internal const string TEST_SITE_NAMING_CONVENTION = GROUP_TEST + "/test_suite_naming_convention";
 
     // Report Settings
     private const string REPORT_SETTINGS = MAIN_CATEGORY + "/report";
@@ -41,18 +44,16 @@ internal static class GdUnit4Settings
     private const string STDOUT_ENABLE_TO_FILE = CATEGORY_LOGGING + "enable_file_logging";
     private const string STDOUT_WITE_TO_FILE = CATEGORY_LOGGING + "log_path";
 
-
     // GdUnit Templates
-    //internal const string TEMPLATES = MAIN_CATEGORY + "/templates";
-    //internal const string TEMPLATES_TS = TEMPLATES + "/testsuite";
-    //internal const string TEMPLATE_TS_GD = TEMPLATES_TS + "/GDScript";
-    //internal const string TEMPLATE_TS_CS = TEMPLATES_TS + "/CSharpScript";
+    // internal const string TEMPLATES = MAIN_CATEGORY + "/templates";
+    // internal const string TEMPLATES_TS = TEMPLATES + "/testsuite";
+    // internal const string TEMPLATE_TS_GD = TEMPLATES_TS + "/GDScript";
+    // internal const string TEMPLATE_TS_CS = TEMPLATES_TS + "/CSharpScript";
 
     // UI Settings
     private const string UI_SETTINGS = MAIN_CATEGORY + "/ui";
     private const string GROUP_UI_INSPECTOR = UI_SETTINGS + "/inspector";
     private const string INSPECTOR_NODE_COLLAPSE = GROUP_UI_INSPECTOR + "/node_collapse";
-
 
     // Shortcut Settings
     /**
@@ -87,7 +88,6 @@ internal static class GdUnit4Settings
 
     // the folder to create new test-suites
     private const string DEFAULT_TEST_LOOKUP_FOLDER = "test";
-
 
     private static T? GetSetting<T>(string name, T @default)
         => ProjectSettings.HasSetting(name)

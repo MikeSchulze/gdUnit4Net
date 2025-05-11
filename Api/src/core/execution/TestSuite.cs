@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -18,11 +21,13 @@ internal sealed class TestSuite : IDisposable
 
         Name = type.Name;
         ResourcePath = sourceFile;
+
         // we do lazy loading to only load test case one times
         testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, tests));
     }
 
-    public TestSuite(TestSuiteNode suite) : this(
+    public TestSuite(TestSuiteNode suite)
+        : this(
         FindTypeOnAssembly(suite.AssemblyPath, suite.ManagedType),
         suite.Tests,
         suite.SourceFile)
@@ -52,7 +57,8 @@ internal sealed class TestSuite : IDisposable
     private static List<TestCase> LoadTestCases(Type type, List<TestCaseNode> includedTests)
         => type.GetMethods()
             .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-            .Join(includedTests,
+            .Join(
+                includedTests,
                 m => m.Name,
                 test => test.ManagedMethod,
                 (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
@@ -62,7 +68,7 @@ internal sealed class TestSuite : IDisposable
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            //  if (assembly.Location != assemblyName)
+            // if (assembly.Location != assemblyName)
             //    continue;
             var type = assembly.GetType(clazz);
             if (type != null)
@@ -72,7 +78,7 @@ internal sealed class TestSuite : IDisposable
         try
         {
             var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyPath));
-            return assembly.GetType(clazz)!;
+            return assembly.GetType(clazz) !;
         }
         catch (Exception ex)
         {

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
@@ -10,7 +13,8 @@ using static Api.ITestReport.ReportType;
 
 internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 {
-    public TestCaseExecutionStage(string name, TestCase testCase, TestCaseAttribute stageAttribute) : base(name, testCase.MethodInfo, stageAttribute)
+    public TestCaseExecutionStage(string name, TestCase testCase, TestCaseAttribute stageAttribute)
+        : base(name, testCase.MethodInfo, stageAttribute)
     {
     }
 

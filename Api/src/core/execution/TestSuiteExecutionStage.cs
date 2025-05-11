@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -22,30 +25,19 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         AfterTestStage = new AfterTestExecutionStage(testSuite);
     }
 
-    private BeforeExecutionStage BeforeStage
-    {
-        get;
-    }
+    private BeforeExecutionStage BeforeStage { get; }
 
-    private AfterExecutionStage AfterStage
-    {
-        get;
-    }
+    private AfterExecutionStage AfterStage { get; }
 
-    private BeforeTestExecutionStage BeforeTestStage
-    {
-        get;
-    }
+    private BeforeTestExecutionStage BeforeTestStage { get; }
 
-    private AfterTestExecutionStage AfterTestStage
-    {
-        get;
-    }
+    private AfterTestExecutionStage AfterTestStage { get; }
 
     public async Task Execute(ExecutionContext testSuiteContext)
     {
         await BeforeStage.Execute(testSuiteContext);
         using (var stdoutHook = testSuiteContext.IsCaptureStdOut ? StdOutHookFactory.CreateStdOutHook() : null)
+        {
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
                 using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
@@ -56,9 +48,10 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
                 if (testCaseContext.IsFailed || testCaseContext.IsError)
                 {
-                    //break;
+                    // break;
                 }
             }
+        }
 
         await AfterStage.Execute(testSuiteContext);
     }
@@ -127,8 +120,10 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             var stdoutMessage = stdoutHook?.GetCapturedOutput();
             if (!string.IsNullOrEmpty(stdoutMessage))
             {
-                executionContext.ReportCollector.PushFront(new TestReport(Stdout,
+                executionContext.ReportCollector.PushFront(new TestReport(
+                    Stdout,
                     executionContext.CurrentTestCase?.Line ?? 0, stdoutMessage));
+
                 // and finally redirect to the console because it was fully captured
                 Console.WriteLine(stdoutMessage);
             }

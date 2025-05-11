@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System.Collections;
@@ -10,19 +13,21 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
 {
-    public EnumerableAssert(IEnumerable? current) : base(current?.Cast<TValue?>())
+    public EnumerableAssert(IEnumerable? current)
+        : base(current?.Cast<TValue?>())
     {
     }
 
-    public EnumerableAssert(IEnumerable<TValue?>? current) : base(current)
+    public EnumerableAssert(IEnumerable<TValue?>? current)
+        : base(current)
     {
     }
 
     public IEnumerableAssert<TValue?> IsEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -30,7 +35,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
 
     public IEnumerableAssert<TValue?> IsNotEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -187,6 +192,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     private EnumerableAssert<TValue?> CheckContains(IEnumerable<TValue?> expected, bool referenceEquals)
     {
         var expectedList = expected.ToList();
+
         // we test for contains nothing
         if (expectedList.Count == 0)
             return this!;
@@ -194,9 +200,8 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         // Create list once to avoid multiple enumerations
         var notFound = expectedList.Where(expectedItem =>
                 Current?.Any(currentItem =>
-                    referenceEquals ? expectedItem.IsSame(currentItem) : expectedItem.IsEquals(currentItem)
-                ) != true // This pattern maintains the original null handling
-        ).ToList();
+                    referenceEquals ? expectedItem.IsSame(currentItem) : expectedItem.IsEquals(currentItem)) != true) // This pattern maintains the original null handling
+            .ToList();
 
         if (notFound.Count > 0)
             ThrowTestFailureReport(AssertFailures.Contains(Current, expectedList, notFound), Current, expected);
@@ -206,6 +211,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     private EnumerableAssert<TValue?> CheckContainsExactly(IEnumerable<TValue?> expected, bool referenceEquals)
     {
         var expectedList = expected.ToList();
+
         // we test for contains nothing
         if (expectedList.Count == 0)
             return this!;
@@ -221,6 +227,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     private EnumerableAssert<TValue?> CheckContainsExactlyInAnyOrder(IEnumerable<TValue?> expected, bool referenceEquals)
     {
         var expectedList = expected.ToList();
+
         // we test for contains nothing
         if (expectedList.Count == 0)
             return this!;
@@ -228,6 +235,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var diff = DiffArrayAnyOrder(Current, expectedList, referenceEquals);
         var notExpected = diff.NotExpected;
         var notFound = diff.NotFound;
+
         // no difference and additions found
         if (notExpected.Count != 0 || notFound.Count != 0)
             ThrowTestFailureReport(AssertFailures.ContainsExactlyInAnyOrder(Current, expectedList, notFound, notExpected), Current, expected);
@@ -237,6 +245,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     private EnumerableAssert<TValue?> CheckNotContains(IEnumerable<TValue?> expected, bool referenceEquals)
     {
         var expectedList = expected.ToList();
+
         // we test for contains nothing
         if (expectedList.Count == 0)
             return this!;
@@ -244,8 +253,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var found = Current?
             .Where(currentItem =>
                 expectedList.Any(expectedItem =>
-                    referenceEquals ? currentItem.IsSame(expectedItem) : currentItem.IsEquals(expectedItem))
-            )
+                    referenceEquals ? currentItem.IsSame(expectedItem) : currentItem.IsEquals(expectedItem)))
             .ToList() ?? new List<TValue?>();
 
         if (found.Count != 0)
@@ -319,10 +327,10 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         };
     }
 
-
     private class ArrayDiff
     {
         public List<TValue?> NotExpected { get; init; } = new();
+
         public List<TValue?> NotFound { get; init; } = new();
     }
 }

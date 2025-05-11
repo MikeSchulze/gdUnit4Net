@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core;
 
 using System;
 using System.Collections.Generic;
@@ -28,21 +31,26 @@ internal sealed class GdUnit4TestEngine : ITestEngine
     }
 
     private TestEngineSettings Settings { get; }
+
     private ITestEngineLogger Logger { get; }
+
     private IDebuggerFramework DebuggerFramework { get; set; } = null!;
+
     private List<ITestRunner> ActiveTestRunners { get; } = new();
 
     public void Dispose() => cancellationSource?.Dispose();
 
     public void Cancel()
     {
-        lock (taskLock) cancellationSource?.Cancel();
-        foreach (var activeTestRunner in ActiveTestRunners) activeTestRunner.Cancel();
+        lock (taskLock)
+            cancellationSource?.Cancel();
+        foreach (var activeTestRunner in ActiveTestRunners)
+            activeTestRunner.Cancel();
     }
 
-    public List<TestCaseDescriptor> Discover(string testAssembly) => TestCaseDiscoverer.Discover(Settings, Logger, testAssembly);
+    public IReadOnlyCollection<TestCaseDescriptor> Discover(string testAssembly) => TestCaseDiscoverer.Discover(Settings, Logger, testAssembly);
 
-    public void Execute(List<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework)
+    public void Execute(IReadOnlyCollection<TestAssemblyNode> testAssemblyNodes, ITestEventListener eventListener, IDebuggerFramework debuggerFramework)
     {
         DebuggerFramework = debuggerFramework;
         var sessionTimeoutCancellationSource = new CancellationTokenSource(Settings.SessionTimeout);
@@ -61,6 +69,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
                 semaphore.Wait(cancellationSource.Token);
 
                 var task = ExecuteTestsInAssembly(assemblyNode, eventListener, cancellationSource.Token)
+
                     // ReSharper disable once AccessToDisposedClosure
                     .ContinueWith(_ => semaphore.Release(), TaskContinuationOptions.ExecuteSynchronously);
                 tasks.Add(task);
@@ -100,11 +109,13 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             catch (Exception ex)
             {
                 Logger.LogError($"Error during cancellation cleanup: {ex.Message}");
+                throw;
             }
         }
         catch (AggregateException ae)
         {
-            foreach (var ex in ae.InnerExceptions) Logger.LogError($"Error executing tests: {ex.Message}");
+            foreach (var ex in ae.InnerExceptions)
+                Logger.LogError($"Error executing tests: {ex.Message}");
             throw;
         }
         catch (Exception ex)
@@ -120,48 +131,6 @@ internal sealed class GdUnit4TestEngine : ITestEngine
                 cancellationSource.Dispose();
                 cancellationSource = null;
             }
-        }
-    }
-
-    private static int TotalTests(List<TestAssemblyNode> testAssemblyNodes)
-    {
-        var totalTests = 0;
-        foreach (var assemblyNode in testAssemblyNodes) totalTests += assemblyNode.Suites.Sum(ts => ts.Tests.Count);
-        return totalTests;
-    }
-
-    private Task ExecuteTestsInAssembly(TestAssemblyNode testAssemblyNode, ITestEventListener eventListener, CancellationToken cancellationToken)
-        => Task.Run(() =>
-        {
-            Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
-
-            var projectWorkingDir = LookupProjectPath(testAssemblyNode.AssemblyPath);
-            Directory.SetCurrentDirectory(projectWorkingDir);
-            Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
-
-            ExecuteEngineTests(testAssemblyNode.Suites, eventListener, cancellationToken);
-
-            Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
-        }, cancellationToken);
-
-    private void ExecuteEngineTests(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
-    {
-        var (directExecutorTestSuites, godotExecutorTestSuites) = SplitTestSuitesByRequiredRuntime(testSuiteNodes);
-        // Run tests that require Godot runtime
-        if (godotExecutorTestSuites.Count > 0)
-        {
-            var godotRunner = new GodotRuntimeTestRunner(Logger, DebuggerFramework, Settings);
-            ActiveTestRunners.Add(godotRunner);
-            godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
-            ActiveTestRunners.Remove(godotRunner);
-        }
-        // Run tests that don't require Godot runtime
-        if (directExecutorTestSuites.Count > 0)
-        {
-            var directRunner = new DefaultTestRunner(Logger, Settings);
-            ActiveTestRunners.Add(directRunner);
-            directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
-            ActiveTestRunners.Remove(directRunner);
         }
     }
 
@@ -184,6 +153,51 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         return (directExecutorTestSuites, godotExecutorTestSuites);
     }
 
+    private static int TotalTests(IReadOnlyCollection<TestAssemblyNode> testAssemblyNodes)
+    {
+        var totalTests = 0;
+        foreach (var assemblyNode in testAssemblyNodes)
+            totalTests += assemblyNode.Suites.Sum(ts => ts.Tests.Count);
+        return totalTests;
+    }
+
+    private Task ExecuteTestsInAssembly(TestAssemblyNode testAssemblyNode, ITestEventListener eventListener, CancellationToken cancellationToken)
+        => Task.Run(
+            () =>
+            {
+                Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
+
+                var projectWorkingDir = LookupProjectPath(testAssemblyNode.AssemblyPath);
+                Directory.SetCurrentDirectory(projectWorkingDir);
+                Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
+
+                ExecuteEngineTests(testAssemblyNode.Suites, eventListener, cancellationToken);
+
+                Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
+            }, cancellationToken);
+
+    private void ExecuteEngineTests(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
+    {
+        var (directExecutorTestSuites, godotExecutorTestSuites) = SplitTestSuitesByRequiredRuntime(testSuiteNodes);
+
+        // Run tests that require Godot runtime
+        if (godotExecutorTestSuites.Count > 0)
+        {
+            var godotRunner = new GodotRuntimeTestRunner(Logger, DebuggerFramework, Settings);
+            ActiveTestRunners.Add(godotRunner);
+            godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
+            ActiveTestRunners.Remove(godotRunner);
+        }
+
+        // Run tests that don't require Godot runtime
+        if (directExecutorTestSuites.Count > 0)
+        {
+            var directRunner = new DefaultTestRunner(Logger, Settings);
+            ActiveTestRunners.Add(directRunner);
+            directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
+            ActiveTestRunners.Remove(directRunner);
+        }
+    }
 
     private string LookupProjectPath(string assemblyPath)
     {
@@ -197,12 +211,13 @@ internal sealed class GdUnit4TestEngine : ITestEngine
                     return currentDir.FullName;
                 currentDir = currentDir.Parent;
             }
+
+            throw new FileNotFoundException("Project file does not exist");
         }
         catch (Exception ex)
         {
             Logger.LogError($"Unable to locate .csproj file: {ex.Message}");
+            throw new FileNotFoundException("Project file does not exist");
         }
-
-        throw new FileNotFoundException("Project file does not exist");
     }
 }

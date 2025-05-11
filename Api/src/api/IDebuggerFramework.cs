@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Api;
 
 using System.Diagnostics;
@@ -9,12 +11,12 @@ using System.Diagnostics;
 public interface IDebuggerFramework
 {
     /// <summary>
-    /// Indicates whether a debugger process is currently executing.
+    /// Gets a value indicating whether indicates whether a debugger process is currently executing.
     /// </summary>
     bool IsDebugProcess { get; }
 
     /// <summary>
-    /// Indicates whether a debugger is attached to a running process.
+    /// Gets a value indicating whether indicates whether a debugger is attached to a running process.
     /// </summary>
     bool IsDebugAttach { get; }
 
