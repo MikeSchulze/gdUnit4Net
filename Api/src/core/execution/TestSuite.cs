@@ -78,7 +78,7 @@ internal sealed class TestSuite : IDisposable
         try
         {
             var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyPath));
-            return assembly.GetType(clazz) !;
+            return assembly.GetType(clazz)!;
         }
         catch (Exception ex)
         {

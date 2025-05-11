@@ -50,5 +50,5 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     private static string NormalizedPath(string path) =>
         path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
 
-    public static string Version() => Assembly.GetAssembly(typeof(GdUnit4NetApiGodotBridge)) !.GetName() !.Version!.ToString();
+    public static string Version() => Assembly.GetAssembly(typeof(GdUnit4NetApiGodotBridge))!.GetName()!.Version!.ToString();
 }

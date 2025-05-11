@@ -133,7 +133,7 @@ internal static class DataPointValueProvider
             {
                 try
                 {
-                    var moveNextTask = (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null) !;
+                    var moveNextTask = (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null)!;
                     var hasNext = await moveNextTask
                         .AsTask()
                         .WaitAsync(cancellationToken.Token)

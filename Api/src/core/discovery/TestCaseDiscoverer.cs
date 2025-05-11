@@ -167,18 +167,18 @@ internal static class TestCaseDiscoverer
                 var testCaseAttribute = CreateTestCaseAttribute(attr);
 
                 return new TestCaseDescriptor
-                    {
-                        Id = Guid.NewGuid(),
-                        AssemblyPath = assemblyPath,
-                        ManagedType = className,
-                        ManagedMethod = mi.Name,
-                        AttributeIndex = index,
-                        LineNumber = navData.LineNumber,
-                        CodeFilePath = navData.CodeFilePath,
-                        RequireRunningGodotEngine = requireRunningGodotEngine,
-                        Categories = allCategories,
-                        Traits = allTraits
-                    }
+                {
+                    Id = Guid.NewGuid(),
+                    AssemblyPath = assemblyPath,
+                    ManagedType = className,
+                    ManagedMethod = mi.Name,
+                    AttributeIndex = index,
+                    LineNumber = navData.LineNumber,
+                    CodeFilePath = navData.CodeFilePath,
+                    RequireRunningGodotEngine = requireRunningGodotEngine,
+                    Categories = allCategories,
+                    Traits = allTraits
+                }
                     .Build(testCaseAttribute, hasMultipleAttributes);
             })
             .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
