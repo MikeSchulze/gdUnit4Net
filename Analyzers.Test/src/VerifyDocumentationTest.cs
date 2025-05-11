@@ -80,7 +80,7 @@ public partial class VerifyDocumentationTest
         StringAssert.Contains(docContent, descriptor.Description.ToString(), $"Documentation should contain the diagnostic description in {docPath}", StringComparison.Ordinal);
     }
 
-    private static IEnumerable<(DiagnosticDescriptor descriptor, string name)> GetAllDiagnosticDescriptors()
+    private static IEnumerable<(DiagnosticDescriptor Descriptor, string Name)> GetAllDiagnosticDescriptors()
     {
         // Get DataPoint diagnostics
         var dataPointType = typeof(DiagnosticRules.DataPoint);
@@ -127,8 +127,11 @@ public partial class VerifyDocumentationTest
     private sealed record DiagnosticRuleTableRecord
     {
         public required string Id { get; init; }
+
         public required string Severity { get; init; }
+
         public required string Title { get; init; }
+
         public override string ToString() => $"| {Id} | {Severity} | {Title} |";
     }
 }
