@@ -167,7 +167,8 @@ public interface ISceneRunner : IDisposable
     public ISceneRunner SetTimeFactor(double timeFactor = 1.0);
 
     /// <summary>
-    ///     Simulates scene processing for a certain number of frames by given delta peer frame by ignoring the current time factor.
+    ///     Simulates scene processing for a certain number of frames by given delta peer frame by ignoring the current time
+    ///     factor.
     ///     <code>
     ///     // Waits until 100 frames are processed with a delta of 20ms peer frame
     ///     await runner.SimulateFrames(100, 20);
@@ -246,8 +247,10 @@ public interface ISceneRunner : IDisposable
     public Task AwaitMillis(uint timeMillis);
 
     /// <summary>
-    ///     Waits for all input events to be processed by flushing any buffered input events and then awaiting a full cycle of both the process and physics frames.
-    ///     This is typically used to ensure that any simulated or queued inputs are fully processed before proceeding with the next steps in the scene.
+    ///     Waits for all input events to be processed by flushing any buffered input events and then awaiting a full cycle of
+    ///     both the process and physics frames.
+    ///     This is typically used to ensure that any simulated or queued inputs are fully processed before proceeding with the
+    ///     next steps in the scene.
     ///     It's essential for reliable input simulation or when synchronizing logic based on inputs.
     ///     <example>
     ///         <code>
@@ -257,7 +260,9 @@ public interface ISceneRunner : IDisposable
     ///     </code>
     ///     </example>
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+    /// <returns>
+    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
+    /// </returns>
     public async Task AwaitInputProcessed()
     {
         if (Scene().ProcessMode != Node.ProcessModeEnum.Disabled)
@@ -339,7 +344,7 @@ public static class SceneRunnerExtensions
         try
         {
             var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(task, timeoutTask);
             if (completedTask != task)
             {
                 // if a signal task token registered we need to be cancel first
@@ -350,7 +355,7 @@ public static class SceneRunnerExtensions
                 throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
             }
 
-            await task.ConfigureAwait(false); // Propagate any exceptions from the task
+            await task; // Propagate any exceptions from the task
         }
         finally
         {

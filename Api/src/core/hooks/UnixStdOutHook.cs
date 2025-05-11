@@ -28,17 +28,17 @@ internal sealed class UnixStdOutHook : IStdOutHook
     public UnixStdOutHook()
     {
         // Get original stdout handle
-        originalStdOutHandle = Dup(STD_OUTPUT_HANDLE);
+        originalStdOutHandle = dup(STD_OUTPUT_HANDLE);
         if (originalStdOutHandle == IntPtr.Zero)
             throw new InvalidOperationException("Failed to get original stdout handle.");
 
         // Create pipe
-        if (Pipe(pipeHandles) != 0)
+        if (pipe(pipeHandles) != 0)
             throw new InvalidOperationException("Failed to create pipe.");
 
         // Store original flags and set non-blocking mode
-        originalFlags = Fcntl(pipeHandles[PIPE_READ], F_GETFL, 0);
-        var hResult = Fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags | O_NONBLOCK);
+        originalFlags = fcntl(pipeHandles[PIPE_READ], F_GETFL, 0);
+        var hResult = fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags | O_NONBLOCK);
         if (hResult != 0)
             throw new InvalidOperationException($"Failed to create fcntl. Error: {hResult}");
     }
@@ -49,10 +49,10 @@ internal sealed class UnixStdOutHook : IStdOutHook
 #pragma warning disable CA1806 // Do ignore method results
 
         // Reset pipe read end blocking mode to its original state
-        Fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags);
+        fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags);
 
-        Close(pipeHandles[PIPE_READ]);
-        Close(pipeHandles[PIPE_WRITE]);
+        close(pipeHandles[PIPE_READ]);
+        close(pipeHandles[PIPE_WRITE]);
 #pragma warning restore CA1806
         stdOutHook.Dispose();
     }
@@ -60,7 +60,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
     public void StartCapture()
     {
         // Redirect stdout to the pipe
-        if (Dup2(pipeHandles[PIPE_WRITE], STD_OUTPUT_HANDLE) == -1)
+        if (dup2(pipeHandles[PIPE_WRITE], STD_OUTPUT_HANDLE) == -1)
             throw new InvalidOperationException("Failed to redirect stdout to pipe.");
 
         stdOutHook.StartCapture();
@@ -78,7 +78,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
         // Restore original stdout
 #pragma warning disable CA1806 // Do ignore method results
-        Dup2(originalStdOutHandle.ToInt32(), STD_OUTPUT_HANDLE);
+        dup2(originalStdOutHandle.ToInt32(), STD_OUTPUT_HANDLE);
 #pragma warning restore CA1806
     }
 
@@ -97,10 +97,10 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
             while (isCapturing)
             {
-                var ready = Poll(ref pollFd, 1, 10); // 10ms timeout
+                var ready = poll(ref pollFd, 1, 10); // 10ms timeout
                 if (ready > 0)
                 {
-                    var bytesRead = Read(pipeHandles[PIPE_READ], buffer, buffer.Length);
+                    var bytesRead = read(pipeHandles[PIPE_READ], buffer, buffer.Length);
                     if (bytesRead > 0)
                         ProcessReadData(buffer, (uint)bytesRead);
                 }
@@ -133,24 +133,24 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
 #pragma warning disable SYSLIB1054
     [DllImport("libc", SetLastError = true)]
-    private static extern int Pipe(int[] pipefd);
+    private static extern int pipe(int[] pipefd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Dup(int oldfd);
+    private static extern int dup(int oldfd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Dup2(int oldfd, int newfd);
+    private static extern int dup2(int oldfd, int newfd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Read(int fd, byte[] buf, int count);
+    private static extern int read(int fd, byte[] buf, int count);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Close(int fd);
+    private static extern int close(int fd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Fcntl(int fd, int cmd, int arg);
+    private static extern int fcntl(int fd, int cmd, int arg);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int Poll(ref PollFd fds, uint nfds, int timeout);
+    private static extern int poll(ref PollFd fds, uint nfds, int timeout);
 #pragma warning restore SYSLIB1054
 }
