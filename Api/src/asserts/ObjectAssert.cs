@@ -1,8 +1,12 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 public sealed class ObjectAssert : AssertBase<object>, IObjectAssert
 {
-    public ObjectAssert(object? current) : base(current)
+    public ObjectAssert(object? current)
+        : base(current)
     {
         var type = current?.GetType();
         if (type is { IsPrimitive: true })

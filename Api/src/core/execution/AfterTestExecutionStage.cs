@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System.Linq;
@@ -14,7 +17,8 @@ using static Api.ITestReport.ReportType;
 
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
 {
-    public AfterTestExecutionStage(TestSuite testSuite) : base("AfterTest", testSuite.Instance.GetType())
+    public AfterTestExecutionStage(TestSuite testSuite)
+        : base("AfterTest", testSuite.Instance.GetType())
     {
     }
 
@@ -56,6 +60,7 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
                         Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test setup stage!
                         Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!
                     """;
+
         return $"""
                 {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
                     Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test setup stage!

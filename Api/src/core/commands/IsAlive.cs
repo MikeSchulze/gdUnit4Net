@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Commands;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Commands;
 
 using System.Net;
 using System.Threading.Tasks;
@@ -13,12 +16,15 @@ using Newtonsoft.Json;
 public class IsAlive : BaseCommand
 {
     [JsonConstructor]
-    private IsAlive() { }
+    private IsAlive()
+    {
+    }
 
     /// <summary>
     ///     Executes a health check and returns an "alive" status response.
     /// </summary>
-    public override Task<Response> Execute(ITestEventListener testEventListener) => Task.FromResult<Response>(new Response
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+    public override Task<Response> Execute(ITestEventListener testEventListener) => Task.FromResult(new Response
     {
         StatusCode = HttpStatusCode.OK,
         Payload = "alive: true"

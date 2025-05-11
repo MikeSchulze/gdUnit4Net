@@ -7,9 +7,9 @@ using GdUnit4.Core;
 
 using Godot;
 
-using Resources;
-
 using SpaceA;
+
+using Tests.Resources;
 
 using static Assertions;
 
@@ -32,7 +32,7 @@ public class GdUnitTestSuiteBuilderTest
     {
         AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceA/TestSuite.cs")).IsEqual(typeof(TestSuite));
         AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceB/TestSuite.cs")).IsEqual(typeof(SpaceB.TestSuite));
-        // source file not exists
+        // source file doesn't exist
         AssertObject(GdUnitTestSuiteBuilder.ParseType("src/core/resources/testsuites/mono/spaceC/TestSuite.cs")).IsNull();
     }
 
@@ -96,7 +96,7 @@ public class GdUnitTestSuiteBuilderTest
         AssertThat((int)dictionary["line"]).IsEqual(16);
         AssertThat(File.ReadAllText(testSuite, Encoding.UTF8)).IsEqual(NewCreatedTestSuite(sourceClass));
 
-        // second call updated the existing test suite and adds a new test case
+        // the second call updated the existing test suite and added a new test case
         dictionary = GdUnitTestSuiteBuilder.Build(sourceClass, 14, testSuite);
         AssertThat(dictionary["path"]).IsEqual(testSuite);
         AssertThat((int)dictionary["line"]).IsEqual(22);

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core;
 
 using System;
@@ -70,10 +73,12 @@ public static class GdUnitTestSuiteBuilder
             {
                 var template = FillFromTemplate(LoadTestSuiteTemplate(), classDefinition, sourcePath);
                 var syntaxTree = CSharpSyntaxTree.ParseText(template);
-                //var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
+
+                // var toWrite = syntaxTree.WithFilePath(testSuitePath).GetCompilationUnitRoot();
                 var toWrite = AddTestCase(syntaxTree, methodToTest);
 
-                using (var streamWriter = File.CreateText(testSuitePath)) toWrite.WriteTo(streamWriter);
+                using (var streamWriter = File.CreateText(testSuitePath))
+                    toWrite.WriteTo(streamWriter);
                 result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
             }
             else
@@ -87,7 +92,8 @@ public static class GdUnitTestSuiteBuilder
                 }
 
                 toWrite = AddTestCase(syntaxTree, methodToTest);
-                using (var streamWriter = File.CreateText(testSuitePath)) toWrite.WriteTo(streamWriter);
+                using (var streamWriter = File.CreateText(testSuitePath))
+                    toWrite.WriteTo(streamWriter);
                 result.Add("line", TestCaseLineNumber(toWrite, methodToTest));
             }
 
@@ -183,6 +189,7 @@ public static class GdUnitTestSuiteBuilder
         var type = Type.GetType(clazz);
         if (type != null)
             return type;
+
         // if the class not found on current assembly lookup over all other loaded assemblies
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
@@ -224,11 +231,13 @@ public static class GdUnitTestSuiteBuilder
     internal static int TestCaseLineNumber(CompilationUnitSyntax root, string testCaseName)
     {
         var classDeclaration = ClassDeclaration(root);
+
         // lookup on test cases
         var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
             .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
         if (method?.Body != null)
             return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
+
         // If method has not a body, return the line of the method declaration
         return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
     }
@@ -269,14 +278,21 @@ public static class GdUnitTestSuiteBuilder
         var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath));
         var programClassSyntax = ClassDeclaration(syntaxTree.GetCompilationUnitRoot());
         var spanToFind = syntaxTree.GetText().Lines[lineNumber - 1].Span;
+
         // lookup on properties
         foreach (var m in programClassSyntax.Members.OfType<PropertyDeclarationSyntax>())
+        {
             if (m.FullSpan.IntersectsWith(spanToFind))
                 return m.Identifier.Text;
+        }
+
         // lookup on methods
         foreach (var m in programClassSyntax.Members.OfType<MethodDeclarationSyntax>())
+        {
             if (m.FullSpan.IntersectsWith(spanToFind))
                 return m.Identifier.Text;
+        }
+
         return null;
     }
 
@@ -289,7 +305,9 @@ public static class GdUnitTestSuiteBuilder
         }
 
         public string? Namespace { get; }
+
         public string Name { get; }
+
         public string ClassName => Namespace == null ? Name : $"{Namespace}.{Name}";
 
         public override bool Equals(object? obj)

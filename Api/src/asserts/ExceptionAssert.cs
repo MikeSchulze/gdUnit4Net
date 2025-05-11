@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -8,7 +11,8 @@ using System.Runtime.ExceptionServices;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-public sealed class ExceptionAssert<TException> : IExceptionAssert where TException : Exception
+public sealed class ExceptionAssert<TException> : IExceptionAssert
+    where TException : Exception
 {
     public ExceptionAssert(Action action)
     {
@@ -24,6 +28,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert where TExcept
     }
 
     public ExceptionAssert(TException e) => Current = e;
+
     private TException? Current { get; }
 
     private string? CustomFailureMessage { get; set; }
@@ -38,7 +43,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert where TExcept
     public IExceptionAssert HasMessage(string expected)
     {
         expected = expected.UnixFormat();
-        var current = Current?.Message.RichTextNormalize() ?? "";
+        var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.Equals(expected, StringComparison.Ordinal))
             ThrowTestFailureReport(AssertFailures.IsEqual(current, expected));
         return this;
@@ -48,7 +53,9 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert where TExcept
     {
         int currentLine;
         if (Current is TestFailedException e)
+        {
             currentLine = e.LineNumber;
+        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
@@ -65,11 +72,13 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert where TExcept
         var fullPath = Path.GetFullPath(fileName);
         string currentFileName;
         if (Current is TestFailedException e)
-            currentFileName = e.FileName ?? "";
+        {
+            currentFileName = e.FileName ?? string.Empty;
+        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
-            currentFileName = stackFrame?.GetFileName() ?? "";
+            currentFileName = stackFrame?.GetFileName() ?? string.Empty;
         }
 
         if (!currentFileName.Equals(fullPath, StringComparison.Ordinal))
@@ -94,7 +103,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert where TExcept
     public IExceptionAssert StartsWithMessage(string value)
     {
         value = value.UnixFormat();
-        var current = Current?.Message.RichTextNormalize() ?? "";
+        var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.StartsWith(value, StringComparison.InvariantCulture))
             ThrowTestFailureReport(AssertFailures.IsEqual(current, value));
         return this;

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -24,25 +27,26 @@ internal class GdUnit4RuntimeExecutorGodotBridge
 {
     private TestEngineSettings Settings { get; } = new();
 
-# pragma warning disable CA1859
+#pragma warning disable CA1859
     private ITestEngineLogger Logger { get; } = new GodotLogger();
-# pragma warning restore CA1859
+#pragma warning restore CA1859
 
     public async Task ExecuteAsync(List<TestSuiteNode> testSuiteNodes, Callable listener, CancellationToken cancellationToken)
     {
         try
         {
-            await Task.Run(async () =>
-                {
-                    var testListener = new GdUnit4TestEventListener(listener);
-
-                    foreach (var testSuiteNode in testSuiteNodes)
+            await Task.Run(
+                    async () =>
                     {
-                        var response = await new ExecuteTestSuiteCommand(testSuiteNode, Settings.CaptureStdOut, true)
-                            .Execute(testListener);
-                        ValidateResponse(response);
-                    }
-                }, cancellationToken)
+                        var testListener = new GdUnit4TestEventListener(listener);
+
+                        foreach (var testSuiteNode in testSuiteNodes)
+                        {
+                            var response = await new ExecuteTestSuiteCommand(testSuiteNode, Settings.CaptureStdOut, true)
+                                .Execute(testListener);
+                            ValidateResponse(response);
+                        }
+                    }, cancellationToken)
                 .WaitAsync(cancellationToken);
         }
         catch (TimeoutException)
@@ -73,11 +77,17 @@ internal class GdUnit4TestEventListener : ITestEventListener
     private readonly Callable listener;
 
     internal GdUnit4TestEventListener(Callable listener)
-        => this.listener = listener;
+    {
+        this.listener = listener;
+    }
 
     public int CompletedTests { get; set; }
 
-    public bool IsFailed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public bool IsFailed
+    {
+        get => throw new NotImplementedException();
+        set => throw new NotImplementedException();
+    }
 
     public void PublishEvent(ITestEvent testEvent) => EmitTestEvent(testEvent as TestEvent);
 

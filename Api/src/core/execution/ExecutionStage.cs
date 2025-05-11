@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution;
 
 using System;
@@ -31,13 +34,15 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         var method = type
             .GetMethods()
             .FirstOrDefault(m => m.IsDefined(typeof(T)));
-        InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>()!);
+        InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>() !);
     }
 
     protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute)
-        => InitExecutionAttributes(name, method, stageAttribute);
+    {
+        InitExecutionAttributes(name, method, stageAttribute);
+    }
 
-    protected string StageName { get; private set; } = "";
+    protected string StageName { get; private set; } = string.Empty;
 
     private bool IsAsync { get; set; }
 
@@ -50,7 +55,6 @@ internal abstract class ExecutionStage<T> : IExecutionStage
     private TestStageAttribute? StageAttribute { get; set; }
 
     internal bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
-
 
     public virtual async Task Execute(ExecutionContext context)
     {
@@ -99,6 +103,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (e.GetBaseException() is TestFailedException ex)
                 ReportAsFailure(context, ex);
             else
+
                 // handle unexpected exceptions
                 ReportUnexpectedException(context, e);
         }
@@ -115,7 +120,6 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         var isMethodMonitored = method?.GetCustomAttributes<GodotExceptionMonitorAttribute>().Any() ?? false;
         IsMonitoringOnGodotExceptionsEnabled = isClassMonitored || isMethodMonitored;
     }
-
 
     private bool ValidateForExpectedException(ExecutionContext context, Exception? e = null)
     {
@@ -135,7 +139,8 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private void ReportAsFailure(ExecutionContext context, TestFailedException e)
     {
-        if (ValidateForExpectedException(context, e)) return;
+        if (ValidateForExpectedException(context, e))
+            return;
 
         if (context.FailureReporting)
             context.ReportCollector.Consume(new TestReport(e));
@@ -168,7 +173,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return frame.GetFileLineNumber();
         }
 
-        return stack.FrameCount > 1 ? stack.GetFrame(0)!.GetFileLineNumber() : -1;
+        return stack.FrameCount > 1 ? stack.GetFrame(0) !.GetFileLineNumber() : -1;
     }
 
     internal static string TrimStackTrace(string stackTrace)

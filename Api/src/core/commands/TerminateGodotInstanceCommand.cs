@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Commands;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Commands;
 
 using System;
 using System.Net;
@@ -16,7 +19,9 @@ using Newtonsoft.Json;
 public class TerminateGodotInstanceCommand : BaseCommand
 {
     [JsonConstructor]
-    public TerminateGodotInstanceCommand() { }
+    public TerminateGodotInstanceCommand()
+    {
+    }
 
     /// <summary>
     ///     Executes the termination command, shutting down the Godot instance.
@@ -24,6 +29,7 @@ public class TerminateGodotInstanceCommand : BaseCommand
     /// <remarks>
     ///     This command gracefully closes the Godot scene tree and engine.
     /// </remarks>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public override Task<Response> Execute(ITestEventListener testEventListener)
     {
         Console.WriteLine("Terminating Godot instance.");
@@ -32,7 +38,7 @@ public class TerminateGodotInstanceCommand : BaseCommand
         return Task.FromResult(new Response
         {
             StatusCode = HttpStatusCode.OK,
-            Payload = ""
+            Payload = string.Empty
         });
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Discovery;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Discovery;
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +12,6 @@ using System.Runtime.CompilerServices;
 using Api;
 
 using Attributes;
-
-using core.attributes;
 
 using Godot;
 
@@ -124,9 +125,11 @@ internal static class TestCaseDiscoverer
             if (moveNextMethod != null)
             {
                 var debugInfo = moveNextMethod.DebugInformation;
+
                 // Try to find the first sequence point that's not compiler-generated
                 return debugInfo?.SequencePoints
                     .FirstOrDefault(sp =>
+
                         // Compiler-generated code often has special column values or hidden lines
                         !sp.IsHidden &&
                         sp.StartColumn > 0 &&
@@ -226,7 +229,8 @@ internal static class TestCaseDiscoverer
                     traits[traitName] = values;
                 }
 
-                if (!values.Contains(traitValue)) values.Add(traitValue);
+                if (!values.Contains(traitValue))
+                    values.Add(traitValue);
             }
 
         return traits;
@@ -304,7 +308,8 @@ internal static class TestCaseDiscoverer
         return testCase;
     }
 
-    private static bool IsAttribute<TAttribute>(CustomAttribute attribute) where TAttribute : Attribute
+    private static bool IsAttribute<TAttribute>(CustomAttribute attribute)
+        where TAttribute : Attribute
         => string.Equals(attribute.AttributeType.FullName, typeof(TAttribute).FullName, StringComparison.Ordinal);
 
     private static bool IsTestSuite(TypeDefinition type) =>
@@ -312,7 +317,6 @@ internal static class TestCaseDiscoverer
         && type.CustomAttributes.Any(attr => attr.AttributeType.Name == "TestSuiteAttribute")
         && type.FullName != null
         && !type.FullName.StartsWith("Microsoft.VisualStudio.TestTools");
-
 
     public static List<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
     {

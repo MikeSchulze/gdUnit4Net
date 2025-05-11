@@ -1,4 +1,5 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4;
 
@@ -80,10 +81,10 @@ using System;
 /// </code>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-public class DataPointAttribute : Attribute
+public sealed class DataPointAttribute : Attribute
 {
     /// <summary>
-    ///     Initializes a new instance of the DataPointAttribute class with a data source.
+    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source.
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
     public DataPointAttribute(string dataPointSource)
@@ -93,7 +94,7 @@ public class DataPointAttribute : Attribute
     }
 
     /// <summary>
-    ///     Initializes a new instance of the DataPointAttribute class with a data source from a specified type.
+    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source from a specified type.
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
     /// <param name="dataPointDeclaringType">The type that contains the data source.</param>
@@ -105,7 +106,7 @@ public class DataPointAttribute : Attribute
     }
 
     /// <summary>
-    ///     Initializes a new instance of the DataPointAttribute class with a data source and parameters.
+    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source and parameters.
     /// </summary>
     /// <param name="dataPointSource">The name of the method that provides the test data.</param>
     /// <param name="arguments">Arguments to pass to the data source method.</param>
@@ -119,16 +120,16 @@ public class DataPointAttribute : Attribute
     ///     Gets the type that contains the data source method or property.
     ///     If null, the test class is used.
     /// </summary>
-    internal Type? DataPointDeclaringType { get; }
+    public Type? DataPointDeclaringType { get; }
 
     /// <summary>
     ///     Gets the name of the method or property that provides the test data.
     /// </summary>
-    internal string DataPointSource { get; }
+    public string DataPointSource { get; }
 
     /// <summary>
     ///     Gets the arguments to pass to the data source method.
     ///     Will be null for properties or methods without parameters.
     /// </summary>
-    internal object?[]? DataPointParameters { get; }
+    internal object?[] ? DataPointParameters { get; }
 }

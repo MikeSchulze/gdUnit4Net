@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Extensions;
 
 using System;
@@ -16,25 +19,31 @@ using Array = Godot.Collections.Array;
 /// <summary>
 ///     An extension to compare C# Objects and Godot Objects by unboxing Variants.
 /// </summary>
-public static class GodotObjectExtensions
+internal static class GodotObjectExtensions
 {
+    public enum Mode
+    {
+        CASE_SENSITIVE,
+        CASE_INSENSITIVE
+    }
+
     internal static SceneTree Instance =>
         Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("SceneTree is not initialized");
 
     /// <summary>
-    ///     A utility to synchronize the current thread with the Godot physics thread.
+    ///     Gets a utility to synchronize the current thread with the Godot physics thread.
     ///     This can be used to await the completion of a single physics frame in Godot.
     /// </summary>
     internal static SignalAwaiter SyncProcessFrame =>
         Instance.ToSignal(Instance, SceneTree.SignalName.ProcessFrame);
 
     /// <summary>
-    ///     A util to synchronize the current thread with the Godot physics thread
+    ///     Gets a util to synchronize the current thread with the Godot physics thread.
     /// </summary>
     internal static SignalAwaiter SyncPhysicsFrame =>
         Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
 
-    internal static bool VariantEquals<T>([NotNullWhen(true)] this T? inLeft, T? inRight, Mode compareMode = Mode.CaseSensitive)
+    internal static bool VariantEquals<T>(this T? inLeft, T? inRight, Mode compareMode = Mode.CASE_SENSITIVE)
     {
         object? left = inLeft.UnboxVariant();
         object? right = inRight.UnboxVariant();
@@ -48,14 +57,110 @@ public static class GodotObjectExtensions
             return true;
 
         var type = left.GetType();
-        if (type.IsPrimitive || typeof(string) == type || left is IEquatable<T>)
-        {
-            if (compareMode == Mode.CaseInsensitive && left is string ls && right is string rs)
-                return ls.ToLower().Equals(rs.ToLower(), StringComparison.Ordinal);
+
+        if (left is string ls && right is string rs)
+            return string.Equals(ls, rs, compareMode == Mode.CASE_INSENSITIVE ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+        if (type.IsPrimitive || left is IEquatable<T>)
             return left.Equals(right);
-        }
 
         return DeepEquals(left, right, compareMode);
+    }
+
+    internal static Array ToGodotArray(this object[] args)
+        => ToGodotArray((IEnumerable)args);
+
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Method purpose is to capture and handle value as 'n.a.' if it fails.")]
+    internal static Array ToGodotArray(this IEnumerable elements)
+    {
+        ArgumentNullException.ThrowIfNull(elements);
+        var converted = new Array();
+        foreach (var item in elements)
+            try
+            {
+                converted.Add(item.ToVariant());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
+                converted.Add(Variant.CreateFrom("n.a"));
+            }
+
+        return converted;
+    }
+
+    internal static Array ToGodotArray(this IEnumerable<object> elements)
+        => ToGodotArray((IEnumerable)elements);
+
+    internal static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable<TVariant> elements)
+        where TVariant : notnull
+        => new(elements);
+
+    internal static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args)
+        where TVariant : notnull
+        => new(args);
+
+    internal static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
+        where TKey : notnull
+        where TValue : notnull
+    {
+        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
+        foreach (var (key, value) in dict)
+            converted[key.ToVariant()] = value.ToVariant();
+        return converted;
+    }
+
+    internal static Dictionary ToGodotDictionary(this IDictionary dict)
+    {
+        var converted = new Dictionary();
+        foreach (var key in dict.Keys)
+            converted[key.ToVariant()] = dict[key].ToVariant();
+        return converted;
+    }
+
+    internal static async Task<object?> Invoke(object instance, string methodName, params Variant[] args)
+    {
+        // if the instance has a GDScript attached, we have to use the Godot `Call` method
+        if (instance is GodotObject goi && goi.GetScript().UnboxVariant() is GDScript)
+        {
+            if (!goi.HasMethod(methodName))
+                throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
+            var current = goi.Call(methodName, args);
+            if (current.VariantType == Variant.Type.Object && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
+            {
+                var results = await goi.ToSignal(current.As<GodotObject>(), "completed");
+                return results[0].UnboxVariant();
+            }
+
+            return current;
+        }
+
+        // for C# implementations we use Invoke
+        var mi = instance.GetType().GetMethod(methodName)
+                 ?? throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
+        object?[] parameters = args.Length == 0
+            ? System.Array.Empty<object>()
+            : args.UnboxVariant()?.ToArray() ?? System.Array.Empty<object>();
+        object? result;
+        var parameterInfo = mi.GetParameters();
+        if (mi.IsStatic == false)
+            result = parameterInfo.Length == 0
+                ? mi.Invoke(instance, null)
+                : mi.Invoke(instance, parameters);
+        else
+            result = parameterInfo.Length == 0
+                ? mi.Invoke(null, null)
+                : mi.Invoke(null, parameters);
+
+        if (result is Task task)
+        {
+            await task.ConfigureAwait(false);
+            var resultProperty = task.GetType().GetProperty("Result")
+                                 ?? throw new InvalidOperationException("Task does not have a 'Result' property.");
+            return resultProperty.GetValue(task);
+        }
+
+        return result;
     }
 
     private static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, Mode compareMode)
@@ -95,13 +200,13 @@ public static class GodotObjectExtensions
             return false;
 
         foreach (var key in left.Keys)
-            if (!right.Contains(key) || !left[key]!.VariantEquals(right[key], compareMode))
+            if (!right.Contains(key) || !left[key].VariantEquals(right[key], compareMode))
                 return false;
 
         return true;
     }
 
-    private static bool DeepEquals<T>(T left, T right, Mode compareMode)
+    private static bool DeepEquals<T>(T? left, T? right, Mode compareMode)
     {
         if (left is GodotObject lo && right is GodotObject ro)
         {
@@ -116,58 +221,11 @@ public static class GodotObjectExtensions
             return le.VariantEquals(re, compareMode);
         if (left is ValueType && right is ValueType)
             return left.Equals(right);
-        return left!.Equals(right);
+        return left?.Equals(right) ?? false;
     }
 
-    public static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable elements) where TVariant : notnull
-        => new(elements.ToGodotArray());
-
-    public static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args) where TVariant : notnull
-        => new(ToGodotArray((IEnumerable)args));
-
-    public static Array ToGodotArray(this object[] args)
-        => ToGodotArray((IEnumerable)args);
-
-    public static Array ToGodotArray(this IEnumerable<object> elements)
-        => ToGodotArray((IEnumerable)elements);
-
-    public static Array ToGodotArray(this IEnumerable elements)
-    {
-        var converted = new Array();
-        foreach (var item in elements)
-            try
-            {
-                converted.Add(item.ToVariant());
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
-                converted.Add(Variant.CreateFrom("n.a"));
-            }
-
-        return converted;
-    }
-
-    public static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
-        where TKey : notnull
-        where TValue : notnull
-    {
-        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
-        foreach (var (key, value) in dict)
-            converted[key.ToVariant()] = value.ToVariant();
-        return converted;
-    }
-
-    public static Dictionary ToGodotDictionary(this IDictionary dict)
-    {
-        var converted = new Dictionary();
-        foreach (var key in dict.Keys)
-            converted[key.ToVariant()] = dict[key].ToVariant();
-        return converted;
-    }
-
-    private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>> GodotObject2Dictionary(GodotObject? obj,
-        System.Collections.Generic.Dictionary<object, bool> hashedObjects)
+    private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>> GodotObject2Dictionary(
+        GodotObject? obj, System.Collections.Generic.Dictionary<object, bool> hashedObjects)
     {
         var r = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>>();
         if (obj == null)
@@ -196,7 +254,9 @@ public static class GodotObjectExtensions
                 dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
             }
             else
+            {
                 dict[propertyName] = propertyValue.UnboxVariant();
+            }
         }
 
         // collect other fields
@@ -209,7 +269,7 @@ public static class GodotObjectExtensions
             if (propertyValue.VariantType == Variant.Type.Callable)
                 continue;
 
-            //System.Console.WriteLine($"Property: {propertyName}:{propertyValue.VariantType}, {propertyUsage} {propertyValue.Obj}");
+            // System.Console.WriteLine($"Property: {propertyName}:{propertyValue.VariantType}, {propertyUsage} {propertyValue.Obj}");
             var isScriptOrDefault = (propertyUsage & (PropertyUsageFlags.ScriptVariable | PropertyUsageFlags.Default)) != 0;
             var isCategory = (propertyUsage & PropertyUsageFlags.Category) != 0;
             if (isScriptOrDefault
@@ -228,60 +288,13 @@ public static class GodotObjectExtensions
                     dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
                 }
                 else
+                {
                     dict[propertyName] = propertyValue.UnboxVariant();
+                }
             }
         }
 
         r[type.FullName!] = dict;
         return r;
-    }
-
-    internal static async Task<object?> Invoke(object instance, string methodName, params Variant[] args)
-    {
-        // if the instance has an GDScript attached we have to use the Godot `Call` method
-        if (instance is GodotObject goi && goi.GetScript().UnboxVariant() is GDScript)
-        {
-            if (!goi.HasMethod(methodName))
-                throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
-            var current = goi.Call(methodName, args);
-            if (current.VariantType == Variant.Type.Object && current.As<GodotObject>().GetClass() == "GDScriptFunctionState")
-            {
-                var results = await goi.ToSignal(current.As<GodotObject>(), "completed");
-                return results[0].UnboxVariant();
-            }
-
-            return current;
-        }
-
-        // for C# implementations we use Invoke
-        var mi = instance.GetType().GetMethod(methodName)
-                 ?? throw new MissingMethodException($"The method '{methodName}' not exist on this instance.");
-        object?[]? parameters = args.Length == 0 ? System.Array.Empty<object>() : args.UnboxVariant()?.ToArray();
-        object? result;
-        var parameterInfo = mi.GetParameters();
-        if (mi.IsStatic == false)
-            result = parameterInfo.Length == 0
-                ? mi.Invoke(instance, null)
-                : mi.Invoke(instance, parameters);
-        else
-            result = parameterInfo.Length == 0
-                ? mi.Invoke(null, null)
-                : mi.Invoke(null, parameters);
-        if (result is Task task)
-        {
-            await task.ConfigureAwait(false);
-            var resultProperty = task.GetType().GetProperty("Result")
-                                 ?? throw new InvalidOperationException("Task does not have a 'Result' property.");
-            return resultProperty.GetValue(task);
-        }
-
-        return result;
-    }
-
-
-    internal enum Mode
-    {
-        CaseSensitive,
-        CaseInsensitive
     }
 }

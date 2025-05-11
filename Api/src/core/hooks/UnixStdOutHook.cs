@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Hooks;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Hooks;
 
 using System;
 using System.Runtime.InteropServices;
@@ -25,17 +28,17 @@ internal sealed class UnixStdOutHook : IStdOutHook
     public UnixStdOutHook()
     {
         // Get original stdout handle
-        originalStdOutHandle = dup(STD_OUTPUT_HANDLE);
+        originalStdOutHandle = Dup(STD_OUTPUT_HANDLE);
         if (originalStdOutHandle == IntPtr.Zero)
             throw new InvalidOperationException("Failed to get original stdout handle.");
 
         // Create pipe
-        if (pipe(pipeHandles) != 0)
+        if (Pipe(pipeHandles) != 0)
             throw new InvalidOperationException("Failed to create pipe.");
 
         // Store original flags and set non-blocking mode
-        originalFlags = fcntl(pipeHandles[PIPE_READ], F_GETFL, 0);
-        var hResult = fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags | O_NONBLOCK);
+        originalFlags = Fcntl(pipeHandles[PIPE_READ], F_GETFL, 0);
+        var hResult = Fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags | O_NONBLOCK);
         if (hResult != 0)
             throw new InvalidOperationException($"Failed to create fcntl. Error: {hResult}");
     }
@@ -44,11 +47,12 @@ internal sealed class UnixStdOutHook : IStdOutHook
     {
         StopCapture();
 #pragma warning disable CA1806 // Do ignore method results
-        // Reset pipe read end blocking mode to its original state
-        fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags);
 
-        close(pipeHandles[PIPE_READ]);
-        close(pipeHandles[PIPE_WRITE]);
+        // Reset pipe read end blocking mode to its original state
+        Fcntl(pipeHandles[PIPE_READ], F_SETFL, originalFlags);
+
+        Close(pipeHandles[PIPE_READ]);
+        Close(pipeHandles[PIPE_WRITE]);
 #pragma warning restore CA1806
         stdOutHook.Dispose();
     }
@@ -56,7 +60,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
     public void StartCapture()
     {
         // Redirect stdout to the pipe
-        if (dup2(pipeHandles[PIPE_WRITE], STD_OUTPUT_HANDLE) == -1)
+        if (Dup2(pipeHandles[PIPE_WRITE], STD_OUTPUT_HANDLE) == -1)
             throw new InvalidOperationException("Failed to redirect stdout to pipe.");
 
         stdOutHook.StartCapture();
@@ -74,7 +78,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
         // Restore original stdout
 #pragma warning disable CA1806 // Do ignore method results
-        dup2(originalStdOutHandle.ToInt32(), STD_OUTPUT_HANDLE);
+        Dup2(originalStdOutHandle.ToInt32(), STD_OUTPUT_HANDLE);
 #pragma warning restore CA1806
     }
 
@@ -87,21 +91,24 @@ internal sealed class UnixStdOutHook : IStdOutHook
             var buffer = new byte[4096];
             var pollFd = new PollFd
             {
-                fd = pipeHandles[PIPE_READ],
-                events = 0x0001 // POLLIN
+                Fd = pipeHandles[PIPE_READ],
+                Events = 0x0001 // POLLIN
             };
 
             while (isCapturing)
             {
-                var ready = poll(ref pollFd, 1, 10); // 10ms timeout
+                var ready = Poll(ref pollFd, 1, 10); // 10ms timeout
                 if (ready > 0)
                 {
-                    var bytesRead = read(pipeHandles[PIPE_READ], buffer, buffer.Length);
-                    if (bytesRead > 0) ProcessReadData(buffer, (uint)bytesRead);
+                    var bytesRead = Read(pipeHandles[PIPE_READ], buffer, buffer.Length);
+                    if (bytesRead > 0)
+                        ProcessReadData(buffer, (uint)bytesRead);
                 }
                 else if (ready < 0)
+                {
                     // Error occurred
                     break;
+                }
             }
         }
         catch (ThreadInterruptedException)
@@ -112,37 +119,38 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
     private void ProcessReadData(byte[] buffer, uint bytesRead)
     {
-        if (bytesRead > 0) Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
+        if (bytesRead > 0)
+            Console.Write(Encoding.UTF8.GetString(buffer, 0, (int)bytesRead));
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct PollFd
     {
-        public int fd;
-        public short events;
-        public short revents;
+        public int Fd;
+        public short Events;
+        public short Revents;
     }
 
 #pragma warning disable SYSLIB1054
     [DllImport("libc", SetLastError = true)]
-    private static extern int pipe(int[] pipefd);
+    private static extern int Pipe(int[] pipefd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int dup(int oldfd);
+    private static extern int Dup(int oldfd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int dup2(int oldfd, int newfd);
+    private static extern int Dup2(int oldfd, int newfd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int read(int fd, byte[] buf, int count);
+    private static extern int Read(int fd, byte[] buf, int count);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int close(int fd);
+    private static extern int Close(int fd);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int fcntl(int fd, int cmd, int arg);
+    private static extern int Fcntl(int fd, int cmd, int arg);
 
     [DllImport("libc", SetLastError = true)]
-    private static extern int poll(ref PollFd fds, uint nfds, int timeout);
+    private static extern int Poll(ref PollFd fds, uint nfds, int timeout);
 #pragma warning restore SYSLIB1054
 }

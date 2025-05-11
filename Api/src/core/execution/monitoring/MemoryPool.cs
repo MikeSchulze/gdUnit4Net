@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution.Monitoring;
 
 using System.Collections.Generic;
@@ -31,7 +34,8 @@ internal class MemoryPool
         OrphanMonitor?.Start(reset);
     }
 
-    public static T? RegisterForAutoFree<T>(T? obj) where T : GodotObject
+    public static T? RegisterForAutoFree<T>(T? obj)
+        where T : GodotObject
     {
         if (obj != null)
             CurrentPool.Value?.registeredObjects.Add(obj);

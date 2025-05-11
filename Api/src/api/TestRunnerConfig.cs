@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Api;
 
 using System.Collections.Generic;
@@ -30,14 +33,14 @@ public class TestRunnerConfig
     public Dictionary<string, IEnumerable<TestCaseConfig>> Included { get; set; } = new();
 
     /// <summary>
-    ///     Holds test run properties to control the test execution
+    ///     Gets or sets holds test run properties to control the test execution.
     /// </summary>
     public Dictionary<string, object> Properties { get; set; } = new();
 
     /// <summary>
-    ///     When set to true, standard output (stdout) from test cases is captured and included in the test result. This can be
+    ///     Gets or sets a value indicating whether when set to true, standard output (stdout) from test cases is captured and included in the test result. This can be
     ///     useful for debugging.
-    ///     Default: false
+    ///     Default: false.
     /// </summary>
     public bool CaptureStdOut { get; set; }
 

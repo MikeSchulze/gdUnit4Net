@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Execution.Monitoring;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Execution.Monitoring;
 
 using System;
 using System.Collections.Generic;
@@ -27,8 +30,11 @@ internal sealed partial class ErrorLogEntry
     }
 
     internal string Details { get; }
+
     internal string Message { get; }
+
     internal ErrorType EntryType { get; }
+
     internal Type? ExceptionType { get; }
 
     private static bool IsDebuggerActive { get; } = DebuggerUtils.IsDebuggerActive();
@@ -70,7 +76,8 @@ internal sealed partial class ErrorLogEntry
             return null;
 
         // Remove the pattern and trim whitespace
-        var content = record.Replace(pattern, "").Trim();
+        var content = record.Replace(pattern, string.Empty).Trim();
+
         // Get the details from the next line if available
         var details = index + 1 < records.Length ? records[index + 1].Trim() : string.Empty;
 
@@ -78,7 +85,8 @@ internal sealed partial class ErrorLogEntry
         if (type == ErrorType.Exception)
         {
             var match = IsDebuggerActive ? ExceptionPatternDebugMode.Match(content) : ExceptionPatternReleaseMode.Match(content);
-            if (!match.Success) return null;
+            if (!match.Success)
+                return null;
             var exceptionTypeName = match.Groups[1].Value;
             var exceptionMessage = match.Groups[2].Value;
             var exceptionType = TryGetExceptionType(exceptionTypeName);
@@ -100,7 +108,6 @@ internal sealed partial class ErrorLogEntry
 
     [GeneratedRegex(@"'([\w\.]+Exception):\s*(.*)'", RegexOptions.Compiled)]
     private static partial Regex ExceptionPatternDebugRegex();
-
 
     [GeneratedRegex(@"([\w\.]+Exception):\s*(.*?)(?:\r\n|\n|$)", RegexOptions.Compiled)]
     private static partial Regex ExceptionPatternReleaseRegex();

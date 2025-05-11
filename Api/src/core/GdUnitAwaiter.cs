@@ -1,4 +1,5 @@
-// ReSharper disable once CheckNamespace
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4;
 
@@ -23,7 +24,8 @@ public static class GdUnitAwaiter
         }
     }
 
-    public sealed class GodotMethodAwaiter<[MustBeVariant] TVariant> where TVariant : notnull
+    public sealed class GodotMethodAwaiter<[MustBeVariant] TVariant>
+        where TVariant : notnull
     {
         public GodotMethodAwaiter(Node instance, string methodName, params Variant[] args)
         {
@@ -35,7 +37,9 @@ public static class GdUnitAwaiter
         }
 
         private string MethodName { get; }
+
         private Node Instance { get; }
+
         private Variant[] Args { get; }
 
         public async Task IsEqual(TVariant expected) =>

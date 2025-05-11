@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Runners;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Runners;
 
 using System;
 using System.IO;
@@ -21,10 +24,8 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
 
     public GodotGdUnit4RestServer(ITestEngineLogger logger)
         : base(new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
-        => Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
-
-    public void Dispose()
     {
+        Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
     }
 
     public bool IsFailed { get; set; }
@@ -34,11 +35,16 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     public void PublishEvent(ITestEvent testEvent)
         => Task.Run(async () => await WriteAsync(testEvent)).Wait();
 
+    public void Dispose()
+    {
+    }
+
     public new async ValueTask DisposeAsync()
     {
         Logger.LogInfo("Closing GdUnit4 RestApi.");
         processLock.Dispose();
-        if (IsConnected) Proxy.Disconnect();
+        if (IsConnected)
+            Proxy.Disconnect();
         await base.DisposeAsync();
     }
 
@@ -70,7 +76,8 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
             return;
 
         await GodotObjectExtensions.SyncProcessFrame;
-        if (!await processLock.WaitAsync(TimeSpan.FromSeconds(1))) return;
+        if (!await processLock.WaitAsync(TimeSpan.FromSeconds(1)))
+            return;
 
         try
         {
@@ -103,7 +110,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     {
         try
         {
-            //Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
+            // Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
             return await command.Execute(testEventListener);
         }
         catch (Exception ex)

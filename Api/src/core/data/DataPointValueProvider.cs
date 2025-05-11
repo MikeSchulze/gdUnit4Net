@@ -1,27 +1,5 @@
-﻿// MIT License
-//
-// GdUnit4 - C# Unit testing library for Godot Engine
-//
-// Copyright (c) 2024 Mike Schulze
-// Copyright (c) 2024 GdUnit4 contributors
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Data;
 
@@ -101,12 +79,9 @@ internal static class DataPointValueProvider
         var declaringType = dataPoint.DataPointDeclaringType ?? testCase.MethodInfo.DeclaringType ??
             throw new ArgumentNullException($"No declaring type found for {dataPoint.DataPointDeclaringType}");
 
-
         // get data from property
-        var dataSource = GetDataPointSource(declaringType, dataPoint, out _);
-
-        if (dataSource == null)
-            throw new ArgumentNullException($"Value returned by property or method {dataPoint.DataPointSource} shouldn't be null.");
+        var dataSource = GetDataPointSource(declaringType, dataPoint, out _) ??
+                         throw new ArgumentNullException($"Value returned by property or method {dataPoint.DataPointSource} shouldn't be null.");
 
         if (!TryGetData(dataSource, out var data))
             throw new ArgumentException(
@@ -123,15 +98,14 @@ internal static class DataPointValueProvider
         var declaringType = dataPoint.DataPointDeclaringType ?? testCase.MethodInfo.DeclaringType ??
             throw new ArgumentNullException($"No declaring type found for {dataPoint.DataPointDeclaringType}");
 
-        var dataSource = GetDataPointSource(declaringType, dataPoint, out var returnType);
-
-        if (dataSource == null)
-            throw new ArgumentNullException($"Value returned by async property or method {dataPoint.DataPointSource} shouldn't be null.");
+        var dataSource = GetDataPointSource(declaringType, dataPoint, out var returnType) ??
+                         throw new ArgumentNullException($"Value returned by async property or method {dataPoint.DataPointSource} shouldn't be null.");
 
         if (!IsAsyncEnumerableType(returnType!))
             throw new ArgumentException($"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IAsyncEnumerable<T>");
 
-        await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout)) yield return item;
+        await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout))
+            yield return item;
     }
 
     private static async IAsyncEnumerable<object?[]> StreamAsyncData(object asyncSource, Type returnType, TimeSpan timeout)
@@ -142,6 +116,7 @@ internal static class DataPointValueProvider
         var enumeratorInterface = typeof(IAsyncEnumerator<>).MakeGenericType(elementType);
 
         using var cancellationToken = new CancellationTokenSource(timeout);
+
         // Get the GetAsyncEnumerator method
         var getEnumeratorMethod = enumerableInterface.GetMethod("GetAsyncEnumerator")
                                   ?? throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on {enumerableInterface.FullName}");
@@ -158,7 +133,7 @@ internal static class DataPointValueProvider
             {
                 try
                 {
-                    var moveNextTask = (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null)!;
+                    var moveNextTask = (ValueTask<bool>)moveNextMethod.Invoke(enumerator, null) !;
                     var hasNext = await moveNextTask
                         .AsTask()
                         .WaitAsync(cancellationToken.Token)
@@ -182,7 +157,9 @@ internal static class DataPointValueProvider
                     yield return (object?[])current;
                 }
                 else
+                {
                     yield return new[] { current };
+                }
             }
         }
         finally
@@ -233,7 +210,8 @@ internal static class DataPointValueProvider
 
             var methodName = sourceType.Name.Split('<', '>')[1];
             var sourceFile = LookupClassPath(originalType);
-            if (sourceFile == null) return $"at {originalType.FullName}.{methodName}()";
+            if (sourceFile == null)
+                return $"at {originalType.FullName}.{methodName}()";
 
             // If we found the source file, parse it to find the method line
             var sourceText = File.ReadAllText(sourceFile);
@@ -265,7 +243,8 @@ internal static class DataPointValueProvider
     private static object? GetDataPointSource(Type declaringType, DataPointAttribute dataPoint, out Type? returnType)
     {
         // First try to get as property
-        var property = declaringType.GetProperty(dataPoint.DataPointSource,
+        var property = declaringType.GetProperty(
+            dataPoint.DataPointSource,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
 
         if (property != null)
@@ -273,20 +252,20 @@ internal static class DataPointValueProvider
             if (!property.CanRead)
                 throw new ArgumentException(
                     $"Property '{dataPoint.DataPointSource}' in {declaringType.FullName} must have a getter");
+
             returnType = property.PropertyType;
 
             return property.GetValue(null, null);
         }
 
         // Then try as method
-        var method = declaringType.GetMethod(dataPoint.DataPointSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+        var method = declaringType.GetMethod(
+            dataPoint.DataPointSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance) ?? throw new ArgumentException(
+            $"No property or method named '{dataPoint.DataPointSource}' found in {declaringType.FullName}");
 
-        if (method == null)
-            throw new ArgumentException(
-                $"No property or method named '{dataPoint.DataPointSource}' found in {declaringType.FullName}");
-
-        if (dataPoint.DataPointParameters != null) ValidateMethodParameters(method, dataPoint.DataPointParameters);
+        if (dataPoint.DataPointParameters != null)
+            ValidateMethodParameters(method, dataPoint.DataPointParameters);
 
         returnType = method.ReturnType;
         return method.Invoke(null, dataPoint.DataPointParameters);
@@ -312,13 +291,16 @@ internal static class DataPointValueProvider
     internal static bool IsAsyncDataPoint(TestCase testCase)
     {
         var dataPoint = testCase.DataPoint;
-        if (dataPoint == null) return false;
+        if (dataPoint == null)
+            return false;
 
         var declaringType = dataPoint.DataPointDeclaringType ?? testCase.MethodInfo.DeclaringType;
-        if (declaringType == null) return false;
+        if (declaringType == null)
+            return false;
 
         // Check property
-        var property = declaringType.GetProperty(dataPoint.DataPointSource,
+        var property = declaringType.GetProperty(
+            dataPoint.DataPointSource,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
 
         if (property != null)
@@ -328,7 +310,8 @@ internal static class DataPointValueProvider
         }
 
         // Check method
-        var method = declaringType.GetMethod(dataPoint.DataPointSource,
+        var method = declaringType.GetMethod(
+            dataPoint.DataPointSource,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
 
         if (method != null)
@@ -351,7 +334,8 @@ internal static class DataPointValueProvider
     {
         data = null;
 
-        if (dataSource == null) return false;
+        if (dataSource == null)
+            return false;
 
         // Handle IEnumerable<object?[]> directly
         if (dataSource is IEnumerable<object?[]> arrayData)
@@ -375,9 +359,11 @@ internal static class DataPointValueProvider
             foreach (var item in enumerable)
                 if (item is object?[] array)
                     resultList.Add(array);
-                else resultList.Add(new[] { item });
+                else
+                    resultList.Add(new[] { item });
 
-            if (resultList.Count == 0) return false;
+            if (resultList.Count == 0)
+                return false;
             data = resultList;
             return true;
         }

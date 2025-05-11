@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -7,7 +10,8 @@ public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
     where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
-    public NumberAssert(TValue current) : base(current)
+    public NumberAssert(TValue current)
+        : base(current)
     {
     }
 

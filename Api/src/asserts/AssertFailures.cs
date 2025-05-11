@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Asserts;
 
 using System;
@@ -39,9 +42,11 @@ public static class AssertFailures
         }
 
         string instanceId;
-        var name = $"<{type.FullName?.Replace("[", "").Replace("]", "") ?? "unknown"}>";
+        var name = $"<{type.FullName?.Replace("[", string.Empty).Replace("]", string.Empty) ?? "unknown"}>";
         if (unboxedValue is GodotObject go && GodotObject.IsInstanceValid(go))
+        {
             instanceId = $"objId: {go.GetInstanceId()}";
+        }
         else
         {
             instanceId = $"objId: {RuntimeHelpers.GetHashCode(value)}";
@@ -51,11 +56,10 @@ public static class AssertFailures
 
         return $"{name} ({instanceId})";
 
-        //if (!type.IsGenericType)
-        //var genericArguments = string.Join(", ", type.GetGenericArguments().Select(a => SimpleClassName(a, null)));
-        //return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
+        // if (!type.IsGenericType)
+        // var genericArguments = string.Join(", ", type.GetGenericArguments().Select(a => SimpleClassName(a, null)));
+        // return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
     }
-
 
     private static string FormatDictionary(IDictionary dict, string color)
     {
@@ -144,7 +148,9 @@ public static class AssertFailures
     }
 
     private static string FormatCurrent(object? value) => FormatValue(value, VALUE_COLOR, true).UnixFormat();
+
     private static string FormatExpected(object? value) => FormatValue(value, VALUE_COLOR, true).UnixFormat();
+
     private static string FormatFailure(object value) => FormatValue(value, ERROR_COLOR, false).UnixFormat();
 
     public static string IsTrue() =>
@@ -381,6 +387,7 @@ public static class AssertFailures
         {
             var diff = notExpected.FindAll(e => !notFound.Any(e2 => Equals(e.UnboxVariant(), e2.UnboxVariant())));
             if (diff.Count == 0)
+            {
                 return $"""
                         {FormatFailure("Expecting contains exactly elements:")}
                         {FormatCurrent(current).Indentation(1)}
@@ -389,6 +396,7 @@ public static class AssertFailures
                          but there has differences in order:
                         {ListDifferences(notFound.ToList(), notExpected.ToList())}
                         """;
+            }
         }
 
         var message = $"""
@@ -398,17 +406,23 @@ public static class AssertFailures
                        {FormatExpected(expected).Indentation(1)}
                        """;
         if (notExpected.Count > 0)
+        {
             message += $"""
 
                          but others where not expected:
                         {FormatExpected(notExpected).Indentation(1)}
                         """;
+        }
+
         if (notFound.Count > 0)
+        {
             message += $"""
 
                          {(notExpected.Count == 0 ? "but" : "and")} some elements not found:
                         {FormatExpected(notFound).Indentation(1)}
                         """;
+        }
+
         return message.UnixFormat();
     }
 
@@ -421,17 +435,23 @@ public static class AssertFailures
                        {FormatExpected(expected).Indentation(1)}
                        """;
         if (notExpected.Count > 0)
+        {
             message += $"""
 
                          but some elements where not expected:
                         {FormatExpected(notExpected).Indentation(1)}
                         """;
+        }
+
         if (notFound.Count > 0)
+        {
             message += $"""
 
                          {(notExpected.Count == 0 ? "but" : "and")} could not find elements:
                         {FormatExpected(notFound).Indentation(1)}
                         """;
+        }
+
         return message;
     }
 
@@ -440,7 +460,6 @@ public static class AssertFailures
          {FormatFailure("Expecting do contain entry:")}
          {FormatCurrent(expected).Indentation(1)}
          """;
-
 
     public static string ContainsKeyValue(IDictionary expected, object? currentValue) =>
         $"""
@@ -559,10 +578,10 @@ public static class AssertFailures
     {
         var output = new List<string>();
         foreach (var it in left.Select((value, i) => new
-                 {
-                     Value = value,
-                     Index = i
-                 }))
+        {
+            Value = value,
+            Index = i
+        }))
         {
             var l = it.Value;
             var r = right.ElementAt(it.Index);

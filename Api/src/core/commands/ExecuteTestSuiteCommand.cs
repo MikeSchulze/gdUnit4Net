@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Commands;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Commands;
 
 using System;
 using System.Linq;
@@ -19,14 +22,17 @@ using Newtonsoft.Json;
 public class ExecuteTestSuiteCommand : BaseCommand
 {
     [JsonConstructor]
-    private ExecuteTestSuiteCommand() { }
+    private ExecuteTestSuiteCommand()
+    {
+    }
 
     /// <summary>
+    ///     Initializes a new instance of the <see cref="ExecuteTestSuiteCommand" /> class.
     ///     Initializes a new instance of the ExecuteTestSuiteCommand.
     /// </summary>
-    /// <param name="testSuite">The test suite to execute</param>
-    /// <param name="isCaptureStdOut">Whether to capture standard output during test execution</param>
-    /// <param name="isReportOrphanNodesEnabled">Whether to report orphaned nodes after test execution</param>
+    /// <param name="testSuite">The test suite to execute.</param>
+    /// <param name="isCaptureStdOut">Whether to capture standard output during test execution.</param>
+    /// <param name="isReportOrphanNodesEnabled">Whether to report orphaned nodes after test execution.</param>
     public ExecuteTestSuiteCommand(TestSuiteNode testSuite, bool isCaptureStdOut, bool isReportOrphanNodesEnabled)
     {
         Suite = testSuite;
@@ -36,8 +42,11 @@ public class ExecuteTestSuiteCommand : BaseCommand
     }
 
     [JsonProperty] private TestSuiteNode Suite { get; set; } = null!;
+
     [JsonProperty] private bool IsCaptureStdOut { get; set; }
+
     [JsonProperty] private bool IsEngineMode { get; set; }
+
     [JsonProperty] private bool IsReportOrphanNodesEnabled { get; set; }
 
     public override async Task<Response> Execute(ITestEventListener testEventListener)
@@ -61,6 +70,7 @@ public class ExecuteTestSuiteCommand : BaseCommand
                     await GodotObjectExtensions.SyncProcessFrame;
                 await new TestSuiteExecutionStage(testSuite).Execute(context);
             }
+
             // handle unexpected exceptions
             catch (Exception e)
             {

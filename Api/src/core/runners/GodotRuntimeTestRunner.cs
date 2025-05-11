@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.Core.Runners;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Runners;
 
 using System;
 using System.Collections.Generic;
@@ -29,6 +32,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     private Process? process;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="GodotRuntimeTestRunner"/> class.
     ///     Initializes a new instance of the GodotRuntimeTestRunner.
     /// </summary>
     /// <param name="logger">The test engine logger for diagnostic output.</param>
@@ -42,6 +46,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     }
 
     private object ProcessLock { get; } = new();
+
     private IDebuggerFramework DebuggerFramework { get; }
 
     /// <summary>
@@ -74,6 +79,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         var message = args.Data?.Trim();
         if (string.IsNullOrEmpty(message))
             return;
+
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
         Logger.LogInfo($":: {message}");
     };
@@ -82,10 +88,12 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         Console.Out.Flush();
         if (sender is Process p)
+        {
             if (p.ExitCode == 0)
                 Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
             else
                 Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
+        }
     };
 
     public override void Cancel()
@@ -122,11 +130,16 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 };
 
             if (DebuggerFramework.IsDebugProcess)
+            {
                 process = DebuggerFramework.LaunchProcessWithDebuggerAttached(processStartInfo);
+            }
             else
             {
-                process = new Process { StartInfo = processStartInfo };
-                process.EnableRaisingEvents = true;
+                process = new Process
+                {
+                    StartInfo = processStartInfo,
+                    EnableRaisingEvents = true
+                };
                 process.ErrorDataReceived += StdErrorProcessor;
                 process.Exited += ExitHandler("GdUnit4 Godot Runtime Test Runner");
                 process.Start();
@@ -139,10 +152,12 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
             process.WaitForExit(2000);
+
             // wait until the process has finished
             var waitRetry = 0;
             while (!process.HasExited && waitRetry++ < 10)
                 Thread.Sleep(100);
+
             // If the process not finished until 10 retries, we kill it manually
             if (!process.HasExited)
             {
@@ -186,6 +201,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             Directory.CreateDirectory(destinationFolderPath);
 
         var sceneRunnerSource = Path.Combine(destinationFolderPath, "GdUnit4TestRunnerScene.cs");
+
         // check if the scene runner already installed
         if (File.Exists(sceneRunnerSource))
             return true;
@@ -239,7 +255,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
             compileProcess.WaitForExit(100);
-
 
             // The compile project can take a while, and we need to wait until it finishes
             // Calculate how many iterations we need based on the compile process timeout
@@ -299,7 +314,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     ///     Cleans up the installed runner file when compilation fails to ensure
     ///     a fresh installation on the next run.
     /// </summary>
-    /// <param name="runnerFilePath">Path to the runner file to remove</param>
+    /// <param name="runnerFilePath">Path to the runner file to remove.</param>
     private void CleanupRunnerOnFailure(string runnerFilePath)
     {
         try
@@ -313,6 +328,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         catch (Exception ex)
         {
             Logger.LogError($"Failed to clean up runner file: {ex.Message}");
+
             // We don't want to throw here as this is just cleanup
         }
     }

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Api;
 
 /// <summary>
@@ -13,7 +16,7 @@ namespace GdUnit4.Api;
 public interface ITestEventListener
 {
     /// <summary>
-    ///     Gets or sets whether any tests have failed.
+    ///     Gets or sets a value indicating whether gets or sets whether any tests have failed.
     /// </summary>
     bool IsFailed { get; protected set; }
 
@@ -25,6 +28,6 @@ public interface ITestEventListener
     /// <summary>
     ///     Processes and publishes a test event.
     /// </summary>
-    /// <param name="testEvent">The test event to publish</param>
+    /// <param name="testEvent">The test event to publish.</param>
     void PublishEvent(ITestEvent testEvent);
 }

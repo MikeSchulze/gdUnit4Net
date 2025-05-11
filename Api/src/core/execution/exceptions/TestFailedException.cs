@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.Core.Execution.Exceptions;
 
 using System;
@@ -13,7 +16,8 @@ public partial class TestFailedException : Exception
 {
     private static readonly Regex PushErrorFileInfo = PushErrorFileInfoRegex();
 
-    public TestFailedException(string message, int lineNumber = -1) : base(message)
+    public TestFailedException(string message, int lineNumber = -1)
+        : base(message)
     {
         LineNumber = lineNumber == -1 ? GetRootCauseLineNumber() : lineNumber;
         var frame = new StackFrame(1, true);
@@ -21,7 +25,8 @@ public partial class TestFailedException : Exception
         OriginalStackTrace = st.ToString();
     }
 
-    private TestFailedException(string message, string details) : base(message)
+    private TestFailedException(string message, string details)
+        : base(message)
     {
         var stackFrames = new StringBuilder();
         foreach (var stackTraceLine in details.Split("\n"))
@@ -40,13 +45,14 @@ public partial class TestFailedException : Exception
         OriginalStackTrace = stackFrames.ToString();
     }
 
-
-    public TestFailedException(string message) : base(message)
+    public TestFailedException(string message)
+        : base(message)
     {
         var stackFrames = new StringBuilder();
         foreach (var frame in new StackTrace(true).GetFrames())
         {
             var mb = frame.GetMethod();
+
             // we only collect test-suite related stack frames
 
             // skip GdUnit4 api frames and skip system api frames do only collect test relates frames
@@ -77,7 +83,9 @@ public partial class TestFailedException : Exception
     {
         get;
         private set;
-    } = -1;
+    }
+
+    = -1;
 
     public string? FileName
     {
@@ -90,16 +98,13 @@ public partial class TestFailedException : Exception
     private static string NormalizedPath(string path) =>
         path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
 
-    private void ApplyStackTrace(string stackTrace) => typeof(Exception)
-        .GetField("_stackTraceString", BindingFlags.Instance | BindingFlags.NonPublic)?
-        .SetValue(this, stackTrace);
-
     private static int GetRootCauseLineNumber()
     {
         // Navigate the stack frames to find the root cause
         for (var i = 0; i <= 15; i++)
         {
             var frame = new StackFrame(i, true);
+
             // Check is the frame an external assembly
             if (frame.GetFileName() != null && frame.GetMethod()?.Module.Assembly != typeof(TestFailedException).Assembly)
                 return frame.GetFileLineNumber();
@@ -108,7 +113,11 @@ public partial class TestFailedException : Exception
         return -1;
     }
 
-
     [GeneratedRegex(@"at: (.*) \((.*\.cs):(\d+)\)$", RegexOptions.Compiled)]
     private static partial Regex PushErrorFileInfoRegex();
+
+    public TestFailedException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
 }

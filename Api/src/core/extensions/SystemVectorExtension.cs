@@ -1,10 +1,13 @@
-﻿namespace GdUnit4.Core.Extensions;
+﻿// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.Core.Extensions;
 
 using SystemVector2 = System.Numerics.Vector2;
 using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
-public static class SystemVectorExtension
+internal static class SystemVectorExtension
 {
     internal static bool IsEqualApprox(this SystemVector2 vector, SystemVector2 other, SystemVector2 approx)
     {
