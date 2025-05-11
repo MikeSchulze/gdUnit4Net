@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Analyzers.Test;
+namespace GdUnit4.Analyzers.Test;
 
 public static class UtilsX1
 {
