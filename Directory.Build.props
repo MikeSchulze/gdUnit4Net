@@ -23,7 +23,7 @@
     <!-- Enforce code style rules during build, not just in the IDE -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
-    <CodeAnalysisRuleSet>../stylecop.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)stylecop.ruleset</CodeAnalysisRuleSet>
 
     <!-- Convert all warnings to errors for stricter enforcement -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -45,13 +45,13 @@
     StyleCop.Analyzers: Enforces style and consistency rules
     Helps ensure readable and maintainable code across the codebase
     -->
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 
     <!-- Required for stylecop.json configuration file to work -->
-    <AdditionalFiles Include="../stylecop.json"/>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json"/>
 
   </ItemGroup>
 </Project>

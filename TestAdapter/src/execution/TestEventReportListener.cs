@@ -44,13 +44,13 @@ internal sealed class TestEventReportListener : ITestEventListener
     {
         switch (testEvent.Type)
         {
-            case SuiteBefore:
+            case SUITE_BEFORE:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName} Processing...");
                 ReportSuiteFailure(testEvent, "[Before]");
                 break;
 
-            case TestBefore:
+            case TEST_BEFORE:
             {
                 var testCase = FindTestCase(testEvent);
                 if (testCase == null)
@@ -68,7 +68,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case TestAfter:
+            case TEST_AFTER:
             {
                 var testCase = FindTestCase(testEvent);
                 if (testCase == null)
@@ -103,15 +103,15 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case SuiteAfter:
+            case SUITE_AFTER:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName}: {testEvent.AsTestOutcome()}\n");
                 ReportSuiteFailure(testEvent, "[After]");
                 break;
 
-            case Init:
+            case INIT:
                 break;
-            case Stop:
+            case STOP:
                 break;
         }
     }
@@ -167,24 +167,24 @@ internal sealed class TestEventReportListener : ITestEventListener
 
         switch (report.Type)
         {
-            case Stdout:
+            case STDOUT:
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 break;
 
-            case Warning:
-            case Orphan:
+            case WARNING:
+            case ORPHAN:
                 normalizedMessage = normalizedMessage.Replace("WARNING:\n", "");
                 testResult.ErrorMessage = "Warning Detected!";
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.AdditionalInfoCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 Framework.SendMessage(TestMessageLevel.Warning, $"Warning:\n{normalizedMessage.Indent()}");
                 break;
-            case Success:
+            case SUCCESS:
                 break;
-            case Failure:
-            case Terminated:
-            case Interrupted:
-            case Abort:
+            case FAILURE:
+            case TERMINATED:
+            case INTERRUPTED:
+            case ABORT:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -201,13 +201,13 @@ internal sealed class TestEventReportListener : ITestEventListener
 
         switch (report.Type)
         {
-            case Stdout:
+            case STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
-            case Warning:
-            case Orphan:
+            case WARNING:
+            case ORPHAN:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 normalizedMessage = normalizedMessage.Replace("WARNING:", "Warning:");
@@ -215,12 +215,12 @@ internal sealed class TestEventReportListener : ITestEventListener
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
 
-            case Success:
+            case SUCCESS:
                 break;
-            case Failure:
-            case Terminated:
-            case Interrupted:
-            case Abort:
+            case FAILURE:
+            case TERMINATED:
+            case INTERRUPTED:
+            case ABORT:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -237,25 +237,25 @@ internal sealed class TestEventReportListener : ITestEventListener
 
         switch (report.Type)
         {
-            case Stdout:
+            case STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Informational, $"Standard Output:\n{normalizedMessage.Indent()}");
                 break;
 
-            case Warning:
-            case Orphan:
+            case WARNING:
+            case ORPHAN:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:")}");
                 break;
-            case Success:
+            case SUCCESS:
                 break;
-            case Failure:
-            case Terminated:
-            case Interrupted:
-            case Abort:
+            case FAILURE:
+            case TERMINATED:
+            case INTERRUPTED:
+            case ABORT:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;
@@ -272,26 +272,26 @@ internal sealed class TestEventReportListener : ITestEventListener
 
         switch (report.Type)
         {
-            case Stdout:
+            case STDOUT:
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, normalizedMessage));
                 foreach (var message in normalizedMessage.Split("\n"))
                     Framework.SendMessage(TestMessageLevel.Informational, HtmlEncoder.Default.Encode($"    {message}"));
                 break;
 
-            case Warning:
-            case Orphan:
+            case WARNING:
+            case ORPHAN:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
-            case Success:
+            case SUCCESS:
                 break;
-            case Failure:
-            case Terminated:
-            case Interrupted:
-            case Abort:
+            case FAILURE:
+            case TERMINATED:
+            case INTERRUPTED:
+            case ABORT:
             default:
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.ErrorStackTrace = report.StackTrace;

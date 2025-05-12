@@ -15,9 +15,9 @@ public class Logger : ITestEngineLogger
 {
     private static readonly Dictionary<ITestEngineLogger.Level, TestMessageLevel> LevelMap = new()
     {
-        { ITestEngineLogger.Level.Informational, TestMessageLevel.Informational },
-        { ITestEngineLogger.Level.Warning, TestMessageLevel.Warning },
-        { ITestEngineLogger.Level.Error, TestMessageLevel.Error }
+        { ITestEngineLogger.Level.INFORMATIONAL, TestMessageLevel.Informational },
+        { ITestEngineLogger.Level.WARNING, TestMessageLevel.Warning },
+        { ITestEngineLogger.Level.ERROR, TestMessageLevel.Error }
     };
 
     private readonly IMessageLogger delegator;

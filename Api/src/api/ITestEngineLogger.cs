@@ -15,22 +15,22 @@ public interface ITestEngineLogger
     /// <summary>
     ///     Defines the available logging severity levels.
     /// </summary>
-    public enum Level
+    enum Level
     {
         /// <summary>
         ///     Informational message.
         /// </summary>
-        Informational = 0,
+        INFORMATIONAL = 0,
 
         /// <summary>
         ///     Warning message.
         /// </summary>
-        Warning = 1,
+        WARNING = 1,
 
         /// <summary>
         ///     Error message.
         /// </summary>
-        Error = 2
+        ERROR = 2
     }
 
     /// <summary>
@@ -45,19 +45,19 @@ public interface ITestEngineLogger
     /// </summary>
     /// <param name="message">The informational message to log.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void LogInfo(string message) => SendMessage(Level.Informational, message);
+    void LogInfo(string message) => SendMessage(Level.INFORMATIONAL, message);
 
     /// <summary>
     ///     Logs a warning message.
     /// </summary>
     /// <param name="message">The warning message to log.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void LogWarning(string message) => SendMessage(Level.Warning, message);
+    void LogWarning(string message) => SendMessage(Level.WARNING, message);
 
     /// <summary>
     ///     Logs an error message.
     /// </summary>
     /// <param name="message">The error message to log.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void LogError(string message) => SendMessage(Level.Error, message);
+    void LogError(string message) => SendMessage(Level.ERROR, message);
 }

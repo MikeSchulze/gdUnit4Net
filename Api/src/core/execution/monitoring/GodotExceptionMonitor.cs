@@ -80,14 +80,14 @@ public class GodotExceptionMonitor
             {
                 switch (logEntry.EntryType)
                 {
-                    case ErrorLogEntry.ErrorType.Exception:
+                    case ErrorLogEntry.ErrorType.EXCEPTION:
                         var exception = CaughtExceptions.FirstOrDefault(e => e.GetType() == logEntry.ExceptionType && e.Message == logEntry.Message);
                         if (exception != null)
                             ExceptionDispatchInfo.Capture(exception).Throw();
                         break;
-                    case ErrorLogEntry.ErrorType.PushError:
+                    case ErrorLogEntry.ErrorType.PUSH_ERROR:
                         throw TestFailedException.FromPushError(logEntry.Message, logEntry.Details);
-                    case ErrorLogEntry.ErrorType.PushWarning:
+                    case ErrorLogEntry.ErrorType.PUSH_WARNING:
                         break;
                     default:
                         break;

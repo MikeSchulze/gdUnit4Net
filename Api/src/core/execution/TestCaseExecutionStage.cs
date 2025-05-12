@@ -26,7 +26,7 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 
         await context.MemoryPool.Gc();
         if (context.MemoryPool.OrphanCount > 0)
-            context.ReportCollector.PushFront(new TestReport(Warning, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
+            context.ReportCollector.PushFront(new TestReport(WARNING, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
     }
 
     private static string ReportOrphans(ExecutionContext context) =>

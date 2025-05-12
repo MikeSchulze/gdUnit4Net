@@ -28,13 +28,13 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
 
     public TestReport(TestFailedException e)
     {
-        Type = ITestReport.ReportType.Failure;
+        Type = ITestReport.ReportType.FAILURE;
         LineNumber = e.LineNumber;
         Message = e.Message;
         StackTrace = e.StackTrace;
     }
 
-    private static IEnumerable<ITestReport.ReportType> ErrorTypes => new[] { ITestReport.ReportType.Terminated, ITestReport.ReportType.Interrupted, ITestReport.ReportType.Abort };
+    private static IEnumerable<ITestReport.ReportType> ErrorTypes => new[] { ITestReport.ReportType.TERMINATED, ITestReport.ReportType.INTERRUPTED, ITestReport.ReportType.ABORT };
 
     public bool Equals(TestReport? other)
         => other is not null
@@ -55,9 +55,9 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
 
     public bool IsError => ErrorTypes.Contains(Type);
 
-    public bool IsFailure => Type == ITestReport.ReportType.Failure;
+    public bool IsFailure => Type == ITestReport.ReportType.FAILURE;
 
-    public bool IsWarning => Type == ITestReport.ReportType.Warning;
+    public bool IsWarning => Type == ITestReport.ReportType.WARNING;
 
     public bool Equals(ITestReport? other) => throw new NotImplementedException();
 

@@ -16,14 +16,14 @@ public interface ITestEvent
     /// </summary>
     enum EventType
     {
-        Init,
-        Stop,
-        SuiteBefore,
-        SuiteAfter,
-        TestBefore,
-        TestAfter,
-        DiscoverStart,
-        DiscoverEnd
+        INIT,
+        STOP,
+        SUITE_BEFORE,
+        SUITE_AFTER,
+        TEST_BEFORE,
+        TEST_AFTER,
+        DISCOVER_START,
+        DISCOVER_END
     }
 
     /// <summary>

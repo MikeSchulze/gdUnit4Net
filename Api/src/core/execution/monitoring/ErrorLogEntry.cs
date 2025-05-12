@@ -13,9 +13,9 @@ internal sealed partial class ErrorLogEntry
 {
     public enum ErrorType
     {
-        Exception,
-        PushError,
-        PushWarning
+        EXCEPTION,
+        PUSH_ERROR,
+        PUSH_WARNING
     }
 
     private static readonly Regex ExceptionPatternDebugMode = ExceptionPatternDebugRegex();
@@ -40,13 +40,13 @@ internal sealed partial class ErrorLogEntry
     private static bool IsDebuggerActive { get; } = DebuggerUtils.IsDebuggerActive();
 
     public static ErrorLogEntry? ExtractPushWarning(string[] records, int index) =>
-        Extract(records, index, ErrorType.PushWarning);
+        Extract(records, index, ErrorType.PUSH_WARNING);
 
     public static ErrorLogEntry? ExtractPushError(string[] records, int index) =>
-        Extract(records, index, ErrorType.PushError);
+        Extract(records, index, ErrorType.PUSH_ERROR);
 
     public static ErrorLogEntry? ExtractException(string[] records, int index) =>
-        Extract(records, index, ErrorType.Exception);
+        Extract(records, index, ErrorType.EXCEPTION);
 
     private static Type? TryGetExceptionType(string typeName)
     {
@@ -82,7 +82,7 @@ internal sealed partial class ErrorLogEntry
         var details = index + 1 < records.Length ? records[index + 1].Trim() : string.Empty;
 
         // Handle exception type parsing
-        if (type == ErrorType.Exception)
+        if (type == ErrorType.EXCEPTION)
         {
             var match = IsDebuggerActive ? ExceptionPatternDebugMode.Match(content) : ExceptionPatternReleaseMode.Match(content);
             if (!match.Success)
@@ -94,7 +94,7 @@ internal sealed partial class ErrorLogEntry
         }
 
         // is PushError we need to scan the stacktrace
-        if (type == ErrorType.PushError)
+        if (type == ErrorType.PUSH_ERROR)
         {
         }
 
@@ -102,7 +102,7 @@ internal sealed partial class ErrorLogEntry
     }
 
     public override string ToString() =>
-        EntryType == ErrorType.Exception
+        EntryType == ErrorType.EXCEPTION
             ? $"{EntryType}: [{ExceptionType?.Name ?? "Unknown Exception"}] {Message}\nDetails: {Details}"
             : $"{EntryType}: {Message}\nDetails: {Details}";
 
@@ -119,9 +119,9 @@ internal sealed partial class ErrorLogEntry
 
     private static readonly Dictionary<ErrorType, Tuple<string, string>> LoggerPatterns = new()
     {
-        { ErrorType.Exception, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
-        { ErrorType.PushError, new Tuple<string, string>(GodotErrorPattern, GodotErrorPattern) },
-        { ErrorType.PushWarning, new Tuple<string, string>("USER WARNING:", "USER WARNING:") }
+        { ErrorType.EXCEPTION, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
+        { ErrorType.PUSH_ERROR, new Tuple<string, string>(GodotErrorPattern, GodotErrorPattern) },
+        { ErrorType.PUSH_WARNING, new Tuple<string, string>("USER WARNING:", "USER WARNING:") }
     };
 #pragma warning restore IDE0060
 }
