@@ -7,5 +7,5 @@ using System.Collections.Generic;
 
 public interface IValueProvider
 {
-    public IEnumerable<object> GetValues();
+    IEnumerable<object> GetValues();
 }

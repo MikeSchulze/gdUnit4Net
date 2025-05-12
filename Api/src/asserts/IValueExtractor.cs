@@ -10,5 +10,5 @@ public interface IValueExtractor
     /// </summary>
     /// <param name="value">The object containing the value to be extracted.</param>
     /// <returns></returns>
-    public object? ExtractValue(object? value);
+    object? ExtractValue(object? value);
 }

@@ -13,7 +13,7 @@ public interface IAssert
     /// </summary>
     /// <param name="message">A custom failure message.</param>
     /// <returns>IAssert.</returns>
-    public IAssert OverrideFailureMessage(string message);
+    IAssert OverrideFailureMessage(string message);
 }
 
 /// <summary>
@@ -25,25 +25,25 @@ public interface IAssertBase<in TValue> : IAssert
     ///     Verifies that the current value is null.
     /// </summary>
     /// <returns>IAssertBase.</returns>
-    public IAssertBase<TValue> IsNull();
+    IAssertBase<TValue> IsNull();
 
     /// <summary>
     ///     Verifies that the current value is not null.
     /// </summary>
     /// <returns>IAssertBase.</returns>
-    public IAssertBase<TValue> IsNotNull();
+    IAssertBase<TValue> IsNotNull();
 
     /// <summary>
     ///     Verifies that the current value is equal to expected one.
     /// </summary>
     /// <param name="expected">The value to be equal.</param>
     /// <returns>IAssertBase.</returns>
-    public IAssertBase<TValue> IsEqual(TValue expected);
+    IAssertBase<TValue> IsEqual(TValue expected);
 
     /// <summary>
     ///     Verifies that the current value is not equal to expected one.
     /// </summary>
     /// <param name="expected">The value to be NOT equal.</param>
     /// <returns>IAssertBase.</returns>
-    public IAssertBase<TValue> IsNotEqual(TValue expected);
+    IAssertBase<TValue> IsNotEqual(TValue expected);
 }

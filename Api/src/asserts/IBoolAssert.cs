@@ -12,18 +12,18 @@ public interface IBoolAssert : IAssertBase<bool>
     ///     Verifies that the current value is true.
     /// </summary>
     /// <returns>IBoolAssert.</returns>
-    public IBoolAssert IsTrue();
+    IBoolAssert IsTrue();
 
     /// <summary>
     ///     Verifies that the current value is false.
     /// </summary>
     /// <returns>IBoolAssert.</returns>
-    public IBoolAssert IsFalse();
+    IBoolAssert IsFalse();
 
     /// <summary>
     ///     Overrides the default failure message by given custom message.
     /// </summary>
     /// <param name="message">A custom failure message.</param>
     /// <returns>IBoolAssert.</returns>
-    public new IBoolAssert OverrideFailureMessage(string message);
+    new IBoolAssert OverrideFailureMessage(string message);
 }

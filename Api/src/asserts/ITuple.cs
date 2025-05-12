@@ -11,5 +11,5 @@ using System.Collections.Generic;
 /// </summary>
 public interface ITuple : IEquatable<object?>
 {
-    public IEnumerable<object?> Values { get; set; }
+    IEnumerable<object?> Values { get; set; }
 }
