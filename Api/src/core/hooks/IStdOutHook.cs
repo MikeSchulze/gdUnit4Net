@@ -7,9 +7,9 @@ using System;
 
 internal interface IStdOutHook : IDisposable
 {
-    public void StartCapture();
+    void StartCapture();
 
-    public void StopCapture();
+    void StopCapture();
 
-    public string GetCapturedOutput();
+    string GetCapturedOutput();
 }

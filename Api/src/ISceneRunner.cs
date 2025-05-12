@@ -22,7 +22,7 @@ public interface ISceneRunner : IDisposable
     ///     Gets a utility to synchronize the current thread with the Godot physics thread.
     ///     This can be used to await the completion of a single physics frame in Godot.
     /// </summary>
-    public static SignalAwaiter SyncProcessFrame => GodotObjectExtensions.SyncProcessFrame;
+    static SignalAwaiter SyncProcessFrame => GodotObjectExtensions.SyncProcessFrame;
 
     /// <summary>
     ///     Gets a util to synchronize the current thread with the Godot physics thread.
@@ -36,30 +36,30 @@ public interface ISceneRunner : IDisposable
     /// <param name="autoFree">If true the loaded scene will be automatic freed when the runner is freed.</param>
     /// <param name="verbose">Prints detailed infos on scene simulation.</param>
     /// <returns></returns>
-    public static ISceneRunner Load(string resourcePath, bool autoFree = false, bool verbose = false) => new SceneRunner(resourcePath, autoFree, verbose);
+    static ISceneRunner Load(string resourcePath, bool autoFree = false, bool verbose = false) => new SceneRunner(resourcePath, autoFree, verbose);
 
-    public static ISceneRunner Load(Node currentScene, bool autoFree = false, bool verbose = false) => new SceneRunner(currentScene, autoFree, verbose);
+    static ISceneRunner Load(Node currentScene, bool autoFree = false, bool verbose = false) => new SceneRunner(currentScene, autoFree, verbose);
 
     /// <summary>
     ///     Simulates that an action has been pressed.
     /// </summary>
     /// <param name="action">The name of the action, e.g., "ui_up".</param>
     /// <returns>The SceneRunner instance.</returns>
-    public ISceneRunner SimulateActionPressed(string action);
+    ISceneRunner SimulateActionPressed(string action);
 
     /// <summary>
     ///     Simulates that an action is press.
     /// </summary>
     /// <param name="action">The name of the action, e.g., "ui_up".</param>
     /// <returns>The SceneRunner instance.</returns>
-    public ISceneRunner SimulateActionPress(string action);
+    ISceneRunner SimulateActionPress(string action);
 
     /// <summary>
     ///     Simulates that an action has been released.
     /// </summary>
     /// <param name="action">The name of the action, e.g., "ui_up".</param>
     /// <returns>The SceneRunner instance.</returns>
-    public ISceneRunner SimulateActionRelease(string action);
+    ISceneRunner SimulateActionRelease(string action);
 
     /// <summary>
     ///     Simulates that a key has been pressed.
@@ -68,7 +68,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="shift">false by default set to true if simulate shift is press.</param>
     /// <param name="control">false by default set to true if simulate control is press.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false);
+    ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false);
 
     /// <summary>
     ///     Simulates that a key is pressed.
@@ -77,7 +77,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="shift">false by default set to true if simulate shift is press.</param>
     /// <param name="control">false by default set to true if simulate control is press.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateKeyPress(Key keyCode, bool shift = false, bool control = false);
+    ISceneRunner SimulateKeyPress(Key keyCode, bool shift = false, bool control = false);
 
     /// <summary>
     ///     Simulates that a key has been released.
@@ -86,14 +86,14 @@ public interface ISceneRunner : IDisposable
     /// <param name="shift">false by default set to true if simulate shift is press.</param>
     /// <param name="control">false by default set to true if simulate control is press.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false);
+    ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false);
 
     /// <summary>
     ///     Simulates a mouse moved to final position.
     /// </summary>
     /// <param name="position">The position in x/y coordinates.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateMouseMove(Vector2 position);
+    ISceneRunner SimulateMouseMove(Vector2 position);
 
     /// <summary>
     ///     Simulates a mouse move to the absolute coordinates.
@@ -102,7 +102,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="time">The time to move the mouse to the final position in seconds (default is 1 second).</param>
     /// <param name="transitionType">Sets the type of transition used (default is Linear).</param>
     /// <returns>SceneRunner.</returns>
-    public Task SimulateMouseMoveAbsolute(Vector2 position, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
+    Task SimulateMouseMoveAbsolute(Vector2 position, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
 
     /// <summary>
     ///     Simulates a mouse move to the relative coordinates (offset).
@@ -111,7 +111,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="time">The time to move the mouse by the relative position in seconds (default is 1 second).</param>
     /// <param name="transitionType">Sets the type of transition used (default is Linear).</param>
     /// <returns>SceneRunner.</returns>
-    public Task SimulateMouseMoveRelative(Vector2 relative, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
+    Task SimulateMouseMoveRelative(Vector2 relative, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear);
 
     /// <summary>
     ///     Simulates a mouse button pressed.
@@ -119,7 +119,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
     /// <param name="doubleClick">Indicates the button was double-clicked.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateMouseButtonPressed(MouseButton button, bool doubleClick = false);
+    ISceneRunner SimulateMouseButtonPressed(MouseButton button, bool doubleClick = false);
 
     /// <summary>
     ///     Simulates a mouse button press. (holding).
@@ -127,33 +127,33 @@ public interface ISceneRunner : IDisposable
     /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
     /// <param name="doubleClick">Indicates the button was double-clicked.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateMouseButtonPress(MouseButton button, bool doubleClick = false);
+    ISceneRunner SimulateMouseButtonPress(MouseButton button, bool doubleClick = false);
 
     /// <summary>
     ///     Simulates a mouse button released.
     /// </summary>
     /// <param name="button">The mouse button identifier, one of the MouseButton or button wheel constants.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SimulateMouseButtonRelease(MouseButton button);
+    ISceneRunner SimulateMouseButtonRelease(MouseButton button);
 
     /// <summary>
     ///     Sets the mouse cursor to given position relative to the viewport.
     /// </summary>
     /// <param name="position">The absolute mouse position.</param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SetMousePos(Vector2 position);
+    ISceneRunner SetMousePos(Vector2 position);
 
     /// <summary>
     ///     Gets the current mouse position of the current viewport.
     /// </summary>
     /// <returns>Vector2.</returns>
-    public Vector2 GetMousePosition();
+    Vector2 GetMousePosition();
 
     /// <summary>
     ///     Gets the current global mouse position of the current window.
     /// </summary>
     /// <returns>Vector2.</returns>
-    public Vector2 GetGlobalMousePosition();
+    Vector2 GetGlobalMousePosition();
 
     /// <summary>
     ///     Sets how fast or slow the scene simulation is processed (clock ticks versus the real).
@@ -164,7 +164,7 @@ public interface ISceneRunner : IDisposable
     /// </summary>
     /// <param name="timeFactor"></param>
     /// <returns>SceneRunner.</returns>
-    public ISceneRunner SetTimeFactor(double timeFactor = 1.0);
+    ISceneRunner SetTimeFactor(double timeFactor = 1.0);
 
     /// <summary>
     ///     Simulates scene processing for a certain number of frames by given delta peer frame by ignoring the current time
@@ -177,7 +177,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="frames">amount of frames to process.</param>
     /// <param name="deltaPeerFrame">the time delta between a frame in milliseconds.</param>
     /// <returns>Task to wait.</returns>
-    public Task SimulateFrames(uint frames, uint deltaPeerFrame);
+    Task SimulateFrames(uint frames, uint deltaPeerFrame);
 
     /// <summary>
     ///     Simulates scene processing for a certain number of frames.
@@ -190,7 +190,7 @@ public interface ISceneRunner : IDisposable
     /// </summary>
     /// <param name="frames">amount of frames to process.</param>
     /// <returns>Task to wait.</returns>
-    public Task SimulateFrames(uint frames);
+    Task SimulateFrames(uint frames);
 
     /// <summary>
     ///     Waits until next frame is processed (signal idle_frame).
@@ -202,7 +202,7 @@ public interface ISceneRunner : IDisposable
     ///     </example>
     /// </summary>
     /// <returns>Task to wait.</returns>
-    public Task AwaitIdleFrame();
+    Task AwaitIdleFrame();
 
     /// <summary>
     ///     Returns a method awaiter to wait for a specific method result.
@@ -216,7 +216,7 @@ public interface ISceneRunner : IDisposable
     /// <typeparam name="TValue">The expected result type.</typeparam>
     /// <param name="methodName">The name of the method to wait.</param>
     /// <returns>GodotMethodAwaiter.</returns>
-    public GdUnitAwaiter.GodotMethodAwaiter<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName)
+    GdUnitAwaiter.GodotMethodAwaiter<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName)
         where TValue : notnull;
 
     /// <summary>
@@ -231,7 +231,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    public Task AwaitSignal(string signal, params Variant[] args);
+    Task AwaitSignal(string signal, params Variant[] args);
 
     /// <summary>
     ///     Waits for a specific amount of milliseconds.
@@ -244,7 +244,7 @@ public interface ISceneRunner : IDisposable
     /// </summary>
     /// <param name="timeMillis">Seconds to wait. 1.0 for one Second.</param>
     /// <returns>Task to wait.</returns>
-    public Task AwaitMillis(uint timeMillis);
+    Task AwaitMillis(uint timeMillis);
 
     /// <summary>
     ///     Waits for all input events to be processed by flushing any buffered input events and then awaiting a full cycle of
@@ -263,7 +263,7 @@ public interface ISceneRunner : IDisposable
     /// <returns>
     ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
     /// </returns>
-    public async Task AwaitInputProcessed()
+    async Task AwaitInputProcessed()
     {
         if (Scene().ProcessMode != Node.ProcessModeEnum.Disabled)
             Input.FlushBufferedEvents();
@@ -276,12 +276,12 @@ public interface ISceneRunner : IDisposable
     ///     Access to current running scene.
     /// </summary>
     /// <returns>Node.</returns>
-    public Node Scene();
+    Node Scene();
 
     /// <summary>
     ///     Shows the running scene and moves the window to the foreground.
     /// </summary>
-    public void MaximizeView();
+    void MaximizeView();
 
     /// <summary>
     ///     Invokes the method by given name and arguments.
@@ -290,7 +290,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="args">The function arguments.</param>
     /// <returns>The return value of invoked method.</returns>
     /// <exception cref="MissingMethodException" />
-    public Variant Invoke(string name, params Variant[] args);
+    Variant Invoke(string name, params Variant[] args);
 
     /// <summary>
     ///     Invokes an async method by given name and arguments.
@@ -299,7 +299,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="args">The function arguments.</param>
     /// <returns>The return value of invoked method.</returns>
     /// <exception cref="MissingMethodException" />
-    public Task<Variant> InvokeAsync(string name, params Variant[] args);
+    Task<Variant> InvokeAsync(string name, params Variant[] args);
 
     /// <summary>
     ///     Returns the value of the property with the specified name.
@@ -307,7 +307,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="name">The name of the property.</param>
     /// <returns>The value of the property.</returns>
     /// <exception cref="MissingFieldException">Thrown when the property is not found.</exception>
-    public dynamic? GetProperty(string name);
+    dynamic? GetProperty(string name);
 
     /// <summary>
     ///     Returns the value of the property with the specified name.
@@ -316,14 +316,14 @@ public interface ISceneRunner : IDisposable
     /// <param name="name">The name of the property.</param>
     /// <returns>The value of the property.</returns>
     /// <exception cref="MissingFieldException">Thrown when the property is not found.</exception>
-    public T? GetProperty<T>(string name);
+    T? GetProperty<T>(string name);
 
     /// <summary>
     ///     Sets the value of the property with the specified name.
     /// </summary>
     /// <param name="name">The name of the property.</param>
     /// <param name="value">The value to set for the property.</param>
-    public void SetProperty(string name, Variant value);
+    void SetProperty(string name, Variant value);
 
     /// <summary>
     ///     Finds the node by given name.
@@ -332,7 +332,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="recursive">Allow recursive search.</param>
     /// <param name="owned">If owned is true, only descendants with a valid owner node are checked.</param>
     /// <returns>The node if found or Null.</returns>
-    public Node FindChild(string name, bool recursive = true, bool owned = false);
+    Node FindChild(string name, bool recursive = true, bool owned = false);
 }
 
 public static class SceneRunnerExtensions
