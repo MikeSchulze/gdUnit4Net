@@ -33,7 +33,7 @@ public class TestEventTest
             { TestEvent.STATISTIC_KEY.SKIPPED, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(Failure, 42, "test failed") };
+        List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };
         var testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100, statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
@@ -69,14 +69,14 @@ public class TestEventTest
             { TestEvent.STATISTIC_KEY.SKIPPED, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(Failure, 42, "test failed") };
+        List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };
 
         var testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
-        AssertThat(current!.Reports).Contains(new TestReport(Failure, 42, "test failed"));
+        AssertThat(current!.Reports).Contains(new TestReport(FAILURE, 42, "test failed"));
         AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("After");
         AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
@@ -106,14 +106,14 @@ public class TestEventTest
             { TestEvent.STATISTIC_KEY.SKIPPED, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(Failure, 42, "test failed") };
+        List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };
 
         var testEvent = TestEvent.AfterTest(Guid.Empty, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
         AssertThat(current).IsNotNull().IsEqual(testEvent);
-        AssertThat(current!.Reports).Contains(new TestReport(Failure, 42, "test failed"));
+        AssertThat(current!.Reports).Contains(new TestReport(FAILURE, 42, "test failed"));
         AssertThat(current.Id).IsEqual(testEvent.Id);
         AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
         AssertThat(current.ErrorCount).IsEqual(2);

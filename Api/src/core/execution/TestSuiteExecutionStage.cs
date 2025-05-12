@@ -79,7 +79,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     if (!executionContext.IsExpectingToFailWithException(e, testCase.MethodInfo))
                         executionContext.ReportCollector.Consume(
                             new TestReport(
-                                Interrupted,
+                                INTERRUPTED,
                                 executionContext.CurrentTestCase?.Line ?? -1,
                                 e.Message,
                                 e.StackTrace));
@@ -94,7 +94,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         }
         catch (Exception e)
         {
-            executionContext.ReportCollector.Consume(new TestReport(Failure, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
+            executionContext.ReportCollector.Consume(new TestReport(FAILURE, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
         }
 
         executionContext.FireAfterTestEvent();
@@ -121,7 +121,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             if (!string.IsNullOrEmpty(stdoutMessage))
             {
                 executionContext.ReportCollector.PushFront(new TestReport(
-                    Stdout,
+                    STDOUT,
                     executionContext.CurrentTestCase?.Line ?? 0, stdoutMessage));
 
                 // and finally redirect to the console because it was fully captured

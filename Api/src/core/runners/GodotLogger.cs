@@ -13,13 +13,13 @@ public sealed class GodotLogger : ITestEngineLogger
     {
         switch (level)
         {
-            case ITestEngineLogger.Level.Informational:
+            case ITestEngineLogger.Level.INFORMATIONAL:
                 GD.PrintS(message);
                 break;
-            case ITestEngineLogger.Level.Warning:
+            case ITestEngineLogger.Level.WARNING:
                 GD.PrintS(message);
                 break;
-            case ITestEngineLogger.Level.Error:
+            case ITestEngineLogger.Level.ERROR:
                 GD.PrintErr(message);
                 break;
             default:

@@ -101,7 +101,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                         var testCanceledEvent = TestEvent
                             .AfterTest(lastTestEvent.Id, lastTestEvent.ResourcePath, lastTestEvent.SuiteName, lastTestEvent.TestName)
                             .WithStatistic(TestEvent.STATISTIC_KEY.ERRORS, 1)
-                            .WithReport(new TestReport(Interrupted, 0, response.Payload));
+                            .WithReport(new TestReport(INTERRUPTED, 0, response.Payload));
                         testEventListener.PublishEvent(testCanceledEvent);
                         return response;
                 }

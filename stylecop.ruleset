@@ -4,8 +4,10 @@
     <Rule Id="IDE0011" Action="None"/> <!-- Disable curly braces { } to surround code blocks. -->
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-    <Rule Id="SA1503" Action="None"/> <!-- Disable BracesMustNotBeOmitted -->
+    <Rule Id="SA1009" Action="None"/> <!-- Disable A closing parenthesis within a C# statement is not spaced correctly Rules-->
+    <Rule Id="SA1135" Action="None"/> <!-- Disable A using directive is not qualified. Rules-->
     <Rule Id="SA1206" Action="None"/> <!-- Disable StyleCop specific Ordering Rules-->
+    <Rule Id="SA1503" Action="None"/> <!-- Disable BracesMustNotBeOmitted -->
     <Rule Id="SA1520" Action="None"/> <!-- Disable The opening and closing braces of a chained Rules-->
 
 

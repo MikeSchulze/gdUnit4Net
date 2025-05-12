@@ -5,6 +5,7 @@ namespace GdUnit4;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +23,20 @@ using Godot.Collections;
 /// <summary>
 ///     The Godot Editor bridge to run C# tests inside the Godot Editor.
 /// </summary>
-// ReSharper disable all MemberCanBePrivate.Global
 public partial class GdUnit4NetApiGodotBridge : RefCounted
 {
+    /// <summary>
+    ///     Creates a test suite based on the specified source path and line number.
+    /// </summary>
+    /// <param name="sourcePath">The path to the source file from which to create the test suite.</param>
+    /// <param name="lineNumber">The line number in the source file where the method to test is defined.</param>
+    /// <param name="testSuitePath">The path where the test suite should be created.</param>
+    /// <returns>A dictionary containing information about the created test suite.</returns>
     public static Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
     {
+        ArgumentException.ThrowIfNullOrEmpty(sourcePath);
+        ArgumentException.ThrowIfNullOrEmpty(testSuitePath);
+
         var result = GdUnitTestSuiteBuilder.Build(NormalizedPath(sourcePath), lineNumber, NormalizedPath(testSuitePath));
 
         // we need to return the original resource name of the test suite on Godot site e.g. `res://foo/..` or `user://foo/..`
@@ -35,20 +45,49 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
         return result.ToGodotDictionary();
     }
 
+    /// <summary>
+    ///     Determines if a given CSharpScript is a test suite by checking for the TestSuiteAttribute.
+    /// </summary>
+    /// <param name="script">The CSharpScript to check.</param>
+    /// <returns>True if the script is a test suite, false otherwise.</returns>
     public static bool IsTestSuite(CSharpScript script)
     {
+        ArgumentNullException.ThrowIfNull(script);
+
         var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(script.ResourcePath), true);
         return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
     }
 
+    /// <summary>
+    ///     Discovers all test cases from a given CSharpScript.
+    /// </summary>
+    /// <param name="sourceScript">The CSharpScript to discover test cases from.</param>
+    /// <returns>A list of TestCaseDescriptor objects representing discovered test cases.</returns>
+#pragma warning disable CA1002
     public static List<TestCaseDescriptor> DiscoverTestsFromScript(CSharpScript sourceScript) =>
-        TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript);
+#pragma warning restore CA1002
+        TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript).ToList();
 
+    /// <summary>
+    ///     Executes test suites asynchronously.
+    /// </summary>
+    /// <param name="testSuiteNodes">The list of test suite nodes to execute.</param>
+    /// <param name="eventListener">A callable that will receive test execution events.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous execution of the test suites.</returns>
+#pragma warning disable CA1002
     public static Task ExecuteAsync(List<TestSuiteNode> testSuiteNodes, Callable eventListener, CancellationToken cancellationToken) =>
+#pragma warning restore CA1002
         new GdUnit4RuntimeExecutorGodotBridge().ExecuteAsync(testSuiteNodes, eventListener, cancellationToken);
 
-    private static string NormalizedPath(string path) =>
-        path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
-
+    /// <summary>
+    ///     Gets the version of the GdUnit4 assembly.
+    /// </summary>
+    /// <returns>The version string of the GdUnit4 assembly.</returns>
     public static string Version() => Assembly.GetAssembly(typeof(GdUnit4NetApiGodotBridge))!.GetName()!.Version!.ToString();
+
+    private static string NormalizedPath(string path) =>
+        path.StartsWith("res://", StringComparison.Ordinal) || path.StartsWith("user://", StringComparison.Ordinal)
+            ? ProjectSettings.GlobalizePath(path)
+            : path;
 }

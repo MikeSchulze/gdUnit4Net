@@ -31,12 +31,12 @@ internal static class StringExtensions
         // Header line (always visible)
         switch (reportType)
         {
-            case Stdout:
+            case STDOUT:
                 sb.AppendLine($"{ANSI_BLUE}{ANSI_BOLD}Standard Output: {ANSI_ITALIC}{ANSI_RESET}");
                 sb.AppendLine($"{ANSI_BLUE}──────────────────────────────────────────{ANSI_RESET}");
 
                 break;
-            case Warning:
+            case WARNING:
                 sb.AppendLine($"{ANSI_YELLOW}{ANSI_BOLD}Warning:{ANSI_ITALIC}{ANSI_RESET}");
 
                 break;

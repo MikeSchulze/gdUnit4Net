@@ -104,17 +104,17 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     public string? DisplayName { get; set; }
 
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount, statistics, reports);
+        new(ITestEvent.EventType.SUITE_BEFORE, resourcePath, suiteName, "Before", totalCount, statistics, reports);
 
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
+        new(ITestEvent.EventType.SUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
 
     public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
-        new(ITestEvent.EventType.TestBefore, id, resourcePath, suiteName, testName);
+        new(ITestEvent.EventType.TEST_BEFORE, id, resourcePath, suiteName, testName);
 
     public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
         List<ITestReport>? reports = null) =>
-        new(ITestEvent.EventType.TestAfter, id, resourcePath, suiteName, testName)
+        new(ITestEvent.EventType.TEST_AFTER, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
             Reports = reports ?? new List<ITestReport>()
