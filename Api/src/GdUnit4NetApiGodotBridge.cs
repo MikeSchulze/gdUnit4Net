@@ -5,7 +5,6 @@ namespace GdUnit4;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +18,9 @@ using Core.Extensions;
 
 using Godot;
 using Godot.Collections;
+
+using static System.ArgumentException;
+using static System.ArgumentNullException;
 
 /// <summary>
 ///     The Godot Editor bridge to run C# tests inside the Godot Editor.
@@ -34,8 +36,8 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// <returns>A dictionary containing information about the created test suite.</returns>
     public static Dictionary CreateTestSuite(string sourcePath, int lineNumber, string testSuitePath)
     {
-        ArgumentException.ThrowIfNullOrEmpty(sourcePath);
-        ArgumentException.ThrowIfNullOrEmpty(testSuitePath);
+        ThrowIfNullOrEmpty(sourcePath);
+        ThrowIfNullOrEmpty(testSuitePath);
 
         var result = GdUnitTestSuiteBuilder.Build(NormalizedPath(sourcePath), lineNumber, NormalizedPath(testSuitePath));
 
@@ -52,7 +54,7 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// <returns>True if the script is a test suite, false otherwise.</returns>
     public static bool IsTestSuite(CSharpScript script)
     {
-        ArgumentNullException.ThrowIfNull(script);
+        ThrowIfNull(script);
 
         var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(script.ResourcePath), true);
         return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
@@ -63,10 +65,8 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// </summary>
     /// <param name="sourceScript">The CSharpScript to discover test cases from.</param>
     /// <returns>A list of TestCaseDescriptor objects representing discovered test cases.</returns>
-#pragma warning disable CA1002
     public static List<TestCaseDescriptor> DiscoverTestsFromScript(CSharpScript sourceScript) =>
-#pragma warning restore CA1002
-        TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript).ToList();
+        TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript);
 
     /// <summary>
     ///     Executes test suites asynchronously.
@@ -75,9 +75,7 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// <param name="eventListener">A callable that will receive test execution events.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task representing the asynchronous execution of the test suites.</returns>
-#pragma warning disable CA1002
     public static Task ExecuteAsync(List<TestSuiteNode> testSuiteNodes, Callable eventListener, CancellationToken cancellationToken) =>
-#pragma warning restore CA1002
         new GdUnit4RuntimeExecutorGodotBridge().ExecuteAsync(testSuiteNodes, eventListener, cancellationToken);
 
     /// <summary>
