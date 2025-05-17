@@ -76,6 +76,7 @@ internal static class GodotObjectExtensions
         ArgumentNullException.ThrowIfNull(elements);
         var converted = new Array();
         foreach (var item in elements)
+        {
             try
             {
                 converted.Add(item.ToVariant());
@@ -85,6 +86,7 @@ internal static class GodotObjectExtensions
                 Console.WriteLine($"Can't convert {item} to Variant\n {e.StackTrace}");
                 converted.Add(Variant.CreateFrom("n.a"));
             }
+        }
 
         return converted;
     }
@@ -144,13 +146,17 @@ internal static class GodotObjectExtensions
         object? result;
         var parameterInfo = mi.GetParameters();
         if (mi.IsStatic == false)
+        {
             result = parameterInfo.Length == 0
                 ? mi.Invoke(instance, null)
                 : mi.Invoke(instance, parameters);
+        }
         else
+        {
             result = parameterInfo.Length == 0
                 ? mi.Invoke(null, null)
                 : mi.Invoke(null, parameters);
+        }
 
         if (result is Task task)
         {
@@ -200,8 +206,10 @@ internal static class GodotObjectExtensions
             return false;
 
         foreach (var key in left.Keys)
+        {
             if (!right.Contains(key) || !left[key].VariantEquals(right[key], compareMode))
                 return false;
+        }
 
         return true;
     }

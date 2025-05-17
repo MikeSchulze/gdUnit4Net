@@ -34,9 +34,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     public GodotRuntimeExecutor(ITestEngineLogger logger)
         : base(new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
-    {
-        Logger.LogInfo("Starting GodotGdUnit4RestClient.");
-    }
+        => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
 
     public async Task StartAsync()
     {
@@ -83,6 +81,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         // read incoming data until is command response or canceled
         TestEvent? lastTestEvent = null;
         while (!cancellationToken.IsCancellationRequested)
+        {
             try
             {
                 var data = await ReadInData(cancellationToken);
@@ -104,6 +103,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                             .WithReport(new TestReport(INTERRUPTED, 0, response.Payload));
                         testEventListener.PublishEvent(testCanceledEvent);
                         return response;
+                    default:
+                        continue;
                 }
             }
             catch (Exception ex)
@@ -114,6 +115,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                     Payload = JsonConvert.SerializeObject(ex)
                 };
             }
+        }
 
         return new Response
         {

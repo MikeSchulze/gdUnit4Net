@@ -128,6 +128,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
     private void UnregisterEmitter(GodotSignalCollector collector, GodotObject emitter)
     {
         if (IsInstanceValid(collector))
+        {
             // WriteLine($"disconnect_signals: {emitter}");
             foreach (var connection in collector.GetIncomingConnections())
             {
@@ -138,6 +139,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
                 // WriteLine($"disconnect: {signalName} from {source} target {collector} -> {methodName}");
                 source.Disconnect(signalName, new Callable(collector, methodName));
             }
+        }
 
         if (IsInstanceValid(emitter))
             CollectedSignals.Remove(emitter);

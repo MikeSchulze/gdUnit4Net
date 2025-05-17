@@ -37,10 +37,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
         InitExecutionAttributes(method?.Name ?? name, method, method?.GetCustomAttribute<TestStageAttribute>()!);
     }
 
-    protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute)
-    {
-        InitExecutionAttributes(name, method, stageAttribute);
-    }
+    protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute) => InitExecutionAttributes(name, method, stageAttribute);
 
     protected string StageName { get; private set; } = string.Empty;
 

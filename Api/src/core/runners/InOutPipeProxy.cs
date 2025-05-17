@@ -57,21 +57,25 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
         var responseLengthBytes = new byte[4];
         await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
+        {
             return new Response
             {
                 StatusCode = HttpStatusCode.Gone,
                 Payload = "Connection interrupted by cancellation requested."
             };
+        }
 
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
         var responseBytes = new byte[responseLength];
         await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
+        {
             return new Response
             {
                 StatusCode = HttpStatusCode.Gone,
                 Payload = "Connection interrupted by cancellation requested."
             };
+        }
 
         var json = Encoding.UTF8.GetString(responseBytes);
         if (json.Length == 0)
@@ -147,6 +151,7 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
     {
         var totalBytesRead = 0;
         while (IsConnected && totalBytesRead < count)
+        {
             try
             {
                 var bytesRead = await Pipe.ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead), cancellationToken);
@@ -158,6 +163,7 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
                     throw;
                 break;
             }
+        }
 
         // Console.WriteLine($"{typeof(TPipe)} Read {count} bytes from {totalBytesRead} of {count}, {IsConnected}");
     }

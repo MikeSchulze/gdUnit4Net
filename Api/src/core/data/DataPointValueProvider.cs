@@ -84,8 +84,10 @@ internal static class DataPointValueProvider
                          throw new ArgumentNullException($"Value returned by property or method {dataPoint.DataPointSource} shouldn't be null.");
 
         if (!TryGetData(dataSource, out var data))
+        {
             throw new ArgumentException(
                 $"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IEnumerable<object?[]> or IEnumerable<object?>");
+        }
 
         return data;
     }
@@ -188,9 +190,11 @@ internal static class DataPointValueProvider
         // Read file line-by-line instead of loading the whole file into memory
         using var reader = new StreamReader(filePath);
         while (reader.ReadLine() is { } line)
+        {
             // If the line contains the class keyword and the class name, it's a likely candidate
             if (line.Contains($"class {className}"))
                 return true;
+        }
 
         return false;
     }
@@ -250,8 +254,10 @@ internal static class DataPointValueProvider
         if (property != null)
         {
             if (!property.CanRead)
+            {
                 throw new ArgumentException(
                     $"Property '{dataPoint.DataPointSource}' in {declaringType.FullName} must have a getter");
+            }
 
             returnType = property.PropertyType;
 
@@ -357,10 +363,12 @@ internal static class DataPointValueProvider
             var resultList = new List<object?[]>();
 
             foreach (var item in enumerable)
+            {
                 if (item is object?[] array)
                     resultList.Add(array);
                 else
                     resultList.Add(new[] { item });
+            }
 
             if (resultList.Count == 0)
                 return false;

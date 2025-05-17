@@ -27,32 +27,38 @@ internal sealed class GdUnitConsole
     public GdUnitConsole PrintError(string message)
     {
         lock (LockObj)
+        {
             return BeginColor(ConsoleColor.DarkRed)
                 .WriteLine(message)
                 .EndColor()
                 .NewLine();
+        }
     }
 
     public GdUnitConsole Print(string message, ConsoleColor color = ConsoleColor.White, int flags = 0)
     {
         lock (LockObj)
+        {
             return BeginColor(color)
                 .Bold((flags & BOLD) == BOLD)
                 .Italic((flags & ITALIC) == ITALIC)
                 .Underline((flags & UNDERLINE) == UNDERLINE)
                 .Write(message)
                 .EndColor();
+        }
     }
 
     public GdUnitConsole Println(string message, ConsoleColor color = ConsoleColor.White, int flags = 0)
     {
         lock (LockObj)
+        {
             return BeginColor(color)
                 .Bold((flags & BOLD) == BOLD)
                 .Italic((flags & ITALIC) == ITALIC)
                 .Underline((flags & UNDERLINE) == UNDERLINE)
                 .WriteLine(message)
                 .EndColor();
+        }
     }
 
     private GdUnitConsole BeginColor(ConsoleColor color)
