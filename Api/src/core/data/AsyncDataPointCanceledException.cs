@@ -8,15 +8,9 @@ using System;
 public sealed class AsyncDataPointCanceledException : Exception
 {
     public AsyncDataPointCanceledException(string message, string stackTrace)
-        : base(message)
-    {
-        StackTrace = stackTrace;
-    }
+        : base(message) => StackTrace = stackTrace;
 
-    private AsyncDataPointCanceledException()
-    {
-        StackTrace = "";
-    }
+    private AsyncDataPointCanceledException() => StackTrace = "";
 
     public override string StackTrace { get; }
 }

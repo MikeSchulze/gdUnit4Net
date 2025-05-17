@@ -397,7 +397,9 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
             || ns.StartsWith("Microsoft")
             || ns == "global"
             || ns == "<global namespace>")
+        {
             return false;
+        }
 
         visitedMethods ??= new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         if (!visitedMethods.Add(method))
@@ -479,7 +481,10 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
                     || ns.StartsWith("Microsoft")
                     || ns == "global"
                     || ns == "<global namespace>")
+                {
                     return false;
+                }
+
                 if (ns.StartsWith("Godot"))
                     return true;
                 current = current.BaseType;

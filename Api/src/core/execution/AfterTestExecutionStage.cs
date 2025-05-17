@@ -55,11 +55,13 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
         var beforeAttribute = BeforeTestAttribute(context);
         var afterAttributes = AfterTestAttribute(context);
         if (beforeAttribute != null && afterAttributes != null)
+        {
             return $"""
                     {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}
                         Detected <{context.MemoryPool.OrphanCount}> orphan nodes during test setup stage!
                         Check [b]{beforeAttribute.Name + ":" + beforeAttribute.Line}[/b] and [b]{afterAttributes.Name + ":" + afterAttributes.Line}[/b] for unfreed instances!
                     """;
+        }
 
         return $"""
                 {AssertFailures.FormatValue("WARNING:", AssertFailures.WARN_COLOR, false)}

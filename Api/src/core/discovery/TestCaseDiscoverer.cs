@@ -87,12 +87,14 @@ internal static class TestCaseDiscoverer
         try
         {
             if (definition.DebugInformation?.SequencePoints == null)
+            {
                 return new CodeNavigation
                 {
                     LineNumber = -1,
                     CodeFilePath = "unknown",
                     MethodName = definition.Name
                 };
+            }
 
             var debugInfo = GetDebugInfo(definition);
 
@@ -199,8 +201,10 @@ internal static class TestCaseDiscoverer
             .ToList();
 
         foreach (var attr in testCategoryAttributes)
+        {
             if (attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string category)
                 categories.Add(category);
+        }
 
         return categories;
     }
@@ -219,6 +223,7 @@ internal static class TestCaseDiscoverer
             .ToList();
 
         foreach (var attr in traitAttributes)
+        {
             if (attr.ConstructorArguments.Count >= 2 &&
                 attr.ConstructorArguments[0].Value is string traitName &&
                 attr.ConstructorArguments[1].Value is string traitValue)
@@ -232,6 +237,7 @@ internal static class TestCaseDiscoverer
                 if (!values.Contains(traitValue))
                     values.Add(traitValue);
             }
+        }
 
         return traits;
     }
@@ -257,8 +263,10 @@ internal static class TestCaseDiscoverer
             }
 
             foreach (var value in trait.Value)
+            {
                 if (!values.Contains(value))
                     values.Add(value);
+            }
         }
 
         return result;
@@ -272,6 +280,7 @@ internal static class TestCaseDiscoverer
         var args = Array.Empty<object?>();
         var firstArg = attribute.ConstructorArguments[0];
         if (firstArg.Value is CustomAttributeArgument[] constructorArgs)
+        {
             args = constructorArgs
                 .Select(arg =>
                 {
@@ -280,12 +289,14 @@ internal static class TestCaseDiscoverer
                     return arg.Value;
                 })
                 .ToArray();
+        }
 
         // Create the TestCase attribute instance with constructor arguments
         var testCase = new TestCaseAttribute(args);
 
         // Handle properties
         foreach (var prop in attribute.Properties)
+        {
             switch (prop.Name)
             {
                 case "TestName":
@@ -303,7 +314,10 @@ internal static class TestCaseDiscoverer
                     if (prop.Argument.Value is string description)
                         testCase.Description = description;
                     break;
+                default:
+                    break;
             }
+        }
 
         return testCase;
     }
@@ -370,9 +384,11 @@ internal static class TestCaseDiscoverer
         lock (AssemblyLocationCache)
         {
             if (AssemblyLocationCache.Count != 0)
+            {
                 return AssemblyLocationCache.TryGetValue(TestAssemblyName(), out var locations)
                     ? locations
                     : new HashSet<string>();
+            }
 
             var assemblyName = TestAssemblyName();
             var assemblyPaths = FindAllAssemblyPaths(Logger, assemblyName);

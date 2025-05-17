@@ -76,10 +76,7 @@ internal class GdUnit4TestEventListener : ITestEventListener
 {
     private readonly Callable listener;
 
-    internal GdUnit4TestEventListener(Callable listener)
-    {
-        this.listener = listener;
-    }
+    internal GdUnit4TestEventListener(Callable listener) => this.listener = listener;
 
     public int CompletedTests { get; set; }
 

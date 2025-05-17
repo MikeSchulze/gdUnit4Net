@@ -64,6 +64,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         {
             var testAttribute = testCase.TestCaseAttributes.First();
             if (DataPointValueProvider.IsAsyncDataPoint(testCase))
+            {
                 try
                 {
                     var timeout = executionContext.GetExecutionTimeout(testAttribute);
@@ -77,20 +78,25 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 catch (AsyncDataPointCanceledException e)
                 {
                     if (!executionContext.IsExpectingToFailWithException(e, testCase.MethodInfo))
+                    {
                         executionContext.ReportCollector.Consume(
                             new TestReport(
                                 INTERRUPTED,
                                 executionContext.CurrentTestCase?.Line ?? -1,
                                 e.Message,
                                 e.StackTrace));
+                    }
                 }
+            }
             else
+            {
                 foreach (var dataPointValues in DataPointValueProvider.GetData(testCase))
                 {
                     var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
                     using ExecutionContext testCaseContext = new(executionContext, displayName);
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues);
                 }
+            }
         }
         catch (Exception e)
         {

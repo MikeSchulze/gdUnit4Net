@@ -64,6 +64,8 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
                 if (currentLength >= length)
                     failed = true;
                 break;
+            default:
+                break;
         }
 
         if (failed)
