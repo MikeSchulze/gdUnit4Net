@@ -11,8 +11,6 @@ using System.Runtime.CompilerServices;
 
 using Api;
 
-using Attributes;
-
 using Godot;
 
 using Mono.Cecil;
@@ -169,18 +167,18 @@ internal static class TestCaseDiscoverer
                 var testCaseAttribute = CreateTestCaseAttribute(attr);
 
                 return new TestCaseDescriptor
-                {
-                    Id = Guid.NewGuid(),
-                    AssemblyPath = assemblyPath,
-                    ManagedType = className,
-                    ManagedMethod = mi.Name,
-                    AttributeIndex = index,
-                    LineNumber = navData.LineNumber,
-                    CodeFilePath = navData.CodeFilePath,
-                    RequireRunningGodotEngine = requireRunningGodotEngine,
-                    Categories = allCategories,
-                    Traits = allTraits
-                }
+                    {
+                        Id = Guid.NewGuid(),
+                        AssemblyPath = assemblyPath,
+                        ManagedType = className,
+                        ManagedMethod = mi.Name,
+                        AttributeIndex = index,
+                        LineNumber = navData.LineNumber,
+                        CodeFilePath = navData.CodeFilePath,
+                        RequireRunningGodotEngine = requireRunningGodotEngine,
+                        Categories = allCategories,
+                        Traits = allTraits
+                    }
                     .Build(testCaseAttribute, hasMultipleAttributes);
             })
             .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
@@ -193,21 +191,11 @@ internal static class TestCaseDiscoverer
     /// <param name="definition">The type or method definition to check for category attributes.</param>
     /// <returns>A list of categories.</returns>
     private static List<string> GetCategories(ICustomAttributeProvider definition)
-    {
-        var categories = new List<string>();
-
-        var testCategoryAttributes = definition.CustomAttributes
+        => definition.CustomAttributes
             .Where(IsAttribute<TestCategoryAttribute>)
+            .Where(attr => attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string)
+            .Select(attr => (string)attr.ConstructorArguments[0].Value)
             .ToList();
-
-        foreach (var attr in testCategoryAttributes)
-        {
-            if (attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string category)
-                categories.Add(category);
-        }
-
-        return categories;
-    }
 
     /// <summary>
     ///     Extracts trait information from a type or method definition.
@@ -215,32 +203,19 @@ internal static class TestCaseDiscoverer
     /// <param name="definition">The type or method definition to check for trait attributes.</param>
     /// <returns>A dictionary of trait names and their values.</returns>
     private static Dictionary<string, List<string>> GetTraits(ICustomAttributeProvider definition)
-    {
-        var traits = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-        var traitAttributes = definition.CustomAttributes
+        => definition.CustomAttributes
             .Where(IsAttribute<TraitAttribute>)
-            .ToList();
-
-        foreach (var attr in traitAttributes)
-        {
-            if (attr.ConstructorArguments.Count >= 2 &&
-                attr.ConstructorArguments[0].Value is string traitName &&
-                attr.ConstructorArguments[1].Value is string traitValue)
-            {
-                if (!traits.TryGetValue(traitName, out var values))
-                {
-                    values = new List<string>();
-                    traits[traitName] = values;
-                }
-
-                if (!values.Contains(traitValue))
-                    values.Add(traitValue);
-            }
-        }
-
-        return traits;
-    }
+            .Where(attr => attr.ConstructorArguments.Count >= 2
+                           && attr.ConstructorArguments[0].Value is string
+                           && attr.ConstructorArguments[1].Value is string)
+            .GroupBy(
+                attr => (string)attr.ConstructorArguments[0].Value,
+                attr => (string)attr.ConstructorArguments[1].Value,
+                StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Distinct().ToList(),
+                StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///     Combines two trait dictionaries.
@@ -251,26 +226,16 @@ internal static class TestCaseDiscoverer
     private static Dictionary<string, List<string>> CombineTraits(
         Dictionary<string, List<string>> first,
         Dictionary<string, List<string>> second)
-    {
-        var result = new Dictionary<string, List<string>>(first, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var trait in second)
-        {
-            if (!result.TryGetValue(trait.Key, out var values))
-            {
-                values = new List<string>();
-                result[trait.Key] = values;
-            }
-
-            foreach (var value in trait.Value)
-            {
-                if (!values.Contains(value))
-                    values.Add(value);
-            }
-        }
-
-        return result;
-    }
+        => first
+            .Concat(second)
+            .GroupBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .SelectMany(pair => pair.Value)
+                    .Distinct()
+                    .ToList(),
+                StringComparer.OrdinalIgnoreCase);
 
     private static TestCaseAttribute CreateTestCaseAttribute(CustomAttribute attribute)
     {

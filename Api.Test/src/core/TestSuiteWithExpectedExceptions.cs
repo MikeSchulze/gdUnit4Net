@@ -26,6 +26,11 @@ public class TestSuiteWithExpectedExceptions
 
 
     [TestCase]
+    [ThrowsException(typeof(TestFailedException), "Expecting: 'False' but is 'True'", 31)]
+    public void ExpectTestFailedExceptionWithLineNumber() =>
+        AssertBool(true).IsFalse();
+
+    [TestCase]
     [ThrowsException(typeof(ArgumentException), "The argument 'message' is invalid")]
     public void ExpectArgumentException() =>
         throw new ArgumentException("The argument 'message' is invalid");

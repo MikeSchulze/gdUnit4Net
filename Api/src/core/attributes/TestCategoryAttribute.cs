@@ -1,14 +1,16 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
-namespace GdUnit4.Core.Attributes;
+// ReSharper disable once CheckNamespace
+// Need to be placed in the root namespace to be accessible by the test runner.
+namespace GdUnit4;
 
 using System;
 
 /// <summary>
 ///     Specifies a category for a test method or class.
 /// </summary>
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 public sealed class TestCategoryAttribute : Attribute
 {
     /// <summary>
