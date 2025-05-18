@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
+// ReSharper disable once CheckNamespace
+// Need to be placed in the root namespace to be accessible by the test runner.
 namespace GdUnit4;
 
 using System;
@@ -84,7 +86,7 @@ using System;
 public sealed class DataPointAttribute : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source.
+    ///     Initializes a new instance of the <see cref="DataPointAttribute" /> class with a data source.
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
     public DataPointAttribute(string dataPointSource)
@@ -94,7 +96,7 @@ public sealed class DataPointAttribute : Attribute
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source from a specified type.
+    ///     Initializes a new instance of the <see cref="DataPointAttribute" /> class with a data source from a specified type.
     /// </summary>
     /// <param name="dataPointSource">The name of the property or method that provides the test data.</param>
     /// <param name="dataPointDeclaringType">The type that contains the data source.</param>
@@ -106,14 +108,14 @@ public sealed class DataPointAttribute : Attribute
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataPointAttribute"/> class with a data source and parameters.
+    ///     Initializes a new instance of the <see cref="DataPointAttribute" /> class with a data source and parameters.
     /// </summary>
     /// <param name="dataPointSource">The name of the method that provides the test data.</param>
-    /// <param name="arguments">Arguments to pass to the data source method.</param>
-    public DataPointAttribute(string dataPointSource, params object?[] arguments)
+    /// <param name="dataPointParameters">Arguments to pass to the data source method.</param>
+    public DataPointAttribute(string dataPointSource, params object?[] dataPointParameters)
     {
         DataPointSource = dataPointSource;
-        DataPointParameters = arguments;
+        DataPointParameters = dataPointParameters;
     }
 
     /// <summary>
@@ -131,5 +133,5 @@ public sealed class DataPointAttribute : Attribute
     ///     Gets the arguments to pass to the data source method.
     ///     Will be null for properties or methods without parameters.
     /// </summary>
-    internal object?[]? DataPointParameters { get; }
+    public object?[]? DataPointParameters { get; }
 }

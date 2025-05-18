@@ -1,13 +1,30 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
+// ReSharper disable once CheckNamespace
+// Need to be placed in the root namespace to be accessible by the test runner.
 namespace GdUnit4;
 
 using System;
 
+/// <summary>
+///     Base attribute class for all test stage attributes in the GdUnit4 testing framework.
+///     TestStageAttribute serves as the foundation for more specific test-related attributes
+///     that mark different phases or types of test execution.
+/// </summary>
+/// <remarks>
+///     This is an abstract base class not intended for direct use. Instead, use derived attributes
+///     such as TestCaseAttribute, BeforeTestAttribute, AfterTestAttribute, etc.
+///     All derived attributes inherit the ability to specify a description and timeout.
+/// </remarks>
 [AttributeUsage(AttributeTargets.Delegate)]
-public class TestStageAttribute : Attribute
+public abstract class TestStageAttribute : Attribute
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestStageAttribute" /> class.
+    /// </summary>
+    /// <param name="name">The name of the test stage, typically derived from the method name.</param>
+    /// <param name="line">The source code line number where the attribute is applied.</param>
     protected TestStageAttribute(string name, int line)
     {
         Name = name;
@@ -15,7 +32,7 @@ public class TestStageAttribute : Attribute
     }
 
     /// <summary>
-    ///     Gets or sets describes the intention of the test, will be shown as a tool tip on the inspector node.
+    ///     Gets or sets describe the intention of the test, will be shown as a tool tip on the inspector node.
     /// </summary>
     public string Description { get; set; } = string.Empty;
 
@@ -25,12 +42,12 @@ public class TestStageAttribute : Attribute
     public long Timeout { get; set; } = -1;
 
     /// <summary>
-    ///     Gets the test name.
+    ///     Gets or sets the test name.
     /// </summary>
-    internal string Name { get; private set; }
+    internal string Name { get; set; }
 
     /// <summary>
-    ///     Gets the line of the annotated method.
+    ///     Gets or sets the line of the annotated method.
     /// </summary>
-    internal int Line { get; private set; }
+    internal int Line { get; set; }
 }
