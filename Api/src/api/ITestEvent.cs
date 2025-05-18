@@ -12,21 +12,6 @@ using System.Collections.Generic;
 public interface ITestEvent
 {
     /// <summary>
-    ///     Defines the different types of test events.
-    /// </summary>
-    enum EventType
-    {
-        INIT,
-        STOP,
-        SUITE_BEFORE,
-        SUITE_AFTER,
-        TEST_BEFORE,
-        TEST_AFTER,
-        DISCOVER_START,
-        DISCOVER_END
-    }
-
-    /// <summary>
     ///     Gets the type of test event.
     /// </summary>
     EventType Type { get; }
@@ -42,32 +27,32 @@ public interface ITestEvent
     string FullyQualifiedName { get; }
 
     /// <summary>
-    ///     Gets the test display name. Used for data driven test e.g. DataPointAttribute.
+    ///     Gets the test display name. Used for data-driven test e.g., DataPointAttribute.
     /// </summary>
     string? DisplayName { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether gets whether the test failed.
+    ///     Gets a value indicating whether the test failed.
     /// </summary>
     bool IsFailed { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether gets whether the test encountered an error.
+    ///     Gets a value indicating whether the test encountered an error.
     /// </summary>
     bool IsError { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether gets whether the test completed successfully.
+    ///     Gets a value indicating whether the test completed successfully.
     /// </summary>
     bool IsSuccess { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether gets whether the test produced warnings.
+    ///     Gets a value indicating whether the test produced warnings.
     /// </summary>
     bool IsWarning { get; }
 
     /// <summary>
-    ///     Gets a value indicating whether gets whether the test was skipped.
+    ///     Gets a value indicating whether the test was skipped.
     /// </summary>
     bool IsSkipped { get; }
 

@@ -20,17 +20,17 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeBefore()
     {
-        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        Dictionary<TestEvent.StatisticKey, object> statistics = new()
         {
-            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
-            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
-            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
-            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
-            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
-            { TestEvent.STATISTIC_KEY.FAILED, true },
-            { TestEvent.STATISTIC_KEY.ERRORS, false },
-            { TestEvent.STATISTIC_KEY.WARNINGS, false },
-            { TestEvent.STATISTIC_KEY.SKIPPED, true }
+            { TestEvent.StatisticKey.ElapsedTime, 124 },
+            { TestEvent.StatisticKey.ErrorCount, 2 },
+            { TestEvent.StatisticKey.FailedCount, 3 },
+            { TestEvent.StatisticKey.SkippedCount, 4 },
+            { TestEvent.StatisticKey.OrphanNodes, 0 },
+            { TestEvent.StatisticKey.Failed, true },
+            { TestEvent.StatisticKey.Errors, false },
+            { TestEvent.StatisticKey.Warnings, false },
+            { TestEvent.StatisticKey.Skipped, true }
         };
 
         List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };
@@ -56,17 +56,17 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeAfter()
     {
-        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        Dictionary<TestEvent.StatisticKey, object> statistics = new()
         {
-            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
-            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
-            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
-            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
-            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
-            { TestEvent.STATISTIC_KEY.FAILED, true },
-            { TestEvent.STATISTIC_KEY.ERRORS, false },
-            { TestEvent.STATISTIC_KEY.WARNINGS, false },
-            { TestEvent.STATISTIC_KEY.SKIPPED, true }
+            { TestEvent.StatisticKey.ElapsedTime, 124 },
+            { TestEvent.StatisticKey.ErrorCount, 2 },
+            { TestEvent.StatisticKey.FailedCount, 3 },
+            { TestEvent.StatisticKey.SkippedCount, 4 },
+            { TestEvent.StatisticKey.OrphanNodes, 0 },
+            { TestEvent.StatisticKey.Failed, true },
+            { TestEvent.StatisticKey.Errors, false },
+            { TestEvent.StatisticKey.Warnings, false },
+            { TestEvent.StatisticKey.Skipped, true }
         };
 
         List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };
@@ -93,17 +93,17 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeAfterTest()
     {
-        Dictionary<TestEvent.STATISTIC_KEY, object> statistics = new()
+        Dictionary<TestEvent.StatisticKey, object> statistics = new()
         {
-            { TestEvent.STATISTIC_KEY.ELAPSED_TIME, 124 },
-            { TestEvent.STATISTIC_KEY.ERROR_COUNT, 2 },
-            { TestEvent.STATISTIC_KEY.FAILED_COUNT, 3 },
-            { TestEvent.STATISTIC_KEY.SKIPPED_COUNT, 4 },
-            { TestEvent.STATISTIC_KEY.ORPHAN_NODES, 0 },
-            { TestEvent.STATISTIC_KEY.FAILED, true },
-            { TestEvent.STATISTIC_KEY.ERRORS, false },
-            { TestEvent.STATISTIC_KEY.WARNINGS, false },
-            { TestEvent.STATISTIC_KEY.SKIPPED, true }
+            { TestEvent.StatisticKey.ElapsedTime, 124 },
+            { TestEvent.StatisticKey.ErrorCount, 2 },
+            { TestEvent.StatisticKey.FailedCount, 3 },
+            { TestEvent.StatisticKey.SkippedCount, 4 },
+            { TestEvent.StatisticKey.OrphanNodes, 0 },
+            { TestEvent.StatisticKey.Failed, true },
+            { TestEvent.StatisticKey.Errors, false },
+            { TestEvent.StatisticKey.Warnings, false },
+            { TestEvent.StatisticKey.Skipped, true }
         };
 
         List<ITestReport> reports = new() { new TestReport(FAILURE, 42, "test failed") };

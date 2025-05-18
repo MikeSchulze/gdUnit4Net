@@ -9,17 +9,17 @@ using Godot;
 
 public sealed class GodotLogger : ITestEngineLogger
 {
-    public void SendMessage(ITestEngineLogger.Level level, string message)
+    public void SendMessage(LogLevel logLevel, string message)
     {
-        switch (level)
+        switch (logLevel)
         {
-            case ITestEngineLogger.Level.INFORMATIONAL:
+            case LogLevel.Informational:
                 GD.PrintS(message);
                 break;
-            case ITestEngineLogger.Level.WARNING:
+            case LogLevel.Warning:
                 GD.PrintS(message);
                 break;
-            case ITestEngineLogger.Level.ERROR:
+            case LogLevel.Error:
                 GD.PrintErr(message);
                 break;
             default:

@@ -18,107 +18,168 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 {
     // constructor needs to serialize/deserialize by JsonConvert
     [JsonConstructor]
-
-    // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
     private TestEvent()
     {
+        SuiteName = string.Empty;
+        TestName = string.Empty;
+        ResourcePath = string.Empty;
+        FullyQualifiedName = string.Empty;
     }
 
-    private TestEvent(ITestEvent.EventType eventType, string resourcePath, string suiteName, string testName, int totalCount = 0,
-        IDictionary<STATISTIC_KEY, object>? statistics = null,
+    private TestEvent(
+        EventType eventType,
+        string resourcePath,
+        string suiteName,
+        string testName,
+        int totalCount = 0,
+        IDictionary<StatisticKey, object>? statistics = null,
         IEnumerable<ITestReport>? reports = null)
     {
         Type = eventType;
         ResourcePath = resourcePath;
         SuiteName = suiteName;
         TestName = testName;
-        Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>();
-        Statistics[STATISTIC_KEY.TOTAL_COUNT] = totalCount;
+        Statistics = statistics ?? new Dictionary<StatisticKey, object>();
+        Statistics[StatisticKey.TotalCount] = totalCount;
         Reports = reports?.ToList() ?? new List<ITestReport>();
         FullyQualifiedName = string.Empty;
     }
 
-    private TestEvent(ITestEvent.EventType eventType, Guid id, string resourcePath, string suiteName, string testName)
+    private TestEvent(EventType eventType, Guid id, string resourcePath, string suiteName, string testName)
     {
         Type = eventType;
         Id = id;
         ResourcePath = resourcePath;
         SuiteName = suiteName;
         TestName = testName;
-        Statistics = new Dictionary<STATISTIC_KEY, object>
-        {
-            [STATISTIC_KEY.TOTAL_COUNT] = 0
-        };
+        Statistics = new Dictionary<StatisticKey, object> { [StatisticKey.TotalCount] = 0 };
         Reports = new List<ITestReport>();
         FullyQualifiedName = string.Empty;
     }
 
-    public IDictionary<STATISTIC_KEY, object> Statistics { get; private init; } = new Dictionary<STATISTIC_KEY, object>();
+    internal enum StatisticKey
+    {
+        Warnings,
+        Failed,
+        Errors,
+        Skipped,
+        ElapsedTime,
+        OrphanNodes,
+        TotalCount,
+        ErrorCount,
+        FailedCount,
+        SkippedCount
+    }
 
-    public int TotalCount => GetByKeyOrDefault(STATISTIC_KEY.TOTAL_COUNT, 0);
+    public Guid Id { get; set; }
 
-    public int ErrorCount => GetByKeyOrDefault(STATISTIC_KEY.ERROR_COUNT, 0);
+    public EventType Type { get; set; }
 
-    public int FailedCount => GetByKeyOrDefault(STATISTIC_KEY.FAILED_COUNT, 0);
+    public string SuiteName { get; set; }
 
-    public int OrphanCount => GetByKeyOrDefault(STATISTIC_KEY.ORPHAN_NODES, 0);
+    public string TestName { get; set; }
 
-    public int SkippedCount => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED_COUNT, 0);
+    public string ResourcePath { get; set; }
 
-    public bool Equals(TestEvent? other) =>
-        other is not null &&
-        (Type,
-            ResourcePath,
-            SuiteName,
-            TestName,
-            TotalCount,
-            ErrorCount,
-            FailedCount,
-            OrphanCount)
-        .Equals((
-            other.Type,
-            other.ResourcePath,
-            other.SuiteName,
-            other.TestName,
-            other.TotalCount,
-            other.ErrorCount,
-            other.FailedCount,
-            other.OrphanCount));
+    public string? DisplayName { get; set; }
+
+    public string FullyQualifiedName { get; set; }
+
+    public IDictionary<StatisticKey, object> Statistics { get; private init; } = new Dictionary<StatisticKey, object>();
 
     [JsonProperty]
     [JsonConverter(typeof(TestReportListConverter))]
     public ICollection<ITestReport> Reports { get; private init; } = new List<ITestReport>();
 
-    public bool IsWarning => GetByKeyOrDefault(STATISTIC_KEY.WARNINGS, false);
+    public int TotalCount => GetByKeyOrDefault(StatisticKey.TotalCount, 0);
 
-    public bool IsSkipped => GetByKeyOrDefault(STATISTIC_KEY.SKIPPED, false);
+    public int ErrorCount => GetByKeyOrDefault(StatisticKey.ErrorCount, 0);
 
-    public bool IsFailed => GetByKeyOrDefault(STATISTIC_KEY.FAILED, false);
+    public int FailedCount => GetByKeyOrDefault(StatisticKey.FailedCount, 0);
 
-    public bool IsError => GetByKeyOrDefault(STATISTIC_KEY.ERRORS, false);
+    public int OrphanCount => GetByKeyOrDefault(StatisticKey.OrphanNodes, 0);
+
+    public int SkippedCount => GetByKeyOrDefault(StatisticKey.SkippedCount, 0);
+
+    public bool IsWarning => GetByKeyOrDefault(StatisticKey.Warnings, false);
+
+    public bool IsSkipped => GetByKeyOrDefault(StatisticKey.Skipped, false);
+
+    public bool IsFailed => GetByKeyOrDefault(StatisticKey.Failed, false);
+
+    public bool IsError => GetByKeyOrDefault(StatisticKey.Errors, false);
 
     public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
 
-    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(STATISTIC_KEY.ELAPSED_TIME, 0));
+    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(StatisticKey.ElapsedTime, 0));
 
-    public string? DisplayName { get; set; }
+    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs?.Equals(rhs) ?? rhs is null;
 
-    public static TestEvent Before(string resourcePath, string suiteName, int totalCount, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SUITE_BEFORE, resourcePath, suiteName, "Before", totalCount, statistics, reports);
+    public static bool operator !=(TestEvent? lhs, TestEvent? rhs) => !(lhs == rhs);
 
-    public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
+    public static IDictionary<StatisticKey, object> BuildStatistics(
+        int orphanCount,
+        bool isError,
+        int errorCount,
+        bool isFailure,
+        int failureCount,
+        bool isWarning,
+        bool isSkipped,
+        int skippedCount,
+        long elapsedSinceMs) => new Dictionary<StatisticKey, object>
+    {
+        { StatisticKey.OrphanNodes, orphanCount },
+        { StatisticKey.ElapsedTime, elapsedSinceMs },
+        { StatisticKey.Warnings, isWarning },
+        { StatisticKey.Errors, isError },
+        { StatisticKey.ErrorCount, errorCount },
+        { StatisticKey.Failed, isFailure },
+        { StatisticKey.FailedCount, failureCount },
+        { StatisticKey.Skipped, isSkipped },
+        { StatisticKey.SkippedCount, skippedCount }
+    };
+
+    public static TestEvent Before(string resourcePath, string suiteName, int totalCount, IDictionary<StatisticKey, object> statistics, IEnumerable<ITestReport> reports) =>
+        new(EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount, statistics, reports);
+
+    public static TestEvent After(string resourcePath, string suiteName, IDictionary<StatisticKey, object> statistics, IEnumerable<ITestReport> reports) =>
+        new(EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
 
     public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
-        new(ITestEvent.EventType.TEST_BEFORE, id, resourcePath, suiteName, testName);
+        new(EventType.TestBefore, id, resourcePath, suiteName, testName);
 
-    public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
+    public static TestEvent AfterTest(
+        Guid id,
+        string resourcePath,
+        string suiteName,
+        string testName,
+        IDictionary<StatisticKey, object>? statistics = null,
         List<ITestReport>? reports = null) =>
-        new(ITestEvent.EventType.TEST_AFTER, id, resourcePath, suiteName, testName)
+        new(EventType.TestAfter, id, resourcePath, suiteName, testName)
         {
-            Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
+            Statistics = statistics ?? new Dictionary<StatisticKey, object>(),
             Reports = reports ?? new List<ITestReport>()
         };
+
+    public bool Equals(TestEvent? other)
+    {
+        if (other is null)
+            return false;
+
+        // Compare reference first for performance
+        if (ReferenceEquals(this, other))
+            return true;
+
+        // Use EqualityComparer for each field
+        return EqualityComparer<EventType>.Default.Equals(Type, other.Type)
+               && StringComparer.Ordinal.Equals(ResourcePath, other.ResourcePath)
+               && StringComparer.Ordinal.Equals(SuiteName, other.SuiteName)
+               && StringComparer.Ordinal.Equals(TestName, other.TestName)
+               && EqualityComparer<int>.Default.Equals(TotalCount, other.TotalCount)
+               && EqualityComparer<int>.Default.Equals(ErrorCount, other.ErrorCount)
+               && EqualityComparer<int>.Default.Equals(FailedCount, other.FailedCount)
+               && EqualityComparer<int>.Default.Equals(OrphanCount, other.OrphanCount);
+    }
 
     public override bool Equals(object? obj)
     {
@@ -127,7 +188,22 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         return false;
     }
 
-    internal TestEvent WithStatistic(STATISTIC_KEY key, object value)
+    public override int GetHashCode() =>
+
+        // ReSharper disable all NonReadonlyMemberInGetHashCode
+        HashCode.Combine(
+            Type,
+            ResourcePath,
+            SuiteName,
+            TestName,
+            TotalCount,
+            ErrorCount,
+            FailedCount,
+            OrphanCount);
+
+    public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, IsSuccess:{IsSuccess} ";
+
+    internal TestEvent WithStatistic(StatisticKey key, object value)
     {
         Statistics[key] = value;
         return this;
@@ -151,91 +227,23 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         return this;
     }
 
-    public static IDictionary<STATISTIC_KEY, object> BuildStatistics(
-        int orphanCount,
-        bool isError, int errorCount,
-        bool isFailure, int failureCount,
-        bool isWarning,
-        bool isSkipped, int skippedCount,
-        long elapsedSinceMs) => new Dictionary<STATISTIC_KEY, object>
-    {
-        { STATISTIC_KEY.ORPHAN_NODES, orphanCount },
-        { STATISTIC_KEY.ELAPSED_TIME, elapsedSinceMs },
-        { STATISTIC_KEY.WARNINGS, isWarning },
-        { STATISTIC_KEY.ERRORS, isError },
-        { STATISTIC_KEY.ERROR_COUNT, errorCount },
-        { STATISTIC_KEY.FAILED, isFailure },
-        { STATISTIC_KEY.FAILED_COUNT, failureCount },
-        { STATISTIC_KEY.SKIPPED, isSkipped },
-        { STATISTIC_KEY.SKIPPED_COUNT, skippedCount }
-    };
-
 #pragma warning disable CA1854
-    private T GetByKeyOrDefault<T>(STATISTIC_KEY key, T defaultValue) =>
+    private T GetByKeyOrDefault<T>(StatisticKey key, T defaultValue) =>
         Statistics.ContainsKey(key) ? (T)Convert.ChangeType(Statistics[key], typeof(T), CultureInfo.InvariantCulture) : defaultValue;
 
 #pragma warning restore CA1854
-    public override string ToString() => $"Event: {Type} {SuiteName}:{TestName}, IsSuccess:{IsSuccess} ";
-
-    public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs?.Equals(rhs) ?? rhs is null;
-
-    public static bool operator !=(TestEvent? lhs, TestEvent? rhs) => !(lhs == rhs);
-
-    public override int GetHashCode() =>
-
-        // ReSharper disable all NonReadonlyMemberInGetHashCode
-        HashCode.Combine(
-            Type,
-            ResourcePath,
-            SuiteName,
-            TestName,
-            TotalCount,
-            ErrorCount,
-            FailedCount,
-            OrphanCount);
-
-    // ReSharper enable all NonReadonlyMemberInGetHashCode
-#pragma warning disable CA1707
-    // ReSharper disable all InconsistentNaming
-
-    public enum STATISTIC_KEY
-    {
-        WARNINGS,
-        FAILED,
-        ERRORS,
-        SKIPPED,
-        ELAPSED_TIME,
-        ORPHAN_NODES,
-        TOTAL_COUNT,
-        ERROR_COUNT,
-        FAILED_COUNT,
-        SKIPPED_COUNT
-    }
-
-    // ReSharper enable all InconsistentNaming
-#pragma warning restore CA1707
-
-#nullable disable
-    public ITestEvent.EventType Type { get; set; }
-
-    public Guid Id { get; set; }
-
-    public string SuiteName { get; set; }
-
-    public string TestName { get; set; }
-
-    public string FullyQualifiedName { get; set; }
-
-    public string ResourcePath { get; set; }
 }
 
-public class TestReportListConverter : JsonConverter<List<ITestReport>>
+#pragma warning disable SA1402
+internal class TestReportListConverter : JsonConverter<List<ITestReport>>
+#pragma warning restore SA1402
 {
-    public override List<ITestReport> ReadJson(JsonReader reader, Type objectType, List<ITestReport> existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override List<ITestReport> ReadJson(JsonReader reader, Type objectType, List<ITestReport>? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         var reports = serializer.Deserialize<List<TestReport>>(reader);
         return reports?.Cast<ITestReport>().ToList() ?? new List<ITestReport>();
     }
 
-    public override void WriteJson(JsonWriter writer, List<ITestReport> value, JsonSerializer serializer) => serializer.Serialize(writer, value?.Cast<TestReport>().ToList());
+    public override void WriteJson(JsonWriter writer, List<ITestReport>? value, JsonSerializer serializer)
+        => serializer.Serialize(writer, value?.Cast<TestReport>().ToList());
 }

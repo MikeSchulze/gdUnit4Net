@@ -113,7 +113,7 @@ internal class GdUnit4TestEventListener : ITestEventListener
         listener.Call(data);
     }
 
-    private static Godot.Collections.Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.STATISTIC_KEY, object> statistics)
+    private static Godot.Collections.Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.StatisticKey, object> statistics)
     {
         var converted = new Godot.Collections.Dictionary<Variant, Variant>();
         foreach (var (key, value) in statistics)

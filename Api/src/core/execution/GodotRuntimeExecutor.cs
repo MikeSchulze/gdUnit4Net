@@ -99,7 +99,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                         // if connection gone we report at interrupted to the actual test
                         var testCanceledEvent = TestEvent
                             .AfterTest(lastTestEvent.Id, lastTestEvent.ResourcePath, lastTestEvent.SuiteName, lastTestEvent.TestName)
-                            .WithStatistic(TestEvent.STATISTIC_KEY.ERRORS, 1)
+                            .WithStatistic(TestEvent.StatisticKey.Errors, 1)
                             .WithReport(new TestReport(INTERRUPTED, 0, response.Payload));
                         testEventListener.PublishEvent(testCanceledEvent);
                         return response;

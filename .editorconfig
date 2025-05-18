@@ -556,18 +556,16 @@ dotnet_diagnostic.CA1861.severity = none
 # Disable StyleCop's underscore rule that prevents SCREAMING_SNAKE_CASE
 dotnet_diagnostic.SA1310.severity = none
 
-# Define the symbol group (what the rule applies to)
-dotnet_naming_symbols.constants.applicable_kinds = field
-dotnet_naming_symbols.constants.required_modifiers = const
-dotnet_naming_symbols.constants.applicable_accessibilities = *
-# Define the naming style (how they should be named)
-dotnet_naming_style.all_upper_style.capitalization = all_upper
-dotnet_naming_style.all_upper_style.word_separator = _
 
-# Associate the naming rule
-dotnet_naming_rule.constants_should_be_all_upper.symbols = constants
-dotnet_naming_rule.constants_should_be_all_upper.style = all_upper_style
-dotnet_naming_rule.constants_should_be_all_upper.severity = error
+# This will make everything that isn't already covered use PascalCase
+dotnet_naming_symbols.remaining_symbols.applicable_kinds = *
+dotnet_naming_symbols.remaining_symbols.applicable_accessibilities = *
+
+# Make everything else use PascalCase
+dotnet_naming_rule.remaining_symbols_should_be_pascal_case.symbols = remaining_symbols
+dotnet_naming_rule.remaining_symbols_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.remaining_symbols_should_be_pascal_case.severity = warning
+
 
 # ReSharper/Rider specific settings for blank lines
 resharper_blank_lines_after_block_statements = 1
