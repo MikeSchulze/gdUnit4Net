@@ -13,11 +13,11 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 /// </summary>
 public class Logger : ITestEngineLogger
 {
-    private static readonly Dictionary<ITestEngineLogger.Level, TestMessageLevel> LevelMap = new()
+    private static readonly Dictionary<LogLevel, TestMessageLevel> LevelMap = new()
     {
-        { ITestEngineLogger.Level.INFORMATIONAL, TestMessageLevel.Informational },
-        { ITestEngineLogger.Level.WARNING, TestMessageLevel.Warning },
-        { ITestEngineLogger.Level.ERROR, TestMessageLevel.Error }
+        { LogLevel.Informational, TestMessageLevel.Informational },
+        { LogLevel.Warning, TestMessageLevel.Warning },
+        { LogLevel.Error, TestMessageLevel.Error }
     };
 
     private readonly IMessageLogger delegator;
@@ -27,18 +27,20 @@ public class Logger : ITestEngineLogger
     /// </summary>
     /// <param name="delegator">The VS test platform message logger to delegate to</param>
     public Logger(IMessageLogger delegator)
-        => this.delegator = delegator ?? throw new ArgumentNullException(nameof(delegator));
+    {
+        this.delegator = delegator ?? throw new ArgumentNullException(nameof(delegator));
+    }
 
     /// <summary>
     ///     Sends a message to the VS test platform logger with the appropriate level.
     /// </summary>
-    /// <param name="level">The severity level of the message</param>
+    /// <param name="logLevel">The severity level of the message</param>
     /// <param name="message">The message to log</param>
-    public void SendMessage(ITestEngineLogger.Level level, string message)
+    public void SendMessage(LogLevel logLevel, string message)
     {
-        if (LevelMap.TryGetValue(level, out var testLogLevel))
+        if (LevelMap.TryGetValue(logLevel, out var testLogLevel))
             delegator.SendMessage(testLogLevel, message);
         else
-            delegator.SendMessage(TestMessageLevel.Error, $"Can't parse logging level {level.ToString()}");
+            delegator.SendMessage(TestMessageLevel.Error, $"Can't parse logging level {logLevel.ToString()}");
     }
 }

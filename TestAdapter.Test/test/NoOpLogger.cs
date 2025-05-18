@@ -4,7 +4,7 @@ using Api;
 
 public sealed class NoOpLogger : ITestEngineLogger
 {
-    public void SendMessage(ITestEngineLogger.Level level, string message)
+    public void SendMessage(LogLevel logLevel, string message)
     {
     }
 }
