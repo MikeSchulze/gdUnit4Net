@@ -228,7 +228,7 @@ internal sealed class ExecutionContext : IDisposable
         return orphanCount;
     }
 
-    private IDictionary<TestEvent.STATISTIC_KEY, object> BuildStatistics(int orphanCount)
+    private IDictionary<TestEvent.StatisticKey, object> BuildStatistics(int orphanCount)
         => TestEvent.BuildStatistics(
             orphanCount,
             IsError, ErrorCount,
