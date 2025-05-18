@@ -24,7 +24,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     {
     }
 
-    private TestEvent(ITestEvent.EventType eventType, string resourcePath, string suiteName, string testName, int totalCount = 0,
+    private TestEvent(EventType eventType, string resourcePath, string suiteName, string testName, int totalCount = 0,
         IDictionary<STATISTIC_KEY, object>? statistics = null,
         IEnumerable<ITestReport>? reports = null)
     {
@@ -38,17 +38,14 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         FullyQualifiedName = string.Empty;
     }
 
-    private TestEvent(ITestEvent.EventType eventType, Guid id, string resourcePath, string suiteName, string testName)
+    private TestEvent(EventType eventType, Guid id, string resourcePath, string suiteName, string testName)
     {
         Type = eventType;
         Id = id;
         ResourcePath = resourcePath;
         SuiteName = suiteName;
         TestName = testName;
-        Statistics = new Dictionary<STATISTIC_KEY, object>
-        {
-            [STATISTIC_KEY.TOTAL_COUNT] = 0
-        };
+        Statistics = new Dictionary<STATISTIC_KEY, object> { [STATISTIC_KEY.TOTAL_COUNT] = 0 };
         Reports = new List<ITestReport>();
         FullyQualifiedName = string.Empty;
     }
@@ -104,17 +101,17 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
     public string? DisplayName { get; set; }
 
     public static TestEvent Before(string resourcePath, string suiteName, int totalCount, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SUITE_BEFORE, resourcePath, suiteName, "Before", totalCount, statistics, reports);
+        new(EventType.SuiteBefore, resourcePath, suiteName, "Before", totalCount, statistics, reports);
 
     public static TestEvent After(string resourcePath, string suiteName, IDictionary<STATISTIC_KEY, object> statistics, IEnumerable<ITestReport> reports) =>
-        new(ITestEvent.EventType.SUITE_AFTER, resourcePath, suiteName, "After", 0, statistics, reports);
+        new(EventType.SuiteAfter, resourcePath, suiteName, "After", 0, statistics, reports);
 
     public static TestEvent BeforeTest(Guid id, string resourcePath, string suiteName, string testName) =>
-        new(ITestEvent.EventType.TEST_BEFORE, id, resourcePath, suiteName, testName);
+        new(EventType.TestBefore, id, resourcePath, suiteName, testName);
 
     public static TestEvent AfterTest(Guid id, string resourcePath, string suiteName, string testName, IDictionary<STATISTIC_KEY, object>? statistics = null,
         List<ITestReport>? reports = null) =>
-        new(ITestEvent.EventType.TEST_AFTER, id, resourcePath, suiteName, testName)
+        new(EventType.TestAfter, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<STATISTIC_KEY, object>(),
             Reports = reports ?? new List<ITestReport>()
@@ -196,6 +193,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 
     // ReSharper enable all NonReadonlyMemberInGetHashCode
 #pragma warning disable CA1707
+
     // ReSharper disable all InconsistentNaming
 
     public enum STATISTIC_KEY
@@ -216,7 +214,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 #pragma warning restore CA1707
 
 #nullable disable
-    public ITestEvent.EventType Type { get; set; }
+    public EventType Type { get; set; }
 
     public Guid Id { get; set; }
 

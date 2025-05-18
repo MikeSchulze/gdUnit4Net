@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using Utilities;
 
-using static Api.ITestEvent.EventType;
+using static Api.EventType;
 using static Api.ITestReport.ReportType;
 
 using TestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
@@ -44,13 +44,13 @@ internal sealed class TestEventReportListener : ITestEventListener
     {
         switch (testEvent.Type)
         {
-            case SUITE_BEFORE:
+            case SuiteBefore:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName} Processing...");
                 ReportSuiteFailure(testEvent, "[Before]");
                 break;
 
-            case TEST_BEFORE:
+            case TestBefore:
             {
                 var testCase = FindTestCase(testEvent);
                 if (testCase == null)
@@ -68,7 +68,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case TEST_AFTER:
+            case TestAfter:
             {
                 var testCase = FindTestCase(testEvent);
                 if (testCase == null)
@@ -103,15 +103,15 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
             }
 
-            case SUITE_AFTER:
+            case SuiteAfter:
                 if (DetailedOutput)
                     Framework.SendMessage(TestMessageLevel.Informational, $"TestSuite: {testEvent.FullyQualifiedName}: {testEvent.AsTestOutcome()}\n");
                 ReportSuiteFailure(testEvent, "[After]");
                 break;
 
-            case INIT:
+            case Init:
                 break;
-            case STOP:
+            case Stop:
                 break;
         }
     }
