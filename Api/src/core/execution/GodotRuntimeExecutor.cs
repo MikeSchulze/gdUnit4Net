@@ -20,7 +20,7 @@ using Reporting;
 
 using Runners;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 /// <summary>
 ///     Implements a command executor that communicates with the Godot runtime through named pipes.
@@ -100,7 +100,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                         var testCanceledEvent = TestEvent
                             .AfterTest(lastTestEvent.Id, lastTestEvent.ResourcePath, lastTestEvent.SuiteName, lastTestEvent.TestName)
                             .WithStatistic(TestEvent.StatisticKey.Errors, 1)
-                            .WithReport(new TestReport(INTERRUPTED, 0, response.Payload));
+                            .WithReport(new TestReport(Interrupted, 0, response.Payload));
                         testEventListener.PublishEvent(testCanceledEvent);
                         return response;
                     default:

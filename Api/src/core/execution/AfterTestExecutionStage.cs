@@ -13,7 +13,7 @@ using Reporting;
 
 using Signals;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
 {
@@ -32,7 +32,7 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
             await base.Execute(context);
             await context.MemoryPool.Gc();
             if (context.MemoryPool.OrphanCount > 0)
-                context.ReportCollector.PushFront(new TestReport(WARNING, 0, ReportOrphans(context)));
+                context.ReportCollector.PushFront(new TestReport(Warning, 0, ReportOrphans(context)));
         }
 
         context.FireAfterTestEvent();

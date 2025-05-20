@@ -11,7 +11,7 @@ using Asserts;
 
 using Reporting;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
 {
@@ -27,7 +27,7 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
         Utils.ClearTempDir();
         await context.MemoryPool.Gc();
         if (context.MemoryPool.OrphanCount > 0)
-            context.ReportCollector.PushFront(new TestReport(WARNING, 0, ReportOrphans(context)));
+            context.ReportCollector.PushFront(new TestReport(Warning, 0, ReportOrphans(context)));
         context.FireAfterEvent();
     }
 

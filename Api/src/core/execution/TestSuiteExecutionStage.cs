@@ -13,7 +13,7 @@ using Hooks;
 
 using Reporting;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 internal sealed class TestSuiteExecutionStage : IExecutionStage
 {
@@ -81,7 +81,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     {
                         executionContext.ReportCollector.Consume(
                             new TestReport(
-                                INTERRUPTED,
+                                Interrupted,
                                 executionContext.CurrentTestCase?.Line ?? -1,
                                 e.Message,
                                 e.StackTrace));
@@ -100,13 +100,17 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         }
         catch (Exception e)
         {
-            executionContext.ReportCollector.Consume(new TestReport(FAILURE, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
+            executionContext.ReportCollector.Consume(new TestReport(Failure, executionContext.CurrentTestCase?.Line ?? -1, e.Message, e.StackTrace));
         }
 
         executionContext.FireAfterTestEvent();
     }
 
-    private async Task RunTestCase(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase, TestCaseAttribute stageAttribute,
+    private async Task RunTestCase(
+        IStdOutHook? stdoutHook,
+        ExecutionContext executionContext,
+        TestCase testCase,
+        TestCaseAttribute stageAttribute,
         params object?[] methodArguments)
     {
         try
@@ -126,9 +130,11 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             var stdoutMessage = stdoutHook?.GetCapturedOutput();
             if (!string.IsNullOrEmpty(stdoutMessage))
             {
-                executionContext.ReportCollector.PushFront(new TestReport(
-                    STDOUT,
-                    executionContext.CurrentTestCase?.Line ?? 0, stdoutMessage));
+                executionContext.ReportCollector.PushFront(
+                    new TestReport(
+                        Stdout,
+                        executionContext.CurrentTestCase?.Line ?? 0,
+                        stdoutMessage));
 
                 // and finally redirect to the console because it was fully captured
                 Console.WriteLine(stdoutMessage);
