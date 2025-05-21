@@ -99,7 +99,6 @@ dotnet_diagnostic.SA1203.severity = warning # Constants should appear before fie
 dotnet_diagnostic.SA1204.severity = warning # Static elements should appear before instance elements
 
 # Member ordering - SA1202 fix - enforce ordering by access level
-dotnet_diagnostic.SA1202.severity = error
 resharper_member_modifier_order = internal static, protected static, private static, static, internal, protected, private
 resharper_access_level_order = internal, protected, private
 resharper_member_order = accessibility, constant_fields, static_fields, fields, constructors, finalizers, properties, events, operators, methods

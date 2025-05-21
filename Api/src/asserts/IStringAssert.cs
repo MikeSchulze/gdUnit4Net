@@ -23,13 +23,13 @@ public interface IStringAssert : IAssertBase<string>
     IStringAssert IsNotEqualIgnoringCase(string expected);
 
     /// <summary>
-    ///     Verifies that the current String is empty, it has a length of 0.
+    ///     Verifies that the current String is empty; it has a length of 0.
     /// </summary>
     /// <returns>IStringAssert.</returns>
     IStringAssert IsEmpty();
 
     /// <summary>
-    ///     Verifies that the current String is not empty, it has a length of minimum 1.
+    ///     Verifies that the current String is not empty; it has a length of minimum 1.
     /// </summary>
     /// <returns>IStringAssert.</returns>
     IStringAssert IsNotEmpty();
@@ -37,28 +37,28 @@ public interface IStringAssert : IAssertBase<string>
     /// <summary>
     ///     Verifies that the current String contains the given String.
     /// </summary>
-    /// <param name="expected">The value to be contains.</param>
+    /// <param name="expected">The value to be contained.</param>
     /// <returns>IStringAssert.</returns>
     IStringAssert Contains(string expected);
 
     /// <summary>
     ///     Verifies that the current String does not contain the given String.
     /// </summary>
-    /// <param name="expected">The value to be NOT contains.</param>
+    /// <param name="expected">The value to be NOT contained.</param>
     /// <returns>IStringAssert.</returns>
     IStringAssert NotContains(string expected);
 
     /// <summary>
     ///     Verifies that the current String does not contain the given String, ignoring case considerations.
     /// </summary>
-    /// <param name="expected">The value to be contains.</param>
+    /// <param name="expected">The value to be contained.</param>
     /// <returns>IStringAssert.</returns>
     IStringAssert ContainsIgnoringCase(string expected);
 
     /// <summary>
     ///     Verifies that the current String does not contain the given String, ignoring case considerations.
     /// </summary>
-    /// <param name="expected">The value to be NOT contains.</param>
+    /// <param name="expected">The value to be NOT contained.</param>
     /// <returns>IStringAssert.</returns>
     IStringAssert NotContainsIgnoringCase(string expected);
 
@@ -80,7 +80,7 @@ public interface IStringAssert : IAssertBase<string>
     ///     Verifies that the current String has the expected length by used comparator.
     /// </summary>
     /// <param name="length">The lengths to be.</param>
-    /// <param name="comparator">The used comparator mode.</param>
+    /// <param name="comparator">They used comparator mode.</param>
     /// <returns>IStringAssert.</returns>
     IStringAssert HasLength(int length, Compare comparator = Compare.EQUAL);
 
@@ -94,7 +94,9 @@ public interface IStringAssert : IAssertBase<string>
 #pragma warning disable CA1707
 
     // ReSharper disable InconsistentNaming
+#pragma warning disable CS1591, SA1600, SA1400, SA1201
     enum Compare
+#pragma warning restore SA1201, SA1400, SA1600
     {
         EQUAL,
         LESS_THAN,
@@ -102,6 +104,7 @@ public interface IStringAssert : IAssertBase<string>
         GREATER_THAN,
         GREATER_EQUAL
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     // ReSharper enable InconsistentNaming
 #pragma warning restore CA1707

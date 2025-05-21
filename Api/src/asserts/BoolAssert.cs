@@ -3,7 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
-public sealed class BoolAssert : AssertBase<bool>, IBoolAssert
+internal sealed class BoolAssert : AssertBase<bool>, IBoolAssert
 {
     public BoolAssert(bool current)
         : base(current)
