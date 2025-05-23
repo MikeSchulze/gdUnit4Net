@@ -3,7 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
-public sealed class ObjectAssert : AssertBase<object>, IObjectAssert
+internal sealed class ObjectAssert : AssertBase<object>, IObjectAssert
 {
     public ObjectAssert(object? current)
         : base(current)

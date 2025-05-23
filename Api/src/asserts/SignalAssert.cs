@@ -12,12 +12,13 @@ using Core.Signals;
 
 using Godot;
 
-public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
+internal sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 {
-    public SignalAssert(GodotObject current) : base(current)
+    public SignalAssert(GodotObject current)
+        : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
 
-    // Is just a dummy method that is called to register the monitor on the emitter, which is done in the constructor
+    // Is just a fake method that is called to register the monitor on the emitter, which is done in the constructor
     public ISignalAssert StartMonitoring()
         => this;
 
@@ -65,7 +66,9 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     private async Task<bool> IsEmittedTask(string signal, params Variant[] args)
     {
+#pragma warning disable CA2000
         var signalCancellationToken = new CancellationTokenSource();
+#pragma warning restore CA2000
         Thread.SetData(Thread.GetNamedDataSlot("SignalCancellationToken"), signalCancellationToken);
         return await Task.Run(() => GodotSignalCollector.Instance.IsEmitted(signalCancellationToken, Current!, signal, args), signalCancellationToken.Token);
     }
@@ -74,31 +77,5 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
     {
         CurrentFailureMessage = CustomFailureMessage ?? message;
         throw new TestFailedException(CurrentFailureMessage, lineNumber);
-    }
-}
-
-public static class SignalAssertExtensions
-{
-    public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
-    {
-        using var timeoutCts = new CancellationTokenSource();
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
-        try
-        {
-            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask);
-            if (completedTask == task)
-                return await task.ConfigureAwait(false);
-
-            var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-            if (data is CancellationTokenSource cancelToken)
-                cancelToken.Cancel();
-            return await task.ConfigureAwait(false);
-        }
-        finally
-        {
-            timeoutCts.Cancel();
-            linkedCts.Cancel();
-        }
     }
 }

@@ -22,17 +22,7 @@ internal static class Comparable
 
         public static Result Equal => new(true, null, null);
 
-        public bool Valid
-        {
-            get;
-            private set;
-        }
-
-        public Result WithProperty(string propertyName)
-        {
-            PropertyName = propertyName;
-            return this;
-        }
+        public bool Valid { get; private set; }
 
 #pragma warning disable IDE0052 // Remove unread private members
 
@@ -44,11 +34,13 @@ internal static class Comparable
         private string? PropertyName { get; set; }
 
         // ReSharper enable all UnusedAutoPropertyAccessor.Local
-        private Result? Parent
-        {
-            get;
-            set;
-        }
+        private Result? Parent { get; set; }
 #pragma warning restore IDE0052 // Remove unread private members
+
+        public Result WithProperty(string propertyName)
+        {
+            PropertyName = propertyName;
+            return this;
+        }
     }
 }
