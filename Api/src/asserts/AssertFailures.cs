@@ -14,7 +14,7 @@ using Core.Extensions;
 using Godot;
 using Godot.Collections;
 
-internal static class AssertFailures
+public static class AssertFailures
 {
     internal const string WARN_COLOR = "#EFF883";
     internal const string ERROR_COLOR = "#CD5C5C";
@@ -551,77 +551,6 @@ internal static class AssertFailures
                 """;
     }
 
-    internal static string AsObjectId(object? value)
-    {
-        if (value == null)
-            return "<Null>";
-
-        var unboxedValue = value;
-        var type = value.GetType();
-        if (value is Variant gv)
-        {
-            unboxedValue = gv.UnboxVariant();
-            if (unboxedValue == null)
-                return "<Godot.Variant> (Null)";
-            type = unboxedValue.GetType();
-        }
-
-        string instanceId;
-        var name = $"<{type.FullName?
-            .Replace("[", string.Empty, StringComparison.Ordinal)
-            .Replace("]", string.Empty, StringComparison.Ordinal) ?? "unknown"}>";
-
-        if (unboxedValue is GodotObject go)
-        {
-            var id = GodotObject.IsInstanceValid(go) ? go.GetInstanceId().ToString() : "<null>";
-            instanceId = $"objId: {id}";
-        }
-        else
-        {
-            instanceId = $"objId: {RuntimeHelpers.GetHashCode(value)}";
-            if (HasOverriddenToString(value))
-                name = value.ToString();
-        }
-
-        return $"{name} ({instanceId})";
-
-        // if (!type.IsGenericType)
-        // var genericArguments = string.Join(", ", type.GetGenericArguments().Select(a => SimpleClassName(a, null)));
-        // return $"{name[..name.IndexOf('`')]}<{genericArguments}>";
-    }
-
-    internal static string FormatValue(object? value, string color, bool quoted)
-    {
-        if (value == null)
-            return "<Null>";
-
-        if (value is string vs)
-            return quoted ? vs.Formatted() : vs;
-
-        if (value is Type)
-            return $"[color={color}]<{value}>[/color]";
-
-        if (value is Variant gv)
-            value = gv.UnboxVariant();
-
-        var type = value!.GetType();
-        if (value is IDictionary dict)
-            return FormatDictionary(dict, color);
-
-        if (value is Dictionary gDict)
-            return FormatDictionary(gDict, color);
-
-        if (type.IsGenericGodotDictionary())
-            return FormatDictionary(value.UnboxVariant(), color);
-
-        if (value is IEnumerable values)
-            return FormatEnumerable(values, color);
-
-        if ((type.IsClass && value is not string) || value is Type)
-            return $"[color={color}]{AsObjectId(value)}[/color]";
-        return quoted ? $"'[color={color}]{value.Formatted()}[/color]'" : $"[color={color}]{value.Formatted()}[/color]";
-    }
-
     internal static string IsEmitted(object? current, string signal, Variant[] args) =>
         $"""
          {FormatFailure("Expecting do emitting signal:")}
@@ -645,72 +574,6 @@ internal static class AssertFailures
           on
          {FormatCurrent(current).Indentation(1)}
          """;
-
-    private static bool HasOverriddenToString(object obj)
-    {
-        var toStringMethod = obj.GetType().GetMethod("ToString");
-        return toStringMethod?.DeclaringType != typeof(object);
-    }
-
-    private static string FormatDictionary(IDictionary dict, string color)
-    {
-        if (dict.Keys.Count == 0)
-            return $"[color={color}]<Empty>[/color]";
-
-        var sortedKeys = dict.Keys.Cast<object>().OrderBy(k => k.ToString());
-        var keyValues = sortedKeys.Select(key => $"{{{key.Formatted()}, {dict[key].Formatted()}}}");
-        var pairs = string.Join("; ", keyValues);
-        return $"[color={color}]{pairs}[/color]";
-    }
-
-#pragma warning disable CA1859
-    private static string FormatDictionary(IDictionary<Variant, Variant> dict, string color)
-    {
-#pragma warning restore CA1859
-        if (dict.Keys.Count == 0)
-            return $"[color={color}]<Empty>[/color]";
-
-        var keyValues = new ArrayList();
-        foreach (var entry in dict)
-        {
-            object? key = entry.Key.UnboxVariant();
-            object? value = entry.Value.UnboxVariant();
-            keyValues.Add($"{{{key.Formatted()}, {value.Formatted()}}}");
-        }
-
-        var pairs = string.Join("; ", keyValues.ToArray());
-        return $"[color={color}]{pairs}[/color]";
-    }
-
-    private static string FormatEnumerable(IEnumerable enumerable, string color)
-    {
-        ArgumentNullException.ThrowIfNull(enumerable);
-        if (string.IsNullOrWhiteSpace(color))
-            throw new ArgumentException("Color cannot be empty", nameof(color));
-
-        var enumerator = enumerable.GetEnumerator();
-        try
-        {
-            if (!enumerator.MoveNext())
-                return $"[color={color}]<Empty>[/color]";
-
-            var keyValues = new List<object?>();
-            do
-                keyValues.Add(enumerator.Current);
-            while (enumerator.MoveNext());
-            return $"[color={color}]{keyValues.Formatted()}[/color]";
-        }
-        finally
-        {
-            (enumerator as IDisposable)?.Dispose();
-        }
-    }
-
-    private static string FormatCurrent(object? value) => FormatValue(value, VALUE_COLOR, true).UnixFormat();
-
-    private static string FormatExpected(object? value) => FormatValue(value, VALUE_COLOR, true).UnixFormat();
-
-    private static string FormatFailure(object value) => FormatValue(value, ERROR_COLOR, false).UnixFormat();
 
     private static string ListDifferences<TValue>(List<TValue> left, List<TValue> right)
     {
