@@ -56,9 +56,11 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         int currentLine;
         if (Current is TestFailedException e)
             currentLine = e.LineNumber;
+        else if (Current is null)
+            currentLine = -1;
         else
         {
-            var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+            var stackFrame = new StackTrace(Current, true).GetFrame(0);
             currentLine = stackFrame?.GetFileLineNumber() ?? -1;
         }
 
@@ -73,9 +75,11 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         string currentFileName;
         if (Current is TestFailedException e)
             currentFileName = e.FileName ?? string.Empty;
+        else if (Current is null)
+            currentFileName = string.Empty;
         else
         {
-            var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+            var stackFrame = new StackTrace(Current, true).GetFrame(0);
             currentFileName = stackFrame?.GetFileName() ?? string.Empty;
         }
 

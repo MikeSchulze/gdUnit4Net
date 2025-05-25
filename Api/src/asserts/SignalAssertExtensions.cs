@@ -3,6 +3,7 @@
 namespace GdUnit4.Asserts;
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,6 +23,7 @@ public static class SignalAssertExtensions
     ///     If the timeout is reached, the signal wait is canceled and the test continues.
     ///     This is useful for preventing tests from hanging indefinitely when expected signals are not emitted.
     /// </remarks>
+    [SuppressMessage("Performance", "CA1849", Justification = "Call async methods when in an async method")]
     public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
     {
         Debug.Assert(task != null, nameof(task) + " != null");
@@ -30,7 +32,7 @@ public static class SignalAssertExtensions
         try
         {
             var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask);
+            var completedTask = await Task.WhenAny(task, timeoutTask).ConfigureAwait(true);
             if (completedTask == task)
                 return await task.ConfigureAwait(false);
 

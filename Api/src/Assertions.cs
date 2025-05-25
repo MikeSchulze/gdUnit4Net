@@ -415,8 +415,11 @@ public static class Assertions
     /// </summary>
     /// <param name="action">An action that may throw an exception.</param>
     /// <returns>An instance of <see cref="IExceptionAssert" /> for further assertions on the thrown exception.</returns>
-    public static IExceptionAssert AssertThrown(Action action) =>
-        new ExceptionAssert<Exception>(action);
+    public static IExceptionAssert AssertThrown(Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return new ExceptionAssert<Exception>(action);
+    }
 
     /// <summary>
     ///     An Assertion to verify for expecting exceptions when performing a task.
@@ -443,7 +446,7 @@ public static class Assertions
 
         try
         {
-            await task;
+            await task.ConfigureAwait(true);
             return default;
         }
         catch (Exception e)
@@ -475,7 +478,7 @@ public static class Assertions
         ArgumentNullException.ThrowIfNull(task);
         try
         {
-            await task;
+            await task.ConfigureAwait(true);
             return default;
         }
         catch (Exception e)

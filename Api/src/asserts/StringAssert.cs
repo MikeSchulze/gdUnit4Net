@@ -64,6 +64,10 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
                 if (currentLength >= length)
                     failed = true;
                 break;
+
+            // ReSharper disable once RedundantEmptySwitchSection
+            default:
+                break;
         }
 
         if (failed)

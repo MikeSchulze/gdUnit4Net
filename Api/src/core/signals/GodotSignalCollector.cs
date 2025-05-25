@@ -70,6 +70,8 @@ internal sealed partial class GodotSignalCollector : RefCounted
                                 emitter.CallDeferred("_Process", sleepTimeInMs);
                             if (isPhysicsProcess && IsInstanceValid(emitter))
                                 emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
+
+                            // ReSharper disable once AccessToDisposedClosure
                             if (signalCancellationToken.IsCancellationRequested)
                                 return false;
                         }
