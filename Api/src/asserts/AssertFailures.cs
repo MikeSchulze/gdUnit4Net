@@ -571,8 +571,11 @@ internal static class AssertFailures
             .Replace("[", string.Empty, StringComparison.Ordinal)
             .Replace("]", string.Empty, StringComparison.Ordinal) ?? "unknown"}>";
 
-        if (unboxedValue is GodotObject go && GodotObject.IsInstanceValid(go))
-            instanceId = $"objId: {go.GetInstanceId()}";
+        if (unboxedValue is GodotObject go)
+        {
+            var id = GodotObject.IsInstanceValid(go) ? go.GetInstanceId().ToString() : "<null>";
+            instanceId = $"objId: {id}";
+        }
         else
         {
             instanceId = $"objId: {RuntimeHelpers.GetHashCode(value)}";

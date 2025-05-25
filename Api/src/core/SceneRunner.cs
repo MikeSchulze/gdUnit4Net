@@ -10,18 +10,12 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Api;
-
 using Asserts;
-
 using Extensions;
-
 using Godot;
-
-using ExecutionContext = Execution.ExecutionContext;
-
 using static Assertions;
+using ExecutionContext = Execution.ExecutionContext;
 
 /// <summary>
 ///     A helper to simulate mouse moving form a source to final position.
