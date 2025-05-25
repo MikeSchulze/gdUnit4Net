@@ -14,7 +14,7 @@ using SystemVector2 = System.Numerics.Vector2;
 using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
-public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
+internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
     where TValue : IEquatable<TValue>
 {
     public VectorAssert(TValue current)
@@ -33,7 +33,7 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
 
     public IVectorAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
-        var minMax = MinMax(expected, approx);
+        var (min, max) = MinMax(expected, approx);
         var isEqualApproximate = (Current, expected, approx) switch
         {
             (SystemVector2 v, SystemVector2 e, SystemVector2 a) => v.IsEqualApprox(e, a),
@@ -48,7 +48,7 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
             _ => false
         };
         if (!isEqualApproximate)
-            ThrowTestFailureReport(AssertFailures.IsBetween(Current, minMax.Item1, minMax.Item2), Current, minMax.Item1);
+            ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, min);
 
         return this;
     }
@@ -109,7 +109,7 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
     }
 
 #pragma warning disable CS8619
-    private static (TValue, TValue) MinMax(TValue left, TValue right) => (left, right) switch
+    private static (TValue Min, TValue Max) MinMax(TValue left, TValue right) => (left, right) switch
     {
         (SystemVector2 l, SystemVector2 r) => ((TValue)Convert.ChangeType(l - r, typeof(TValue), CultureInfo.InvariantCulture),
             (TValue)Convert.ChangeType(l + r, typeof(TValue), CultureInfo.InvariantCulture)),
