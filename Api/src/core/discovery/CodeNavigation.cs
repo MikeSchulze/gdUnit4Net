@@ -6,7 +6,7 @@ namespace GdUnit4.Core.Discovery;
 /// <summary>
 ///     Value type representing source code navigation information for a test method.
 /// </summary>
-public readonly struct CodeNavigation
+internal readonly struct CodeNavigation
 {
     /// <summary>
     ///     Gets the method this navigation data refers to.
@@ -28,6 +28,14 @@ public readonly struct CodeNavigation
     /// </summary>
     public readonly bool IsValid => CodeFilePath != null;
 
+    /// <summary>
+    ///     Returns a JSON string representation of the test case descriptor.
+    /// </summary>
+    /// <returns>A formatted JSON string containing all properties of the test case descriptor.</returns>
+    /// <remarks>
+    ///     This method is primarily used for debugging and logging purposes.
+    ///     The JSON output includes all properties with indented formatting for readability.
+    /// </remarks>
     public override string ToString()
         => $"""
             CodeNavigation:

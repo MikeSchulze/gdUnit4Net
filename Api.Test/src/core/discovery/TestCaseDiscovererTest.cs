@@ -1,6 +1,7 @@
 ﻿namespace GdUnit4.Tests.Core.Discovery;
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -89,7 +90,7 @@ public class TestCaseDiscovererTest
             ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
             ManagedMethod = "SingleTestCase",
             Id = tests[0].Id,
-            LineNumber = 20,
+            LineNumber = 21,
             CodeFilePath = codeFilePath,
             AttributeIndex = 0,
             RequireRunningGodotEngine = false
@@ -111,7 +112,7 @@ public class TestCaseDiscovererTest
                 ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                 ManagedMethod = "SingleTestCaseWithCustomName",
                 Id = tests[0].Id,
-                LineNumber = 28,
+                LineNumber = 29,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 0,
                 RequireRunningGodotEngine = false,
@@ -144,7 +145,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCase",
                     Id = tests[0].Id,
-                    LineNumber = 34,
+                    LineNumber = 35,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 0,
                     RequireRunningGodotEngine = false
@@ -157,7 +158,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCase",
                     Id = tests[1].Id,
-                    LineNumber = 34,
+                    LineNumber = 35,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 1,
                     RequireRunningGodotEngine = false
@@ -170,7 +171,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCase",
                     Id = tests[2].Id,
-                    LineNumber = 34,
+                    LineNumber = 35,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 2,
                     RequireRunningGodotEngine = false
@@ -195,7 +196,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCaseWithCustomTestName",
                     Id = tests[0].Id,
-                    LineNumber = 41,
+                    LineNumber = 42,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 0,
                     RequireRunningGodotEngine = false
@@ -208,7 +209,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCaseWithCustomTestName",
                     Id = tests[1].Id,
-                    LineNumber = 41,
+                    LineNumber = 42,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 1,
                     RequireRunningGodotEngine = false
@@ -221,7 +222,7 @@ public class TestCaseDiscovererTest
                     ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
                     ManagedMethod = "MultiRowTestCaseWithCustomTestName",
                     Id = tests[2].Id,
-                    LineNumber = 41,
+                    LineNumber = 42,
                     CodeFilePath = codeFilePath,
                     AttributeIndex = 2,
                     RequireRunningGodotEngine = false
@@ -243,7 +244,7 @@ public class TestCaseDiscovererTest
             ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
             ManagedMethod = "ThreadedTestCase",
             Id = tests[0].Id,
-            LineNumber = 46,
+            LineNumber = 47,
             CodeFilePath = codeFilePath,
             AttributeIndex = 0,
             RequireRunningGodotEngine = false
@@ -264,7 +265,7 @@ public class TestCaseDiscovererTest
             ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
             ManagedMethod = "ThreadedTestCaseTyped",
             Id = tests[0].Id,
-            LineNumber = 50,
+            LineNumber = 51,
             CodeFilePath = codeFilePath,
             AttributeIndex = 0,
             RequireRunningGodotEngine = false
@@ -291,7 +292,7 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestFoo",
-                Id = tests[0].Id,
+                Id = tests[9].Id,
                 LineNumber = 42,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 0,
@@ -305,7 +306,7 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestCaseArguments",
-                Id = tests[4].Id,
+                Id = tests[3].Id,
                 LineNumber = 64,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 0,
@@ -317,7 +318,7 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestCaseArguments",
-                Id = tests[5].Id,
+                Id = tests[4].Id,
                 LineNumber = 64,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 1,
@@ -339,7 +340,7 @@ public class TestCaseDiscovererTest
             ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
             ManagedMethod = "WithCategories",
             Id = tests[0].Id,
-            LineNumber = 59,
+            LineNumber = 60,
             CodeFilePath = codeFilePath,
             AttributeIndex = 0,
             RequireRunningGodotEngine = false,
@@ -361,7 +362,7 @@ public class TestCaseDiscovererTest
             ManagedType = "GdUnit4.Tests.Core.Discovery.ExampleTestSuiteToDiscover",
             ManagedMethod = "WithTraits",
             Id = tests[0].Id,
-            LineNumber = 69,
+            LineNumber = 70,
             CodeFilePath = codeFilePath,
             AttributeIndex = 0,
             RequireRunningGodotEngine = false,
@@ -374,7 +375,7 @@ public class TestCaseDiscovererTest
         });
     }
 
-    private List<TestCaseDescriptor> DiscoverTests<TClassType>(string testMethod)
+    private IReadOnlyList<TestCaseDescriptor> DiscoverTests<TClassType>(string testMethod)
     {
         var clazzType = typeof(TClassType);
         var readerParameters = new ReaderParameters
@@ -385,12 +386,11 @@ public class TestCaseDiscovererTest
         using var assemblyDefinition = AssemblyDefinition.ReadAssembly(clazzType.Module.FullyQualifiedName, readerParameters);
         var methodDefinition = DiscoverTestUtils.FindMethodDefinition(assemblyDefinition, clazzType, testMethod);
         return TestCaseDiscoverer.DiscoverTestCasesFromMethod(
-            null,
             methodDefinition,
             "/path/to/test_assembly.dll",
             false,
             clazzType.FullName ?? "",
-            new List<string>(),
-            new Dictionary<string, List<string>>());
+            ImmutableList.Create<string>(),
+            ImmutableDictionary.Create<string, List<string>>());
     }
 }

@@ -5,6 +5,7 @@
 namespace GdUnit4;
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -88,6 +89,7 @@ public static class GodotAwaiterExtension
     ///         or operations do not complete as expected.
     ///     </para>
     /// </remarks>
+    [SuppressMessage("Performance", "CA1849", Justification = "Call async methods when in an async method")]
     public static async Task<TVariant> WithTimeout<TVariant>(this Task<TVariant> task, int timeoutMillis)
         where TVariant : IGdUnitAwaitable
     {

@@ -31,7 +31,7 @@ internal class GdUnit4RuntimeExecutorGodotBridge
     private ITestEngineLogger Logger { get; } = new GodotLogger();
 #pragma warning restore CA1859
 
-    public async Task ExecuteAsync(List<TestSuiteNode> testSuiteNodes, Callable listener, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(IReadOnlyCollection<TestSuiteNode> testSuiteNodes, Callable listener, CancellationToken cancellationToken)
     {
         try
         {
@@ -43,11 +43,14 @@ internal class GdUnit4RuntimeExecutorGodotBridge
                         foreach (var testSuiteNode in testSuiteNodes)
                         {
                             var response = await new ExecuteTestSuiteCommand(testSuiteNode, Settings.CaptureStdOut, true)
-                                .Execute(testListener);
+                                .Execute(testListener)
+                                .ConfigureAwait(true);
                             ValidateResponse(response);
                         }
-                    }, cancellationToken)
-                .WaitAsync(cancellationToken);
+                    },
+                    cancellationToken)
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(true);
         }
         catch (TimeoutException)
         {
@@ -57,7 +60,9 @@ internal class GdUnit4RuntimeExecutorGodotBridge
         {
             Logger.LogInfo("Running tests are cancelled.");
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             Logger.LogError($"{ex.Message}\n{ex.StackTrace}");
         }
@@ -72,7 +77,9 @@ internal class GdUnit4RuntimeExecutorGodotBridge
     }
 }
 
+#pragma warning disable SA1402
 internal class GdUnit4TestEventListener : ITestEventListener
+#pragma warning restore SA1402
 {
     private readonly Callable listener;
 
@@ -88,12 +95,20 @@ internal class GdUnit4TestEventListener : ITestEventListener
 
     public void PublishEvent(ITestEvent testEvent) => EmitTestEvent(testEvent as TestEvent);
 
+    private static Godot.Collections.Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.StatisticKey, object> statistics)
+    {
+        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
+        foreach (var (key, value) in statistics)
+            converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
+        return converted;
+    }
+
     private void EmitTestEvent(TestEvent? testEvent)
     {
         if (testEvent == null)
             return;
 
-        var data = new Dictionary
+        using var data = new Dictionary
         {
             { "type", testEvent.Type.ToVariant() },
             { "guid", testEvent.Id.ToString() },
@@ -111,13 +126,5 @@ internal class GdUnit4TestEventListener : ITestEventListener
         }
 
         listener.Call(data);
-    }
-
-    private static Godot.Collections.Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.StatisticKey, object> statistics)
-    {
-        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
-        foreach (var (key, value) in statistics)
-            converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
-        return converted;
     }
 }
