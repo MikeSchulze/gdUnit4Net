@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
+using GdUnit4.Asserts;
 using GdUnit4.Core.Execution.Exceptions;
-using GdUnit4.Core.Extensions;
 
 using Godot;
 
@@ -144,7 +144,17 @@ public class SceneRunnerGDScriptSceneTest
 
         // AwaitOnSignal must fail after an maximum timeout of 500ms because no signal '"panel_color_change"' with given args color=Yellow is emitted
         await AssertThrown(sceneRunner.AwaitSignal("panel_color_change", box1, Colors.Yellow).WithTimeout(700))
-            .ContinueWith(result => result.Result?.IsInstanceOf<ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 700ms."));
+            .ContinueWith(result => result.Result?
+                .IsInstanceOf<TestFailedException>()
+                .HasMessage("""
+                    Expecting do emitting signal:
+                        "panel_color_change([$colorRectId, (1, 1, 0, 1)])"
+                     by
+                        $sceneId
+                    """
+                    .Replace("$colorRectId", AssertFailures.AsObjectId(box1))
+                    .Replace("$sceneId", AssertFailures.AsObjectId(sceneRunner.Scene()))
+                ));
         // verify the box is still green
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }

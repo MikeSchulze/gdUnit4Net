@@ -43,9 +43,10 @@ public static class AssertFailures
 
         string instanceId;
         var name = $"<{type.FullName?.Replace("[", string.Empty).Replace("]", string.Empty) ?? "unknown"}>";
-        if (unboxedValue is GodotObject go && GodotObject.IsInstanceValid(go))
+        if (unboxedValue is GodotObject go)
         {
-            instanceId = $"objId: {go.GetInstanceId()}";
+            var id = GodotObject.IsInstanceValid(go) ? go.GetInstanceId().ToString() : "<null>";
+            instanceId = $"objId: {id}";
         }
         else
         {
@@ -577,11 +578,12 @@ public static class AssertFailures
     private static string ListDifferences<TValue>(List<TValue> left, List<TValue> right)
     {
         var output = new List<string>();
-        foreach (var it in left.Select((value, i) => new
-        {
-            Value = value,
-            Index = i
-        }))
+        foreach (var it in left
+                     .Select((value, i) => new
+                     {
+                         Value = value,
+                         Index = i
+                     }))
         {
             var l = it.Value;
             var r = right.ElementAt(it.Index);

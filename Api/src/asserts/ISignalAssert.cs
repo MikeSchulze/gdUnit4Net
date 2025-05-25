@@ -10,7 +10,7 @@ using Godot;
 /// <summary>
 ///     An Assertion Tool to verify Godot signals.
 /// </summary>
-public interface ISignalAssert : IAssertBase<GodotObject>
+public interface ISignalAssert : IAssertBase<GodotObject>, IGdUnitAwaitable
 {
     /// <summary>
     ///     Starts the monitoring of emitted signals during the test runtime.

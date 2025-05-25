@@ -11,11 +11,17 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Api;
+
+using Asserts;
+
 using Extensions;
 
 using Godot;
 
 using ExecutionContext = Execution.ExecutionContext;
+
+using static Assertions;
 
 /// <summary>
 ///     A helper to simulate mouse moving form a source to final position.
@@ -270,9 +276,9 @@ internal sealed class SceneRunner : ISceneRunner
 
     public Node Scene() => currentScene;
 
-    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
+    public IGodotMethodAwaitable<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
         where TVariant : notnull
-        => new(currentScene, methodName);
+        => new GodotMethodAwaitable<TVariant>(currentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
     {
@@ -280,8 +286,8 @@ internal sealed class SceneRunner : ISceneRunner
         await Task.Delay(TimeSpan.FromMilliseconds(timeMillis), tokenSource.Token);
     }
 
-    public async Task AwaitSignal(string signal, params Variant[] args) =>
-        await currentScene.AwaitSignal(signal, args);
+    public async Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args) =>
+        await new SignalAssert(currentScene).IsEmitted(signal, args);
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
 
@@ -513,4 +519,46 @@ internal sealed class SceneRunner : ISceneRunner
         => currentScene.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null
            || currentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(field => field.Name.Equals(name, StringComparison.Ordinal))
            || currentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+
+    private sealed class GodotMethodAwaitable<[MustBeVariant] TVariant> : IGodotMethodAwaitable<TVariant>
+        where TVariant : notnull
+    {
+        public GodotMethodAwaitable(Node instance, string methodName, params Variant[] args)
+        {
+            Instance = instance;
+            MethodName = methodName;
+            Args = args;
+            if (!Instance.HasMethod(MethodName) && Instance.GetType().GetMethod(methodName) == null)
+                throw new MissingMethodException($"The method '{MethodName}' not exist on loaded scene.");
+        }
+
+        private string MethodName { get; }
+
+        private Node Instance { get; }
+
+        private Variant[] Args { get; }
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsEqual(TVariant expected) =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsEqual(expected))
+                .ConfigureAwait(true);
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsNull() =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsNull())
+                .ConfigureAwait(true);
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsNotNull() =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsNotNull())
+                .ConfigureAwait(true);
+
+        private async Task<IGodotMethodAwaitable<TVariant>> CallAndWaitIsFinished(Action<object?> assertion)
+            => await Task.Run(async () =>
+                {
+                    // sync to the main thread
+                    await GodotObjectExtensions.SyncProcessFrame;
+                    var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args).ConfigureAwait(true);
+                    assertion(value);
+                    return this;
+                })
+                .ConfigureAwait(true);
+    }
 }

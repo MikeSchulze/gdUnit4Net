@@ -4,11 +4,13 @@
 namespace GdUnit4;
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
+using Api;
+
+using Asserts;
+
 using Core;
-using Core.Execution.Exceptions;
 using Core.Extensions;
 
 using Godot;
@@ -27,7 +29,7 @@ public interface ISceneRunner : IDisposable
     /// <summary>
     ///     Gets a util to synchronize the current thread with the Godot physics thread.
     /// </summary>
-    public static SignalAwaiter SyncPhysicsFrame => GodotObjectExtensions.SyncPhysicsFrame;
+    static SignalAwaiter SyncPhysicsFrame => GodotObjectExtensions.SyncPhysicsFrame;
 
     /// <summary>
     ///     Loads a scene into the SceneRunner to be simulated.
@@ -216,7 +218,7 @@ public interface ISceneRunner : IDisposable
     /// <typeparam name="TValue">The expected result type.</typeparam>
     /// <param name="methodName">The name of the method to wait.</param>
     /// <returns>GodotMethodAwaiter.</returns>
-    GdUnitAwaiter.GodotMethodAwaiter<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName)
+    IGodotMethodAwaitable<TValue> AwaitMethod<[MustBeVariant] TValue>(string methodName)
         where TValue : notnull;
 
     /// <summary>
@@ -231,7 +233,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    Task AwaitSignal(string signal, params Variant[] args);
+    Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args);
 
     /// <summary>
     ///     Waits for a specific amount of milliseconds.
@@ -333,34 +335,4 @@ public interface ISceneRunner : IDisposable
     /// <param name="owned">If owned is true, only descendants with a valid owner node are checked.</param>
     /// <returns>The node if found or Null.</returns>
     Node FindChild(string name, bool recursive = true, bool owned = false);
-}
-
-public static class SceneRunnerExtensions
-{
-    public static async Task WithTimeout(this Task task, int timeoutMillis)
-    {
-        using var timeoutCts = new CancellationTokenSource();
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
-        try
-        {
-            var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
-            var completedTask = await Task.WhenAny(task, timeoutTask);
-            if (completedTask != task)
-            {
-                // if a signal task token registered we need to be cancel first
-                var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-                if (data is CancellationTokenSource cancelToken)
-                    cancelToken.Cancel();
-                var lineNumber = GdUnitExtensions.GetWithTimeoutLineNumber();
-                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
-            }
-
-            await task; // Propagate any exceptions from the task
-        }
-        finally
-        {
-            timeoutCts.Cancel();
-            linkedCts.Cancel();
-        }
-    }
 }

@@ -4,10 +4,11 @@
 namespace GdUnit4.Core.Signals;
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Extensions;
 
@@ -20,16 +21,17 @@ using Error = Godot.Error;
 
 internal sealed partial class GodotSignalCollector : RefCounted
 {
+    internal const string SIGNAL_CANCELLATION_TOKEN_SLOT_NAME = "SignalCancellationToken";
+
     public static GodotSignalCollector Instance { get; } = new();
 
-    internal Dictionary<GodotObject, Dictionary<string, List<Variant[]>>> CollectedSignals { get; } = new();
+    internal ConcurrentDictionary<GodotObject, ConcurrentDictionary<string, ConcurrentBag<Variant[]>>> CollectedSignals { get; } = new();
 
     public void RegisterEmitter(GodotObject emitter)
     {
         // do not register the same emitter at twice
-        if (CollectedSignals.ContainsKey(emitter))
-            return;
-        CollectedSignals[emitter] = new Dictionary<string, List<Variant[]>>();
+        if (!CollectedSignals.TryAdd(emitter, new ConcurrentDictionary<string, ConcurrentBag<Variant[]>>()))
+            return; // Already registered
 
         // connect to 'TreeExiting' of the emitter to finally release all acquired resources/connections.
         var action = UnregisterEmitter;
@@ -41,53 +43,72 @@ internal sealed partial class GodotSignalCollector : RefCounted
 
     internal int Count(GodotObject emitter, string signalName, Variant[] args)
         => IsSignalCollecting(emitter, signalName)
-            ? CollectedSignals[emitter][signalName].FindAll(signalArgs => signalArgs.VariantEquals(args)).Count
+            ? CollectedSignals[emitter][signalName].Count(signalArgs => signalArgs.VariantEquals(args))
             : 0;
 
     internal bool IsSignalCollecting(GodotObject emitter, string signalName)
         => CollectedSignals.ContainsKey(emitter) && CollectedSignals[emitter].ContainsKey(signalName);
 
-    internal bool IsEmitted(CancellationTokenSource token, GodotObject emitter, string signal, Variant[] args)
+    internal async Task<bool> IsEmitted(GodotObject emitter, string signal, Variant[] args)
     {
         try
         {
-            var isProcess = emitter.HasMethod("_Process");
-            var isPhysicsProcess = emitter.HasMethod("_PhysicsProcess");
-            var sleepTimeInMs = 10;
-            while (!Match(emitter, signal, args))
-            {
-                Thread.Sleep(sleepTimeInMs);
-                if (isProcess)
-                    emitter.CallDeferred("_Process", sleepTimeInMs);
-                if (isPhysicsProcess)
-                    emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
-                if (token.IsCancellationRequested)
-                    return false;
-            }
+            using var signalCancellationToken = new CancellationTokenSource();
+            Thread.SetData(Thread.GetNamedDataSlot(SIGNAL_CANCELLATION_TOKEN_SLOT_NAME), signalCancellationToken);
+            return await Task.Run(
+                () =>
+                {
+                    try
+                    {
+                        var isProcess = emitter.HasMethod("_Process");
+                        var isPhysicsProcess = emitter.HasMethod("_PhysicsProcess");
+                        var sleepTimeInMs = 10;
+                        while (IsInstanceValid(emitter) && !Match(emitter, signal, args))
+                        {
+                            Thread.Sleep(sleepTimeInMs);
+                            if (isProcess && IsInstanceValid(emitter))
+                                emitter.CallDeferred("_Process", sleepTimeInMs);
+                            if (isPhysicsProcess && IsInstanceValid(emitter))
+                                emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
+                            if (signalCancellationToken.IsCancellationRequested)
+                                return false;
+                        }
 
-            return true;
-        }
+                        return true;
+                    }
 #pragma warning disable CA1031
-        catch (Exception e)
+                    catch (Exception e)
 #pragma warning restore CA1031
-        {
-            WriteLine(e.Message);
-            return false;
+                    {
+                        WriteLine(e.Message);
+                        WriteLine(e.StackTrace);
+                        return false;
+                    }
+                    finally
+                    {
+                        ResetCollectedSignals(emitter);
+                    }
+                },
+                signalCancellationToken.Token).ConfigureAwait(true);
         }
         finally
         {
-            ResetCollectedSignals(emitter);
+            Thread.SetData(Thread.GetNamedDataSlot(SIGNAL_CANCELLATION_TOKEN_SLOT_NAME), null);
         }
     }
 
     internal void Clean()
     {
-        CollectedSignals.Keys.ToList().ForEach(emitter => UnregisterEmitter(this, emitter));
+        CollectedSignals.Keys
+            .ToList()
+            .ForEach(emitter => UnregisterEmitter(this, emitter));
         CollectedSignals.Clear();
     }
 
     private void ConnectAllSignals(GodotObject emitter)
     {
+        var emitterSignals = CollectedSignals[emitter];
+
         foreach (var signalDef in emitter.GetSignalList())
         {
             var signalName = (string)signalDef["name"];
@@ -95,7 +116,8 @@ internal sealed partial class GodotSignalCollector : RefCounted
             var error = emitter.Connect(signalName, BuildCallable(emitter, signalName, args.Count));
             if (error != Error.Ok)
                 WriteLine($"Error on connecting signal {signalName}, Error: {error}");
-            CollectedSignals[emitter][signalName] = new List<Variant[]>();
+
+            emitterSignals.TryAdd(signalName, new ConcurrentBag<Variant[]>());
         }
     }
 
@@ -119,6 +141,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
 
     private void CollectSignal(GodotObject emitter, string signalName, params Variant[] signalArgs)
     {
+        // WriteLine($"CollectSignal: {emitter}:{signalName} {signalArgs.Formatted()}");
         if (IsSignalCollecting(emitter, signalName))
             CollectedSignals[emitter][signalName].Add(signalArgs);
     }
@@ -142,7 +165,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
         }
 
         if (IsInstanceValid(emitter))
-            CollectedSignals.Remove(emitter);
+            CollectedSignals.TryRemove(emitter, out _);
 
         // DebugSignalList("UnregisterEmitter");
     }
@@ -159,9 +182,22 @@ internal sealed partial class GodotSignalCollector : RefCounted
     }
 
     private bool Match(GodotObject emitter, string signalName, params Variant[] args)
+    {
+        if (!IsInstanceValid(emitter))
+        {
+            WriteLine($"Test match signal '{signalName}', the emitter is disposed.");
+            return false;
+        }
+
+        // WriteLine($"Test match signal: {emitter}:{signalName} {args.Formatted()}");
+        if (!CollectedSignals.TryGetValue(emitter, out var emitterSignals))
+            return false;
+
+        return emitterSignals.TryGetValue(signalName, out var signalBag)
+               && signalBag.Any(receivedArgs => receivedArgs.VariantEquals(args));
 
         // DebugSignalList("--match--");
-        => CollectedSignals[emitter][signalName].Any(receivedArgs => receivedArgs.VariantEquals(args));
+    }
 
     [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Debug output not requiring localization")]
     private void DebugSignalList(string message)

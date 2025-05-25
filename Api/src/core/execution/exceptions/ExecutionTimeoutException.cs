@@ -5,7 +5,7 @@ namespace GdUnit4.Core.Execution.Exceptions;
 
 using System;
 
-public sealed class ExecutionTimeoutException : Exception
+internal sealed class ExecutionTimeoutException : Exception
 {
     public ExecutionTimeoutException(string message, int line)
         : base(message)
@@ -15,9 +15,5 @@ public sealed class ExecutionTimeoutException : Exception
     {
         get;
         private set;
-    }
-
-    public ExecutionTimeoutException()
-    {
     }
 }

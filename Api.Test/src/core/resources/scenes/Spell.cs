@@ -5,9 +5,10 @@ using Godot;
 public partial class Spell : Node
 {
     [Signal]
-    public delegate void SpellExplodeEventHandler();
+    public delegate void SpellExplodeEventHandler(ulong spellId);
 
     private const float SPELL_LIVE_TIME = 1000f;
+    private bool spellExploded;
 
     private bool spellFired;
     private double spellLiveTime;
@@ -29,5 +30,12 @@ public partial class Spell : Node
     private void Move(float delta) => spellPos.X += delta;
 
     private void Explode()
-        => EmitSignal(SignalName.SpellExplode, this);
+    {
+        if (spellExploded)
+            return;
+
+        EmitSignal(SignalName.SpellExplode, GetInstanceId());
+        QueueFree();
+        spellExploded = true;
+    }
 }
