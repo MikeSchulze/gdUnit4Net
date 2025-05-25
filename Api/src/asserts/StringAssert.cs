@@ -7,7 +7,7 @@ using System;
 
 using Core.Extensions;
 
-internal sealed class StringAssert : AssertBase<string>, IStringAssert
+public sealed class StringAssert : AssertBase<string>, IStringAssert
 {
     public StringAssert(string? current)
         : base(current)
@@ -16,7 +16,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert Contains(string expected)
     {
-        if (Current == null || !Current.Contains(expected, StringComparison.Ordinal))
+        if (Current == null || !Current.Contains(expected))
             ThrowTestFailureReport(AssertFailures.Contains(Current, expected), Current, expected);
         return this;
     }
@@ -64,6 +64,8 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
                 if (currentLength >= length)
                     failed = true;
                 break;
+            default:
+                break;
         }
 
         if (failed)
@@ -103,7 +105,7 @@ internal sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert NotContains(string expected)
     {
-        if (Current != null && Current.Contains(expected, StringComparison.Ordinal))
+        if (Current != null && Current.Contains(expected))
             ThrowTestFailureReport(AssertFailures.NotContains(Current, expected), Current, expected);
         return this;
     }

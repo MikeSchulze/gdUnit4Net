@@ -129,14 +129,15 @@ public class VectorAssertTest
 
     [TestCase]
     [DataPoint(nameof(SystemVectorApproximateDataPoints))]
+    [RequireGodotRuntime]
     public void SystemVectorIsEqualApprox(dynamic vector, dynamic epsilon)
     {
         AssertThat(vector).IsEqualApprox(vector, epsilon);
         AssertThat(vector + epsilon).IsEqualApprox(vector, epsilon);
         AssertThat(vector - epsilon).IsEqualApprox(vector, epsilon);
 
-        var lessValue = vector - epsilon * 2;
-        var greaterValue = vector + epsilon * 2;
+        var lessValue = vector - (epsilon * 2);
+        var greaterValue = vector + (epsilon * 2);
         var min = vector - epsilon;
         var max = vector + epsilon;
         AssertThrown(() => AssertThat(lessValue).IsEqualApprox(vector, epsilon))
@@ -166,8 +167,8 @@ public class VectorAssertTest
         AssertThat(vector + epsilon).IsEqualApprox(vector, epsilon);
         AssertThat(vector - epsilon).IsEqualApprox(vector, epsilon);
 
-        var lessValue = vector - epsilon * 2;
-        var greaterValue = vector + epsilon * 2;
+        var lessValue = vector - (epsilon * 2);
+        var greaterValue = vector + (epsilon * 2);
         var min = vector - epsilon;
         var max = vector + epsilon;
         AssertThrown(() => AssertThat(lessValue).IsEqualApprox(vector, epsilon))

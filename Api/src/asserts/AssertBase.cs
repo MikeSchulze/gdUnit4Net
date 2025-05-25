@@ -6,7 +6,7 @@ namespace GdUnit4.Asserts;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal abstract class AssertBase<TValue> : IAssertBase<TValue>
+public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected AssertBase(TValue? current) => Current = current;
 
@@ -52,6 +52,15 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
         return this;
     }
 
+#pragma warning disable IDE0060 // Remove unused parameter
+    protected void ThrowTestFailureReport(string message, object? current, object? expected)
+#pragma warning restore IDE0060 // Remove unused parameter
+    {
+        var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
+        CurrentFailureMessage = failureMessage;
+        throw new TestFailedException(failureMessage);
+    }
+
     internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
     {
         var left = lKey.UnboxVariant();
@@ -60,14 +69,5 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
         if ((left is string || left?.GetType().IsPrimitive) ?? false)
             return Equals(left, right);
         return ReferenceEquals(left, right);
-    }
-
-#pragma warning disable IDE0060 // Remove unused parameter
-    protected void ThrowTestFailureReport(string message, object? current, object? expected)
-#pragma warning restore IDE0060 // Remove unused parameter
-    {
-        var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
-        CurrentFailureMessage = failureMessage;
-        throw new TestFailedException(failureMessage);
     }
 }

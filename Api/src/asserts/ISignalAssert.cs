@@ -20,21 +20,21 @@ public interface ISignalAssert : IAssertBase<GodotObject>, IGdUnitAwaitable
     ISignalAssert StartMonitoring();
 
     /// <summary>
-    ///     Verifies that a given signal is emitted until waiting time.
+    ///     Verifies that given signal is emitted until waiting time.
     /// </summary>
     /// <param name="signal">The signal name.</param>
     /// <param name="args">Optional signal arguments.</param>
-    /// Example: it waits a maximum of 2000 ms before is failing if the signal is not emitted
+    /// Example: it waits a maximum of 2000ms before is failing if the signal is not emitted
     /// await AssertSignal(node).IsEmitted("draw").WithTimeout(2000);
     /// <returns>Task.</returns>
     Task<ISignalAssert> IsEmitted(string signal, params Variant[] args);
 
     /// <summary>
-    ///     Verifies that the given signal is NOT emitted until waiting time.
+    ///     Verifies that given signal is NOT emitted until waiting time.
     /// </summary>
     /// <param name="signal">The signal name.</param>
     /// <param name="args">Optional signal arguments.</param>
-    /// Example: it waits until 2000 ms and is failing if the signal is emitted in this time
+    /// Example: it waits until 2000ms and is failing if the signal is emitted in this time
     /// await AssertSignal(node).IsNotEmitted("draw").WithTimeout(2000);
     /// <returns>Task.</returns>
     Task<ISignalAssert> IsNotEmitted(string signal, params Variant[] args);

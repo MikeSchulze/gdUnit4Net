@@ -9,7 +9,7 @@ namespace GdUnit4.Asserts;
 public interface IExceptionAssert : IAssert
 {
     /// <summary>
-    ///     Verifies the exception message is equal to the expected one.
+    ///     Verifies the exception message is equal to expected one.
     /// </summary>
     /// <param name="expected">The expected exception message.</param>
     /// <returns>IExceptionAssert.</returns>
@@ -30,14 +30,14 @@ public interface IExceptionAssert : IAssert
     IExceptionAssert IsInstanceOf<TExpectedType>();
 
     /// <summary>
-    ///     Verifies the exception is thrown at the expected file line number.
+    ///     Verifies the exception is thrown at expected file line number.
     /// </summary>
     /// <param name="lineNumber">The line number the exception is thrown.</param>
     /// <returns>IExceptionAssert.</returns>
     IExceptionAssert HasFileLineNumber(int lineNumber);
 
     /// <summary>
-    ///     Verifies the exception is thrown in the expected file name.
+    ///     Verifies the exception is thrown in expected file name.
     /// </summary>
     /// <param name="fileName">The file name where the exception is thrown.</param>
     /// <returns>IExceptionAssert.</returns>

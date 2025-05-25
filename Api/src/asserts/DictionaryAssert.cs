@@ -9,7 +9,7 @@ using System.Linq;
 
 using CommandLine;
 
-internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
+public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
     where TKey : notnull
 {
     public DictionaryAssert(IDictionary<TKey, TValue>? current)
@@ -166,7 +166,9 @@ internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, 
     public new IDictionaryAssert<TKey, TValue> OverrideFailureMessage(string message)
         => (IDictionaryAssert<TKey, TValue>)base.OverrideFailureMessage(message);
 
-    internal static DictionaryAssert<TKey, TValue> From(IDictionary? current)
+#pragma warning disable CA1000 // Do not declare static members on generic types
+    public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
+#pragma warning restore CA1000 // Do not declare static members on generic types
         => new(current);
 
     private TValue? TryGetValue(TKey key)

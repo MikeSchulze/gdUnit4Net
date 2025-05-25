@@ -11,7 +11,7 @@ using System.Runtime.ExceptionServices;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal sealed class ExceptionAssert<TException> : IExceptionAssert
+public sealed class ExceptionAssert<TException> : IExceptionAssert
     where TException : Exception
 {
     public ExceptionAssert(Action action)
@@ -20,9 +20,7 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         {
             action.Invoke();
         }
-#pragma warning disable CA1031
         catch (Exception e)
-#pragma warning restore CA1031
         {
             var capturedException = ExceptionDispatchInfo.Capture(e.InnerException ?? e);
             Current = (TException)capturedException.SourceException;
@@ -55,7 +53,9 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
     {
         int currentLine;
         if (Current is TestFailedException e)
+        {
             currentLine = e.LineNumber;
+        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
@@ -72,7 +72,9 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         var fullPath = Path.GetFullPath(fileName);
         string currentFileName;
         if (Current is TestFailedException e)
+        {
             currentFileName = e.FileName ?? string.Empty;
+        }
         else
         {
             var stackFrame = new StackTrace(Current!, true).GetFrame(0);
@@ -107,16 +109,16 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
+    private void ThrowTestFailureReport(string message)
+    {
+        var failureMessage = CustomFailureMessage ?? message;
+        throw new TestFailedException(failureMessage);
+    }
+
     internal string? GetExceptionStackTrace()
     {
         if (Current is TestFailedException tfe)
             return tfe.StackTrace;
         return Current?.StackTrace ?? null;
-    }
-
-    private void ThrowTestFailureReport(string message)
-    {
-        var failureMessage = CustomFailureMessage ?? message;
-        throw new TestFailedException(failureMessage);
     }
 }

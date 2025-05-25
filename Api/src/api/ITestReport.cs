@@ -48,6 +48,6 @@ public interface ITestReport
     /// <summary>
     ///     Serializes the test report into a dictionary representation containing its properties and values.
     /// </summary>
-    /// <returns>The report serialized as a dictionary.</returns>
+    /// <returns></returns>
     IDictionary<string, object> Serialize();
 }

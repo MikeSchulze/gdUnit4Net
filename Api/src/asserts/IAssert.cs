@@ -4,13 +4,8 @@
 namespace GdUnit4.Asserts;
 
 /// <summary>
-///     The main interface of all GdUnit4 assertions.
-///     Provides the core functionality for assertion-based testing in the GdUnit4 framework.
+///     Main interface of all GdUnit4 asserts.
 /// </summary>
-/// <remarks>
-///     This interface defines the base contract that all assertion types must implement,
-///     enabling consistent behavior across different types of assertions.
-/// </remarks>
 public interface IAssert
 {
     /// <summary>
@@ -22,14 +17,8 @@ public interface IAssert
 }
 
 /// <summary>
-///     The base interface of all GdUnit asserts.
-///     Provides common assertion methods that apply to most value types.
+///     Base interface of all GdUnit asserts.
 /// </summary>
-/// <typeparam name="TValue">The type of value being tested by this assertion.</typeparam>
-/// <remarks>
-///     This generic interface extends the core IAssert interface with type-specific
-///     assertion methods for comparing values and checking nullability.
-/// </remarks>
 public interface IAssertBase<in TValue> : IAssert
 {
     /// <summary>
@@ -45,14 +34,14 @@ public interface IAssertBase<in TValue> : IAssert
     IAssertBase<TValue> IsNotNull();
 
     /// <summary>
-    ///     Verifies that the current value is equal to the expected one.
+    ///     Verifies that the current value is equal to expected one.
     /// </summary>
     /// <param name="expected">The value to be equal.</param>
     /// <returns>IAssertBase.</returns>
     IAssertBase<TValue> IsEqual(TValue expected);
 
     /// <summary>
-    ///     Verifies that the current value is not equal to the expected one.
+    ///     Verifies that the current value is not equal to expected one.
     /// </summary>
     /// <param name="expected">The value to be NOT equal.</param>
     /// <returns>IAssertBase.</returns>

@@ -179,13 +179,12 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         => ExtractV(new ValueExtractor(methodName, args));
 
     public IEnumerableAssert<object?> ExtractV(params IValueExtractor[] extractors)
-        => new EnumerableAssert<object?>(
-            Current?.Select(v =>
-                {
-                    var values = extractors.Select(e => e.ExtractValue(v)).ToArray();
-                    return values.Length == 1 ? values.First() : new Tuple(values);
-                })
-                .ToList());
+        => new EnumerableAssert<object?>(Current?.Select(v =>
+            {
+                var values = extractors.Select(e => e.ExtractValue(v)).ToArray();
+                return values.Length == 1 ? values.First() : new Tuple(values);
+            })
+            .ToList());
 
     public new IEnumerableAssert<TValue?> OverrideFailureMessage(string message)
         => (IEnumerableAssert<TValue?>)base.OverrideFailureMessage(message);
@@ -334,4 +333,11 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
 
         public List<TValue?> NotFound { get; init; } = new();
     }
+}
+
+internal static class CompareExtensions
+{
+    internal static bool IsEquals<T>(this T? c, T? e) => Comparable.IsEqual(c, e).Valid;
+
+    internal static bool IsSame<T>(this T? c, T? e) => AssertBase<T>.IsSame(c, e);
 }
