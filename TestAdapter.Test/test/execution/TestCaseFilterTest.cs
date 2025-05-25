@@ -57,15 +57,15 @@ public class TestCaseFilterTest
                 CodeFilePath = "/tests/core/ExampleTestSuiteA.cs",
                 LineNumber = 12,
                 RequireRunningGodotEngine = false,
-                Categories =
+                Categories = new List<string>
                 {
                     "UnitTest",
                     "Fast"
                 },
-                Traits =
+                Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new List<string> { "TeamA" },
-                    ["Priority"] = new List<string> { "High" }
+                    ["Owner"] = new() { "TeamA" },
+                    ["Priority"] = new() { "High" }
                 }
             },
             new()
@@ -79,12 +79,12 @@ public class TestCaseFilterTest
                 CodeFilePath = "/tests/core/ExampleTestSuiteA.cs",
                 LineNumber = 22,
                 RequireRunningGodotEngine = false,
-                Categories = { "IntegrationTest" },
-                Traits =
+                Categories = new List<string> { "IntegrationTest" },
+                Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new List<string> { "TeamB" },
-                    ["Priority"] = new List<string> { "Medium" },
-                    ["Component"] = new List<string> { "Database" }
+                    ["Owner"] = new() { "TeamB" },
+                    ["Priority"] = new() { "Medium" },
+                    ["Component"] = new() { "Database" }
                 }
             },
             new()
@@ -98,12 +98,12 @@ public class TestCaseFilterTest
                 CodeFilePath = "/tests/core/ExampleTestSuiteB.cs",
                 LineNumber = 32,
                 RequireRunningGodotEngine = false,
-                Categories = { "SlowTest" },
-                Traits =
+                Categories = new List<string> { "SlowTest" },
+                Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new List<string> { "TeamC" },
-                    ["Priority"] = new List<string> { "Low" },
-                    ["Feature"] = new List<string> { "Reporting" }
+                    ["Owner"] = new() { "TeamC" },
+                    ["Priority"] = new() { "Low" },
+                    ["Feature"] = new() { "Reporting" }
                 }
             },
             new()
@@ -117,20 +117,20 @@ public class TestCaseFilterTest
                 CodeFilePath = "/tests/core/ExampleTestSuiteB.cs",
                 LineNumber = 45,
                 RequireRunningGodotEngine = false,
-                Categories =
+                Categories = new List<string>
                 {
                     "UnitTest",
                     "SlowTest"
                 },
-                Traits =
+                Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new List<string>
+                    ["Owner"] = new()
                     {
                         "TeamA",
                         "TeamC"
                     }, // Multiple values for a trait
-                    ["Priority"] = new List<string> { "Medium" },
-                    ["Component"] = new List<string> { "UI" }
+                    ["Priority"] = new() { "Medium" },
+                    ["Component"] = new() { "UI" }
                 }
             }
         };

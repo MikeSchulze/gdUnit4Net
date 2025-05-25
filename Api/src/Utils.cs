@@ -37,7 +37,9 @@ public static class Utils
 
         using (var tokenSource = new CancellationTokenSource())
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(timeout), tokenSource.Token);
+            await Task
+                .Delay(TimeSpan.FromMilliseconds(timeout), tokenSource.Token)
+                .ConfigureAwait(true);
         }
 
         stopwatch.Stop();

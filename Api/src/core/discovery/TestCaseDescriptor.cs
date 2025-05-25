@@ -17,12 +17,12 @@ using Newtonsoft.Json;
 public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
 {
     /// <summary>
-    ///     Gets or sets simple display name of the test case.
+    ///     Gets or sets a simple display name of the test case.
     /// </summary>
     public string SimpleName { get; set; } = string.Empty;
 
     /// <summary>
-    ///     Gets or sets fully qualified name including class path and test parameters.
+    ///     Gets or sets a fully qualified name including class path and test parameters.
     /// </summary>
     public string FullyQualifiedName { get; set; } = string.Empty;
 
@@ -32,22 +32,22 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     public required string AssemblyPath { get; init; }
 
     /// <summary>
-    ///     Gets fully qualified name of the class containing this test.
+    ///     Gets a fully qualified name of the class containing this test.
     /// </summary>
     public required string ManagedType { get; init; }
 
     /// <summary>
-    ///     Gets name of the test method.
+    ///     Gets the name of the test method.
     /// </summary>
     public required string ManagedMethod { get; init; }
 
     /// <summary>
-    ///     Gets unique identifier for this test case.
+    ///     Gets a unique identifier for this test case.
     /// </summary>
     public required Guid Id { get; init; }
 
     /// <summary>
-    ///     Gets line number in source file where test is defined.
+    ///     Gets the line number in a source file where the test is defined.
     /// </summary>
     public required int LineNumber { get; init; }
 
@@ -57,12 +57,12 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     public required string? CodeFilePath { get; init; }
 
     /// <summary>
-    ///     Gets index if multiple test cases exist for same method.
+    ///     Gets index if multiple test cases exist for the same method.
     /// </summary>
     public required int AttributeIndex { get; init; }
 
     /// <summary>
-    ///     Gets a value indicating whether whether this test requires the Godot engine to be running.
+    ///     Gets a value indicating whether this test requires the Godot engine to be running.
     /// </summary>
     public required bool RequireRunningGodotEngine { get; init; }
 
@@ -70,15 +70,22 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     ///     Gets the list of categories associated with this test case.
     ///     Categories are set by the TestCategory attributes.
     /// </summary>
-    public List<string> Categories { get; init; } = new();
+    public IReadOnlyCollection<string> Categories { get; init; } = new List<string>();
 
     /// <summary>
     ///     Gets the collection of traits associated with this test case.
     ///     Each trait is a name-value pair that can be used for filtering and reporting.
     /// </summary>
-    public Dictionary<string, List<string>> Traits { get; init; } = new();
+    public IReadOnlyDictionary<string, List<string>> Traits { get; init; } = new Dictionary<string, List<string>>();
 
-    // ReSharper disable once UsageOfDefaultStructEquality
+    /// <summary>
+    ///     Determines whether the specified <see cref="TestCaseDescriptor" /> is equal to the current instance.
+    /// </summary>
+    /// <param name="other">The test case descriptor to compare with the current instance.</param>
+    /// <returns>
+    ///     <see langword="true" /> if the specified descriptor is equal to the current instance;
+    ///     otherwise, <see langword="false" />.
+    /// </returns>
     public bool Equals(TestCaseDescriptor? other)
     {
         if (other is null)
@@ -101,15 +108,42 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
                    other.Traits.ContainsKey(key) && Traits[key].SequenceEqual(other.Traits[key]));
     }
 
-    public TestCaseDescriptor Build(TestCaseAttribute testCaseAttribute, bool hasMultipleAttributes)
+    /// <summary>
+    ///     Determines whether two <see cref="TestCaseDescriptor" /> instances are equal.
+    /// </summary>
+    /// <param name="left">The first test case descriptor to compare.</param>
+    /// <param name="right">The second test case descriptor to compare.</param>
+    /// <returns>
+    ///     <see langword="true" /> if the descriptors are equal; otherwise, <see langword="false" />.
+    /// </returns>
+#pragma warning disable SA1201
+    public static bool operator ==(TestCaseDescriptor? left, TestCaseDescriptor? right)
     {
-        SimpleName = TestCase.BuildDisplayName(ManagedMethod, testCaseAttribute, hasMultipleAttributes ? AttributeIndex : -1);
-        FullyQualifiedName = hasMultipleAttributes
-            ? $"{ManagedType}.{ManagedMethod}.{SimpleName}"
-            : $"{ManagedType}.{SimpleName}";
-        return this;
+        if (left is null)
+            return right is null;
+        return left.Equals(right);
     }
+#pragma warning restore SA1201
 
+    /// <summary>
+    ///     Determines whether two <see cref="TestCaseDescriptor" /> instances are not equal.
+    /// </summary>
+    /// <param name="left">The first test case descriptor to compare.</param>
+    /// <param name="right">The second test case descriptor to compare.</param>
+    /// <returns>
+    ///     <see langword="true" /> if the descriptors are not equal; otherwise, <see langword="false" />.
+    /// </returns>
+    public static bool operator !=(TestCaseDescriptor? left, TestCaseDescriptor? right)
+        => !(left == right);
+
+    /// <summary>
+    ///     Determines whether the specified object is equal to the current <see cref="TestCaseDescriptor" />.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current instance.</param>
+    /// <returns>
+    ///     <see langword="true" /> if the specified object is a <see cref="TestCaseDescriptor" />
+    ///     and is equal to the current instance; otherwise, <see langword="false" />.
+    /// </returns>
     public override bool Equals(object? obj)
     {
         if (obj is null)
@@ -119,6 +153,10 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
         return obj is TestCaseDescriptor descriptor && Equals(descriptor);
     }
 
+    /// <summary>
+    ///     Returns a hash code for the current <see cref="TestCaseDescriptor" />.
+    /// </summary>
+    /// <returns>A 32-bit signed integer hash code.</returns>
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
@@ -134,14 +172,22 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
         return hashCode.ToHashCode();
     }
 
-    public static bool operator ==(TestCaseDescriptor? left, TestCaseDescriptor? right)
-    {
-        if (left is null)
-            return right is null;
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(TestCaseDescriptor? left, TestCaseDescriptor? right) => !(left == right);
-
+    /// <summary>
+    ///     Returns a JSON string representation of the test case descriptor.
+    /// </summary>
+    /// <returns>A formatted JSON string containing all properties of the test case descriptor.</returns>
+    /// <remarks>
+    ///     This method is primarily used for debugging and logging purposes.
+    ///     The JSON output includes all properties with indented formatting for readability.
+    /// </remarks>
     public override string ToString() => JsonConvert.SerializeObject(this, Formatting.Indented);
+
+    internal TestCaseDescriptor Build(TestCaseAttribute testCaseAttribute, bool hasMultipleAttributes)
+    {
+        SimpleName = TestCase.BuildDisplayName(ManagedMethod, testCaseAttribute, hasMultipleAttributes ? AttributeIndex : -1);
+        FullyQualifiedName = hasMultipleAttributes
+            ? $"{ManagedType}.{ManagedMethod}.{SimpleName}"
+            : $"{ManagedType}.{SimpleName}";
+        return this;
+    }
 }
