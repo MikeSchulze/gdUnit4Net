@@ -35,11 +35,18 @@ public interface ISceneRunner : IDisposable
     ///     Loads a scene into the SceneRunner to be simulated.
     /// </summary>
     /// <param name="resourcePath">The path to the scene resource.</param>
-    /// <param name="autoFree">If true the loaded scene will be automatic freed when the runner is freed.</param>
-    /// <param name="verbose">Prints detailed infos on scene simulation.</param>
-    /// <returns></returns>
+    /// <param name="autoFree">If true, the loaded scene will be automatically freed when the runner is freed.</param>
+    /// <param name="verbose">Prints detailed info on scene simulation.</param>
+    /// <returns>ISceneRunner.</returns>
     static ISceneRunner Load(string resourcePath, bool autoFree = false, bool verbose = false) => new SceneRunner(resourcePath, autoFree, verbose);
 
+    /// <summary>
+    ///     Loads a scene into the SceneRunner to be simulated.
+    /// </summary>
+    /// <param name="currentScene">The scene as an instance.</param>
+    /// <param name="autoFree">If true, the loaded scene will be automatically freed when the runner is freed.</param>
+    /// <param name="verbose">Prints detailed info on scene simulation.</param>
+    /// <returns>ISceneRunner.</returns>
     static ISceneRunner Load(Node currentScene, bool autoFree = false, bool verbose = false) => new SceneRunner(currentScene, autoFree, verbose);
 
     /// <summary>
@@ -91,7 +98,7 @@ public interface ISceneRunner : IDisposable
     ISceneRunner SimulateKeyRelease(Key keyCode, bool shift = false, bool control = false);
 
     /// <summary>
-    ///     Simulates a mouse moved to final position.
+    ///     Simulates a mouse moved to the final position.
     /// </summary>
     /// <param name="position">The position in x/y coordinates.</param>
     /// <returns>SceneRunner.</returns>
@@ -109,7 +116,7 @@ public interface ISceneRunner : IDisposable
     /// <summary>
     ///     Simulates a mouse move to the relative coordinates (offset).
     /// </summary>
-    /// <param name="relative">The relative position, e.g. the mouse position offset.</param>
+    /// <param name="relative">The relative position, e.g., the mouse position offset.</param>
     /// <param name="time">The time to move the mouse by the relative position in seconds (default is 1 second).</param>
     /// <param name="transitionType">Sets the type of transition used (default is Linear).</param>
     /// <returns>SceneRunner.</returns>
@@ -139,7 +146,7 @@ public interface ISceneRunner : IDisposable
     ISceneRunner SimulateMouseButtonRelease(MouseButton button);
 
     /// <summary>
-    ///     Sets the mouse cursor to given position relative to the viewport.
+    ///     Sets the mouse cursor to the given position relative to the viewport.
     /// </summary>
     /// <param name="position">The absolute mouse position.</param>
     /// <returns>SceneRunner.</returns>
@@ -159,62 +166,62 @@ public interface ISceneRunner : IDisposable
 
     /// <summary>
     ///     Sets how fast or slow the scene simulation is processed (clock ticks versus the real).
-    ///     <code>
-    ///     // It defaults to 1.0. A value of 2.0 means the game moves twice as fast as real life,
-    ///     // whilst a value of 0.5 means the game moves at half the regular speed
-    /// </code>
+    ///     It defaults to 1.0. A value of 2.0 means the game moves twice as fast as real life,
+    ///     whilst a value of 0.5 means the game moves at half the regular speed.
     /// </summary>
-    /// <param name="timeFactor"></param>
+    /// <param name="timeFactor">The factor fast or slow the scene simulation is processed.</param>
     /// <returns>SceneRunner.</returns>
     ISceneRunner SetTimeFactor(double timeFactor = 1.0);
 
     /// <summary>
     ///     Simulates scene processing for a certain number of frames by given delta peer frame by ignoring the current time
     ///     factor.
-    ///     <code>
-    ///     // Waits until 100 frames are processed with a delta of 20ms peer frame
-    ///     await runner.SimulateFrames(100, 20);
-    /// </code>
     /// </summary>
-    /// <param name="frames">amount of frames to process.</param>
+    /// <example>
+    ///     <code>
+    ///     // Waits until 100 frames are processed with a delta of 20 ms peer frame.
+    ///     await runner.SimulateFrames(100, 20);
+    ///   </code>
+    /// </example>
+    /// <param name="frames">number of frames to process.</param>
     /// <param name="deltaPeerFrame">the time delta between a frame in milliseconds.</param>
     /// <returns>Task to wait.</returns>
     Task SimulateFrames(uint frames, uint deltaPeerFrame);
 
     /// <summary>
     ///     Simulates scene processing for a certain number of frames.
-    ///     <example>
-    ///         <code>
-    ///     // Waits until 100 frames are processed
+    /// </summary>
+    /// <example>
+    ///     <code>
+    ///     // Waits until 100 frames are processed.
     ///     await runner.SimulateFrames(100);
     /// </code>
-    ///     </example>
-    /// </summary>
-    /// <param name="frames">amount of frames to process.</param>
+    /// </example>
+    /// <param name="frames">number of frames to process.</param>
     /// <returns>Task to wait.</returns>
     Task SimulateFrames(uint frames);
 
     /// <summary>
-    ///     Waits until next frame is processed (signal idle_frame).
-    ///     <example>
-    ///         <code>
-    ///     // Waits until next frame is processed
+    ///     Waits until the next frame is processed (signal idle_frame).
+    /// </summary>
+    /// <example>
+    ///     <code>
+    ///     // Waits until the next frame is processed.
     ///     await runner.AwaitIdleFrame();
     /// </code>
-    ///     </example>
-    /// </summary>
+    /// </example>
     /// <returns>Task to wait.</returns>
     Task AwaitIdleFrame();
 
     /// <summary>
     ///     Returns a method awaiter to wait for a specific method result.
-    ///     <example>
-    ///         <code>
-    ///     // Waits until '10' is returned by the method 'calculateX()' or will be interrupted after a timeout of 3s
+    /// </summary>
+    /// <example>
+    ///     <code>
+    ///     // Waits until '10' is returned by the method 'calculateX()' or will be interrupted after a timeout of 3 seconds.
     ///     await runner.AwaitMethod("calculateX").IsEqual(10).WithTimeout(3000);
     /// </code>
-    ///     </example>
-    /// </summary>
+    /// </example>
     /// <typeparam name="TValue">The expected result type.</typeparam>
     /// <param name="methodName">The name of the method to wait.</param>
     /// <returns>GodotMethodAwaiter.</returns>
@@ -223,27 +230,27 @@ public interface ISceneRunner : IDisposable
 
     /// <summary>
     ///     Waits for given signal is emitted.
-    ///     <example>
-    ///         <code>
-    ///     // Waits for signal "mySignal" is emitted by the scene.
-    ///     await runner.AwaitSignal("mySignal");
-    /// </code>
-    ///     </example>
     /// </summary>
+    /// <example>
+    ///     <code>
+    ///      // Waits for signal "mySignal" is emitted by the scene.
+    ///      await runner.AwaitSignal("mySignal");
+    ///   </code>
+    /// </example>
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
     Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args);
 
     /// <summary>
-    ///     Waits for a specific amount of milliseconds.
-    ///     <example>
-    ///         <code>
-    ///     // Waits for two seconds
+    ///     Waits for a specific number of milliseconds.
+    /// </summary>
+    /// <example>
+    ///     <code>
+    ///     // Waits for two seconds.
     ///     await runner.AwaitMillis(2000);
     /// </code>
-    ///     </example>
-    /// </summary>
+    /// </example>
     /// <param name="timeMillis">Seconds to wait. 1.0 for one Second.</param>
     /// <returns>Task to wait.</returns>
     Task AwaitMillis(uint timeMillis);
@@ -254,16 +261,16 @@ public interface ISceneRunner : IDisposable
     ///     This is typically used to ensure that any simulated or queued inputs are fully processed before proceeding with the
     ///     next steps in the scene.
     ///     It's essential for reliable input simulation or when synchronizing logic based on inputs.
-    ///     <example>
-    ///         <code>
+    /// </summary>
+    /// <example>
+    ///     <code>
     ///     runner.SetMousePos(new Vector2(60, 20))
     ///         .SimulateMouseButtonPressed(MouseButton.Left);
     ///     await runner.AwaitInputProcessed()  // Ensure all inputs are processed before continuing
     ///     </code>
-    ///     </example>
-    /// </summary>
+    /// </example>
     /// <returns>
-    ///     <placeholder>A <see cref="Task" /> representing the asynchronous operation.</placeholder>
+    ///     A <see cref="Task" /> representing the asynchronous operation.
     /// </returns>
     async Task AwaitInputProcessed()
     {
@@ -275,7 +282,7 @@ public interface ISceneRunner : IDisposable
     }
 
     /// <summary>
-    ///     Access to current running scene.
+    ///     Access to the current running scene.
     /// </summary>
     /// <returns>Node.</returns>
     Node Scene();
@@ -288,19 +295,17 @@ public interface ISceneRunner : IDisposable
     /// <summary>
     ///     Invokes the method by given name and arguments.
     /// </summary>
-    /// <param name="name">The name of method to invoke.</param>
+    /// <param name="name">The name of the method to invoke.</param>
     /// <param name="args">The function arguments.</param>
-    /// <returns>The return value of invoked method.</returns>
-    /// <exception cref="MissingMethodException" />
+    /// <returns>The return value of the invoked method.</returns>
     Variant Invoke(string name, params Variant[] args);
 
     /// <summary>
     ///     Invokes an async method by given name and arguments.
     /// </summary>
-    /// <param name="name">The name of method to invoke.</param>
+    /// <param name="name">The name of the method to invoke.</param>
     /// <param name="args">The function arguments.</param>
-    /// <returns>The return value of invoked method.</returns>
-    /// <exception cref="MissingMethodException" />
+    /// <returns>The return value of the invoked method.</returns>
     Task<Variant> InvokeAsync(string name, params Variant[] args);
 
     /// <summary>
@@ -328,9 +333,9 @@ public interface ISceneRunner : IDisposable
     void SetProperty(string name, Variant value);
 
     /// <summary>
-    ///     Finds the node by given name.
+    ///     Finds the node by the given name.
     /// </summary>
-    /// <param name="name">The name of node to find.</param>
+    /// <param name="name">The name of the node to find.</param>
     /// <param name="recursive">Allow recursive search.</param>
     /// <param name="owned">If owned is true, only descendants with a valid owner node are checked.</param>
     /// <returns>The node if found or Null.</returns>
