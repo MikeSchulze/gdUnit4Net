@@ -19,13 +19,8 @@ using Newtonsoft.Json;
 /// <summary>
 ///     Command to execute a test suite with configurable execution options.
 /// </summary>
-public class ExecuteTestSuiteCommand : BaseCommand
+internal class ExecuteTestSuiteCommand : BaseCommand
 {
-    [JsonConstructor]
-    private ExecuteTestSuiteCommand()
-    {
-    }
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="ExecuteTestSuiteCommand" /> class.
     ///     Initializes a new instance of the ExecuteTestSuiteCommand.
@@ -41,13 +36,22 @@ public class ExecuteTestSuiteCommand : BaseCommand
         IsEngineMode = Suite.Tests.First().RequireRunningGodotEngine;
     }
 
-    [JsonProperty] private TestSuiteNode Suite { get; set; } = null!;
+    [JsonConstructor]
+    private ExecuteTestSuiteCommand()
+    {
+    }
 
-    [JsonProperty] private bool IsCaptureStdOut { get; set; }
+    [JsonProperty]
+    private TestSuiteNode Suite { get; set; } = null!;
 
-    [JsonProperty] private bool IsEngineMode { get; set; }
+    [JsonProperty]
+    private bool IsCaptureStdOut { get; set; }
 
-    [JsonProperty] private bool IsReportOrphanNodesEnabled { get; set; }
+    [JsonProperty]
+    private bool IsEngineMode { get; set; }
+
+    [JsonProperty]
+    private bool IsReportOrphanNodesEnabled { get; set; }
 
     public override async Task<Response> Execute(ITestEventListener testEventListener)
     {
@@ -68,13 +72,19 @@ public class ExecuteTestSuiteCommand : BaseCommand
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
                     await GodotObjectExtensions.SyncProcessFrame;
-                await new TestSuiteExecutionStage(testSuite).Execute(context);
+                await new TestSuiteExecutionStage(testSuite)
+                    .Execute(context)
+                    .ConfigureAwait(true);
             }
 
             // handle unexpected exceptions
+#pragma warning disable CA1031
             catch (Exception e)
+#pragma warning restore CA1031
             {
-                await Console.Error.WriteLineAsync($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}");
+                await Console.Error
+                    .WriteLineAsync($"Unexpected Exception: {e.Message} \nStackTrace: {e.StackTrace}")
+                    .ConfigureAwait(true);
             }
             finally
             {
@@ -87,7 +97,9 @@ public class ExecuteTestSuiteCommand : BaseCommand
                 Payload = $"Test suite {Suite.ManagedType} executed successfully."
             };
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             return new Response
             {

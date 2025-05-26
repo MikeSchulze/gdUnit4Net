@@ -186,7 +186,21 @@ csharp_style_implicit_object_creation_when_type_is_apparent = true : warning
 # "Null" checking preferences
 csharp_style_throw_expression = true : warning
 csharp_style_conditional_delegate_call = true : warning
+# Enforce attributes on separate lines
+dotnet_diagnostic.SA1134.severity = warning
+# Alternative: Use IDE rules for attribute placement
+csharp_style_prefer_attributes_on_same_line = false
+dotnet_diagnostic.IDE0055.severity = warning
 
+# ReSharper/Rider specific settings for attribute placement
+resharper_place_attribute_on_same_line = false
+resharper_place_simple_attribute_on_same_line = false
+resharper_place_type_attribute_on_same_line = false
+resharper_place_method_attribute_on_same_line = false
+resharper_place_accessor_attribute_on_same_line = false
+resharper_place_field_attribute_on_same_line = false
+# Don't require localization for string literals
+dotnet_diagnostic.CA1303.severity = none
 
 # Code block preferences
 csharp_prefer_braces = when_multiline : warning

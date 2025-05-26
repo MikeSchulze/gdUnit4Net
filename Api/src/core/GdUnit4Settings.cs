@@ -31,9 +31,9 @@ internal static class GdUnit4Settings
     // Report Settings
     private const string REPORT_SETTINGS = MAIN_CATEGORY + "/report";
     private const string GROUP_GODOT = REPORT_SETTINGS + "/godot";
+    private const string REPORT_ORPHANS = REPORT_SETTINGS + "/verbose_orphans";
     private const string REPORT_PUSH_ERRORS = GROUP_GODOT + "/push_error";
     private const string REPORT_SCRIPT_ERRORS = GROUP_GODOT + "/script_error";
-    internal const string REPORT_ORPHANS = REPORT_SETTINGS + "/verbose_orphans";
     private const string GROUP_ASSERT = REPORT_SETTINGS + "/assert";
     private const string REPORT_ASSERT_WARNINGS = GROUP_ASSERT + "/verbose_warnings";
     private const string REPORT_ASSERT_ERRORS = GROUP_ASSERT + "/verbose_errors";
@@ -42,7 +42,7 @@ internal static class GdUnit4Settings
     // Godot debug stdout/logging settings
     private const string CATEGORY_LOGGING = "debug/file_logging/";
     private const string STDOUT_ENABLE_TO_FILE = CATEGORY_LOGGING + "enable_file_logging";
-    private const string STDOUT_WITE_TO_FILE = CATEGORY_LOGGING + "log_path";
+    private const string STDOUT_WRITE_TO_FILE = CATEGORY_LOGGING + "log_path";
 
     // GdUnit Templates
     // internal const string TEMPLATES = MAIN_CATEGORY + "/templates";
@@ -54,25 +54,6 @@ internal static class GdUnit4Settings
     private const string UI_SETTINGS = MAIN_CATEGORY + "/ui";
     private const string GROUP_UI_INSPECTOR = UI_SETTINGS + "/inspector";
     private const string INSPECTOR_NODE_COLLAPSE = GROUP_UI_INSPECTOR + "/node_collapse";
-
-    // Shortcut Settings
-    /**
-     * internal const string SHORTCUT_SETTINGS = MAIN_CATEGORY + "/Shortcuts";
-     * internal const string GROUP_SHORTCUT_INSPECTOR = SHORTCUT_SETTINGS + "/inspector";
-     * internal const string SHORTCUT_INSPECTOR_RERUN_TEST = GROUP_SHORTCUT_INSPECTOR + "/rerun_test";
-     * internal const string SHORTCUT_INSPECTOR_RERUN_TEST_DEBUG = GROUP_SHORTCUT_INSPECTOR + "/rerun_test_debug";
-     * internal const string SHORTCUT_INSPECTOR_RUN_TEST_OVERALL = GROUP_SHORTCUT_INSPECTOR + "/run_test_overall";
-     * internal const string SHORTCUT_INSPECTOR_RUN_TEST_STOP = GROUP_SHORTCUT_INSPECTOR + "/run_test_stop";
-     *
-     * internal const string GROUP_SHORTCUT_EDITOR = SHORTCUT_SETTINGS + "/editor";
-     * internal const string SHORTCUT_EDITOR_RUN_TEST = GROUP_SHORTCUT_EDITOR + "/run_test";
-     * internal const string SHORTCUT_EDITOR_RUN_TEST_DEBUG = GROUP_SHORTCUT_EDITOR + "/run_test_debug";
-     * internal const string SHORTCUT_EDITOR_CREATE_TEST = GROUP_SHORTCUT_EDITOR + "/create_test";
-     *
-     * internal const string GROUP_SHORTCUT_FILESYSTEM = SHORTCUT_SETTINGS + "/filesystem";
-     * internal const string SHORTCUT_FILESYSTEM_RUN_TEST = GROUP_SHORTCUT_FILESYSTEM + "/run_test";
-     * internal const string SHORTCUT_FILESYSTEM_RUN_TEST_DEBUG = GROUP_SHORTCUT_FILESYSTEM + "/run_test_debug";
-     */
 
     // Toolbar Settings
     private const string GROUP_UI_TOOLBAR = UI_SETTINGS + "/toolbar";
@@ -89,11 +70,6 @@ internal static class GdUnit4Settings
     // the folder to create new test-suites
     private const string DEFAULT_TEST_LOOKUP_FOLDER = "test";
 
-    private static T? GetSetting<T>(string name, T @default)
-        => ProjectSettings.HasSetting(name)
-            ? ProjectSettings.GetSetting(name).UnboxVariant()
-            : @default;
-
     public static bool IsUpdateNotificationEnabled()
         => ProjectSettings.HasSetting(UPDATE_NOTIFICATION_ENABLED) && (bool)ProjectSettings.GetSetting(UPDATE_NOTIFICATION_ENABLED);
 
@@ -104,12 +80,12 @@ internal static class GdUnit4Settings
     }
 
     public static string GetLogPath()
-        => (string)ProjectSettings.GetSetting(STDOUT_WITE_TO_FILE);
+        => (string)ProjectSettings.GetSetting(STDOUT_WRITE_TO_FILE);
 
     public static void SetLogPath(string path)
     {
         ProjectSettings.SetSetting(STDOUT_ENABLE_TO_FILE, true);
-        ProjectSettings.SetSetting(STDOUT_WITE_TO_FILE, path);
+        ProjectSettings.SetSetting(STDOUT_WRITE_TO_FILE, path);
         ProjectSettings.Save();
     }
 
@@ -151,4 +127,9 @@ internal static class GdUnit4Settings
 
     public static bool IsLogEnabled()
         => (bool)ProjectSettings.GetSetting(STDOUT_ENABLE_TO_FILE);
+
+    private static T? GetSetting<T>(string name, T @default)
+        => ProjectSettings.HasSetting(name)
+            ? ProjectSettings.GetSetting(name).UnboxVariant()
+            : @default;
 }

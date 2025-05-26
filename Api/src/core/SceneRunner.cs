@@ -10,51 +10,18 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Api;
+
 using Asserts;
+
 using Extensions;
+
 using Godot;
+
 using static Assertions;
+
 using ExecutionContext = Execution.ExecutionContext;
-
-/// <summary>
-///     A helper to simulate mouse moving form a source to final position.
-/// </summary>
-public partial class MouseMoveTask : Node, IDisposable
-{
-    public MouseMoveTask(Vector2 currentPosition, Vector2 finalPosition)
-    {
-        CurrentMousePosition = currentPosition;
-        FinalMousePosition = finalPosition;
-    }
-
-    private Vector2 CurrentMousePosition { get; set; }
-
-    private Vector2 FinalMousePosition { get; }
-
-    public new void Dispose()
-    {
-        QueueFree();
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    public async Task WaitOnFinalPosition(ISceneRunner sceneRunner, double time, Tween.TransitionType transitionType)
-    {
-        using var tween = sceneRunner.Scene().CreateTween();
-        tween.TweenProperty(this, "CurrentMousePosition", FinalMousePosition, time).SetTrans(transitionType);
-        tween.Play();
-
-        while (!sceneRunner.GetMousePosition().IsEqualApprox(FinalMousePosition))
-        {
-            sceneRunner.SimulateMouseMove(CurrentMousePosition);
-            await ISceneRunner.SyncProcessFrame;
-        }
-
-        sceneRunner.SimulateMouseMove(FinalMousePosition);
-        await ISceneRunner.SyncProcessFrame;
-    }
-}
 
 internal sealed class SceneRunner : ISceneRunner
 {
@@ -349,7 +316,7 @@ internal sealed class SceneRunner : ISceneRunner
 
     private void ResetInputToDefault()
     {
-        // reset all mouse button to initial state if is need
+        // reset all mouse buttons to the initial state if it needs
         foreach (var button in mouseButtonOnPress)
         {
             if (Input.IsMouseButtonPressed(button))
@@ -393,12 +360,12 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     copy over current active mouse mask and combine with current mask.
+    ///     copy over current active mouse mask and combine with the current mask.
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputMouseMask(InputEvent inputEvent)
     {
-        // first apply last mask
+        // first apply the last mask
         if (LastInputEvent is InputEventMouse lastInputEvent && inputEvent is InputEventMouse ie)
             ie.ButtonMask |= lastInputEvent.ButtonMask;
         if (inputEvent is InputEventMouseButton inputEventMouseButton)
@@ -418,7 +385,7 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     /// <summary>
-    ///     copy over last mouse position if is need.
+    ///     copy over the last mouse position if it needs.
     /// </summary>
     /// <param name="inputEvent"></param>
     private void ApplyInputMousePosition(InputEvent inputEvent)
@@ -451,7 +418,7 @@ internal sealed class SceneRunner : ISceneRunner
             currentScene.GetViewport().SetInputAsHandled();
         }
 
-        // save last input event needs to be merged with next InputEventMouseButton
+        // save the last input event needs to be merged with the next InputEventMouseButton
         LastInputEvent = inputEvent;
         return this;
     }

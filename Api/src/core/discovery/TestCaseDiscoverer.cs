@@ -100,7 +100,7 @@ internal static class TestCaseDiscoverer
                 if (assembly == null || testSuite == null)
                     continue;
 
-                return DiscoverTests(null, assembly.MainModule.FileName, testSuite).ToImmutableList();
+                return DiscoverTests(null, assembly.MainModule.FileName, testSuite);
             }
 
             Logger.LogWarning($"Could not find assembly or test suite for {className} at {fullScriptPath}");
