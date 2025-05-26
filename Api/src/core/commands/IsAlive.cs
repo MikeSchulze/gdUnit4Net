@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///     Command to check if the test engine is alive and responding.
 /// </summary>
-public class IsAlive : BaseCommand
+internal class IsAlive : BaseCommand
 {
     [JsonConstructor]
     private IsAlive()
@@ -23,10 +23,12 @@ public class IsAlive : BaseCommand
     /// <summary>
     ///     Executes a health check and returns an "alive" status response.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-    public override Task<Response> Execute(ITestEventListener testEventListener) => Task.FromResult(new Response
-    {
-        StatusCode = HttpStatusCode.OK,
-        Payload = "alive: true"
-    });
+#pragma warning disable SA1611
+    public override Task<Response> Execute(ITestEventListener testEventListener) => Task.FromResult(
+        new Response
+#pragma warning restore SA1611
+        {
+            StatusCode = HttpStatusCode.OK,
+            Payload = "alive: true"
+        });
 }

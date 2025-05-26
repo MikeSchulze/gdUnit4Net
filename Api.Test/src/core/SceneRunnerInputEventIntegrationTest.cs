@@ -413,12 +413,12 @@ public sealed class SceneRunnerInputEventIntegrationTest
         // initial pos
         AssertThat(ActualMousePos()).IsEqual(sourcePosition);
 
-        // now move it to new position, in 1s
+        // now move it to a new position, in 1 s
         await sceneRunner.SimulateMouseMoveAbsolute(new Vector2(900, 400));
         // check relative position is reached
         AssertThat(ActualMousePos()).IsEqual(new Vector2(900, 400));
 
-        // and now move it back to source position, in 500ms
+        // and now move it back to the source position, in 500 ms
         await sceneRunner.SimulateMouseMoveAbsolute(sourcePosition, .5);
         AssertThat(ActualMousePos()).IsEqual(sourcePosition);
     }

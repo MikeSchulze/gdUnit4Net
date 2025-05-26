@@ -5,6 +5,7 @@ namespace GdUnit4.Core;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -14,7 +15,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-public static class GdUnitTestSuiteBuilder
+internal static class GdUnitTestSuiteBuilder
 {
     private const string DEFAULT_TEMP_TS_CS = """
                                                   // GdUnit generated TestSuite
@@ -64,7 +65,7 @@ public static class GdUnitTestSuiteBuilder
                 return result;
             }
 
-            // create directory if not exists
+            // create a directory if not exists
             var dir = Path.GetDirectoryName(testSuitePath);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir!);
@@ -99,7 +100,9 @@ public static class GdUnitTestSuiteBuilder
 
             return result;
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Console.Error.WriteLine($"Can't parse method name from {sourcePath}:{lineNumber}. Error: {e.Message}");
             result.Add("error", e.Message);
@@ -121,11 +124,61 @@ public static class GdUnitTestSuiteBuilder
             var root = CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot();
             return ParseClassDefinition(root);
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Console.Error.WriteLine($"Can't parse namespace of {classPath}. Error: {e.Message}");
             return null;
         }
+    }
+
+    internal static Type? ParseType(string classPath, bool isTestSuite = false)
+    {
+        if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
+        {
+            Console.WriteLine($"Warning: Class `{classPath}` does not exist.");
+            return null;
+        }
+
+        return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
+    }
+
+    internal static int TestCaseLineNumber(CompilationUnitSyntax root, string testCaseName)
+    {
+        var classDeclaration = ClassDeclaration(root);
+
+        // lookup on test cases
+        var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
+            .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
+        if (method?.Body != null)
+            return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
+
+        // If the method has not a body, return the line of the method declaration
+        return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
+    }
+
+    internal static string? FindMethod(string sourcePath, int lineNumber)
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath));
+        var programClassSyntax = ClassDeclaration(syntaxTree.GetCompilationUnitRoot());
+        var spanToFind = syntaxTree.GetText().Lines[lineNumber - 1].Span;
+
+        // lookup on properties
+        foreach (var m in programClassSyntax.Members.OfType<PropertyDeclarationSyntax>())
+        {
+            if (m.FullSpan.IntersectsWith(spanToFind))
+                return m.Identifier.Text;
+        }
+
+        // lookup on methods
+        foreach (var m in programClassSyntax.Members.OfType<MethodDeclarationSyntax>())
+        {
+            if (m.FullSpan.IntersectsWith(spanToFind))
+                return m.Identifier.Text;
+        }
+
+        return null;
     }
 
     private static ClassDefinition ParseClassDefinition(CompilationUnitSyntax root)
@@ -156,7 +209,7 @@ public static class GdUnitTestSuiteBuilder
 
         if (classDeclaration != null)
         {
-            // Construct full class name with namespace
+            // Construct a full class name with namespace
             var namespaceSyntax = classDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()
                                   ?? classDeclaration.Ancestors().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax;
             var className = namespaceSyntax != null ? namespaceSyntax.Name + "." + classDeclaration.Identifier : classDeclaration.Identifier.ValueText;
@@ -167,22 +220,11 @@ public static class GdUnitTestSuiteBuilder
         return null;
     }
 
-    public static Type? ParseType(string classPath, bool isTestSuite = false)
-    {
-        if (string.IsNullOrEmpty(classPath) || !new FileInfo(classPath).Exists)
-        {
-            Console.WriteLine($"Warning: Class `{classPath}` does not exist.");
-            return null;
-        }
-
-        return FindClassWithTestSuiteAttribute(classPath, isTestSuite);
-    }
-
     private static BaseNamespaceDeclarationSyntax? ParseNameSpaceSyntax(CompilationUnitSyntax root) =>
         root.Members.OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault() as BaseNamespaceDeclarationSyntax ??
         root.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
 
-    internal static Type? FindTypeOnAssembly(string clazz)
+    private static Type? FindTypeOnAssembly(string clazz)
     {
         if (ClazzCache.TryGetValue(clazz, out var onAssembly))
             return onAssembly;
@@ -190,7 +232,7 @@ public static class GdUnitTestSuiteBuilder
         if (type != null)
             return type;
 
-        // if the class not found on current assembly lookup over all other loaded assemblies
+        // if the class isn't found on current assembly lookup over all other loaded assemblies
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             type = assembly.GetType(clazz);
@@ -212,6 +254,7 @@ public static class GdUnitTestSuiteBuilder
         return DEFAULT_TEMP_TS_CS;
     }
 
+    [SuppressMessage("Globalization", "CA1307", Justification = "This is a template and not a user input.")]
     private static string FillFromTemplate(string template, ClassDefinition classDefinition, string classPath) =>
         template
             .Replace(TAG_TEST_SUITE_NAMESPACE, string.IsNullOrEmpty(classDefinition.Namespace) ? "GdUnitDefaultTestNamespace" : classDefinition.Namespace)
@@ -226,20 +269,6 @@ public static class GdUnitTestSuiteBuilder
         return namespaceSyntax == null
             ? root.Members.OfType<ClassDeclarationSyntax>().First()
             : namespaceSyntax.Members.OfType<ClassDeclarationSyntax>().First();
-    }
-
-    internal static int TestCaseLineNumber(CompilationUnitSyntax root, string testCaseName)
-    {
-        var classDeclaration = ClassDeclaration(root);
-
-        // lookup on test cases
-        var method = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
-            .FirstOrDefault(m => m.Identifier.Text.Equals(testCaseName, StringComparison.Ordinal));
-        if (method?.Body != null)
-            return method.Body.GetLocation().GetLineSpan().StartLinePosition.Line;
-
-        // If method has not a body, return the line of the method declaration
-        return method?.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1 ?? -1;
     }
 
     private static bool TestCaseExists(CompilationUnitSyntax root, string testCaseName) =>
@@ -271,29 +300,6 @@ public static class GdUnitTestSuiteBuilder
         var newBody = SyntaxFactory.Block(SyntaxFactory.ParseStatement("AssertNotYetImplemented();"));
         method = method.ReplaceNode(method.Body!, newBody);
         return root.InsertNodesAfter(insertAt, new[] { method }).NormalizeWhitespace("\t", "\n");
-    }
-
-    internal static string? FindMethod(string sourcePath, int lineNumber)
-    {
-        var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath));
-        var programClassSyntax = ClassDeclaration(syntaxTree.GetCompilationUnitRoot());
-        var spanToFind = syntaxTree.GetText().Lines[lineNumber - 1].Span;
-
-        // lookup on properties
-        foreach (var m in programClassSyntax.Members.OfType<PropertyDeclarationSyntax>())
-        {
-            if (m.FullSpan.IntersectsWith(spanToFind))
-                return m.Identifier.Text;
-        }
-
-        // lookup on methods
-        foreach (var m in programClassSyntax.Members.OfType<MethodDeclarationSyntax>())
-        {
-            if (m.FullSpan.IntersectsWith(spanToFind))
-                return m.Identifier.Text;
-        }
-
-        return null;
     }
 
     internal class ClassDefinition : IEquatable<object>
