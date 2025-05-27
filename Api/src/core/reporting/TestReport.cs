@@ -34,7 +34,8 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
         StackTrace = e.StackTrace;
     }
 
-    private static IEnumerable<ReportType> ErrorTypes => new[] { ReportType.Terminated, ReportType.Interrupted, ReportType.Abort };
+    private IEnumerable<ReportType> ErrorTypes
+        => new[] { ReportType.Terminated, ReportType.Interrupted, ReportType.Abort };
 
     public bool Equals(TestReport? other)
         => other is not null
@@ -59,17 +60,28 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
 
     public bool IsWarning => Type == ReportType.Warning;
 
-    public IDictionary<string, object> Serialize()
-        => new Dictionary<string, object>
-        {
-            { "type", (int)Type },
-            { "line_number", LineNumber },
-            { "message", Message }
-        };
+    public IDictionary<string, object> Serialize() => new Dictionary<string, object>
+    {
+        { "type", (int)Type },
+        { "line_number", LineNumber },
+        { "message", Message }
+    };
 
-    public bool Equals(ITestReport? other) => throw new NotImplementedException();
+    public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
 
-    public override string ToString() => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
+    public static bool operator !=(TestReport lhs, TestReport rhs) => !(lhs == rhs);
+
+    public override bool Equals(object? obj)
+        => obj is TestReport other && Equals(other);
+
+    public bool Equals(ITestReport? other)
+        => throw new NotImplementedException();
+
+    public override int GetHashCode() =>
+        HashCode.Combine(Type, LineNumber, Message, IsError, IsFailure, IsWarning);
+
+    public override string ToString()
+        => $"[color=green]line [/color][color=aqua]{LineNumber}:[/color]\n {Message}";
 
     public TestReport Deserialize(IDictionary<string, object> serialized)
     {
@@ -78,13 +90,4 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
         var message = (string)serialized["message"];
         return new TestReport(type, lineNumber, message);
     }
-
-    public override bool Equals(object? obj) => obj is TestReport other && Equals(other);
-
-    public override int GetHashCode() =>
-        HashCode.Combine(Type, LineNumber, Message, IsError, IsFailure, IsWarning);
-
-    public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
-
-    public static bool operator !=(TestReport lhs, TestReport rhs) => !(lhs == rhs);
 }

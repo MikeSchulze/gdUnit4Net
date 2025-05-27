@@ -23,8 +23,8 @@ internal static class GodotObjectExtensions
 {
     public enum Mode
     {
-        CASE_SENSITIVE,
-        CASE_INSENSITIVE
+        CaseSensitive,
+        CaseInsensitive
     }
 
     internal static SceneTree Instance =>
@@ -43,7 +43,11 @@ internal static class GodotObjectExtensions
     internal static SignalAwaiter SyncPhysicsFrame =>
         Instance.ToSignal(Instance, SceneTree.SignalName.PhysicsFrame);
 
-    internal static bool VariantEquals<T>(this T? inLeft, T? inRight, Mode compareMode = Mode.CASE_SENSITIVE)
+    [SuppressMessage(
+        "Usage",
+        "CA1508:Avoid dead conditional code",
+        Justification = "UnboxVariant() can return strings - static analysis limitation")]
+    internal static bool VariantEquals<T>(this T? inLeft, T? inRight, Mode compareMode = Mode.CaseSensitive)
     {
         object? left = inLeft.UnboxVariant();
         object? right = inRight.UnboxVariant();
@@ -59,7 +63,7 @@ internal static class GodotObjectExtensions
         var type = left.GetType();
 
         if (left is string ls && right is string rs)
-            return string.Equals(ls, rs, compareMode == Mode.CASE_INSENSITIVE ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+            return string.Equals(ls, rs, compareMode == Mode.CaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
         if (type.IsPrimitive || left is IEquatable<T>)
             return left.Equals(right);
@@ -233,7 +237,8 @@ internal static class GodotObjectExtensions
     }
 
     private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>> GodotObject2Dictionary(
-        GodotObject? obj, System.Collections.Generic.Dictionary<object, bool> hashedObjects)
+        GodotObject? obj,
+        System.Collections.Generic.Dictionary<object, bool> hashedObjects)
     {
         var r = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>>();
         if (obj == null)
@@ -262,9 +267,7 @@ internal static class GodotObjectExtensions
                 dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
             }
             else
-            {
                 dict[propertyName] = propertyValue.UnboxVariant();
-            }
         }
 
         // collect other fields
@@ -296,9 +299,7 @@ internal static class GodotObjectExtensions
                     dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
                 }
                 else
-                {
                     dict[propertyName] = propertyValue.UnboxVariant();
-                }
             }
         }
 

@@ -22,12 +22,6 @@ internal sealed class Tuple : ITuple
         set => throw new NotImplementedException();
     }
 
-    public override bool Equals(object? obj) => obj is Tuple tuple && Values.VariantEquals(tuple.Values);
-
-    public override int GetHashCode() => HashCode.Combine(values);
-
-    public override string ToString() => $"tuple({string.Join(", ", Values.Select(GdUnitExtensions.Formatted)).Indentation(0)})";
-
     public static bool operator ==(Tuple? tuple1, Tuple? tuple2)
     {
         if (ReferenceEquals(tuple1, tuple2))
@@ -38,4 +32,10 @@ internal sealed class Tuple : ITuple
     }
 
     public static bool operator !=(Tuple? tuple1, Tuple? tuple2) => !(tuple1 == tuple2);
+
+    public override bool Equals(object? obj) => obj is Tuple tuple && Values.VariantEquals(tuple.Values);
+
+    public override int GetHashCode() => HashCode.Combine(values);
+
+    public override string ToString() => $"tuple({string.Join(", ", Values.Select(GdUnitExtensions.Formatted)).Indentation(0)})";
 }
