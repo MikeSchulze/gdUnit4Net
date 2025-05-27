@@ -4,12 +4,22 @@
 namespace GdUnit4.Core.Hooks;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
 using Microsoft.Win32.SafeHandles;
 
+[SuppressMessage("Style", "IDE1006", Justification = "Unix system call names follow C naming conventions")]
+[SuppressMessage(
+    "StyleCop.CSharp.NamingRules",
+    "SA1300:Element should begin with upper-case letter",
+    Justification = "Unix system call names must match libc function names exactly")]
+[SuppressMessage(
+    "StyleCop.CSharp.OrderingRules",
+    "SA1201:Elements should appear in the correct order",
+    Justification = "P/Invoke declarations are grouped together for clarity at the end of the class")]
 internal sealed class WindowsStdOutHook : IStdOutHook
 {
     private const int STD_OUTPUT_HANDLE = -11;
@@ -18,6 +28,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
     private readonly SafeFileHandle pipeReadHandle;
     private readonly SafeFileHandle pipeWriteHandle;
     private readonly StdOutConsoleHook stdOutHook = new();
+    private bool disposed;
     private IntPtr readEvent;
     private Thread? readThread;
 
@@ -37,14 +48,8 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     public void Dispose()
     {
-        StopCapture();
-        stdOutHook.Dispose();
-        pipeReadHandle.Dispose();
-        pipeWriteHandle.Dispose();
-        if (readEvent == IntPtr.Zero)
-            return;
-        CloseHandle(readEvent);
-        readEvent = IntPtr.Zero;
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     public void StartCapture()
@@ -69,6 +74,33 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
     public string GetCapturedOutput() => stdOutHook.GetCapturedOutput();
 
+    // Add finalizer
+    ~WindowsStdOutHook()
+        => Dispose(false);
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                // Dispose of managed resources
+                stdOutHook.Dispose();
+                pipeReadHandle.Dispose();
+                pipeWriteHandle.Dispose();
+            }
+
+            // Dispose unmanaged resources
+            if (readEvent != IntPtr.Zero)
+            {
+                CloseHandle(readEvent);
+                readEvent = IntPtr.Zero;
+            }
+
+            disposed = true;
+        }
+    }
+
     private void ReadPipeOutput()
     {
         var buffer = new byte[4096];
@@ -79,15 +111,16 @@ internal sealed class WindowsStdOutHook : IStdOutHook
             while (true)
             {
                 if (ReadFile(pipeReadHandle, buffer, (uint)buffer.Length, out var bytesRead, ref overlapped))
-                {
                     ProcessReadData(buffer, bytesRead);
-                }
                 else
                 {
                     var error = Marshal.GetLastWin32Error();
-                    if (error == 997) // ERROR_IO_PENDING
+
+                    // ERROR_IO_PENDING
+                    if (error == 997)
                     {
-                        if (WaitForSingleObject(readEvent, 100) == 0) // WAIT_OBJECT_0
+                        // WAIT_OBJECT_0
+                        if (WaitForSingleObject(readEvent, 100) == 0)
                         {
                             if (GetOverlappedResult(pipeReadHandle, ref overlapped, out bytesRead, false))
                                 ProcessReadData(buffer, bytesRead);
@@ -125,27 +158,35 @@ internal sealed class WindowsStdOutHook : IStdOutHook
 
 #pragma warning disable SYSLIB1054
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern IntPtr GetStdHandle(int nStdHandle);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, IntPtr lpPipeAttributes, uint nSize);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern bool ReadFile(SafeFileHandle hFile, [Out] byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, ref Overlapped lpOverlapped);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern bool GetOverlappedResult(SafeFileHandle hFile, ref Overlapped lpOverlapped, out uint lpNumberOfBytesTransferred, bool bWait);
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern IntPtr CreateEvent(IntPtr lpEventAttributes, bool bManualReset, bool bInitialState, string lpName);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern bool CloseHandle(IntPtr hObject);
 
     [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32 | DllImportSearchPath.UserDirectories)]
     private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
 #pragma warning restore SYSLIB1054
 }

@@ -4,10 +4,20 @@
 namespace GdUnit4.Core.Hooks;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
+[SuppressMessage("Style", "IDE1006", Justification = "Unix system call names follow C naming conventions")]
+[SuppressMessage(
+    "StyleCop.CSharp.NamingRules",
+    "SA1300:Element should begin with upper-case letter",
+    Justification = "Unix system call names must match libc function names exactly")]
+[SuppressMessage(
+    "StyleCop.CSharp.OrderingRules",
+    "SA1201:Elements should appear in the correct order",
+    Justification = "P/Invoke declarations are grouped together for clarity at the end of the class")]
 internal sealed class UnixStdOutHook : IStdOutHook
 {
     private const int STD_OUTPUT_HANDLE = 1; // STDOUT_FILENO in Unix
@@ -133,24 +143,31 @@ internal sealed class UnixStdOutHook : IStdOutHook
 
 #pragma warning disable SYSLIB1054
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int pipe(int[] pipefd);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int dup(int oldfd);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int dup2(int oldfd, int newfd);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int read(int fd, byte[] buf, int count);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int close(int fd);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int fcntl(int fd, int cmd, int arg);
 
     [DllImport("libc", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern int poll(ref PollFd fds, uint nfds, int timeout);
 #pragma warning restore SYSLIB1054
 }
