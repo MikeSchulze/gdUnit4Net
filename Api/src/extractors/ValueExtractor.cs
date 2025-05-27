@@ -57,7 +57,11 @@ internal sealed class ValueExtractor : IValueExtractor
         if (method != null)
         {
             if (args.Any() && instance is GodotObject go)
-                return go.Callv(GdUnitExtensions.ToSnakeCase(method.Name), args.ToGodotArray()).UnboxVariant();
+            {
+                using var godotArray = args.ToGodotArray();
+                return go.Callv(GdUnitExtensions.ToSnakeCase(method.Name), godotArray).UnboxVariant();
+            }
+
             return method.Invoke(instance, args.ToArray());
         }
 

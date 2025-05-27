@@ -32,8 +32,7 @@ internal static class GodotVariantExtensions
             if (v.VariantType != Variant.Type.Object)
                 return v.UnboxVariant();
 
-            var godotObject = value as GodotObject;
-            if (godotObject != null && !GodotObject.IsInstanceValid(godotObject))
+            if (value is GodotObject godotObject && !GodotObject.IsInstanceValid(godotObject))
                 return godotObject;
 
             return v.UnboxVariant();

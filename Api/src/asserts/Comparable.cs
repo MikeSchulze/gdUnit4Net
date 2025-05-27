@@ -7,7 +7,7 @@ using Core.Extensions;
 
 internal static class Comparable
 {
-    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.Mode compareMode = GodotObjectExtensions.Mode.CASE_SENSITIVE, Result? r = null)
+    public static Result IsEqual<T>(T? left, T? right, GodotObjectExtensions.Mode compareMode = GodotObjectExtensions.Mode.CaseSensitive, Result? r = null)
         => new(left.VariantEquals(right, compareMode), left, right, r);
 
     public class Result
