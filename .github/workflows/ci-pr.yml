@@ -1,4 +1,3 @@
-﻿# Main CI workflow with .NET matrix - calls ci-core.yml for each .NET version
 name: ci-pr
 run-name: ${{ github.head_ref || github.ref_name }}-ci-pr
 
@@ -8,29 +7,205 @@ on:
       - '**.jpg'
       - '**.png'
       - '**.md'
+  #- '**.yml'
   workflow_dispatch:
+
 
 concurrency:
   group: ci-pr-${{ github.event.number }}
   cancel-in-progress: true
 
+
 jobs:
 
-  test-matrix:
+  setup-dotnet:
+    name: "🔧 Setup .NET8"
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+        #  global-json-file: 'global.json'
+
+  compile:
+    name: "🔨 Compile Projects"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Build Projects"
+        run: |
+          dotnet restore
+          dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
+
+      - name: "Cache Build Output"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+
+  # Analyzer jobs
+
+  analyzer-style-check:
+    name: "🔍 Check Style: Analyzers"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet format Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
+
+
+  analyzer-tests:
+    name: "🧪 Test: Analyzers"
+    needs: compile
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+
+      - name: "Run Unit Tests"
+        if: ${{ !cancelled() }}
+        run: |
+          cd Analyzers.Test
+          dotnet test --no-build --settings .runsettings --verbosity normal
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 10
+          name: artifact_analyzer
+          path: |
+            Analyzers.Test/TestResults/test-result.trx
+            Analyzers.Test/TestResults/test-result.html
+
+  # API
+  api-style-check:
+    name: "🔍 Check Style: API"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet format Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
+        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
+
+
+  # Adapter jobs
+  test-adapter-test:
+    name: "🧪 Test: TestAdapter"
+    needs: compile
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+
+      - name: "Run Unit Tests"
+        if: ${{ !cancelled() }}
+        run: |
+          cd TestAdapter.Test
+          dotnet test --settings .runsettings --no-build --verbosity normal
+
+      - name: "Upload Unit Test Reports"
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 10
+          name: artifact_adapter_tests
+          path: |
+            ./TestAdapter.Test/TestResults/test-result.trx
+            ./TestAdapter.Test/TestResults/test-result.html
+
+
+  api-tests:
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
-        dotnet-version:
-          - '7.0.410'
-          - '8.0.410'
-        include:
-          - dotnet-version: '7.0.410'
-            dotnet-major: '7'
-          - dotnet-version: '8.0.410'
-            dotnet-major: '8'
+        godot-version: [ '4.2', '4.2.1', '4.2.2', '4.3', '4.4' ]
+        godot-status: [ 'stable' ]
+      #  include:
+      #    - godot-version: '4.4'
+      #      godot-status: 'dev3'
 
-    name: "🔧 .NET ${{ matrix.dotnet-major }} Pipeline"
-    uses: ./.github/workflows/ci-core.yml
+
+    name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
+    needs: [ compile ]
+    uses: ./.github/workflows/unit-tests.yml
     with:
-      dotnet-version: ${{ matrix.dotnet-version }}
-      dotnet-major: ${{ matrix.dotnet-major }}
+      godot-version: ${{ matrix.godot-version }}
+      godot-status: ${{ matrix.godot-status }}
+
+
+  finalize:
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    name: Final Results
+    needs: [ analyzer-style-check, analyzer-tests, api-style-check, api-tests, test-adapter-test ]
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

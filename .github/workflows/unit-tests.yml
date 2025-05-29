@@ -5,46 +5,31 @@ on:
   workflow_call:
     inputs:
       os:
-        description: 'The OS to run on'
         required: false
         type: string
         default: 'ubuntu-22.04'
       godot-version:
-        description: 'The used Godot version'
         required: true
         type: string
       godot-status:
-        description: 'The used Godot status version'
         required: true
         type: string
-      dotnet-version:
-        description: '.NET SDK version to use'
-        type: string
-        required: true
 
   workflow_dispatch:
     inputs:
       os:
-        description: 'The OS to run on'
         required: false
         type: string
         default: 'ubuntu-22.04'
       godot-version:
-        description: 'The used Godot version'
         required: true
         type: string
       godot-status:
-        description: 'The used Godot status version'
         required: true
         type: string
-      dotnet-version:
-        description: '.NET SDK version to use'
-        type: string
-        default: '8.0.410'
-        required: false
 
 concurrency:
-  group: unit-tests-${{ github.head_ref || github.ref_name }}-${{ inputs.godot-version }}-Net${{ inputs.dotnet-version }}
+  group: unit-tests-${{ github.head_ref || github.ref_name }}-${{ inputs.godot-version }}
   cancel-in-progress: true
 
 jobs:
@@ -106,7 +91,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ inputs.dotnet-version }}
+          dotnet-version: 8.0.410
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -116,7 +101,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-net${{ inputs.dotnet-major }}-build-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -166,7 +151,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ inputs.dotnet-version }}
+          dotnet-version: 8.0.410
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -176,7 +161,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-net${{ inputs.dotnet-major }}-build-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
