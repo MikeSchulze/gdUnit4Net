@@ -15,8 +15,8 @@ using System;
 ///         to help identify the source of the cancellation.
 ///     </para>
 /// </remarks>
-/// <seealso cref="System.OperationCanceledException" />
-/// <seealso cref="Core.Data.DataPointValueProvider" />
+/// <seealso cref="OperationCanceledException" />
+/// <seealso cref="DataPointValueProvider" />
 public sealed class AsyncDataPointCanceledException : Exception
 {
     /// <summary>
