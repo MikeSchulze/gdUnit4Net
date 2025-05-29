@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using System.Text;
 using System.Threading.Tasks;
 
 using Exceptions;
@@ -86,7 +87,7 @@ internal class GodotExceptionMonitor
                             ExceptionDispatchInfo.Capture(exception).Throw();
                         break;
                     case ErrorLogEntry.ErrorType.PushError:
-                        throw TestFailedException.FromPushError(logEntry.Message, logEntry.Details);
+                        throw ToTestFailedException(logEntry);
                     case ErrorLogEntry.ErrorType.PushWarning:
                         break;
 
@@ -100,6 +101,39 @@ internal class GodotExceptionMonitor
         {
             CaughtExceptions.Clear();
         }
+    }
+
+    /// <summary>
+    ///     Normalizes a Godot resource path to a system file path.
+    /// </summary>
+    /// <param name="path">The path to normalize, which may be a Godot resource path (res:// or user://).</param>
+    /// <returns>The normalized system file path.</returns>
+    /// <remarks>
+    ///     Converts Godot-specific path formats (res://, user://) to absolute system paths
+    ///     for consistent file location reporting across different environments.
+    /// </remarks>
+    private static string NormalizedPath(string path) =>
+        path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
+
+    private static TestFailedException ToTestFailedException(ErrorLogEntry logEntry)
+    {
+        var stackFrames = new StringBuilder();
+        var fileName = string.Empty;
+        var lineNumber = 0;
+        foreach (var stackTraceLine in logEntry.Details.Split("\n"))
+        {
+            var match = GodotPushErrorPattern.Match(stackTraceLine);
+            if (match.Success)
+            {
+                var methodInfo = match.Groups[1].Value;
+                fileName = NormalizedPath(match.Groups[2].Value);
+                lineNumber = int.Parse(match.Groups[3].Value);
+                stackFrames.Append($"  at: {methodInfo} in {fileName}:line {lineNumber}");
+                stackFrames.AppendLine();
+            }
+        }
+
+        return new TestFailedException(logEntry.Message, stackFrames.ToString(), fileName, lineNumber);
     }
 
     private static bool ShouldIgnoreException(Exception ex)

@@ -39,6 +39,6 @@ internal static partial class GodotPushErrorPattern
     ///     Pattern: "at: (method_info) in (file_path):(line_number)"
     /// </summary>
     /// <returns>A compiled regex for parsing Godot error stack traces.</returns>
-    [GeneratedRegex(@"at:\s+(.+)\s+in\s+(.+):(\d+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"at: (.*) \((.*\.cs):(\d+)\)$", RegexOptions.Compiled)]
     private static partial Regex PushErrorFileInfoRegex();
 }

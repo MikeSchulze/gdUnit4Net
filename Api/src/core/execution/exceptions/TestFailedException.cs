@@ -8,8 +8,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
-using Godot;
-
 /// <summary>
 ///     Exception thrown when a test assertion fails or a test cannot complete successfully.
 /// </summary>
@@ -118,32 +116,23 @@ public sealed class TestFailedException : Exception
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="TestFailedException" /> class from Godot push_error details.
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class with pre-parsed Godot error details.
     /// </summary>
     /// <param name="message">The error message from Godot.</param>
-    /// <param name="details">The detailed error information containing stack trace from push_error.</param>
+    /// <param name="stackFrames">The formatted stack trace information.</param>
+    /// <param name="fileName">The source file name where the error occurred.</param>
+    /// <param name="lineNumber">The line number where the error occurred.</param>
     /// <remarks>
-    ///     This private constructor is used by <see cref="FromPushError" /> to create exceptions
-    ///     from Godot's error reporting system, parsing the specific format used by push_error.
+    ///     This private constructor is used internally when Godot error details have already been
+    ///     parsed and the stack trace, file name, and line number have been extracted.
+    ///     It directly sets the exception properties without additional parsing.
     /// </remarks>
-    private TestFailedException(string message, string details)
+    public TestFailedException(string message, string stackFrames, string fileName, int lineNumber)
         : base(message)
     {
-        var stackFrames = new StringBuilder();
-        foreach (var stackTraceLine in details.Split("\n"))
-        {
-            var match = GodotPushErrorPattern.Match(stackTraceLine);
-            if (match.Success)
-            {
-                var methodInfo = match.Groups[1].Value;
-                FileName = NormalizedPath(match.Groups[2].Value);
-                LineNumber = int.Parse(match.Groups[3].Value);
-                stackFrames.Append($"  at: {methodInfo} in {FileName}:line {LineNumber}");
-                stackFrames.AppendLine();
-            }
-        }
-
-        OriginalStackTrace = stackFrames.ToString();
+        OriginalStackTrace = stackFrames;
+        FileName = fileName;
+        LineNumber = lineNumber;
     }
 
     /// <summary>
@@ -182,30 +171,6 @@ public sealed class TestFailedException : Exception
     ///     The full path to the source file where the failure occurred, or null if not available.
     /// </value>
     public string? FileName { get; private set; }
-
-    /// <summary>
-    ///     Creates a <see cref="TestFailedException" /> from Godot's push_error output.
-    /// </summary>
-    /// <param name="message">The error message reported by Godot.</param>
-    /// <param name="details">The detailed stack trace information from push_error.</param>
-    /// <returns>A new <see cref="TestFailedException" /> with parsed location information.</returns>
-    /// <remarks>
-    ///     This method parses Godot's specific error format to extract meaningful stack trace
-    ///     information and create an exception with proper source location details.
-    /// </remarks>
-    public static TestFailedException FromPushError(string message, string details) => new(message, details);
-
-    /// <summary>
-    ///     Normalizes a Godot resource path to a system file path.
-    /// </summary>
-    /// <param name="path">The path to normalize, which may be a Godot resource path (res:// or user://).</param>
-    /// <returns>The normalized system file path.</returns>
-    /// <remarks>
-    ///     Converts Godot-specific path formats (res://, user://) to absolute system paths
-    ///     for consistent file location reporting across different environments.
-    /// </remarks>
-    private static string NormalizedPath(string path) =>
-        path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
 
     /// <summary>
     ///     Determines the line number of the root cause by analyzing the call stack.
