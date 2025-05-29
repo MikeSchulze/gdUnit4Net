@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///     Base implementation of a test runner that manages test execution lifecycle and command processing.
 /// </summary>
-public class BaseTestRunner : ITestRunner
+internal class BaseTestRunner : ITestRunner
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="BaseTestRunner" /> class.
@@ -34,6 +34,8 @@ public class BaseTestRunner : ITestRunner
         Settings = settings;
     }
 
+    protected ITestEngineLogger Logger { get; }
+
     private object SyncLock { get; } = new();
 
     private ICommandExecutor Executor { get; }
@@ -42,11 +44,11 @@ public class BaseTestRunner : ITestRunner
 
     private CancellationTokenSource? RunnerCancellationToken { get; set; }
 
-    protected ITestEngineLogger Logger { get; }
-
     public async ValueTask DisposeAsync()
     {
-        await Executor.DisposeAsync();
+        await Executor
+            .DisposeAsync()
+            .ConfigureAwait(true);
         RunnerCancellationToken?.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -55,17 +57,13 @@ public class BaseTestRunner : ITestRunner
     {
         Logger.LogInfo("Try cancelling the test run...");
         lock (SyncLock)
-        {
             RunnerCancellationToken?.Cancel();
-        }
     }
 
     public void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
         lock (SyncLock)
-        {
             RunnerCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        }
 
         var token = RunnerCancellationToken.Token;
         Task.Run(
@@ -73,15 +71,21 @@ public class BaseTestRunner : ITestRunner
                 {
                     try
                     {
-                        await Executor.StartAsync();
+                        await Executor
+                            .StartAsync()
+                            .ConfigureAwait(true);
                         foreach (var testSuite in testSuiteNodes)
                         {
                             // using (var stdoutHook = testSuiteContext.IsCaptureStdOut ? StdOutHookFactory.CreateStdOutHook() : null)
-                            var response = await Executor.ExecuteCommand(new ExecuteTestSuiteCommand(testSuite, Settings.CaptureStdOut, true), eventListener, token);
+                            var response = await Executor
+                                .ExecuteCommand(new ExecuteTestSuiteCommand(testSuite, Settings.CaptureStdOut, true), eventListener, token)
+                                .ConfigureAwait(true);
                             ValidateResponse(response);
                         }
 
-                        await Executor.StopAsync();
+                        await Executor
+                            .StopAsync()
+                            .ConfigureAwait(true);
                     }
                     catch (TimeoutException)
                     {
@@ -91,11 +95,14 @@ public class BaseTestRunner : ITestRunner
                     {
                         Logger.LogInfo("Running tests are cancelled.");
                     }
+#pragma warning disable CA1031
                     catch (Exception ex)
+#pragma warning restore CA1031
                     {
                         Logger.LogError($"{ex.Message}\n{ex.StackTrace}");
                     }
-                }, token)
+                },
+                token)
             .ContinueWith(
                 _ =>
                 {
@@ -104,7 +111,8 @@ public class BaseTestRunner : ITestRunner
                         RunnerCancellationToken?.Dispose();
                         RunnerCancellationToken = null;
                     }
-                }, token)
+                },
+                TaskScheduler.Default)
             .Wait(token);
     }
 

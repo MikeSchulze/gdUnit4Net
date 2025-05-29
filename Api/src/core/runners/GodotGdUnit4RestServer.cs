@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Mike Schulze
+// Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Runners;
@@ -31,11 +31,9 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     public int CompletedTests { get; set; }
 
     public void PublishEvent(ITestEvent testEvent)
-        => Task.Run(async () => await WriteAsync(testEvent)).Wait();
-
-    public void Dispose()
-    {
-    }
+        => Task.Run(async () => await WriteAsync(testEvent)
+                .ConfigureAwait(false))
+            .Wait();
 
     public new async ValueTask DisposeAsync()
     {
@@ -43,32 +41,10 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
         processLock.Dispose();
         if (IsConnected)
             Proxy.Disconnect();
-        await base.DisposeAsync();
+        await base
+            .DisposeAsync()
+            .ConfigureAwait(false);
     }
-
-    internal async Task Start()
-    {
-        Logger.LogInfo("GodotGdUnit4RestApi:: Waiting for client connecting.");
-        await Proxy.WaitForConnectionAsync();
-        Logger.LogInfo($"GodotGdUnit4RestApi:: Client connected. User:{Proxy.GetImpersonationUserName()}");
-    }
-
-    public void Stop() => Task.Run(async () =>
-    {
-        if (await processLock.WaitAsync(TimeSpan.FromMilliseconds(100)))
-        {
-            try
-            {
-                await DisposeAsync();
-            }
-            finally
-            {
-                processLock.Release();
-            }
-        }
-        else
-            Logger.LogWarning("GodotGdUnit4RestApi:: Stop requested but processing is in progress.");
-    });
 
     public async Task Process()
     {
@@ -76,7 +52,9 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
             return;
 
         await GodotObjectExtensions.SyncProcessFrame;
-        if (!await processLock.WaitAsync(TimeSpan.FromSeconds(1)))
+        if (!await processLock
+                .WaitAsync(TimeSpan.FromSeconds(1))
+                .ConfigureAwait(true))
             return;
 
         try
@@ -88,15 +66,20 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
                 return;
             }
 
-            var command = await ReadCommand<BaseCommand>(tokenSource.Token);
-            var response = await ProcessCommand(command, this);
-            await WriteResponse(response);
+            var command = await ReadCommand<BaseCommand>(tokenSource.Token)
+                .ConfigureAwait(true);
+            var response = await ProcessCommand(command, this)
+                .ConfigureAwait(true);
+            await WriteResponse(response)
+                .ConfigureAwait(true);
         }
         catch (IOException e)
         {
             Logger.LogError($"GodotGdUnit4RestApi:: Client has disconnected by '{e.Message}'");
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             Logger.LogError($"GodotGdUnit4RestApi:: {ex.Message} \n{ex.StackTrace}");
         }
@@ -106,14 +89,45 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
         }
     }
 
+    internal async Task Start()
+    {
+        Logger.LogInfo("GodotGdUnit4RestApi:: Waiting for client connecting.");
+        await Proxy
+            .WaitForConnectionAsync()
+            .ConfigureAwait(false);
+        Logger.LogInfo($"GodotGdUnit4RestApi:: Client connected. User:{Proxy.GetImpersonationUserName()}");
+    }
+
+    internal void Stop() => Task.Run(async () =>
+    {
+        if (await processLock.WaitAsync(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false))
+        {
+            try
+            {
+                await DisposeAsync()
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                processLock.Release();
+            }
+        }
+        else
+            Logger.LogWarning("GodotGdUnit4RestApi:: Stop requested but processing is in progress.");
+    });
+
     private async Task<Response> ProcessCommand(BaseCommand command, ITestEventListener testEventListener)
     {
         try
         {
             // Logger.LogInfo($"GodotGdUnit4RestApi:: Processing command {command}.");
-            return await command.Execute(testEventListener);
+            return await command
+                .Execute(testEventListener)
+                .ConfigureAwait(false);
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             Logger.LogError($"GodotGdUnit4RestApi:: Processing command failed {ex.Message}.");
             return new Response

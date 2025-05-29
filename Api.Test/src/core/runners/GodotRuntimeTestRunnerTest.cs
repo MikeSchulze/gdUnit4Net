@@ -98,7 +98,7 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).InitRuntimeEnvironment(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for successful compilation").IsTrue();
@@ -126,7 +126,7 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act, Set a longer timeout for this test
-        var result = CreateTestRunner(5000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(5000).InitRuntimeEnvironment(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for a process that completes just before timeout").IsTrue();
@@ -158,7 +158,7 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).InitRuntimeEnvironment(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on timeout").IsFalse();
@@ -187,7 +187,7 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).InitRuntimeEnvironment(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on compilation failure").IsFalse();

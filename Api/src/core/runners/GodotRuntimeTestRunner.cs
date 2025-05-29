@@ -6,6 +6,7 @@ namespace GdUnit4.Core.Runners;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -21,6 +22,10 @@ using Environment = System.Environment;
 ///     Test runner implementation that executes tests in a separate Godot runtime process.
 ///     Handles process management, IPC, and test execution coordination with the Godot engine.
 /// </summary>
+[SuppressMessage(
+    "Reliability",
+    "CA2000:Dispose objects before losing scope",
+    Justification = "GodotRuntimeExecutor ownership is transferred to base class which handles disposal")]
 internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 {
     /// <summary>
@@ -32,7 +37,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     private Process? process;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GodotRuntimeTestRunner"/> class.
+    ///     Initializes a new instance of the <see cref="GodotRuntimeTestRunner" /> class.
     ///     Initializes a new instance of the GodotRuntimeTestRunner.
     /// </summary>
     /// <param name="logger">The test engine logger for diagnostic output.</param>
@@ -84,18 +89,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         Logger.LogInfo($":: {message}");
     };
 
-    private EventHandler ExitHandler(string source = "") => (sender, _) =>
-    {
-        Console.Out.Flush();
-        if (sender is Process p)
-        {
-            if (p.ExitCode == 0)
-                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
-            else
-                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
-        }
-    };
-
     public override void Cancel()
     {
         base.Cancel();
@@ -111,7 +104,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         lock (ProcessLock)
         {
-            if (!InitRuntimeEnvironment())
+            if (!InitRuntimeEnvironment(Environment.CurrentDirectory, GodotBin))
                 return;
 
             Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
@@ -130,9 +123,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 };
 
             if (DebuggerFramework.IsDebugProcess)
-            {
                 process = DebuggerFramework.LaunchProcessWithDebuggerAttached(processStartInfo);
-            }
             else
             {
                 process = new Process
@@ -169,6 +160,24 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         }
     }
 
+    internal bool InitRuntimeEnvironment(string workingDirectory, string godotBinary) =>
+        InstallTestRunnerClasses(workingDirectory, godotBinary);
+
+    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
+        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
+
+    private EventHandler ExitHandler(string source = "") => (sender, _) =>
+    {
+        Console.Out.Flush();
+        if (sender is Process p)
+        {
+            if (p.ExitCode == 0)
+                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
+            else
+                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
+        }
+    };
+
     private void CloseProcess(Process? processToClose)
     {
         if (processToClose == null)
@@ -181,20 +190,20 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             processToClose.Exited -= ExitHandler();
             processToClose.Dispose();
         }
+#pragma warning disable CA1031
         catch (Exception)
+#pragma warning restore CA1031
         {
             // ignore
         }
         finally
         {
-            process = null;
+            lock (ProcessLock)
+                process = null;
         }
     }
 
-    private bool InitRuntimeEnvironment() =>
-        InstallTestRunnerClasses(Environment.CurrentDirectory, GodotBin);
-
-    internal bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
+    private bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
@@ -213,7 +222,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerSceneTemplate.cs");
         using var reader = new StreamReader(stream!);
         var content = reader.ReadToEnd();
-        content = content.Replace("GdUnit4TestRunnerSceneTemplate", "GdUnit4TestRunnerScene");
+        content = content.Replace("GdUnit4TestRunnerSceneTemplate", "GdUnit4TestRunnerScene", StringComparison.Ordinal);
         File.WriteAllText(sceneRunnerSource, content, Encoding.UTF8);
 
         try
@@ -268,28 +277,29 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             // If the process has not finished within the timeout period, we kill it manually
             if (!compileProcess.HasExited)
             {
-                Logger.LogError($"""
-                                 ╔═══════════════════════ Godot compilation TIMEOUT ═════════════════════════════════════════════════════════════════════╗
+                Logger.LogError(
+                    $"""
+                     ╔═══════════════════════ Godot compilation TIMEOUT ═════════════════════════════════════════════════════════════════════╗
 
-                                   Godot project compilation did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.
+                       Godot project compilation did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.
 
-                                   Possible reasons:
-                                   - Your Godot project may be large or complex, requiring more time to compile
-                                   - Your system may be under heavy load or has limited resources
-                                   - There might be a compilation issue causing Godot to hang
+                       Possible reasons:
+                       - Your Godot project may be large or complex, requiring more time to compile
+                       - Your system may be under heavy load or has limited resources
+                       - There might be a compilation issue causing Godot to hang
 
-                                   ACTION REQUIRED:
-                                   To increase the compilation timeout, set the 'CompileProcessTimeout' property in your GdUnit4 settings.
+                       ACTION REQUIRED:
+                       To increase the compilation timeout, set the 'CompileProcessTimeout' property in your GdUnit4 settings.
 
-                                   Add or modify the following in your .runsettings file:
-                                   <GdUnit4>
-                                       <CompileProcessTimeout>60000</CompileProcessTimeout>  <!-- 60 seconds -->
-                                   </GdUnit4>
+                       Add or modify the following in your .runsettings file:
+                       <GdUnit4>
+                           <CompileProcessTimeout>60000</CompileProcessTimeout>  <!-- 60 seconds -->
+                       </GdUnit4>
 
-                                   The process will now be forcefully terminated, which may result in incomplete compilation.
+                       The process will now be forcefully terminated, which may result in incomplete compilation.
 
-                                 ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-                                 """);
+                     ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+                     """);
 
                 compileProcess.Kill(true);
                 CleanupRunnerOnFailure(sceneRunnerSource);
@@ -302,7 +312,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             CloseProcess(compileProcess);
             return isSuccess;
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Logger.LogError($"Install GdUnit4 `TestRunner` fails with: {e.Message}\n {e.StackTrace}");
             CleanupRunnerOnFailure(sceneRunnerSource);
@@ -325,14 +337,13 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 File.Delete(runnerFilePath);
             }
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             Logger.LogError($"Failed to clean up runner file: {ex.Message}");
 
             // We don't want to throw here as this is just cleanup
         }
     }
-
-    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
-        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
 }

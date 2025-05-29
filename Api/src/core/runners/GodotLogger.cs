@@ -7,8 +7,9 @@ using Api;
 
 using Godot;
 
-public sealed class GodotLogger : ITestEngineLogger
+internal sealed class GodotLogger : ITestEngineLogger
 {
+    /// <inheritdoc />
     public void SendMessage(LogLevel logLevel, string message)
     {
         switch (logLevel)
