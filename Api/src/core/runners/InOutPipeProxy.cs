@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Mike Schulze
+// Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Runners;
@@ -29,33 +29,37 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
         Pipe = pipe;
     }
 
-    // ReSharper disable once StaticMemberInGenericType
-    private static JsonSerializerSettings JsonSettings { get; } = new()
-    {
-        TypeNameHandling = TypeNameHandling.All,
-        Formatting = Formatting.Indented
-    };
-
-    private TPipe Pipe { get; }
-
     protected ITestEngineLogger Logger { get; }
 
     protected bool IsConnected => Pipe.IsConnected;
 
     protected TPipe Proxy => Pipe;
 
+    // ReSharper disable once StaticMemberInGenericType
+#pragma warning disable CA2326, CA2327
+    private static JsonSerializerSettings JsonSettings { get; } = new()
+    {
+        TypeNameHandling = TypeNameHandling.All,
+        Formatting = Formatting.Indented
+    };
+#pragma warning restore CA2326, CA2327
+
+    private TPipe Pipe { get; }
+
     public async ValueTask DisposeAsync()
     {
         if (IsConnected)
             Pipe.Close();
-        await Pipe.DisposeAsync();
+        await Pipe.DisposeAsync()
+            .ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 
     protected async Task<object?> ReadInData(CancellationToken cancellationToken)
     {
         var responseLengthBytes = new byte[4];
-        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
+        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken)
+            .ConfigureAwait(false);
         if (cancellationToken.IsCancellationRequested)
         {
             return new Response
@@ -67,7 +71,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
 
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
         var responseBytes = new byte[responseLength];
-        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken);
+        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken)
+            .ConfigureAwait(false);
         if (cancellationToken.IsCancellationRequested)
         {
             return new Response
@@ -85,20 +90,23 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
                ?? throw new JsonSerializationException($"Failed to deserialize response:\n{json}");
     }
 
-    protected async Task WriteResponse(Response response) => await WriteAsync(response);
+    protected async Task WriteResponse(Response response) => await WriteAsync(response)
+        .ConfigureAwait(false);
 
     protected async Task<TCommand> ReadCommand<TCommand>(CancellationToken cancellationToken)
         where TCommand : BaseCommand
     {
         var responseLengthBytes = new byte[4];
-        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken);
+        await ReadExactBytesAsync(responseLengthBytes, 0, 4, cancellationToken)
+            .ConfigureAwait(false);
         var responseLength = BinaryPrimitives.ReadInt32LittleEndian(responseLengthBytes);
 
         if (!IsConnected)
             throw new IOException("Client not connected");
 
         var responseBytes = new byte[responseLength];
-        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken);
+        await ReadExactBytesAsync(responseBytes, 0, responseLength, cancellationToken)
+            .ConfigureAwait(false);
         if (!IsConnected)
             throw new IOException("Client not connected");
 
@@ -108,7 +116,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
 
     protected async Task WriteCommand<TCommand>(TCommand command)
         where TCommand : BaseCommand
-        => await WriteAsync(command);
+        => await WriteAsync(command)
+            .ConfigureAwait(false);
 
     protected async Task WriteAsync<TData>(TData data)
     {
@@ -119,9 +128,15 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
         var lengthBytes = new byte[4];
         BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, messageBytes.Length);
 
-        await Pipe.WriteAsync(lengthBytes);
-        await Pipe.WriteAsync(messageBytes);
-        await Pipe.FlushAsync();
+        await Pipe
+            .WriteAsync(lengthBytes)
+            .ConfigureAwait(false);
+        await Pipe
+            .WriteAsync(messageBytes)
+            .ConfigureAwait(false);
+        await Pipe
+            .FlushAsync()
+            .ConfigureAwait(false);
     }
 
     private static string SerializeObject<TObject>(TObject data)
@@ -142,10 +157,8 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
     }
 
     private static TObject DeserializeObject<TObject>(string json)
-    {
-        var command = JsonConvert.DeserializeObject<TObject>(json, JsonSettings) ?? throw new JsonSerializationException($"Failed to deserialize command payload:'{json}'");
-        return command;
-    }
+        => JsonConvert.DeserializeObject<TObject>(json, JsonSettings) ??
+           throw new JsonSerializationException($"Failed to deserialize command payload:'{json}'");
 
     private async Task ReadExactBytesAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
@@ -154,7 +167,9 @@ internal class InOutPipeProxy<TPipe> : IAsyncDisposable
         {
             try
             {
-                var bytesRead = await Pipe.ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead), cancellationToken);
+                var bytesRead = await Pipe
+                    .ReadAsync(buffer.AsMemory(offset + totalBytesRead, count - totalBytesRead), cancellationToken)
+                    .ConfigureAwait(false);
                 totalBytesRead += bytesRead;
             }
             catch (OperationCanceledException)
