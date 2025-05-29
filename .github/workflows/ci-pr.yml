@@ -79,7 +79,6 @@ jobs:
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
-        id: format
         run: |
           dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
           dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
@@ -145,7 +144,6 @@ jobs:
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
-        id: format
         run: |
           dotnet format ./Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
         # dotnet format ./Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
@@ -205,7 +203,7 @@ jobs:
 
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
-    needs: [ compile, api-style-check ]
+    needs: [ compile ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
