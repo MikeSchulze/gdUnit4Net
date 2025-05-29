@@ -63,7 +63,7 @@ internal interface IExecutionStage
     ///     A task representing the asynchronous execution of this stage.
     ///     The task completes when the stage has finished its operations.
     /// </returns>
-    /// <exception cref="Core.Execution.Exceptions.TestFailedException">
+    /// <exception cref="Exceptions.TestFailedException">
     ///     Thrown when test execution fails and cannot continue to subsequent stages.
     /// </exception>
     Task Execute(ExecutionContext context);
