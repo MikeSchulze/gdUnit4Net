@@ -23,9 +23,13 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
     public override async Task Execute(ExecutionContext context)
     {
         context.MemoryPool.SetActive(StageName);
-        await base.Execute(context);
+        await base
+            .Execute(context)
+            .ConfigureAwait(true);
         Utils.ClearTempDir();
-        await context.MemoryPool.Gc();
+        await context.MemoryPool
+            .Gc()
+            .ConfigureAwait(true);
         if (context.MemoryPool.OrphanCount > 0)
             context.ReportCollector.PushFront(new TestReport(Warning, 0, ReportOrphans(context)));
         context.FireAfterEvent();

@@ -39,8 +39,11 @@ internal sealed class ExecutionContext : IDisposable
     }
 
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments)
-        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled,
-        context.IsEngineMode)
+        : this(
+            context.TestSuite,
+            context.EventListeners,
+            context.ReportOrphanNodesEnabled,
+            context.IsEngineMode)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -56,9 +59,11 @@ internal sealed class ExecutionContext : IDisposable
 
     // used for dynamic datapoint tests
     public ExecutionContext(ExecutionContext context, string displayName)
-        : this(context.TestSuite, context.EventListeners,
-        context.ReportOrphanNodesEnabled,
-        context.IsEngineMode)
+        : this(
+            context.TestSuite,
+            context.EventListeners,
+            context.ReportOrphanNodesEnabled,
+            context.IsEngineMode)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -85,78 +90,24 @@ internal sealed class ExecutionContext : IDisposable
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCase.TestCaseAttribute);
     }
 
+    public static ExecutionContext? Current
+        => Thread.GetData(Thread.GetNamedDataSlot("ExecutionContext")) as ExecutionContext;
+
     public bool IsEngineMode { get; set; }
 
-    private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
+    public bool IsCaptureStdOut { get; set; } = true;
 
-    public bool IsCaptureStdOut
-    {
-        get;
-        set;
-    }
+    public bool FailureReporting { get; set; }
 
-    = true;
+    public MemoryPool MemoryPool { get; }
 
-    private bool ReportOrphanNodesEnabled
-    {
-        get;
-    }
+    public TestSuite TestSuite { get; }
 
-    public bool FailureReporting
-    {
-        get;
-        set;
-    }
+    public TestCase? CurrentTestCase { get; set; }
 
-    public MemoryPool MemoryPool
-    {
-        get;
-    }
-
-    private Stopwatch Stopwatch
-    {
-        get;
-    }
-
-    public TestSuite TestSuite
-    {
-        get;
-    }
-
-    private List<IDisposable> Disposables
-    {
-        get;
-    }
-
-    public static ExecutionContext? Current => Thread.GetData(Thread.GetNamedDataSlot("ExecutionContext")) as ExecutionContext;
-
-    private IEnumerable<ITestEventListener> EventListeners
-    {
-        get;
-    }
-
-    private List<ExecutionContext> SubExecutionContexts
-    {
-        get;
-    }
-
-    public TestCase? CurrentTestCase
-    {
-        get;
-        set;
-    }
-
-    public string TestCaseName
-    {
-        get;
-        set;
-    }
-
-    = string.Empty;
+    public string TestCaseName { get; set; } = string.Empty;
 
     public object?[] MethodArguments { get; private set; } = Array.Empty<object?>();
-
-    private long Duration => Stopwatch.ElapsedMilliseconds;
 
     public int CurrentIteration
     {
@@ -164,21 +115,29 @@ internal sealed class ExecutionContext : IDisposable
         set => iteration = value;
     }
 
-    public TestReportCollector ReportCollector
-    {
-        get;
-    }
-
     public bool IsFailed => ReportCollector.Failures.Any() || SubExecutionContexts.Any(context => context.IsFailed);
 
     public bool IsError => ReportCollector.Errors.Any() || SubExecutionContexts.Any(context => context.IsError);
 
-    private bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Any(context => context.IsWarning);
+    public bool IsWarning => ReportCollector.Warnings.Any() || SubExecutionContexts.Any(context => context.IsWarning);
 
-    public bool IsSkipped
-    {
-        get;
-    }
+    public bool IsSkipped { get; }
+
+    public TestReportCollector ReportCollector { get; }
+
+    private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
+
+    private bool ReportOrphanNodesEnabled { get; }
+
+    private Stopwatch Stopwatch { get; }
+
+    private List<IDisposable> Disposables { get; }
+
+    private IEnumerable<ITestEventListener> EventListeners { get; }
+
+    private List<ExecutionContext> SubExecutionContexts { get; }
+
+    private long Duration => Stopwatch.ElapsedMilliseconds;
 
     private List<ITestReport> CollectReports => ReportCollector.Reports;
 
@@ -191,6 +150,9 @@ internal sealed class ExecutionContext : IDisposable
     private string FullyQualifiedName { get; }
 
     private string? DisplayName { get; }
+
+    public static void RegisterDisposable(IDisposable disposable) =>
+        Current?.Disposables.Add(disposable);
 
     public void Dispose()
     {
@@ -220,6 +182,38 @@ internal sealed class ExecutionContext : IDisposable
         return attribute.Verify(exception!);
     }
 
+    public void FireBeforeEvent() =>
+        FireTestEvent(
+            TestEvent
+                .Before(TestSuite.ResourcePath, TestSuite.Name, TestSuite.TestCaseCount, BuildStatistics(0), CollectReports)
+                .WithFullyQualifiedName(FullyQualifiedName));
+
+    public void FireAfterEvent() =>
+        FireTestEvent(
+            TestEvent
+                .After(TestSuite.ResourcePath, TestSuite.Name, BuildStatistics(OrphanCount(false)), CollectReports)
+                .WithFullyQualifiedName(FullyQualifiedName));
+
+    public void FireBeforeTestEvent() =>
+        FireTestEvent(
+            TestEvent
+                .BeforeTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
+                .WithFullyQualifiedName(FullyQualifiedName)
+                .WithDisplayName(DisplayName));
+
+    public void FireAfterTestEvent() =>
+        FireTestEvent(
+            TestEvent
+                .AfterTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
+                .WithFullyQualifiedName(FullyQualifiedName)
+                .WithDisplayName(DisplayName));
+
+    public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
+        testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);
+
+    internal void PrintDebug(string name = "")
+        => Console.WriteLine($"{name} test context {TestSuite.Name} {TestCaseName} error: {IsError} failed: {IsFailed} skipped: {IsSkipped}");
+
     private int OrphanCount(bool recursive)
     {
         var orphanCount = MemoryPool.OrphanCount;
@@ -231,43 +225,15 @@ internal sealed class ExecutionContext : IDisposable
     private IDictionary<TestEvent.StatisticKey, object> BuildStatistics(int orphanCount)
         => TestEvent.BuildStatistics(
             orphanCount,
-            IsError, ErrorCount,
-            IsFailed, FailureCount,
+            IsError,
+            ErrorCount,
+            IsFailed,
+            FailureCount,
             IsWarning,
-            IsSkipped, SkippedCount,
+            IsSkipped,
+            SkippedCount,
             Duration);
 
     private void FireTestEvent(TestEvent e) =>
         EventListeners.ToList().ForEach(l => l.PublishEvent(e));
-
-    public void FireBeforeEvent() =>
-        FireTestEvent(TestEvent
-            .Before(TestSuite.ResourcePath, TestSuite.Name, TestSuite.TestCaseCount, BuildStatistics(0), CollectReports)
-            .WithFullyQualifiedName(FullyQualifiedName));
-
-    public void FireAfterEvent() =>
-        FireTestEvent(TestEvent
-            .After(TestSuite.ResourcePath, TestSuite.Name, BuildStatistics(OrphanCount(false)), CollectReports)
-            .WithFullyQualifiedName(FullyQualifiedName));
-
-    public void FireBeforeTestEvent() =>
-        FireTestEvent(TestEvent
-            .BeforeTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName)
-            .WithFullyQualifiedName(FullyQualifiedName)
-            .WithDisplayName(DisplayName));
-
-    public void FireAfterTestEvent() =>
-        FireTestEvent(TestEvent
-            .AfterTest(CurrentTestCase!.Id, TestSuite.ResourcePath, TestSuite.Name, TestCaseName, BuildStatistics(OrphanCount(true)), CollectReports)
-            .WithFullyQualifiedName(FullyQualifiedName)
-            .WithDisplayName(DisplayName));
-
-    public static void RegisterDisposable(IDisposable disposable) =>
-        Current?.Disposables.Add(disposable);
-
-    public void PrintDebug(string name = "")
-        => Console.WriteLine($"{name} test context {TestSuite.Name} {TestCaseName} error: {IsError} failed: {IsFailed} skipped: {IsSkipped}");
-
-    public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
-        testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);
 }

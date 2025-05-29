@@ -25,39 +25,48 @@ internal sealed class TestCase
 
     public Guid Id { get; }
 
-    public int Line
-    {
-        get;
-        private set;
-    }
+    public int Line { get; private set; }
 
     public List<TestCaseAttribute> TestCaseAttributes
         => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter).ToList();
 
-    private Func<TestCaseAttribute, bool> TestParametersFilter { get; } = _ => true;
-
     public TestCaseAttribute TestCaseAttribute { get; init; }
 
-    internal bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
+    public MethodInfo MethodInfo { get; set; }
+
+    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : Parameters.SelectMany(ResolveParam).ToArray();
+
+    public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
+
+    public bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
     internal bool HasDataPoint => DataPoint != null;
 
     internal DataPointAttribute? DataPoint => MethodInfo.GetCustomAttribute<DataPointAttribute>();
 
-    public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
+    private Func<TestCaseAttribute, bool> TestParametersFilter { get; } = _ => true;
 
-    private IEnumerable<object> Parameters
+    private IEnumerable<object> Parameters { get; }
+
+    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = -1)
     {
-        get;
+        var name = attribute.TestName ?? testName;
+        if (attributeIndex == -1)
+            return name;
+
+        var parameters = string
+            .Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted))
+            .Replace(".", ",", StringComparison.Ordinal);
+        return $"{name}:{attributeIndex} ({parameters})";
     }
 
-    public MethodInfo MethodInfo
+    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute attr)
     {
-        get;
-        set;
+        if (attr.Arguments.Length == 0)
+            return $"{classNameSpace}.{attr.TestName ?? testName}";
+        var parameterizedTestName = BuildDisplayName(testName, attr);
+        return $"{classNameSpace}.{testName}.{parameterizedTestName}";
     }
-
-    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : Parameters.SelectMany(ResolveParam).ToArray();
 
     private IEnumerable<object> ResolveParam(object input)
     {
@@ -71,27 +80,9 @@ internal sealed class TestCase
             .SelectMany(pi => pi.GetCustomAttributesData()
                 .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
                 .Select(attr =>
-                    {
-                        var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
-                        return attr.Constructor.Invoke(arguments);
-                    }))
+                {
+                    var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
+                    return attr.Constructor.Invoke(arguments);
+                }))
             .ToList();
-
-    internal static string BuildDisplayName(string testName, TestCaseAttribute attribute, int attributeIndex = -1)
-    {
-        var name = attribute.TestName ?? testName;
-        if (attributeIndex == -1)
-            return name;
-
-        var parameters = string.Join(", ", attribute.Arguments.Select(GdUnitExtensions.Formatted)).Replace(".", ",");
-        return $"{name}:{attributeIndex} ({parameters})";
-    }
-
-    internal static string BuildFullyQualifiedName(string classNameSpace, string testName, TestCaseAttribute attr)
-    {
-        if (attr.Arguments.Length == 0)
-            return $"{classNameSpace}.{attr.TestName ?? testName}";
-        var parameterizedTestName = BuildDisplayName(testName, attr);
-        return $"{classNameSpace}.{testName}.{parameterizedTestName}";
-    }
 }
