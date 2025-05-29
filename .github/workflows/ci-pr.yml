@@ -95,8 +95,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
+          global-json-file: 'global.json'
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -135,16 +134,8 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
-
-      - name: "Verify .NET version"
-        run: |
-          dotnet --version
-          dotnet --list-sdks
-          which dotnet
-
-          /usr/share/dotnet/dotnet --version
+          dotnet-version: 8.0.410
+       #   global-json-file: './global.json'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -152,7 +143,6 @@ jobs:
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         run: |
-          cat global.json
           dotnet format ./Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
         # dotnet format ./Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
 
