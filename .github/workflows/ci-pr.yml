@@ -191,7 +191,7 @@ jobs:
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
     needs: [ compile ]
-    uses: .github/workflows/unit-tests.yml
+    uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
       godot-status: ${{ matrix.godot-status }}
