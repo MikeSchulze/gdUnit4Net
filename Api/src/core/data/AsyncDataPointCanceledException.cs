@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Mike Schulze
+// Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Data;
@@ -15,8 +15,8 @@ using System;
 ///         to help identify the source of the cancellation.
 ///     </para>
 /// </remarks>
-/// <seealso cref="System.OperationCanceledException" />
-/// <seealso cref="Core.Data.DataPointValueProvider" />
+/// <seealso cref="OperationCanceledException" />
+/// <seealso cref="DataPointValueProvider" />
 public sealed class AsyncDataPointCanceledException : Exception
 {
     /// <summary>

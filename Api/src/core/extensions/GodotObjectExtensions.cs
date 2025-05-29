@@ -149,7 +149,7 @@ internal static class GodotObjectExtensions
             : args.UnboxVariant()?.ToArray() ?? System.Array.Empty<object>();
         object? result;
         var parameterInfo = mi.GetParameters();
-        if (mi.IsStatic == false)
+        if (!mi.IsStatic)
         {
             result = parameterInfo.Length == 0
                 ? mi.Invoke(instance, null)

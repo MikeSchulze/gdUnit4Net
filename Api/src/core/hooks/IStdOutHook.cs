@@ -34,7 +34,7 @@ using Godot;
 ///         and must properly restore the original console output when disposed.
 ///     </para>
 /// </remarks>
-/// <seealso cref="System.Console" />
+/// <seealso cref="Console" />
 /// <seealso cref="System.IO.TextWriter" />
 /// <seealso cref="GD.PrintS" />
 internal interface IStdOutHook : IDisposable
