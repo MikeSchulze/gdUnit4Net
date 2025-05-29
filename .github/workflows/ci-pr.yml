@@ -7,31 +7,40 @@ on:
       - '**.jpg'
       - '**.png'
       - '**.md'
-  #- '**.yml'
   workflow_dispatch:
-
 
 concurrency:
   group: ci-pr-${{ github.event.number }}
   cancel-in-progress: true
 
-
 jobs:
+  # Global matrix job that defines the .NET versions
+  setup-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        dotnet-version: [ 7.0.410, 8.0.410 ]
+        include:
+          - dotnet-version: '7.0.410'
+            dotnet-major: '7'
+          - dotnet-version: '8.0.410'
+            dotnet-major: '8'
 
-  setup-dotnet:
-    name: "🔧 Setup .NET8"
+    name: "🔧 Setup .NET ${{ matrix.dotnet-major }}"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 1
+    outputs:
+      dotnet-version: ${{ matrix.dotnet-version }}
+      dotnet-major: ${{ matrix.dotnet-major }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
-        #  global-json-file: 'global.json'
+          dotnet-version: ${{ matrix.dotnet-version }}
 
   compile:
-    name: "🔨 Compile Projects"
-    needs: setup-dotnet
+    name: "🔨 Compile Projects - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: setup-matrix
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
     steps:
@@ -39,7 +48,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
       - name: "Build Projects"
         run: |
@@ -53,15 +62,11 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
-
-  # Analyzer jobs
+          key: ${{ runner.os }}-net${{ needs.setup-matrix.outputs.dotnet-major }}-build-${{ github.sha }}-${{ github.run_id }}
 
   analyzer-style-check:
-    name: "🔍 Check Style: Analyzers"
-    needs: setup-dotnet
+    name: "🔍 Check Style: Analyzers - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: setup-matrix
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
     steps:
@@ -69,7 +74,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
@@ -77,19 +82,17 @@ jobs:
           dotnet format Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
           dotnet format Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
 
-
   analyzer-tests:
-    name: "🧪 Test: Analyzers"
-    needs: compile
+    name: "🧪 Test: Analyzers - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: [ setup-matrix, compile ]
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -99,7 +102,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-net${{ needs.setup-matrix.outputs.dotnet-major }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -112,15 +115,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           retention-days: 10
-          name: artifact_analyzer
+          name: artifact_analyzer_net${{ needs.setup-matrix.outputs.dotnet-major }}
           path: |
             Analyzers.Test/TestResults/test-result.trx
             Analyzers.Test/TestResults/test-result.html
 
-  # API
   api-style-check:
-    name: "🔍 Check Style: API"
-    needs: setup-dotnet
+    name: "🔍 Check Style: API - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: setup-matrix
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 2
     steps:
@@ -128,27 +130,23 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         run: |
           dotnet format Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
-        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
 
-
-  # Adapter jobs
   test-adapter-test:
-    name: "🧪 Test: TestAdapter"
-    needs: compile
+    name: "🧪 Test: TestAdapter - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: [ setup-matrix, compile ]
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 3
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -158,7 +156,7 @@ jobs:
             **/obj
             **/bin
             **/nupkg
-          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ runner.os }}-net${{ needs.setup-matrix.outputs.dotnet-major }}-build-${{ github.sha }}-${{ github.run_id }}
 
       - name: "Run Unit Tests"
         if: ${{ !cancelled() }}
@@ -171,11 +169,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           retention-days: 10
-          name: artifact_adapter_tests
+          name: artifact_adapter_tests_net${{ needs.setup-matrix.outputs.dotnet-major }}
           path: |
             ./TestAdapter.Test/TestResults/test-result.trx
             ./TestAdapter.Test/TestResults/test-result.html
-
 
   api-tests:
     strategy:
@@ -184,23 +181,19 @@ jobs:
       matrix:
         godot-version: [ '4.2', '4.2.1', '4.2.2', '4.3', '4.4' ]
         godot-status: [ 'stable' ]
-      #  include:
-      #    - godot-version: '4.4'
-      #      godot-status: 'dev3'
 
-
-    name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
-    needs: [ compile ]
+    name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }} - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
+    needs: [ setup-matrix, compile ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
       godot-status: ${{ matrix.godot-status }}
-
+      dotnet-version: ${{ needs.setup-matrix.outputs.dotnet-version }}
 
   finalize:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
-    name: Final Results
+    name: "Final Results - .NET ${{ needs.setup-matrix.outputs.dotnet-major }}"
     needs: [ analyzer-style-check, analyzer-tests, api-style-check, api-tests, test-adapter-test ]
     steps:
       - run: exit 1
