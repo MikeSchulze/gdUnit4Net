@@ -19,7 +19,7 @@ concurrency:
 jobs:
 
   setup-dotnet:
-    name: "🔧 Setup .NET"
+    name: "🔧 Setup .NET8"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 1
     steps:
@@ -74,8 +74,8 @@ jobs:
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         run: |
-          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
-          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
 
 
   analyzer-tests:
@@ -114,8 +114,8 @@ jobs:
           retention-days: 10
           name: artifact_analyzer
           path: |
-            ./Analyzers.Test/TestResults/test-result.trx
-            ./Analyzers.Test/TestResults/test-result.html
+            Analyzers.Test/TestResults/test-result.trx
+            Analyzers.Test/TestResults/test-result.html
 
   # API
   api-style-check:
@@ -133,8 +133,8 @@ jobs:
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
         run: |
-          dotnet format ./Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
-        # dotnet format ./Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
+        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
 
 
   # Adapter jobs
@@ -177,7 +177,7 @@ jobs:
             ./TestAdapter.Test/TestResults/test-result.html
 
 
-  unit-tests:
+  api-tests:
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -191,7 +191,7 @@ jobs:
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
     needs: [ compile ]
-    uses: ./.github/workflows/unit-tests.yml
+    uses: .github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
       godot-status: ${{ matrix.godot-status }}
@@ -201,7 +201,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [ analyzer-style-check, analyzer-tests, api-style-check, test-adapter-test, unit-tests ]
+    needs: [ analyzer-style-check, analyzer-tests, api-style-check, api-tests, test-adapter-test ]
     steps:
       - run: exit 1
         if: >-
