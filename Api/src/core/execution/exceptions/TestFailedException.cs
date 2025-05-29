@@ -7,15 +7,54 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 using Godot;
 
+/// <summary>
+///     Exception thrown when a test assertion fails or a test cannot complete successfully.
+/// </summary>
+/// <remarks>
+///     <para>
+///         This exception is specifically designed for the GdUnit4 testing framework to provide
+///         enhanced stack trace information and source location details for failed tests.
+///         It captures relevant stack frames while filtering out framework-internal calls.
+///     </para>
+///     <para>
+///         The exception automatically extracts line numbers and file names from the call stack
+///         to provide precise failure location information for test debugging and reporting.
+///         It also supports integration with Godot's error reporting system through push_error parsing.
+///     </para>
+///     <para>
+///         Unlike standard exceptions, this class preserves original stack trace information
+///         and provides additional metadata specific to test execution context.
+///     </para>
+/// </remarks>
 [Serializable]
-public partial class TestFailedException : Exception
+public sealed class TestFailedException : Exception
 {
-    private static readonly Regex PushErrorFileInfo = PushErrorFileInfoRegex();
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class.
+    /// </summary>
+    /// <remarks>
+    ///     This parameterless constructor is primarily used for serialization scenarios.
+    ///     For test failures, prefer constructors that provide failure details.
+    /// </remarks>
+    public TestFailedException()
+    {
+    }
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class with a specified error message and optional line number.
+    /// </summary>
+    /// <param name="message">The message that describes the test failure.</param>
+    /// <param name="lineNumber">
+    ///     The line number where the failure occurred. If -1 (default), the line number
+    ///     will be automatically determined from the call stack.
+    /// </param>
+    /// <remarks>
+    ///     This constructor automatically captures stack trace information from the calling context
+    ///     and determines the failure location if no explicit line number is provided.
+    /// </remarks>
     public TestFailedException(string message, int lineNumber = -1)
         : base(message)
     {
@@ -25,26 +64,29 @@ public partial class TestFailedException : Exception
         OriginalStackTrace = st.ToString();
     }
 
-    private TestFailedException(string message, string details)
-        : base(message)
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class with a specified error message and inner exception.
+    /// </summary>
+    /// <param name="message">The message that describes the test failure.</param>
+    /// <param name="innerException">The exception that caused the current test failure.</param>
+    /// <remarks>
+    ///     Use this constructor when a test fails due to an underlying exception that should be preserved
+    ///     for debugging purposes. The inner exception's stack trace will be maintained.
+    /// </remarks>
+    public TestFailedException(string message, Exception innerException)
+        : base(message, innerException)
     {
-        var stackFrames = new StringBuilder();
-        foreach (var stackTraceLine in details.Split("\n"))
-        {
-            var match = PushErrorFileInfo.Match(stackTraceLine);
-            if (match.Success)
-            {
-                var methodInfo = match.Groups[1].Value;
-                FileName = NormalizedPath(match.Groups[2].Value);
-                LineNumber = int.Parse(match.Groups[3].Value);
-                stackFrames.Append($"  at: {methodInfo} in {FileName}:line {LineNumber}");
-                stackFrames.AppendLine();
-            }
-        }
-
-        OriginalStackTrace = stackFrames.ToString();
     }
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class with automatic stack trace filtering.
+    /// </summary>
+    /// <param name="message">The message that describes the test failure.</param>
+    /// <remarks>
+    ///     This constructor performs intelligent stack trace filtering to show only test-related frames,
+    ///     excluding GdUnit4 framework internals and system calls. It stops collecting frames when
+    ///     it reaches a method marked with <see cref="TestCaseAttribute" />.
+    /// </remarks>
     public TestFailedException(string message)
         : base(message)
     {
@@ -75,29 +117,104 @@ public partial class TestFailedException : Exception
         OriginalStackTrace = stackFrames.ToString();
     }
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class from Godot push_error details.
+    /// </summary>
+    /// <param name="message">The error message from Godot.</param>
+    /// <param name="details">The detailed error information containing stack trace from push_error.</param>
+    /// <remarks>
+    ///     This private constructor is used by <see cref="FromPushError" /> to create exceptions
+    ///     from Godot's error reporting system, parsing the specific format used by push_error.
+    /// </remarks>
+    private TestFailedException(string message, string details)
+        : base(message)
+    {
+        var stackFrames = new StringBuilder();
+        foreach (var stackTraceLine in details.Split("\n"))
+        {
+            var match = GodotPushErrorPattern.Match(stackTraceLine);
+            if (match.Success)
+            {
+                var methodInfo = match.Groups[1].Value;
+                FileName = NormalizedPath(match.Groups[2].Value);
+                LineNumber = int.Parse(match.Groups[3].Value);
+                stackFrames.Append($"  at: {methodInfo} in {FileName}:line {LineNumber}");
+                stackFrames.AppendLine();
+            }
+        }
+
+        OriginalStackTrace = stackFrames.ToString();
+    }
+
+    /// <summary>
+    ///     Gets or sets the original stack trace information captured when the exception was created.
+    /// </summary>
     public string? OriginalStackTrace { get; set; }
 
+    /// <summary>
+    ///     Gets the stack trace for this exception, preferring the original filtered stack trace if available.
+    /// </summary>
+    /// <value>
+    ///     The filtered original stack trace if available, otherwise the standard exception stack trace.
+    /// </value>
+    /// <remarks>
+    ///     This override provides cleaner stack traces by filtering out framework internals,
+    ///     making it easier to identify the actual test failure location.
+    /// </remarks>
     public override string? StackTrace => OriginalStackTrace ?? base.StackTrace;
 
-    public int LineNumber
-    {
-        get;
-        private set;
-    }
+    /// <summary>
+    ///     Gets the line number in the source file where the test failure occurred.
+    /// </summary>
+    /// <value>
+    ///     The line number where the failure occurred, or -1 if the line number could not be determined.
+    /// </value>
+    /// <remarks>
+    ///     This property is automatically populated by analyzing the call stack or can be
+    ///     explicitly set through constructor parameters for precise failure location reporting.
+    /// </remarks>
+    public int LineNumber { get; private set; } = -1;
 
-    = -1;
+    /// <summary>
+    ///     Gets the name of the source file where the test failure occurred.
+    /// </summary>
+    /// <value>
+    ///     The full path to the source file where the failure occurred, or null if not available.
+    /// </value>
+    public string? FileName { get; private set; }
 
-    public string? FileName
-    {
-        get;
-        private set;
-    }
-
+    /// <summary>
+    ///     Creates a <see cref="TestFailedException" /> from Godot's push_error output.
+    /// </summary>
+    /// <param name="message">The error message reported by Godot.</param>
+    /// <param name="details">The detailed stack trace information from push_error.</param>
+    /// <returns>A new <see cref="TestFailedException" /> with parsed location information.</returns>
+    /// <remarks>
+    ///     This method parses Godot's specific error format to extract meaningful stack trace
+    ///     information and create an exception with proper source location details.
+    /// </remarks>
     public static TestFailedException FromPushError(string message, string details) => new(message, details);
 
+    /// <summary>
+    ///     Normalizes a Godot resource path to a system file path.
+    /// </summary>
+    /// <param name="path">The path to normalize, which may be a Godot resource path (res:// or user://).</param>
+    /// <returns>The normalized system file path.</returns>
+    /// <remarks>
+    ///     Converts Godot-specific path formats (res://, user://) to absolute system paths
+    ///     for consistent file location reporting across different environments.
+    /// </remarks>
     private static string NormalizedPath(string path) =>
         path.StartsWith("res://") || path.StartsWith("user://") ? ProjectSettings.GlobalizePath(path) : path;
 
+    /// <summary>
+    ///     Determines the line number of the root cause by analyzing the call stack.
+    /// </summary>
+    /// <returns>The line number where the failure originated, or -1 if not determinable.</returns>
+    /// <remarks>
+    ///     This method walks up the call stack to find the first frame that originates
+    ///     from outside the GdUnit4 framework, indicating the actual test failure location.
+    /// </remarks>
     private static int GetRootCauseLineNumber()
     {
         // Navigate the stack frames to find the root cause
@@ -111,13 +228,5 @@ public partial class TestFailedException : Exception
         }
 
         return -1;
-    }
-
-    [GeneratedRegex(@"at: (.*) \((.*\.cs):(\d+)\)$", RegexOptions.Compiled)]
-    private static partial Regex PushErrorFileInfoRegex();
-
-    public TestFailedException(string message, Exception innerException)
-        : base(message, innerException)
-    {
     }
 }

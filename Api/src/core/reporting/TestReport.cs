@@ -34,18 +34,6 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
         StackTrace = e.StackTrace;
     }
 
-    private IEnumerable<ReportType> ErrorTypes
-        => new[] { ReportType.Terminated, ReportType.Interrupted, ReportType.Abort };
-
-    public bool Equals(TestReport? other)
-        => other is not null
-           && Type == other.Type
-           && LineNumber == other.LineNumber
-           && Message == other.Message
-           && IsError == other.IsError
-           && IsFailure == other.IsFailure
-           && IsWarning == other.IsWarning;
-
     public ReportType Type { get; }
 
     public int LineNumber { get; }
@@ -60,6 +48,13 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
 
     public bool IsWarning => Type == ReportType.Warning;
 
+    private IEnumerable<ReportType> ErrorTypes
+        => new[] { ReportType.Terminated, ReportType.Interrupted, ReportType.Abort };
+
+    public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
+
+    public static bool operator !=(TestReport lhs, TestReport rhs) => !(lhs == rhs);
+
     public IDictionary<string, object> Serialize() => new Dictionary<string, object>
     {
         { "type", (int)Type },
@@ -67,9 +62,14 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
         { "message", Message }
     };
 
-    public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
-
-    public static bool operator !=(TestReport lhs, TestReport rhs) => !(lhs == rhs);
+    public bool Equals(TestReport? other)
+        => other is not null
+           && Type == other.Type
+           && LineNumber == other.LineNumber
+           && Message == other.Message
+           && IsError == other.IsError
+           && IsFailure == other.IsFailure
+           && IsWarning == other.IsWarning;
 
     public override bool Equals(object? obj)
         => obj is TestReport other && Equals(other);

@@ -5,21 +5,19 @@ namespace GdUnit4.Core.Execution.Monitoring;
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 using Godot;
 
-internal sealed partial class ErrorLogEntry
+internal sealed class ErrorLogEntry
 {
-    public enum ErrorType
-    {
-        EXCEPTION,
-        PUSH_ERROR,
-        PUSH_WARNING
-    }
+    private static readonly string GodotErrorPattern = IsGodot4X4 ? "ERROR:" : "USER ERROR:";
 
-    private static readonly Regex ExceptionPatternDebugMode = ExceptionPatternDebugRegex();
-    private static readonly Regex ExceptionPatternReleaseMode = ExceptionPatternReleaseRegex();
+    private static readonly Dictionary<ErrorType, Tuple<string, string>> LoggerPatterns = new()
+    {
+        { ErrorType.Exception, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
+        { ErrorType.PushError, new Tuple<string, string>(GodotErrorPattern, GodotErrorPattern) },
+        { ErrorType.PushWarning, new Tuple<string, string>("USER WARNING:", "USER WARNING:") }
+    };
 
     private ErrorLogEntry(ErrorType entryType, string message, string details, Type? exceptionType = null)
     {
@@ -27,6 +25,13 @@ internal sealed partial class ErrorLogEntry
         Message = message;
         Details = details;
         ExceptionType = exceptionType;
+    }
+
+    internal enum ErrorType
+    {
+        Exception,
+        PushError,
+        PushWarning
     }
 
     internal string Details { get; }
@@ -39,14 +44,25 @@ internal sealed partial class ErrorLogEntry
 
     private static bool IsDebuggerActive { get; } = DebuggerUtils.IsDebuggerActive();
 
+#pragma warning disable IDE0060
+
+    private static bool IsGodot4X4 => (int)Engine.GetVersionInfo()["hex"] >= 0x40400;
+
+#pragma warning restore IDE0060
+
     public static ErrorLogEntry? ExtractPushWarning(string[] records, int index) =>
-        Extract(records, index, ErrorType.PUSH_WARNING);
+        Extract(records, index, ErrorType.PushWarning);
 
     public static ErrorLogEntry? ExtractPushError(string[] records, int index) =>
-        Extract(records, index, ErrorType.PUSH_ERROR);
+        Extract(records, index, ErrorType.PushError);
 
     public static ErrorLogEntry? ExtractException(string[] records, int index) =>
-        Extract(records, index, ErrorType.EXCEPTION);
+        Extract(records, index, ErrorType.Exception);
+
+    public override string ToString() =>
+        EntryType == ErrorType.Exception
+            ? $"{EntryType}: [{ExceptionType?.Name ?? "Unknown Exception"}] {Message}\nDetails: {Details}"
+            : $"{EntryType}: {Message}\nDetails: {Details}";
 
     private static Type? TryGetExceptionType(string typeName)
     {
@@ -58,7 +74,9 @@ internal sealed partial class ErrorLogEntry
 
             return null;
         }
+#pragma warning disable CA1031
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             GD.PrintErr($"Failed to resolve exception type '{typeName}': {ex.Message}");
             return null;
@@ -76,15 +94,15 @@ internal sealed partial class ErrorLogEntry
             return null;
 
         // Remove the pattern and trim whitespace
-        var content = record.Replace(pattern, string.Empty).Trim();
+        var content = record.Replace(pattern, string.Empty, StringComparison.Ordinal).Trim();
 
         // Get the details from the next line if available
         var details = index + 1 < records.Length ? records[index + 1].Trim() : string.Empty;
 
         // Handle exception type parsing
-        if (type == ErrorType.EXCEPTION)
+        if (type == ErrorType.Exception)
         {
-            var match = IsDebuggerActive ? ExceptionPatternDebugMode.Match(content) : ExceptionPatternReleaseMode.Match(content);
+            var match = IsDebuggerActive ? GodotExceptionPattern.DebugMode(content) : GodotExceptionPattern.ReleaseMode(content);
             if (!match.Success)
                 return null;
             var exceptionTypeName = match.Groups[1].Value;
@@ -94,34 +112,10 @@ internal sealed partial class ErrorLogEntry
         }
 
         // is PushError we need to scan the stacktrace
-        if (type == ErrorType.PUSH_ERROR)
+        if (type == ErrorType.PushError)
         {
         }
 
         return new ErrorLogEntry(type, content, details);
     }
-
-    public override string ToString() =>
-        EntryType == ErrorType.EXCEPTION
-            ? $"{EntryType}: [{ExceptionType?.Name ?? "Unknown Exception"}] {Message}\nDetails: {Details}"
-            : $"{EntryType}: {Message}\nDetails: {Details}";
-
-    [GeneratedRegex(@"'([\w\.]+Exception):\s*(.*)'", RegexOptions.Compiled)]
-    private static partial Regex ExceptionPatternDebugRegex();
-
-    [GeneratedRegex(@"([\w\.]+Exception):\s*(.*?)(?:\r\n|\n|$)", RegexOptions.Compiled)]
-    private static partial Regex ExceptionPatternReleaseRegex();
-
-#pragma warning disable IDE0060
-    private static bool IsGodot4X4 => (int)Engine.GetVersionInfo()["hex"] >= 0x40400;
-
-    private static readonly string GodotErrorPattern = IsGodot4X4 ? "ERROR:" : "USER ERROR:";
-
-    private static readonly Dictionary<ErrorType, Tuple<string, string>> LoggerPatterns = new()
-    {
-        { ErrorType.EXCEPTION, new Tuple<string, string>("ERROR:", IsGodot4X4 ? "ERROR:" : "USER ERROR:") },
-        { ErrorType.PUSH_ERROR, new Tuple<string, string>(GodotErrorPattern, GodotErrorPattern) },
-        { ErrorType.PUSH_WARNING, new Tuple<string, string>("USER WARNING:", "USER WARNING:") }
-    };
-#pragma warning restore IDE0060
 }

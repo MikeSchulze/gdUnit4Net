@@ -22,9 +22,13 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
     {
         context.MemoryPool.SetActive(StageName, true);
 
-        await base.Execute(context);
+        await base
+            .Execute(context)
+            .ConfigureAwait(true);
 
-        await context.MemoryPool.Gc();
+        await context.MemoryPool
+            .Gc()
+            .ConfigureAwait(true);
         if (context.MemoryPool.OrphanCount > 0)
             context.ReportCollector.PushFront(new TestReport(Warning, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
     }

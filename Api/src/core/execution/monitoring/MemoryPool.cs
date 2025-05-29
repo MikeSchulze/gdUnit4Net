@@ -18,21 +18,11 @@ internal class MemoryPool
 
     public MemoryPool(bool reportOrphanNodesEnabled) => OrphanMonitor = reportOrphanNodesEnabled ? new OrphanNodesMonitor() : null;
 
-    private OrphanNodesMonitor? OrphanMonitor
-    {
-        get;
-    }
-
     public int OrphanCount => OrphanMonitor?.OrphanCount ?? 0;
 
     public string Name { get; set; } = "Unknown";
 
-    public void SetActive(string name, bool reset = false)
-    {
-        Name = name;
-        CurrentPool.Value = this;
-        OrphanMonitor?.Start(reset);
-    }
+    private OrphanNodesMonitor? OrphanMonitor { get; }
 
     public static T? RegisterForAutoFree<T>(T? obj)
         where T : GodotObject
@@ -40,6 +30,13 @@ internal class MemoryPool
         if (obj != null)
             CurrentPool.Value?.registeredObjects.Add(obj);
         return obj;
+    }
+
+    public void SetActive(string name, bool reset = false)
+    {
+        Name = name;
+        CurrentPool.Value = this;
+        OrphanMonitor?.Start(reset);
     }
 
     public async Task Gc()
@@ -52,6 +49,8 @@ internal class MemoryPool
             await GodotObjectExtensions.SyncProcessFrame;
     }
 
+    public void StopMonitoring() => OrphanMonitor?.Stop();
+
     private void FreeInstance(GodotObject obj)
     {
         // needs to manually exclude JavaClass see https://github.com/godotengine/godot/issues/44932
@@ -63,6 +62,4 @@ internal class MemoryPool
                 obj.Free();
         }
     }
-
-    public void StopMonitoring() => OrphanMonitor?.Stop();
 }

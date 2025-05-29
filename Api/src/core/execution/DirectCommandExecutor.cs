@@ -15,7 +15,7 @@ using Commands;
 ///     Implements a direct command executor that executes commands without additional runtime overhead.
 ///     Used for direct test execution without interprocess communication.
 /// </summary>
-public class DirectCommandExecutor : ICommandExecutor
+internal class DirectCommandExecutor : ICommandExecutor
 {
     public Task StartAsync() => Task.CompletedTask;
 
@@ -29,5 +29,7 @@ public class DirectCommandExecutor : ICommandExecutor
 
     public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken)
         where T : BaseCommand
-        => await command.Execute(testEventListener);
+        => await command
+            .Execute(testEventListener)
+            .ConfigureAwait(true);
 }

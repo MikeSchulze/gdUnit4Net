@@ -14,6 +14,14 @@ internal sealed class TestSuite : IDisposable
 {
     private readonly Lazy<IEnumerable<TestCase>> testCases;
 
+    public TestSuite(TestSuiteNode suite)
+        : this(
+            FindTypeOnAssembly(suite.AssemblyPath, suite.ManagedType),
+            suite.Tests,
+            suite.SourceFile)
+    {
+    }
+
     internal TestSuite(Type type, List<TestCaseNode> tests, string sourceFile)
     {
         Instance = Activator.CreateInstance(type)
@@ -24,14 +32,6 @@ internal sealed class TestSuite : IDisposable
 
         // we do lazy loading to only load test case one times
         testCases = new Lazy<IEnumerable<TestCase>>(() => LoadTestCases(type, tests));
-    }
-
-    public TestSuite(TestSuiteNode suite)
-        : this(
-        FindTypeOnAssembly(suite.AssemblyPath, suite.ManagedType),
-        suite.Tests,
-        suite.SourceFile)
-    {
     }
 
     public int TestCaseCount => TestCases.Count();

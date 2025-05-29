@@ -40,7 +40,9 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            await Proxy.ConnectAsync(10000);
+            await Proxy
+                .ConnectAsync(10000)
+                .ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -53,11 +55,14 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None);
+            await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None)
+                .ConfigureAwait(true);
 
             // Give server time to process shutdown
-            await Task.Delay(100);
-            await DisposeAsync();
+            await Task
+                .Delay(100)
+                .ConfigureAwait(true);
+            await DisposeAsync().ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -76,7 +81,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         cancellationToken.ThrowIfCancellationRequested();
 
         // commit command
-        await WriteCommand(command);
+        await WriteCommand(command)
+            .ConfigureAwait(false);
 
         // read incoming data until is command response or canceled
         TestEvent? lastTestEvent = null;
@@ -84,7 +90,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         {
             try
             {
-                var data = await ReadInData(cancellationToken);
+                var data = await ReadInData(cancellationToken)
+                    .ConfigureAwait(false);
                 switch (data)
                 {
                     case TestEvent testEvent:
@@ -107,7 +114,9 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                         continue;
                 }
             }
+#pragma warning disable CA1031
             catch (Exception ex)
+#pragma warning restore CA1031
             {
                 return new Response
                 {
@@ -125,7 +134,9 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     }
 }
 
+#pragma warning disable SA1402
 internal class NoInteractTestEventListener : ITestEventListener
+#pragma warning restore SA1402
 {
     public bool IsFailed { get; set; }
 

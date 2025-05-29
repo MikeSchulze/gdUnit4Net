@@ -20,7 +20,7 @@ using Godot;
 
 using FileAccess = System.IO.FileAccess;
 
-public class GodotExceptionMonitor
+internal class GodotExceptionMonitor
 {
     // Types of exceptions that should be ignored during test execution
     private static readonly HashSet<Type> IgnoredExceptionTypes = new()
@@ -80,15 +80,17 @@ public class GodotExceptionMonitor
             {
                 switch (logEntry.EntryType)
                 {
-                    case ErrorLogEntry.ErrorType.EXCEPTION:
+                    case ErrorLogEntry.ErrorType.Exception:
                         var exception = CaughtExceptions.FirstOrDefault(e => e.GetType() == logEntry.ExceptionType && e.Message == logEntry.Message);
                         if (exception != null)
                             ExceptionDispatchInfo.Capture(exception).Throw();
                         break;
-                    case ErrorLogEntry.ErrorType.PUSH_ERROR:
+                    case ErrorLogEntry.ErrorType.PushError:
                         throw TestFailedException.FromPushError(logEntry.Message, logEntry.Details);
-                    case ErrorLogEntry.ErrorType.PUSH_WARNING:
+                    case ErrorLogEntry.ErrorType.PushWarning:
                         break;
+
+                    // ReSharper disable once RedundantEmptySwitchSection
                     default:
                         break;
                 }
@@ -98,14 +100,6 @@ public class GodotExceptionMonitor
         {
             CaughtExceptions.Clear();
         }
-    }
-
-    private void OnFirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
-    {
-        if (ShouldIgnoreException(e.Exception))
-            return;
-        if (IsSceneProcessing())
-            CaughtExceptions.Add(e.Exception);
     }
 
     private static bool ShouldIgnoreException(Exception ex)
@@ -149,6 +143,14 @@ public class GodotExceptionMonitor
             // Check if the declaring type is or inherits from Node
             return typeof(Node).IsAssignableFrom(declaringType) || typeof(RefCounted).IsAssignableFrom(declaringType);
         return false;
+    }
+
+    private void OnFirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
+    {
+        if (ShouldIgnoreException(e.Exception))
+            return;
+        if (IsSceneProcessing())
+            CaughtExceptions.Add(e.Exception);
     }
 
     private List<ErrorLogEntry> ScanGodotLogFile()
