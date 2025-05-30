@@ -134,7 +134,7 @@ public class TestCaseFilterTest
                 }
             }
         };
-        var settings = new GdUnit4Settings { DisplayName = GdUnit4Settings.DisplayNameOptions.FullyQualifiedName };
+        var settings = new GdUnit4Settings { DisplayName = DisplayNameOptions.FullyQualifiedName };
 
         testsExamples = testDescriptors
             .Select(descriptor =>

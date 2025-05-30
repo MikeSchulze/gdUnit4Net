@@ -1,4 +1,5 @@
-﻿// ReSharper disable MemberCanBePrivate.Global
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.TestAdapter.Settings;
 
@@ -11,8 +12,11 @@ using Utilities;
 internal class GodotProjectSettings
 {
     internal ApplicationSection Application { get; set; } = new();
+
     internal DebugSection Debug { get; set; } = new();
+
     internal EditorPluginsSection EditorPlugins { get; set; } = new();
+
     internal GdUnit4Section GdUnit4 { get; set; } = new();
 
     internal static GodotProjectSettings LoadFromFile(string filePath)
@@ -20,7 +24,7 @@ internal class GodotProjectSettings
         var settings = new GodotProjectSettings();
         var lines = File.ReadAllLines(filePath);
 
-        var currentSection = "";
+        var currentSection = string.Empty;
         foreach (var line in lines)
         {
             var trimmedLine = line.Trim();
@@ -30,11 +34,11 @@ internal class GodotProjectSettings
 
             if (trimmedLine.StartsWith('[') && trimmedLine.EndsWith(']'))
             {
-                currentSection = trimmedLine.Substring(1, trimmedLine.Length - 2);
+                currentSection = trimmedLine[1..^1];
                 continue;
             }
 
-            if (currentSection == "" || !trimmedLine.Contains('='))
+            if (string.IsNullOrEmpty(currentSection) || !trimmedLine.Contains('=', StringComparison.Ordinal))
                 continue;
 
             var parts = trimmedLine.Split(new[] { '=' }, 2);
@@ -53,6 +57,17 @@ internal class GodotProjectSettings
         return settings;
     }
 
+    internal static string GlobalizeGodotPath(string path, string projectName)
+    {
+        if (!path.StartsWith("user://") && !path.StartsWith("res://"))
+            return path;
+
+        return path
+            .Replace("user:/", Path.Combine(Utils.GetUserDataDirectory, "app_userdata", projectName), StringComparison.OrdinalIgnoreCase)
+            .Replace("res:/", Utils.GetProjectDirectory, StringComparison.OrdinalIgnoreCase)
+            .Replace("/", Path.DirectorySeparatorChar.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void SetPropertyValue(GodotProjectSettings settings, string section, string key, object value)
     {
         object? sectionObj = section.ToLower() switch
@@ -64,7 +79,8 @@ internal class GodotProjectSettings
             _ => null
         };
 
-        if (sectionObj == null) return;
+        if (sectionObj == null)
+            return;
 
         var propertyParts = key.Split('/');
         var currentObj = sectionObj;
@@ -86,6 +102,7 @@ internal class GodotProjectSettings
         var finalProperty = currentObj.GetType().GetProperty(finalPropertyName);
 
         if (finalProperty != null)
+        {
             try
             {
                 if (finalProperty.PropertyType.IsArray)
@@ -99,25 +116,28 @@ internal class GodotProjectSettings
                     finalProperty.SetValue(currentObj, convertedValue);
                 }
             }
+#pragma warning disable CA1031
             catch (Exception)
+#pragma warning restore CA1031
             {
                 // Log or handle conversion errors
             }
+        }
     }
 
     private static string ToPascalCase(string input)
     {
         var words = input.Split('_', StringSplitOptions.RemoveEmptyEntries);
-        return string.Concat(words.Select(word =>
-            char.ToUpper(word[0]) +
-            (word.Length > 1 ? word.Substring(1).ToLower() : "")
-        ));
+        return string.Concat(
+            words.Select(word =>
+                char.ToUpper(word[0]) +
+                (word.Length > 1 ? word[1..].ToLower() : string.Empty)));
     }
 
     private static object ParseValue(string value)
     {
         if (value.StartsWith('"') && value.EndsWith('"'))
-            return value.Substring(1, value.Length - 2);
+            return value[1..^1];
 
         if (value.StartsWith("PackedStringArray(") && value.EndsWith(')'))
         {
@@ -136,20 +156,9 @@ internal class GodotProjectSettings
         return value;
     }
 
-
-    internal static string GlobalizeGodotPath(string path, string projectName)
-    {
-        if (!path.StartsWith("user://") && !path.StartsWith("res://"))
-            return path;
-
-        return path
-            .Replace("user:/", Path.Combine(Utils.GetUserDataDirectory, "app_userdata", projectName))
-            .Replace("res:/", Utils.GetProjectDirectory)
-            .Replace("/", Path.DirectorySeparatorChar.ToString());
-    }
-
-
+#pragma warning disable SA1201, SA1600
     public interface ISettingsSection
+#pragma warning restore SA1201, SA1600
     {
     }
 
@@ -159,10 +168,13 @@ internal class GodotProjectSettings
 
         public class ConfigSetting
         {
-            public string Name { get; set; } = "";
+            public string Name { get; set; } = string.Empty;
+
             public string[] Tags { get; set; } = Array.Empty<string>();
+
             public string[] Features { get; set; } = Array.Empty<string>();
-            public string Icon { get; set; } = "";
+
+            public string Icon { get; set; } = string.Empty;
         }
     }
 
@@ -173,10 +185,10 @@ internal class GodotProjectSettings
         public class FileLoggingSettings
         {
             public bool EnableFileLogging { get; set; }
+
             public string LogPath { get; set; } = "user://logs/godot.log";
         }
     }
-
 
     public class EditorPluginsSection : ISettingsSection
     {
@@ -186,8 +198,8 @@ internal class GodotProjectSettings
     public class GdUnit4Section : ISettingsSection
     {
         public TestRunSettings Settings { get; set; } = new();
-        public ReportSettings Report { get; set; } = new();
 
+        public ReportSettings Report { get; set; } = new();
 
         public class TestRunSettings
         {

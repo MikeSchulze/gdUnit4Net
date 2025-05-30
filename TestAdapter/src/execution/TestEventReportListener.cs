@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter.Execution;
 
 using System;
@@ -32,12 +35,16 @@ internal sealed class TestEventReportListener : ITestEventListener
         framework.SendMessage(TestMessageLevel.Informational, $"Detected IDE {IdeType}");
     }
 
-    private IFrameworkHandle Framework { get; }
-    private IReadOnlyList<TestCase> TestCases { get; }
-    private bool DetailedOutput { get; }
+    public IFrameworkHandle Framework { get; }
 
-    private Ide IdeType => IdeDetector.Detect(Framework);
+    public IReadOnlyList<TestCase> TestCases { get; }
+
+    public bool DetailedOutput { get; }
+
+    public Ide IdeType => IdeDetector.Detect(Framework);
+
     public int CompletedTests { get; set; }
+
     public bool IsFailed { get; set; }
 
     public void PublishEvent(ITestEvent testEvent)
@@ -87,6 +94,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                     EndTime = DateTimeOffset.Now,
                     Duration = testEvent.ElapsedInMs
                 };
+
                 // Set dynamic driven test name (DataPointAttribute)
                 if (testEvent.DisplayName != null)
                     testResult.DisplayName = testEvent.DisplayName;
@@ -110,11 +118,20 @@ internal sealed class TestEventReportListener : ITestEventListener
                 break;
 
             case Init:
-                break;
             case Stop:
+            case DiscoverStart:
+            case DiscoverEnd:
+            default:
                 break;
         }
     }
+
+    public void Dispose()
+    {
+    }
+
+    private static bool IsEventFailed(ITestEvent e)
+        => e.Reports.Count > 0;
 
     private void ReportSuiteFailure(ITestEvent testEvent, string displayName)
     {
@@ -141,25 +158,25 @@ internal sealed class TestEventReportListener : ITestEventListener
                     Framework.RecordEnd(testCase, testResult.Outcome);
                 });
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Framework.SendMessage(TestMessageLevel.Error, $"{e.Message}\n{e.StackTrace}");
         }
     }
 
-    public void Dispose()
-    {
-    }
-
-// ReSharper disable once UnusedMethodReturnValue.Local
-    private TestResult AddTestReport(ITestReport report, TestResult testResult) => IdeDetector.Detect(Framework) switch
-    {
-        Ide.JetBrainsRider => AddRiderTestReport(report, testResult),
-        Ide.VisualStudio => AddVisualStudio2022TestReport(report, testResult),
-        Ide.VisualStudioCode => AddVisualStudioCodeTestReport(report, testResult),
-        Ide.Unknown => AddDefaultTestReport(report, testResult),
-        _ => AddDefaultTestReport(report, testResult)
-    };
+    // ReSharper disable once UnusedMethodReturnValue.Local
+#pragma warning disable IDE0072
+    private TestResult AddTestReport(ITestReport report, TestResult testResult)
+        => IdeDetector.Detect(Framework) switch
+#pragma warning restore IDE0072
+        {
+            Ide.JetBrainsRider => AddRiderTestReport(report, testResult),
+            Ide.VisualStudio => AddVisualStudio2022TestReport(report, testResult),
+            Ide.VisualStudioCode => AddVisualStudioCodeTestReport(report, testResult),
+            _ => AddDefaultTestReport(report, testResult)
+        };
 
     private TestResult AddRiderTestReport(ITestReport report, TestResult testResult)
     {
@@ -174,12 +191,13 @@ internal sealed class TestEventReportListener : ITestEventListener
 
             case Warning:
             case Orphan:
-                normalizedMessage = normalizedMessage.Replace("WARNING:\n", "");
+                normalizedMessage = normalizedMessage.Replace("WARNING:\n", string.Empty, StringComparison.Ordinal);
                 testResult.ErrorMessage = "Warning Detected!";
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.AdditionalInfoCategory, normalizedMessage.FormatMessageColored(report.Type)));
                 Framework.SendMessage(TestMessageLevel.Warning, $"Warning:\n{normalizedMessage.Indent()}");
                 break;
             case Success:
+            case Skipped:
                 break;
             case Failure:
             case Terminated:
@@ -210,12 +228,13 @@ internal sealed class TestEventReportListener : ITestEventListener
             case Orphan:
                 // for now, we report in category error
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
-                normalizedMessage = normalizedMessage.Replace("WARNING:", "Warning:");
+                normalizedMessage = normalizedMessage.Replace("WARNING:", "Warning:", StringComparison.Ordinal);
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
 
             case Success:
+            case Skipped:
                 break;
             case Failure:
             case Terminated:
@@ -248,9 +267,10 @@ internal sealed class TestEventReportListener : ITestEventListener
                 // see https://developercommunity.visualstudio.com/t/Test-Explorer-not-show-additional-report/10768871?port=1025&fsid=1427bd7b-5ee3-4b74-9bc6-3f3f4663546c
                 testResult.ErrorMessage = normalizedMessage;
                 testResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardErrorCategory, normalizedMessage));
-                Framework.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:")}");
+                Framework.SendMessage(TestMessageLevel.Warning, $"{normalizedMessage.Replace("WARNING:", "Warning:", StringComparison.Ordinal)}");
                 break;
             case Success:
+            case Skipped:
                 break;
             case Failure:
             case Terminated:
@@ -268,7 +288,11 @@ internal sealed class TestEventReportListener : ITestEventListener
 
     private TestResult AddDefaultTestReport(ITestReport report, TestResult testResult)
     {
-        var normalizedMessage = report.Message.RichTextNormalize().TrimEnd().Replace("WARNING:", "Warning:").Replace("ERROR:", "Error:");
+        var normalizedMessage = report.Message
+            .RichTextNormalize()
+            .TrimEnd()
+            .Replace("WARNING:", "Warning:", StringComparison.Ordinal)
+            .Replace("ERROR:", "Error:", StringComparison.Ordinal);
 
         switch (report.Type)
         {
@@ -287,6 +311,7 @@ internal sealed class TestEventReportListener : ITestEventListener
                 Framework.SendMessage(TestMessageLevel.Warning, normalizedMessage);
                 break;
             case Success:
+            case Skipped:
                 break;
             case Failure:
             case Terminated:
@@ -310,7 +335,4 @@ internal sealed class TestEventReportListener : ITestEventListener
 
     private List<TestCase> FindChildTestCases(ITestEvent e)
         => TestCases.Where(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal)).ToList();
-
-    private static bool IsEventFailed(ITestEvent e)
-        => e.Reports.Count > 0;
 }

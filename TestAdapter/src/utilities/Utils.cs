@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter.Utilities;
 
 using System;
@@ -14,6 +17,11 @@ internal static class Utils
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "godot"),
         PlatformID.MacOSX => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Godot"),
+        PlatformID.Win32S => throw new NotImplementedException(),
+        PlatformID.Win32Windows => throw new NotImplementedException(),
+        PlatformID.WinCE => throw new NotImplementedException(),
+        PlatformID.Xbox => throw new NotImplementedException(),
+        PlatformID.Other => throw new NotImplementedException(),
         _ => throw new PlatformNotSupportedException("Unsupported operating system")
     };
 

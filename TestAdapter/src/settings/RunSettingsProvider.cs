@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.TestAdapter.Settings;
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.TestAdapter.Settings;
 
 using System.Collections.Generic;
 using System.IO;
@@ -28,9 +31,9 @@ public static class RunSettingsProvider
     /// <summary>
     ///     Extracts environment variables defined in RunSettings configuration.
     /// </summary>
-    /// <param name="settingsXml">The RunSettings XML content</param>
-    /// <returns>Dictionary of environment variable names and values</returns>
-    /// <exception cref="SettingsException">Thrown when XML parsing fails</exception>
+    /// <param name="settingsXml">The RunSettings XML content.</param>
+    /// <returns>Dictionary of environment variable names and values.</returns>
+    /// <exception cref="SettingsException">Thrown when XML parsing fails.</exception>
     public static Dictionary<string, string> GetEnvironmentVariables(string? settingsXml)
     {
         if (string.IsNullOrEmpty(settingsXml))
@@ -49,10 +52,12 @@ public static class RunSettingsProvider
         variables.MoveToContent();
         variables.Read(); // Move past the EnvironmentVariables element
         while (!variables.EOF)
+        {
             if (variables.IsStartElement())
                 envVars[variables.Name] = variables.ReadElementContentAsString();
             else
                 variables.Read();
+        }
 
         return envVars;
     }

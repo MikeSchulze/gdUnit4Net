@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.TestAdapter.Utilities;
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.TestAdapter.Utilities;
 
 using System;
 using System.Collections.Generic;
@@ -23,24 +26,21 @@ public class Logger : ITestEngineLogger
     private readonly IMessageLogger delegator;
 
     /// <summary>
-    ///     Initializes a new instance of the TestLogger class.
+    /// Initializes a new instance of the <see cref="Logger"/> class.
     /// </summary>
-    /// <param name="delegator">The VS test platform message logger to delegate to</param>
-    public Logger(IMessageLogger delegator)
-    {
-        this.delegator = delegator ?? throw new ArgumentNullException(nameof(delegator));
-    }
+    /// <param name="delegator">The VS test platform message logger to delegate to.</param>
+    public Logger(IMessageLogger delegator) => this.delegator = delegator ?? throw new ArgumentNullException(nameof(delegator));
 
     /// <summary>
     ///     Sends a message to the VS test platform logger with the appropriate level.
     /// </summary>
-    /// <param name="logLevel">The severity level of the message</param>
-    /// <param name="message">The message to log</param>
+    /// <param name="logLevel">The severity level of the message.</param>
+    /// <param name="message">The message to log.</param>
     public void SendMessage(LogLevel logLevel, string message)
     {
         if (LevelMap.TryGetValue(logLevel, out var testLogLevel))
             delegator.SendMessage(testLogLevel, message);
         else
-            delegator.SendMessage(TestMessageLevel.Error, $"Can't parse logging level {logLevel.ToString()}");
+            delegator.SendMessage(TestMessageLevel.Error, $"Can't parse logging level {logLevel}");
     }
 }

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter;
 
 using System;
@@ -22,17 +25,34 @@ using Settings;
 
 using Utilities;
 
+/// <summary>
+///     Visual Studio Test Platform adapter executor for GdUnit4 test framework.
+///     This class implements the VSTest adapter pattern by implementing <see cref="ITestExecutor2" />
+///     to execute GdUnit4 tests through Visual Studio Test Explorer, dotnet test, and other VSTest runners.
+/// </summary>
+/// <remarks>
+///     This adapter executor:
+///     - Executes GdUnit4 tests discovered by <see cref="GdUnit4TestDiscoverer" />
+///     - Integrates with VSTest execution lifecycle (run, cancel, debug)
+///     - Supports both individual test execution and full assembly scanning
+///     - Handles test filtering, grouping, and result reporting
+///     - Manages GdUnit4 test engine lifecycle and configuration
+///     - Provides debugging support for different IDEs (JetBrains Rider detection)
+///     - Supports parallel test execution and timeout configuration
+///     - Converts VSTest TestCase objects back to GdUnit4 test nodes for execution
+///     The executor works in conjunction with the discoverer to provide a complete
+///     VSTest adapter implementation that bridges GdUnit4 tests with the VSTest platform.
+/// </remarks>
 [ExtensionUri(ExecutorUri)]
-// ReSharper disable once ClassNeverInstantiated.Global
 public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 {
     /// <summary>
-    ///     The Uri used to identify the GdUnit4 Executor
+    ///     The Uri used to identify the GdUnit4 Executor.
     /// </summary>
     public const string ExecutorUri = "executor://GdUnit4.TestAdapter";
 
     /// <summary>
-    ///     The default test session timeout is set to 10min (600000ms)
+    ///     The default test session timeout is set to 10min (600000ms).
     /// </summary>
     private const int DEFAULT_SESSION_TIMEOUT = 600000;
 
@@ -43,14 +63,25 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     private ITestEngineLogger? Log { get; set; }
 #pragma warning restore CA1859
 
-    public void Dispose() => GC.SuppressFinalize(this);
+    /// <summary>
+    ///     Releases resources used by the test executor, including the GdUnit4 test engine.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
     /// <summary>
-    ///     Runs only the tests specified by parameter 'tests'.
+    ///     Executes specific GdUnit4 tests provided as VSTest TestCase objects.
+    ///     This method is called when running selected tests from Test Explorer or filtered test runs.
     /// </summary>
-    /// <param name="tests">Tests to be run.</param>
-    /// <param name="runContext">Context to use when executing the tests.</param>
-    /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
+    /// <param name="tests">Collection of VSTest TestCase objects to execute.</param>
+    /// <param name="runContext">VSTest run context containing settings and configuration.</param>
+    /// <param name="frameworkHandle">VSTest framework handle for result reporting and operations.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     Thrown when any of the required parameters (tests, runContext, frameworkHandle) are null.
+    /// </exception>
     public void RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         _ = tests ?? throw new ArgumentNullException(nameof(tests), "Argument 'tests' is null, abort!");
@@ -62,10 +93,10 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             return;
 
         Log = new Logger(frameworkHandle);
-        if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredEngineVersion)
+        if (ITestEngine.EngineVersion() < GdUnit4TestDiscoverer.MinRequiredGdUnit4ApiVersion)
         {
             Log.LogError(
-                $"Wrong GdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredEngineVersion}'");
+                $"Wrong GdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{GdUnit4TestDiscoverer.MinRequiredGdUnit4ApiVersion}'");
             Log.LogError("Abort the test discovery.");
             return;
         }
@@ -85,12 +116,12 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 
         testEngine = ITestEngine.GetInstance(engineSettings, Log);
         Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
-        Log.LogInfo(runConfiguration.TestSessionTimeout == 0
-            ? $"No 'TestSessionTimeout' is specified. Set default test session timeout to: {TimeSpan.FromMilliseconds(DEFAULT_SESSION_TIMEOUT)}"
-            : $"Set test session timeout to: {TimeSpan.FromMilliseconds(engineSettings.SessionTimeout)}");
+        Log.LogInfo(
+            runConfiguration.TestSessionTimeout == 0
+                ? $"No 'TestSessionTimeout' is specified. Set default test session timeout to: {TimeSpan.FromMilliseconds(DEFAULT_SESSION_TIMEOUT)}"
+                : $"Set test session timeout to: {TimeSpan.FromMilliseconds(engineSettings.SessionTimeout)}");
 
-        //var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
-
+        // var runSettings = XmlRunSettingsUtilities.GetTestRunParameters(runContext.RunSettings?.SettingsXml);
         try
         {
             SetupRunnerEnvironment(runContext, frameworkHandle);
@@ -117,11 +148,22 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     }
 
     /// <summary>
-    ///     Runs 'all' the tests present in the specified 'containers'.
+    ///     Discovers and executes all GdUnit4 tests found in the specified assembly sources.
+    ///     This method is called when running all tests in assemblies or when no specific tests are selected.
     /// </summary>
-    /// <param name="sources">Path to test container files to look for tests in.</param>
-    /// <param name="runContext">Context to use when executing the tests.</param>
-    /// <param name="frameworkHandle">Handle to the framework to record results and to do framework operations.</param>
+    /// <param name="sources">Collection of assembly file paths to scan for tests.</param>
+    /// <param name="runContext">VSTest run context containing settings and configuration.</param>
+    /// <param name="frameworkHandle">VSTest framework handle for result reporting and operations.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     Thrown when any of the required parameters (sources, runContext, frameworkHandle) are null.
+    /// </exception>
+    /// <remarks>
+    ///     This method combines discovery and execution by:
+    ///     1. Using <see cref="GdUnit4TestDiscoverer" /> to find all tests in the provided assemblies
+    ///     2. Delegating to the specific test execution method with the discovered tests
+    ///     This approach ensures consistent behavior between "Run All" and "Run Selected" scenarios
+    ///     while avoiding code duplication.
+    /// </remarks>
     public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         _ = sources ?? throw new ArgumentNullException(nameof(sources), "Argument 'containers' is null, abort!");
@@ -130,12 +172,14 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 
         TestCaseDiscoverySink discoverySink = new();
         new GdUnit4TestDiscoverer().DiscoverTests(sources, runContext, fh, discoverySink);
-        if (discoverySink.TestCases.Count == 0) return;
+        if (discoverySink.TestCases.Count == 0)
+            return;
         RunTests(discoverySink.TestCases, runContext, frameworkHandle);
     }
 
     /// <summary>
-    ///     Cancel the execution of the tests.
+    ///     Cancels the currently running test execution.
+    ///     This method is called when the user requests cancellation through the VSTest platform.
     /// </summary>
     public void Cancel()
     {
@@ -143,16 +187,81 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         testEngine?.Cancel();
     }
 
+    /// <summary>
+    ///     Determines whether the test host should attach to a debugger when running tests from assembly sources.
+    ///     Always returns true to enable debugging support.
+    /// </summary>
+    /// <param name="sources">Assembly sources being tested (not used in decision).</param>
+    /// <param name="runContext">Run context (not used in decision).</param>
+    /// <returns>Always returns true to enable debugger attachment.</returns>
     public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext) => true;
 
+    /// <summary>
+    ///     Determines whether the test host should attach to a debugger when running specific tests.
+    ///     Always returns true to enable debugging support.
+    /// </summary>
+    /// <param name="tests">Test cases being executed (not used in decision).</param>
+    /// <param name="runContext">Run context (not used in decision).</param>
+    /// <returns>Always returns true to enable debugger attachment.</returns>
     public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext) => true;
 
+    /// <summary>
+    ///     Sets up environment variables from VSTest run settings for the test execution environment.
+    /// </summary>
+    /// <param name="runContext">VSTest run context containing settings with environment variables.</param>
+    /// <param name="frameworkHandle">Framework handle for error reporting.</param>
+    /// <remarks>
+    ///     Environment variables configured in the test run settings (.runsettings file) are applied
+    ///     to the current process before test execution. This allows tests to access custom configuration
+    ///     through environment variables.
+    /// </remarks>
+    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
+    {
+        try
+        {
+            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
+                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
+        }
+        catch (XmlException ex)
+        {
+            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    ///     Releases resources used by the test executor, including the GdUnit4 test engine.
+    /// </summary>
+    /// <param name="disposing">.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            testEngine?.Dispose();
+            testEngine = null;
+        }
+    }
+
+    /// <summary>
+    ///     Creates an appropriate debugger framework implementation based on the detected IDE.
+    /// </summary>
+    /// <param name="frameworkHandle">VSTest framework handle for IDE detection.</param>
+    /// <returns>IDE-specific debugger framework implementation.</returns>
+    /// <remarks>
+    ///     Currently supports special handling for JetBrains Rider, with fallback to default implementation.
+    ///     Different IDEs may require different debugging integration approaches.
+    /// </remarks>
     private static IDebuggerFramework GetDebuggerFramework(IFrameworkHandle frameworkHandle)
         => IsJetBrainsRider(frameworkHandle)
             ? new RiderDebuggerFramework(frameworkHandle)
             : new DefaultDebuggerFramework(frameworkHandle);
 
+    /// <summary>
+    ///     Converts VSTest TestCase objects to GdUnit4 test node hierarchy for execution.
+    /// </summary>
+    /// <param name="testCases">Collection of VSTest TestCase objects to convert.</param>
+    /// <returns>List of test assembly nodes organized in GdUnit4's hierarchical test structure.</returns>
     private static List<TestAssemblyNode> ToGdUnitTestNodes(IEnumerable<TestCase> testCases) =>
+
         // Group test cases by assembly path
         testCases
             .GroupBy(tc => tc.Source)
@@ -174,27 +283,28 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
                     {
                         var t = tests.First();
 
-                        var ManagedType = t.GetPropertyValue<string>(TestCaseExtensions.ManagedTypeProperty, "");
+                        var managedType = t.GetPropertyValue(TestCaseExtensions.ManagedTypeProperty, string.Empty);
                         var suite = new TestSuiteNode
                         {
                             Id = Guid.NewGuid(),
                             ParentId = assembly.Id,
-                            ManagedType = ManagedType,
+                            ManagedType = managedType,
                             AssemblyPath = assembly.AssemblyPath,
                             SourceFile = t.CodeFilePath ?? "Unknown",
                             Tests = new List<TestCaseNode>()
                         };
 
-                        suite.Tests.AddRange(tests
-                            .Select(test => new TestCaseNode
-                            {
-                                Id = test.Id,
-                                ParentId = suite.Id,
-                                ManagedMethod = test.GetPropertyValue<string>(TestCaseExtensions.ManagedMethodProperty, ""),
-                                AttributeIndex = test.GetPropertyValue(TestCaseExtensions.ManagedMethodAttributeIndexProperty, 0),
-                                LineNumber = test.LineNumber,
-                                RequireRunningGodotEngine = test.GetPropertyValue(TestCaseExtensions.RequireRunningGodotEngineProperty, false)
-                            }).ToList());
+                        suite.Tests.AddRange(
+                            tests
+                                .Select(test => new TestCaseNode
+                                {
+                                    Id = test.Id,
+                                    ParentId = suite.Id,
+                                    ManagedMethod = test.GetPropertyValue(TestCaseExtensions.ManagedMethodProperty, string.Empty),
+                                    AttributeIndex = test.GetPropertyValue(TestCaseExtensions.ManagedMethodAttributeIndexProperty, 0),
+                                    LineNumber = test.LineNumber,
+                                    RequireRunningGodotEngine = test.GetPropertyValue(TestCaseExtensions.RequireRunningGodotEngineProperty, false)
+                                }).ToList());
 
                         return suite;
                     });
@@ -204,24 +314,16 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
             })
             .ToList();
 
-    internal static void SetupRunnerEnvironment(IRunContext runContext, IFrameworkHandle frameworkHandle)
-    {
-        try
-        {
-            foreach (var variable in RunSettingsProvider.GetEnvironmentVariables(runContext.RunSettings?.SettingsXml))
-                Environment.SetEnvironmentVariable(variable.Key, variable.Value);
-        }
-        catch (XmlException ex)
-        {
-            frameworkHandle.SendMessage(TestMessageLevel.Error, "Error while setting environment variables: " + ex.Message);
-        }
-    }
-
+    /// <summary>
+    ///     Detects if the test execution is running within JetBrains Rider IDE.
+    /// </summary>
+    /// <param name="frameworkHandle">VSTest framework handle for type inspection.</param>
+    /// <returns>True if JetBrains Rider is detected; otherwise, false.</returns>
     private static bool IsJetBrainsRider(IFrameworkHandle frameworkHandle)
     {
         var version = frameworkHandle.GetType().Assembly.GetName().Version;
         if (frameworkHandle is not IFrameworkHandle2
-            || !frameworkHandle.GetType().ToString().Contains("JetBrains")
+            || !frameworkHandle.GetType().ToString().Contains("JetBrains", StringComparison.Ordinal)
             || version < new Version("2.16.1.14"))
             return false;
 

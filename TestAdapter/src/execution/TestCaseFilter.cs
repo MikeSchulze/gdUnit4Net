@@ -1,4 +1,7 @@
-﻿namespace GdUnit4.TestAdapter.Execution;
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
+namespace GdUnit4.TestAdapter.Execution;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +16,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 /// <summary>
 ///     Implementation for filtering test cases.
 /// </summary>
-public class TestCaseFilter
+internal class TestCaseFilter
 {
     private readonly ITestCaseFilterExpression? filterExpression;
 
@@ -25,7 +28,6 @@ public class TestCaseFilter
                 TestCaseExtensions.SupportedProperties.Keys,
                 TestCaseExtensions.GetPropertyProvider());
         }
-
         catch (TestPlatformFormatException e)
         {
             logger.LogError(e.Message);
@@ -35,8 +37,8 @@ public class TestCaseFilter
     /// <summary>
     ///     Runs the filter on the provided test cases and returns the filtered collection.
     /// </summary>
-    /// <param name="testCases">The collection of test cases to filter</param>
-    /// <returns>The filtered collection of test cases or the original collection if the filter is null</returns>
+    /// <param name="testCases">The collection of test cases to filter.</param>
+    /// <returns>The filtered collection of test cases or the original collection if the filter is null.</returns>
     public List<TestCase> Execute(List<TestCase> testCases) =>
         filterExpression == null
             ? testCases
@@ -45,8 +47,8 @@ public class TestCaseFilter
     /// <summary>
     ///     Determines if a test case matches the filter criteria.
     /// </summary>
-    /// <param name="testCase">Test case to evaluate</param>
-    /// <returns>True if the test case matches the filter, false otherwise</returns>
+    /// <param name="testCase">Test case to evaluate.</param>
+    /// <returns>True if the test case matches the filter, false otherwise.</returns>
     private bool MatchTestCase(TestCase testCase)
         => filterExpression?.MatchTestCase(testCase, testCase.GetPropertyValue) ?? false;
 }
