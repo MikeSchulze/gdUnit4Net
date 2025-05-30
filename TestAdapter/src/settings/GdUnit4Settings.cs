@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter.Settings;
 
 using System.IO;
@@ -6,54 +9,140 @@ using System.Xml.Serialization;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
+/// <summary>
+///     Specifies how test case names are displayed in test results and Test Explorer.
+/// </summary>
+public enum DisplayNameOptions
+{
+    /// <summary>
+    ///     Display only the simple method name (e.g., "TestMethod").
+    /// </summary>
+    SimpleName,
+
+    /// <summary>
+    ///     Display the fully qualified name including namespace, class, and method (e.g., "MyNamespace.MyClass.TestMethod").
+    /// </summary>
+    FullyQualifiedName
+}
+
+/// <summary>
+///     Configuration settings for GdUnit4 test adapter that can be specified in .runsettings files.
+///     This class extends VSTest's TestRunSettings to provide GdUnit4-specific configuration options
+///     for test execution, display formatting, and Godot engine integration.
+/// </summary>
+/// <remarks>
+///     These settings can be configured in a .runsettings file using the following format:
+///     <code>
+/// &lt;RunSettings&gt;
+///   &lt;GdUnit4&gt;
+///     &lt;DisplayName&gt;SimpleName&lt;/DisplayName&gt;
+///     &lt;CaptureStdOut&gt;true&lt;/CaptureStdOut&gt;
+///     &lt;Parameters&gt;--verbose --headless&lt;/Parameters&gt;
+///     &lt;CompileProcessTimeout&gt;30000&lt;/CompileProcessTimeout&gt;
+///   &lt;/GdUnit4&gt;
+/// &lt;/RunSettings&gt;
+/// </code>
+///     The settings control:
+///     - Test case display formatting in Test Explorer and results
+///     - Standard output capture for debugging purposes
+///     - Additional parameters passed to the Godot engine during test execution
+///     - Compilation timeout for projects that require extended build times
+///     These settings are loaded by <see cref="GdUnit4SettingsProvider" /> during test discovery and execution.
+/// </remarks>
 [XmlRoot(RunSettingsXmlNode)]
 public class GdUnit4Settings : TestRunSettings
 {
-    public enum DisplayNameOptions
-    {
-        SimpleName,
-        FullyQualifiedName
-    }
-
+    /// <summary>
+    ///     The XML node name used to identify GdUnit4 settings in .runsettings files.
+    /// </summary>
     public const string RunSettingsXmlNode = "GdUnit4";
 
     private static readonly XmlSerializer Serializer = new(typeof(GdUnit4Settings));
 
-    public GdUnit4Settings() : base(RunSettingsXmlNode)
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="GdUnit4Settings" /> class.
+    /// </summary>
+    public GdUnit4Settings()
+        : base(RunSettingsXmlNode)
     {
     }
 
     /// <summary>
-    ///     Additional Godot runtime parameters. These are passed to the Godot executable when running tests.
+    ///     Gets or sets additional Godot runtime parameters. These are passed to the Godot executable when running tests.
     /// </summary>
+    /// <value>
+    ///     A string containing command-line parameters for the Godot engine, such as "--verbose", "--headless", or custom flags.
+    ///     Can be null or empty if no additional parameters are needed.
+    /// </value>
+    /// <example>
+    ///     <code>
+    /// Parameters = "--verbose --headless"
+    /// </code>
+    /// </example>
     public string? Parameters { get; set; }
 
     /// <summary>
-    ///     Controls the display name format of test cases in the test results.
-    ///     Allowed values:
-    ///     - SimpleName: Uses only the method name (e.g., "TestMethod")
-    ///     - FullyQualifiedName: Uses the full path including class and method name (e.g., "MyNamespace.MyClass.TestMethod")
-    ///     Default: SimpleName
+    ///     Gets or sets the display name format for test cases in test results and Test Explorer.
     /// </summary>
+    /// <value>
+    ///     A <see cref="DisplayNameOptions" /> value that controls how test names appear.
+    ///     Default is <see cref="DisplayNameOptions.SimpleName" />.
+    /// </value>
+    /// <remarks>
+    ///     <para><see cref="DisplayNameOptions.SimpleName" />: Shows only the method name (e.g., "TestMethod").</para>
+    ///     <para><see cref="DisplayNameOptions.FullyQualifiedName" />: Shows the complete path (e.g., "MyNamespace.MyClass.TestMethod").</para>
+    /// </remarks>
     public DisplayNameOptions DisplayName { get; set; } = DisplayNameOptions.SimpleName;
 
     /// <summary>
-    ///     When set to true, standard output (stdout) from test cases is captured and included in the test result. This can be
-    ///     useful for debugging.
-    ///     Default: false
+    ///     Gets or sets a value indicating whether standard output (stdout) from test cases is captured and included in test results.
     /// </summary>
+    /// <value>
+    ///     <c>true</c> to capture standard output for debugging purposes; <c>false</c> to ignore stdout.
+    ///     Default is <c>false</c>.
+    /// </value>
+    /// <remarks>
+    ///     When enabled, any console output from tests (Console.WriteLine, Godot print statements, etc.)
+    ///     will be captured and displayed in test results. This can be useful for debugging test failures
+    ///     but may impact performance for tests with extensive output.
+    /// </remarks>
     public bool CaptureStdOut { get; set; }
 
     /// <summary>
-    ///     The maximum duration allowed for a compilation process in milliseconds.
+    ///     Gets the maximum duration allowed for a compilation process in milliseconds.
     /// </summary>
+    /// <value>
+    ///     The timeout value in milliseconds. Default is 20000 milliseconds (20 seconds).
+    /// </value>
     /// <remarks>
-    ///     After this timeout period expires, the compilation process is forcefully terminated.
-    ///     Default value is 20000 milliseconds (20 seconds)
-    ///     Set to a higher value for projects that require more compilation time.
+    ///     <para>
+    ///         This timeout applies to the compilation phase before test execution. If compilation takes longer
+    ///         than this duration, the process will be forcefully terminated.
+    ///     </para>
+    ///     <para>
+    ///         Increase this value for larger projects or slower build environments that require more time
+    ///         to compile. Very large Godot projects with many dependencies may need timeouts of 60+ seconds.
+    ///     </para>
     /// </remarks>
+    /// <example>
+    ///     For a large project that requires more compilation time:
+    ///     <code>
+    /// CompileProcessTimeout = 60000; // 60 seconds
+    /// </code>
+    /// </example>
     public int CompileProcessTimeout { get; init; } = 20000;
 
+    /// <summary>
+    ///     Converts the current settings instance to an XML element for inclusion in .runsettings files.
+    /// </summary>
+    /// <returns>
+    ///     An <see cref="XmlElement" /> representing the serialized settings that can be embedded
+    ///     in VSTest run settings configuration.
+    /// </returns>
+    /// <remarks>
+    ///     This method is called by the VSTest framework when processing .runsettings files.
+    ///     The returned XML element will be used to reconstruct the settings during test execution.
+    /// </remarks>
     public override XmlElement ToXml()
     {
         using var stringWriter = new StringWriter();

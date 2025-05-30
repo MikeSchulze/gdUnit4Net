@@ -136,8 +136,25 @@ jobs:
           dotnet format Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
         # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
 
+  # Test Adapter
+  adapter-style-check:
+    name: "🔍 Check Style: Test Adapter"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
 
-  # Adapter jobs
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet format TestAdapter/GdUnit4TestAdapter.csproj --verify-no-changes --verbosity diagnostic
+        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
+
   test-adapter-test:
     name: "🧪 Test: TestAdapter"
     needs: compile
@@ -201,7 +218,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [ analyzer-style-check, analyzer-tests, api-style-check, api-tests, test-adapter-test ]
+    needs: [ analyzer-style-check, api-style-check, adapter-style-check, analyzer-tests, api-tests, test-adapter-test ]
     steps:
       - run: exit 1
         if: >-
