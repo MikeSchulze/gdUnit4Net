@@ -1,14 +1,96 @@
+v5.0.0
 
-v4.4.0-rc*
+## Major Architecture Overhaul
+
+**BREAKING CHANGES:**
+* Test Engine Redesign: Complete rework of the test engine that no longer requires Godot runtime by default
+* Migration Required: Tests using Godot features (scenes, nodes, resources) must now be marked with `[RequireGodotRuntime]` attribute
+* Significant performance improvements for logic-only tests (up to 10x faster)
 
 Improvements:
+* GD-27: Added VSTest filter support with test categories and traits
 * GD-46: Added support of DataPoint attributes, which make it possible to define parameterized tests with dynamic test data
 * GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
-* GD-140: Code cleanup and fix formatting, fix warnings
 * GD-144: Added AwaitInputProcessed to SceneRunner
+* GD-149: Add error to the execution log when the test session timeout occurs
 * GD-153: Add Roslyn Analyzer to validate TestCase and DataPoint attribute combinations
-* GD-156: Add an exception hook to report exceptions as test errors that are normally caught and hidden by Godot
+* GD-156: Add an exception hook to report exceptions as test failures that are normally caught and hidden by Godot
+* GD-160: Apply runsettings environment variables to the test execution context
+* GD-163: Collect the Godot log file into test report
 
+Bug Fixes:
+* GD-199: TestRunner install ends with abnormal exit on large projects
+* GD-203: Handle failure reporting for test stages [Before] and [After]
+* GD-212: Fix vector assertion `IsEqualApprox`
+
+
+## 📋 Migration Guide:
+
+**Before v5.0.0:**
+```csharp
+[Test]
+public void MyTest()
+{
+    // All tests ran in Godot runtime
+    var node = new Node();
+    AddChild(node);
+}
+```
+
+**v5.0.0:**
+```csharp
+[Test]
+public void MyLogicTest()
+{
+    // Runs fast without Godot runtime
+    var result = Calculator.Add(1, 2);
+    AssertThat(result).IsEqual(3);
+}
+
+[Test]
+[RequireGodotRuntime]  // Required for Godot-dependent tests
+public void MyGodotTest()
+{
+    var node = new Node();
+    AddChild(node);
+}
+
+[Test]
+[DataPoint(nameof(TestData))]  // Data-driven tests
+public void TestCalculations(int a, int b, int expected)
+{
+    AssertThat(Calculator.Add(a, b)).IsEqual(expected);
+}
+
+[Test]
+[ThrowsException(typeof(ArgumentNullException), "Value cannot be null")]
+public void TestValidation()
+{
+    Calculator.Add(null, 5); // Expects specific exception
+}
+
+public static IEnumerable<object[]> TestData => new[]
+{
+    new object[] { 1, 2, 3 },
+    new object[] { 5, 7, 12 }
+};
+```
+
+## ⚙️ Configuration:
+
+New `.runsettings` options:
+```xml
+<RunSettings>
+  <GdUnit4>
+    <CaptureStdOut>true</CaptureStdOut>
+    <Parameters>--verbose --headless</Parameters>
+    <DisplayName>FullyQualifiedName</DisplayName>
+    <CompileProcessTimeout>30000</CompileProcessTimeout>
+  </GdUnit4>
+</RunSett>
+```
+
+This release represents a major evolution in GdUnit4's architecture, providing developers with the flexibility to write fast, efficient tests while maintaining full Godot integration capabilities when required.
 -------------------------------------------------------------------------------------------------------
 
 v4.3.1

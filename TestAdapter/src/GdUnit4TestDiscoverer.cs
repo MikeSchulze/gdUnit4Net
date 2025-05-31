@@ -48,8 +48,8 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     /// <summary>
     ///     Gets the minimum required GdUnit4 API version needed for test discovery.
     /// </summary>
-    /// <value>The minimum version (4.4.0) required for compatibility.</value>
-    internal static Version MinRequiredGdUnit4ApiVersion { get; } = new("4.4.0");
+    /// <value>The minimum version (5.0.0) required for compatibility.</value>
+    internal static Version MinRequiredGdUnit4ApiVersion { get; } = new("5.0.0");
 
 #pragma warning disable CA1859
     private ITestEngineLogger Logger { get; set; } = null!;

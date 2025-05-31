@@ -10,7 +10,10 @@ using Api;
 
 using Godot;
 
-internal partial class GdUnit4TestRunnerSceneCore : SceneTree
+/// <summary>
+///     The GdUnit4Net test runner scene.
+/// </summary>
+public partial class GdUnit4TestRunnerSceneCore : SceneTree
 {
     /// <inheritdoc />
     [SuppressMessage(

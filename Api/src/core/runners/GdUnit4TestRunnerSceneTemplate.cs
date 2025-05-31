@@ -6,6 +6,9 @@ namespace GdUnit4.TestRunner;
 
 using Core.Runners;
 
-internal partial class GdUnit4TestRunnerSceneTemplate : GdUnit4TestRunnerSceneCore
+/// <summary>
+///     The GdUnit4Net test runner scene.
+/// </summary>
+public partial class GdUnit4TestRunnerSceneTemplate : GdUnit4TestRunnerSceneCore
 {
 }
