@@ -153,7 +153,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           dotnet format TestAdapter/GdUnit4TestAdapter.csproj --verify-no-changes --verbosity diagnostic
-        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Api.Test/GdUnit4TestAdapter.Tests.csproj --verify-no-changes --verbosity diagnostic
 
   test-adapter-test:
     name: "🧪 Test: TestAdapter"

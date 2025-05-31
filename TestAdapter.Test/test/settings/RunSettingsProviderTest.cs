@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Test.Settings;
+namespace GdUnit4.TestAdapter.Test.Settings;
 
 using System.Collections.Generic;
 
@@ -9,7 +9,7 @@ using TestAdapter.Settings;
 [TestClass]
 public class RunSettingsProviderTest
 {
-    private static readonly string XmlSettingsWithoutEnv =
+    private const string XML_SETTINGS_WITHOUT_ENV =
         """
         <?xml version="1.0" encoding="utf-8"?>
         <RunSettings>
@@ -27,7 +27,7 @@ public class RunSettingsProviderTest
         </RunSettings>
         """;
 
-    private static readonly string XmlSettingsWithoutEnvironmentVariablesEntry =
+    private const string XML_SETTINGS_WITHOUT_ENVIRONMENT_VARIABLES_ENTRY =
         """
         <?xml version="1.0" encoding="utf-8"?>
         <RunSettings>
@@ -43,8 +43,7 @@ public class RunSettingsProviderTest
         </RunSettings>
         """;
 
-
-    private static readonly string XmlSettings =
+    private const string XML_SETTINGS =
         """
         <?xml version="1.0" encoding="utf-8"?>
         <RunSettings>
@@ -64,11 +63,10 @@ public class RunSettingsProviderTest
         </RunSettings>
         """;
 
-
     [TestMethod]
     public void GetEnvironmentVariables()
     {
-        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XmlSettings);
+        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XML_SETTINGS);
 
         var expected = new Dictionary<string, string>
         {
@@ -81,7 +79,7 @@ public class RunSettingsProviderTest
     [TestMethod]
     public void GetEnvironmentVariablesWithoutEnv()
     {
-        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XmlSettingsWithoutEnv);
+        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XML_SETTINGS_WITHOUT_ENV);
 
         var expected = new Dictionary<string, string>();
         CollectionAssert.AreEqual(expected, environmentVariables);
@@ -90,7 +88,7 @@ public class RunSettingsProviderTest
     [TestMethod]
     public void GetEnvironmentVariablesWithoutEnvironmentVariablesEntry()
     {
-        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XmlSettingsWithoutEnvironmentVariablesEntry);
+        var environmentVariables = RunSettingsProvider.GetEnvironmentVariables(XML_SETTINGS_WITHOUT_ENVIRONMENT_VARIABLES_ENTRY);
 
         var expected = new Dictionary<string, string>();
         CollectionAssert.AreEqual(expected, environmentVariables);
