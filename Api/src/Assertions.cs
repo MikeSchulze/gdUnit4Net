@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -383,28 +384,48 @@ public static class Assertions
 
         if (typeof(IDictionary).IsAssignableFrom(valueType))
         {
-            if (valueType.IsGenericType)
-            {
-                var assertType = typeof(DictionaryAssert<,>).MakeGenericType(valueType.GenericTypeArguments);
-                var instance = Activator.CreateInstance(assertType, current)
-                               ?? throw new InvalidOperationException($"Failed to create instance of {assertType.Name}");
-                return instance;
-            }
+            if (!valueType.IsGenericType)
+                return DictionaryAssert<object, object?>.From(current as IDictionary);
 
-            return DictionaryAssert<object, object?>.From(current as IDictionary);
+            var assertType = typeof(DictionaryAssert<,>).MakeGenericType(valueType.GenericTypeArguments);
+            var constructorArgType = typeof(IDictionary<,>).MakeGenericType(valueType.GenericTypeArguments);
+            var constructor = (assertType.GetConstructor(
+                                   BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                   null,
+                                   new[] { constructorArgType },
+                                   null)
+                               ?? assertType.GetConstructor(
+                                   BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                   null,
+                                   new[] { valueType },
+                                   null))
+                              ?? throw new InvalidOperationException($"No suitable constructor found for {assertType.Name}");
+
+            var instance = constructor.Invoke(new object[] { current! });
+            return instance;
         }
 
         if (typeof(IEnumerable).IsAssignableFrom(valueType))
         {
-            if (valueType.IsGenericType)
-            {
-                var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType.GenericTypeArguments[0]);
-                var instance = Activator.CreateInstance(assertType, current)
-                               ?? throw new InvalidOperationException($"Failed to create instance of {assertType.Name}");
-                return instance;
-            }
+            if (!valueType.IsGenericType)
+                return AssertThat(current as IEnumerable);
 
-            return AssertThat(current as IEnumerable);
+            var assertType = typeof(EnumerableAssert<>).MakeGenericType(valueType.GenericTypeArguments[0]);
+            var constructorArgType = typeof(IEnumerable<>).MakeGenericType(valueType.GenericTypeArguments[0]);
+            var constructor = assertType.GetConstructor(
+                                  BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                  null,
+                                  new[] { constructorArgType },
+                                  null)
+                              ?? assertType.GetConstructor(
+                                  BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                  null,
+                                  new[] { valueType },
+                                  null)
+                              ?? throw new InvalidOperationException($"No suitable constructor found for {assertType.Name}");
+
+            var instance = constructor.Invoke(new object[] { current! });
+            return instance;
         }
 
         return new ObjectAssert(current);

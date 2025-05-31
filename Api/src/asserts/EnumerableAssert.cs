@@ -3,6 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,15 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
 {
-    public EnumerableAssert(IEnumerable? current)
+    internal EnumerableAssert(IEnumerable? current)
         : base(current?.Cast<TValue?>())
     {
     }
 
-    public EnumerableAssert(IEnumerable<TValue?>? current)
+    internal EnumerableAssert(IEnumerable<TValue?>? current)
         : base(current)
     {
     }
@@ -176,7 +178,10 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
     }
 
     public IEnumerableAssert<object?> Extract(string methodName, params object[] args)
-        => ExtractV(new ValueExtractor(methodName, args));
+    {
+        ArgumentException.ThrowIfNullOrEmpty(methodName);
+        return ExtractV(new ValueExtractor(methodName, args));
+    }
 
     public IEnumerableAssert<object?> ExtractV(params IValueExtractor[] extractors)
         => new EnumerableAssert<object?>(
@@ -335,3 +340,4 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         public List<TValue?> NotFound { get; init; } = new();
     }
 }
+#pragma warning restore CS1591, SA1600

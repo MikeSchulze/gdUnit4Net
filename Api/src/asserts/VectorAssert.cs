@@ -14,10 +14,11 @@ using SystemVector2 = System.Numerics.Vector2;
 using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
-internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
     where TValue : IEquatable<TValue>
 {
-    public VectorAssert(TValue current)
+    internal VectorAssert(TValue current)
         : base(current)
     {
     }
@@ -133,3 +134,4 @@ internal class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
     };
 #pragma warning restore CS8619
 }
+#pragma warning restore CS1591, SA1600

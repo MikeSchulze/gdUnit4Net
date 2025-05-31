@@ -11,11 +11,13 @@ using System.Runtime.ExceptionServices;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal sealed class ExceptionAssert<TException> : IExceptionAssert
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public sealed class ExceptionAssert<TException> : IExceptionAssert
     where TException : Exception
 {
-    public ExceptionAssert(Action action)
+    internal ExceptionAssert(Action action)
     {
+        ArgumentNullException.ThrowIfNull(action);
         try
         {
             action.Invoke();
@@ -29,7 +31,7 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         }
     }
 
-    public ExceptionAssert(TException e) => Current = e;
+    internal ExceptionAssert(TException e) => Current = e;
 
     private TException? Current { get; }
 
@@ -44,6 +46,7 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
 
     public IExceptionAssert HasMessage(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         expected = expected.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.Equals(expected, StringComparison.Ordinal))
@@ -98,12 +101,14 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
 
     public IAssert OverrideFailureMessage(string message)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
         CustomFailureMessage = message.UnixFormat();
         return this;
     }
 
     public IExceptionAssert StartsWithMessage(string value)
     {
+        ArgumentException.ThrowIfNullOrEmpty(value);
         value = value.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.StartsWith(value, StringComparison.InvariantCulture))
@@ -124,3 +129,4 @@ internal sealed class ExceptionAssert<TException> : IExceptionAssert
         throw new TestFailedException(failureMessage);
     }
 }
+#pragma warning restore CS1591, SA1600

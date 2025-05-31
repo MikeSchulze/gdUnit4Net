@@ -6,7 +6,8 @@ namespace GdUnit4.Asserts;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal abstract class AssertBase<TValue> : IAssertBase<TValue>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected AssertBase(TValue? current) => Current = current;
 
@@ -66,8 +67,11 @@ internal abstract class AssertBase<TValue> : IAssertBase<TValue>
     protected void ThrowTestFailureReport(string message, object? current, object? expected)
 #pragma warning restore IDE0060 // Remove unused parameter
     {
+#pragma warning disable CA1062
         var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
+#pragma warning restore CA1062
         CurrentFailureMessage = failureMessage;
         throw new TestFailedException(failureMessage);
     }
 }
+#pragma warning restore CS1591, SA1600

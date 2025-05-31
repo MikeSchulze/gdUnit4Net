@@ -9,10 +9,11 @@ using System.Linq;
 
 using CommandLine;
 
-internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
     where TKey : notnull
 {
-    public DictionaryAssert(IDictionary<TKey, TValue>? current)
+    internal DictionaryAssert(IDictionary<TKey, TValue>? current)
         : base(current)
     {
     }
@@ -182,3 +183,4 @@ internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, 
             ThrowTestFailureReport(AssertFailures.IsNotNull(), base.Current, null);
     }
 }
+#pragma warning restore CS1591, SA1600
