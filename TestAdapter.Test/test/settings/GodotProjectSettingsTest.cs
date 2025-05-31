@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Test.Settings;
+namespace GdUnit4.TestAdapter.Test.Settings;
 
 using System.IO;
 
@@ -6,9 +6,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using TestAdapter.Settings;
 
-using static TestUtils;
-
 using static TestAdapter.Utilities.Utils;
+using static TestUtils;
 
 [TestClass]
 public class GodotProjectSettingsTest
@@ -20,6 +19,7 @@ public class GodotProjectSettingsTest
         Assert.AreEqual(
             Path.Combine(GetUserDataDirectory, "app_userdata", "gdUnit4Test", "logs", "godot.log"),
             GodotProjectSettings.GlobalizeGodotPath("user://logs/godot.log", "gdUnit4Test"));
+
         // project specific path
         Assert.AreEqual(
             Path.Combine(GetProjectDirectory, "logs", "godot.log"),

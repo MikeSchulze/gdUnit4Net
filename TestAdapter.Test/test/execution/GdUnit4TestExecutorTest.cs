@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Test.Execution;
+namespace GdUnit4.TestAdapter.Test.Execution;
 
 using System;
 
@@ -10,7 +10,7 @@ using Moq;
 [TestClass]
 public class GdUnit4TestExecutorTest
 {
-    private static readonly string XmlSettings =
+    private const string XML_SETTINGS =
         """
         <?xml version="1.0" encoding="utf-8"?>
         <RunSettings>
@@ -49,7 +49,7 @@ public class GdUnit4TestExecutorTest
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
         mockRunContext.SetupGet(rc => rc.RunSettings)
-            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
+            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // run
         GdUnit4TestExecutor.SetupRunnerEnvironment(mockRunContext.Object, frameworkHandle);

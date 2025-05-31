@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Test;
+namespace GdUnit4.TestAdapter.Test;
 
 using System;
 using System.IO;
