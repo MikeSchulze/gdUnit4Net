@@ -56,7 +56,7 @@ public class GdUnit4TestDiscovererTest
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // Check initial state
-        var assemblyPath = AssemblyPaths.LIBARYPATH;
+        var assemblyPath = GetExampleAssemblyPath();
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded initially");
 
         // Check discovery process
@@ -135,7 +135,7 @@ public class GdUnit4TestDiscovererTest
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // var assemblyPath = "D:\\development\\workspace\\gdUnit4Net\\test\\.godot\\mono\\temp\\bin\\Debug\\gdUnit4Test.dll"; //AssemblyPaths.LibraryPath;
-        const string assemblyPath = AssemblyPaths.LIBARYPATH;
+        var assemblyPath = GetExampleAssemblyPath();
 
         Assert.IsTrue(File.Exists(assemblyPath), $"Can find the test assembly: '{assemblyPath}'");
         var discoverer = new GdUnit4TestDiscoverer();
@@ -194,6 +194,28 @@ public class GdUnit4TestDiscovererTest
         => AppDomain.CurrentDomain
             .GetAssemblies()
             .Any(a => a.Location == assemblyPath);
+
+    private static string GetExampleAssemblyPath()
+    {
+        // Get test assembly location
+        var testDir = Path.GetDirectoryName(typeof(GdUnit4TestDiscovererTest).Assembly.Location)!;
+
+        // Navigate up to solution root
+        var solutionRoot = Path.GetFullPath(Path.Combine(testDir, "..", "..", "..", ".."));
+
+        // Godot projects compile to .godot/mono/temp/bin/Debug/
+        var exampleAssembly = Path.Combine(solutionRoot, "Example", ".godot", "mono", "temp", "bin", "Debug", "ExampleProject.dll");
+
+        // Verify it exists
+        if (!File.Exists(exampleAssembly))
+        {
+            throw new FileNotFoundException(
+                $"Example assembly not found at {exampleAssembly}. " +
+                "Make sure the Godot Example project is built.");
+        }
+
+        return exampleAssembly;
+    }
 
     private void AssertTestCase(IEnumerable<TestCase> tests, string fullyQualifiedName, string displayName, string source, string codeFilePath, int lineNumber)
     {
