@@ -22,7 +22,7 @@
         <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
         <PackageReference Include="gdUnit4.api" Version="5.0.0-rc2"/>
         <PackageReference Include="gdUnit4.test.adapter" Version="3.0.0-rc1"/>
-        <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc6">
+        <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc7">
             <PrivateAssets>none</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
