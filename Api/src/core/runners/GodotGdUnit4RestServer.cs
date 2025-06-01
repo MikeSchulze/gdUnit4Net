@@ -100,7 +100,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
 
     internal void Stop() => Task.Run(async () =>
     {
-        if (await processLock.WaitAsync(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false))
+        if (await processLock.WaitAsync(TimeSpan.FromMilliseconds(1000)).ConfigureAwait(false))
         {
             try
             {

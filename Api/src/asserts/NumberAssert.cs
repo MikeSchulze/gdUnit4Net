@@ -6,11 +6,12 @@ namespace GdUnit4.Asserts;
 using System;
 using System.Numerics;
 
-internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
     where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
-    public NumberAssert(TValue current)
+    internal NumberAssert(TValue current)
         : base(current)
     {
     }
@@ -115,3 +116,4 @@ internal class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
         return this;
     }
 }
+#pragma warning restore CS1591, SA1600

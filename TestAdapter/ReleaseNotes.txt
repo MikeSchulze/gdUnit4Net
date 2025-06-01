@@ -1,3 +1,22 @@
+v3.0.0
+* GD-27: Added VSTest filter support with test categories and traits
+* GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
+* GD-160: Apply runsettings environment variables to the test execution context
+
+## ⚙️ Configuration:
+
+New `.runsettings` options:
+```xml
+<RunSettings>
+  <GdUnit4>
+    <CaptureStdOut>true</CaptureStdOut>
+    <Parameters>--verbose --headless</Parameters>
+    <DisplayName>FullyQualifiedName</DisplayName>
+    <CompileProcessTimeout>30000</CompileProcessTimeout>
+  </GdUnit4>
+</RunSett>
+```
+--------------------------------------------------------------------------
 
 v2.1.0
 Improvements:

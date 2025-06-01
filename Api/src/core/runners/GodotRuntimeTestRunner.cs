@@ -31,7 +31,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <summary>
     ///     Directory name for temporary test runner files.
     /// </summary>
-    internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter";
+    internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter_v5";
 
     private readonly TestEngineSettings settings;
     private Process? process;
@@ -104,13 +104,16 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         lock (ProcessLock)
         {
-            if (!InitRuntimeEnvironment(Environment.CurrentDirectory, GodotBin))
+            var godotBinary = GodotBin;
+            if (!InstallTestRunnerClasses(Environment.CurrentDirectory))
                 return;
 
+            if (!ReCompileGodotProject(Environment.CurrentDirectory, godotBinary))
+                return;
             Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
 
             var processStartInfo =
-                new ProcessStartInfo(GodotBin, BuildGodotArguments(settings))
+                new ProcessStartInfo(godotBinary, BuildGodotArguments(settings))
                 {
                     StandardOutputEncoding = Encoding.Default,
                     RedirectStandardOutput = true,
@@ -160,50 +163,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         }
     }
 
-    internal bool InitRuntimeEnvironment(string workingDirectory, string godotBinary) =>
-        InstallTestRunnerClasses(workingDirectory, godotBinary);
-
-    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
-        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
-
-    private EventHandler ExitHandler(string source = "") => (sender, _) =>
-    {
-        Console.Out.Flush();
-        if (sender is Process p)
-        {
-            if (p.ExitCode == 0)
-                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
-            else
-                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
-        }
-    };
-
-    private void CloseProcess(Process? processToClose)
-    {
-        if (processToClose == null)
-            return;
-        try
-        {
-            processToClose.CancelErrorRead();
-            processToClose.CancelOutputRead();
-            processToClose.ErrorDataReceived -= StdErrorProcessor;
-            processToClose.Exited -= ExitHandler();
-            processToClose.Dispose();
-        }
-#pragma warning disable CA1031
-        catch (Exception)
-#pragma warning restore CA1031
-        {
-            // ignore
-        }
-        finally
-        {
-            lock (ProcessLock)
-                process = null;
-        }
-    }
-
-    private bool InstallTestRunnerClasses(string workingDirectory, string godotBinary)
+    internal bool InstallTestRunnerClasses(string workingDirectory, bool reCompile = true)
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
@@ -225,10 +185,21 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         content = content.Replace("GdUnit4TestRunnerSceneTemplate", "GdUnit4TestRunnerScene", StringComparison.Ordinal);
         File.WriteAllText(sceneRunnerSource, content, Encoding.UTF8);
 
+        if (!reCompile)
+            return true;
+        var isSuccess = RunDotnetRestore(workingDirectory);
+        if (!isSuccess)
+            CleanupRunnerOnFailure(sceneRunnerSource);
+        return isSuccess;
+    }
+
+    internal bool ReCompileGodotProject(string workingDirectory, string godotBinary)
+    {
+        using var compileProcess = new Process();
         try
         {
             // recompile the project
-            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . --headless --build-solutions --quit-after 1000")
+            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . -e --headless --quit-after 1000 --verbose")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -240,8 +211,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             };
 
             Logger.LogInfo($"Working dir {workingDirectory}");
-            Logger.LogInfo($"Run Rebuild Godot Project ... {godotBinary} {processStartInfo.Arguments}");
-            using var compileProcess = new Process();
+            Logger.LogInfo($"Rebuild Godot Project ... {godotBinary} {processStartInfo.Arguments}");
             compileProcess.StartInfo = processStartInfo;
             compileProcess.EnableRaisingEvents = true;
             compileProcess.OutputDataReceived += (_, args) =>
@@ -257,7 +227,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             if (!compileProcess.Start())
             {
                 Logger.LogError(@"Rebuild Godot Project fails on process start, exit ..");
-                CleanupRunnerOnFailure(sceneRunnerSource);
                 return false;
             }
 
@@ -302,23 +271,138 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                      """);
 
                 compileProcess.Kill(true);
-                CleanupRunnerOnFailure(sceneRunnerSource);
             }
 
-            var isSuccess = compileProcess.ExitCode == 0;
-            if (!isSuccess)
-                CleanupRunnerOnFailure(sceneRunnerSource);
-
-            CloseProcess(compileProcess);
-            return isSuccess;
+            return compileProcess.ExitCode == 0;
         }
 #pragma warning disable CA1031
         catch (Exception e)
 #pragma warning restore CA1031
         {
             Logger.LogError($"Install GdUnit4 `TestRunner` fails with: {e.Message}\n {e.StackTrace}");
-            CleanupRunnerOnFailure(sceneRunnerSource);
+
             return false;
+        }
+        finally
+        {
+            CloseProcess(compileProcess);
+        }
+    }
+
+    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
+        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
+
+    private bool RunDotnetRestore(string workingDirectory)
+    {
+        try
+        {
+            Logger.LogInfo("Running dotnet build to ensure dependencies are available...");
+            var arguments = "build --configuration Debug " +
+                            "--verbosity normal " +
+                            "--no-restore " +
+                            "/p:BuildProjectReferences=false " + // Don't rebuild project refs
+                            "/p:_GetChildProjectCopyToOutputDirectoryItems=false " + // Don't copy child project items
+                            "/p:SkipCopyingFrameworkReferences=true "; // Skip framework refs (already present)
+            var processStartInfo = new ProcessStartInfo("dotnet", arguments)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = workingDirectory
+            };
+
+            using var restoreProcess = new Process();
+            restoreProcess.StartInfo = processStartInfo;
+            restoreProcess.EnableRaisingEvents = true;
+
+            restoreProcess.OutputDataReceived += (_, args) =>
+            {
+                var message = args.Data?.Trim();
+                if (!string.IsNullOrEmpty(message))
+                    Logger.LogInfo($"build: {message}");
+            };
+
+            restoreProcess.ErrorDataReceived += (_, args) =>
+            {
+                var message = args.Data?.Trim();
+                if (!string.IsNullOrEmpty(message))
+                    Logger.LogInfo($"error: {message}");
+            };
+
+            if (!restoreProcess.Start())
+            {
+                Logger.LogError("Failed to start dotnet build process");
+                return false;
+            }
+
+            restoreProcess.BeginErrorReadLine();
+            restoreProcess.BeginOutputReadLine();
+
+            // Wait for restore to complete (should be quick)
+            var completed = restoreProcess.WaitForExit(30000); // 30 second timeout
+
+            if (!completed)
+            {
+                Logger.LogWarning("dotnet build timed out after 30 seconds");
+                restoreProcess.Kill(true);
+                return false;
+            }
+
+            var success = restoreProcess.ExitCode == 0;
+            if (success)
+            {
+                Logger.LogInfo("dotnet build completed successfully");
+                return success;
+            }
+
+            Logger.LogError($"dotnet build failed with exit code: {restoreProcess.ExitCode}");
+            return false;
+        }
+#pragma warning disable CA1031
+        catch (Exception ex)
+#pragma warning restore CA1031
+        {
+            Logger.LogError($"Error running build restore: {ex.Message}");
+            return false;
+        }
+    }
+
+    private EventHandler ExitHandler(string source = "") => (sender, _) =>
+    {
+        Console.Out.Flush();
+        if (sender is Process p)
+        {
+            if (p.ExitCode == 0)
+                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
+            else
+                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
+        }
+    };
+
+    private void CloseProcess(Process? processToClose)
+    {
+        if (processToClose == null)
+            return;
+        try
+        {
+            processToClose.CancelErrorRead();
+            processToClose.CancelOutputRead();
+            processToClose.ErrorDataReceived -= StdErrorProcessor;
+            processToClose.Exited -= ExitHandler();
+            processToClose.Dispose();
+        }
+#pragma warning disable CA1031
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+            // ignore
+        }
+        finally
+        {
+            lock (ProcessLock)
+                process = null;
         }
     }
 

@@ -11,9 +11,10 @@ using Core.Signals;
 
 using Godot;
 
-internal sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 {
-    public SignalAssert(GodotObject current)
+    internal SignalAssert(GodotObject current)
         : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
 
@@ -72,3 +73,4 @@ internal sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         throw new TestFailedException(CurrentFailureMessage, lineNumber);
     }
 }
+#pragma warning restore CS1591, SA1600
