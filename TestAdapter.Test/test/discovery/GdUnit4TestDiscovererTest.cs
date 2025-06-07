@@ -171,7 +171,7 @@ public class GdUnit4TestDiscovererTest
             "Success",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            14);
+            15);
 
         // multi testcase attribute usage
         AssertTestCase(
@@ -180,14 +180,14 @@ public class GdUnit4TestDiscovererTest
             "TestA:0 (0, 1, 2)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            31);
+            32);
         AssertTestCase(
             discoveredTests,
             "Examples.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
             "TestB:1 (1, 2, 3)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            31);
+            32);
     }
 
     private static bool IsAssemblyLoaded(string assemblyPath)

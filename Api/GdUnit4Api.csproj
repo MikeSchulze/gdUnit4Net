@@ -62,6 +62,8 @@
     <None Include="../LICENSE" Pack="true" PackagePath="/"/>
     <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
     <None Include="../icon.png" Pack="true" PackagePath="/"/>
+    <None Include="build/gdUnit4.api.props" Pack="true" PackagePath="build/gdUnit4.api.props"/>
+    <None Include="buildTransitive/gdUnit4.api.props" Pack="true" PackagePath="buildTransitive/gdUnit4.api.props"/>
 
     <!-- provide the test runner scene as resource -->
     <EmbeddedResource Include="src\core\runners\GdUnit4TestRunnerSceneTemplate.cs"/>

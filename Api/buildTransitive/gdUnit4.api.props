@@ -1,0 +1,5 @@
+﻿<Project>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);GDUNIT4NET_API_V5</DefineConstants>
+  </PropertyGroup>
+</Project>
