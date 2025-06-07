@@ -1,5 +1,6 @@
 namespace Examples;
 
+#if GDUNIT4NET_API_V5
 using GdUnit4;
 
 using static GdUnit4.Assertions;
@@ -30,3 +31,4 @@ public class ExampleTest
     [TestCase(1, 2, 3, TestName = "TestB", Description = "foo ")]
     public void DataRows(int a, int b, int c) => AssertBool(true).IsTrue();
 }
+#endif
