@@ -13,7 +13,7 @@ runs:
   using: composite
   steps:
     - name: 'Publish Test Results'
-      uses: dorny/test-reporter@v1.9.1
+      uses: dorny/test-reporter@v2.1.0
       with:
         name: ${{ inputs.report-name }}
         path: ${{ inputs.report-path }}
