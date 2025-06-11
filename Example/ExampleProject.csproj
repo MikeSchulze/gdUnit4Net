@@ -19,7 +19,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
         <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions, but set it to private to prevent conflicts -->
-        <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
+        <PackageReference Include="MSTest.TestFramework" Version="3.9.2" ExcludeAssets="build;analyzers;native"/>
         <PackageReference Include="gdUnit4.api" Version="5.0.0-rc3"/>
         <PackageReference Include="gdUnit4.test.adapter" Version="3.0.0-rc1"/>
         <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc7">
