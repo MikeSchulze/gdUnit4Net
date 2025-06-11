@@ -51,7 +51,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
     <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="$(MicrosoftSdkVersion)" PrivateAssets="None"/>
-    <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+    <PackageReference Include="coverlet.collector" Version="6.0.4"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
     <ProjectReference Include="..\Api\GdUnit4Api.csproj" />
 
