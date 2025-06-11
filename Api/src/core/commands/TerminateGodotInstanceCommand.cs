@@ -16,7 +16,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///     Command to safely terminate a running Godot instance.
 /// </summary>
-public class TerminateGodotInstanceCommand : BaseCommand
+internal class TerminateGodotInstanceCommand : BaseCommand
 {
     [JsonConstructor]
     public TerminateGodotInstanceCommand()
@@ -29,16 +29,18 @@ public class TerminateGodotInstanceCommand : BaseCommand
     /// <remarks>
     ///     This command gracefully closes the Godot scene tree and engine.
     /// </remarks>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+    /// <returns>
+    ///     A <see cref="Task" /> representing the asynchronous operation.
+    /// </returns>
     public override Task<Response> Execute(ITestEventListener testEventListener)
     {
         Console.WriteLine("Terminating Godot instance.");
-        var hint = Engine.IsEditorHint();
         (Engine.GetMainLoop() as SceneTree)?.Quit();
-        return Task.FromResult(new Response
-        {
-            StatusCode = HttpStatusCode.OK,
-            Payload = string.Empty
-        });
+        return Task.FromResult(
+            new Response
+            {
+                StatusCode = HttpStatusCode.OK,
+                Payload = string.Empty
+            });
     }
 }

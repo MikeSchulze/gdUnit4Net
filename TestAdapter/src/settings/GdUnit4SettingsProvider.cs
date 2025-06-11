@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter.Settings;
 
 using System;
@@ -8,12 +11,13 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 [SettingsName(GdUnit4Settings.RunSettingsXmlNode)]
+
 // ReSharper disable once ClassNeverInstantiated.Global
 internal sealed class GdUnit4SettingsProvider : ISettingsProvider
 {
-    private XmlSerializer Serializer { get; } = new(typeof(GdUnit4Settings));
+    private GdUnit4Settings Settings { get; set; } = new();
 
-    public GdUnit4Settings Settings { get; private set; } = new();
+    private XmlSerializer Serializer { get; } = new(typeof(GdUnit4Settings));
 
     public void Load(XmlReader reader)
     {
@@ -25,13 +29,15 @@ internal sealed class GdUnit4SettingsProvider : ISettingsProvider
                 Settings = settings ?? new GdUnit4Settings();
             }
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Console.WriteLine($"Loading GdUnit4 Adapter settings failed! {e}");
         }
     }
 
-    public static GdUnit4Settings LoadSettings(IDiscoveryContext discoveryContext)
+    internal static GdUnit4Settings LoadSettings(IDiscoveryContext discoveryContext)
     {
         var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
         return gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();

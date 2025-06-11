@@ -9,7 +9,7 @@ using Asserts;
 
 using Reporting;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
 {
@@ -22,11 +22,15 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
     {
         context.MemoryPool.SetActive(StageName, true);
 
-        await base.Execute(context);
+        await base
+            .Execute(context)
+            .ConfigureAwait(true);
 
-        await context.MemoryPool.Gc();
+        await context.MemoryPool
+            .Gc()
+            .ConfigureAwait(true);
         if (context.MemoryPool.OrphanCount > 0)
-            context.ReportCollector.PushFront(new TestReport(WARNING, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
+            context.ReportCollector.PushFront(new TestReport(Warning, context.CurrentTestCase?.Line ?? 0, ReportOrphans(context)));
     }
 
     private static string ReportOrphans(ExecutionContext context) =>

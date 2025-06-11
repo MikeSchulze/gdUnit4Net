@@ -3,6 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,21 +14,22 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
 {
-    public EnumerableAssert(IEnumerable? current)
+    internal EnumerableAssert(IEnumerable? current)
         : base(current?.Cast<TValue?>())
     {
     }
 
-    public EnumerableAssert(IEnumerable<TValue?>? current)
+    internal EnumerableAssert(IEnumerable<TValue?>? current)
         : base(current)
     {
     }
 
     public IEnumerableAssert<TValue?> IsEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -35,7 +37,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
 
     public IEnumerableAssert<TValue?> IsNotEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -176,15 +178,19 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
     }
 
     public IEnumerableAssert<object?> Extract(string methodName, params object[] args)
-        => ExtractV(new ValueExtractor(methodName, args));
+    {
+        ArgumentException.ThrowIfNullOrEmpty(methodName);
+        return ExtractV(new ValueExtractor(methodName, args));
+    }
 
     public IEnumerableAssert<object?> ExtractV(params IValueExtractor[] extractors)
-        => new EnumerableAssert<object?>(Current?.Select(v =>
-            {
-                var values = extractors.Select(e => e.ExtractValue(v)).ToArray();
-                return values.Length == 1 ? values.First() : new Tuple(values);
-            })
-            .ToList());
+        => new EnumerableAssert<object?>(
+            Current?.Select(v =>
+                {
+                    var values = extractors.Select(e => e.ExtractValue(v)).ToArray();
+                    return values.Length == 1 ? values.First() : new Tuple(values);
+                })
+                .ToList());
 
     public new IEnumerableAssert<TValue?> OverrideFailureMessage(string message)
         => (IEnumerableAssert<TValue?>)base.OverrideFailureMessage(message);
@@ -334,10 +340,4 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         public List<TValue?> NotFound { get; init; } = new();
     }
 }
-
-internal static class CompareExtensions
-{
-    internal static bool IsEquals<T>(this T? c, T? e) => Comparable.IsEqual(c, e).Valid;
-
-    internal static bool IsSame<T>(this T? c, T? e) => AssertBase<T>.IsSame(c, e);
-}
+#pragma warning restore CS1591, SA1600

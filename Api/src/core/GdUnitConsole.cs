@@ -18,12 +18,6 @@ internal sealed class GdUnitConsole
     private static readonly object LockObj = new();
     private readonly Dictionary<string, (int Left, int Top)> savedCursorsByName = new();
 
-    private GdUnitConsole NewLine()
-    {
-        Console.WriteLine();
-        return this;
-    }
-
     public GdUnitConsole PrintError(string message)
     {
         lock (LockObj)
@@ -61,6 +55,24 @@ internal sealed class GdUnitConsole
         }
     }
 
+    internal void SaveCursor(string name) =>
+        savedCursorsByName[name] = Console.GetCursorPosition();
+
+    internal void RestoreCursor(string name)
+    {
+        if (savedCursorsByName.TryGetValue(name, out var position))
+        {
+            Console.SetCursorPosition(position.Left, position.Top);
+            savedCursorsByName.Remove(name);
+        }
+    }
+
+    private GdUnitConsole NewLine()
+    {
+        Console.WriteLine();
+        return this;
+    }
+
     private GdUnitConsole BeginColor(ConsoleColor color)
     {
         var c = ToColor(color);
@@ -95,7 +107,7 @@ internal sealed class GdUnitConsole
         return this;
     }
 
-    private static Color ToColor(ConsoleColor color)
+    private Color ToColor(ConsoleColor color)
     {
         var colorName = Enum.GetName(typeof(ConsoleColor), color);
         return Color.FromName(colorName!);
@@ -111,17 +123,5 @@ internal sealed class GdUnitConsole
     {
         Console.WriteLine(message);
         return this;
-    }
-
-    internal void SaveCursor(string name) =>
-        savedCursorsByName[name] = Console.GetCursorPosition();
-
-    internal void RestoreCursor(string name)
-    {
-        if (savedCursorsByName.TryGetValue(name, out var position))
-        {
-            Console.SetCursorPosition(position.Left, position.Top);
-            savedCursorsByName.Remove(name);
-        }
     }
 }

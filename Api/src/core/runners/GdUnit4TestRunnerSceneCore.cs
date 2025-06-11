@@ -4,20 +4,31 @@
 namespace GdUnit4.Core.Runners;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using Api;
 
 using Godot;
 
+/// <summary>
+///     The GdUnit4Net test runner scene.
+/// </summary>
 public partial class GdUnit4TestRunnerSceneCore : SceneTree
 {
+    /// <inheritdoc />
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "TestRunner disposal is managed by Godot internals.")]
     public override void _Initialize()
     {
         try
         {
             Root.AddChild(new TestRunner());
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             GD.PrintErr("Exception", e.Message);
             Quit(100); // Exit with error code

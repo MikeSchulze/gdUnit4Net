@@ -11,50 +11,17 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Api;
+
+using Asserts;
+
 using Extensions;
 
 using Godot;
 
+using static Assertions;
+
 using ExecutionContext = Execution.ExecutionContext;
-
-/// <summary>
-///     A helper to simulate mouse moving form a source to final position.
-/// </summary>
-public partial class MouseMoveTask : Node, IDisposable
-{
-    public MouseMoveTask(Vector2 currentPosition, Vector2 finalPosition)
-    {
-        CurrentMousePosition = currentPosition;
-        FinalMousePosition = finalPosition;
-    }
-
-    private Vector2 CurrentMousePosition { get; set; }
-
-    private Vector2 FinalMousePosition { get; }
-
-    public new void Dispose()
-    {
-        QueueFree();
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    public async Task WaitOnFinalPosition(ISceneRunner sceneRunner, double time, Tween.TransitionType transitionType)
-    {
-        using var tween = sceneRunner.Scene().CreateTween();
-        tween.TweenProperty(this, "CurrentMousePosition", FinalMousePosition, time).SetTrans(transitionType);
-        tween.Play();
-
-        while (!sceneRunner.GetMousePosition().IsEqualApprox(FinalMousePosition))
-        {
-            sceneRunner.SimulateMouseMove(CurrentMousePosition);
-            await ISceneRunner.SyncProcessFrame;
-        }
-
-        sceneRunner.SimulateMouseMove(FinalMousePosition);
-        await ISceneRunner.SyncProcessFrame;
-    }
-}
 
 internal sealed class SceneRunner : ISceneRunner
 {
@@ -198,12 +165,14 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     public async Task SimulateMouseMoveRelative(Vector2 relative, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear)
-        => await SimulateMouseMoveAbsolute(GetMousePosition() + relative, time, transitionType);
+        => await SimulateMouseMoveAbsolute(GetMousePosition() + relative, time, transitionType)
+            .ConfigureAwait(true);
 
     public async Task SimulateMouseMoveAbsolute(Vector2 position, double time = 1.0, Tween.TransitionType transitionType = Tween.TransitionType.Linear)
     {
         using var mouseMove = new MouseMoveTask(GetMousePosition(), position);
-        await mouseMove.WaitOnFinalPosition(this, time, transitionType);
+        await mouseMove.WaitOnFinalPosition(this, time, transitionType)
+            .ConfigureAwait(true);
     }
 
     public ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex, bool doubleClick = false)
@@ -258,7 +227,10 @@ internal sealed class SceneRunner : ISceneRunner
     public async Task SimulateFrames(uint frames, uint deltaPeerFrame)
     {
         for (var frame = 0; frame <= frames; frame++)
-            await AwaitMillis(deltaPeerFrame);
+        {
+            await AwaitMillis(deltaPeerFrame)
+                .ConfigureAwait(true);
+        }
     }
 
     public async Task SimulateFrames(uint frames)
@@ -270,18 +242,20 @@ internal sealed class SceneRunner : ISceneRunner
 
     public Node Scene() => currentScene;
 
-    public GdUnitAwaiter.GodotMethodAwaiter<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
+    public IGodotMethodAwaitable<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
         where TVariant : notnull
-        => new(currentScene, methodName);
+        => new GodotMethodAwaitable<TVariant>(currentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
     {
         using var tokenSource = new CancellationTokenSource();
-        await Task.Delay(TimeSpan.FromMilliseconds(timeMillis), tokenSource.Token);
+        await Task.Delay(TimeSpan.FromMilliseconds(timeMillis), tokenSource.Token)
+            .ConfigureAwait(true);
     }
 
-    public async Task AwaitSignal(string signal, params Variant[] args) =>
-        await currentScene.AwaitSignal(signal, args);
+    public async Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args) =>
+        await new SignalAssert(currentScene).IsEmitted(signal, args)
+            .ConfigureAwait(true);
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
 
@@ -293,7 +267,8 @@ internal sealed class SceneRunner : ISceneRunner
 
     public async Task<Variant> InvokeAsync(string name, params Variant[] args)
     {
-        var result = await GodotObjectExtensions.Invoke(currentScene, name, args);
+        var result = await GodotObjectExtensions.Invoke(currentScene, name, args)
+            .ConfigureAwait(true);
         return result.ToVariant();
     }
 
@@ -337,6 +312,12 @@ internal sealed class SceneRunner : ISceneRunner
         IsDisposed = true;
     }
 
+    internal static MouseButtonMask ToMouseButtonMask(MouseButton button)
+    {
+        var button_mask = 1 << ((int)button - 1);
+        return (MouseButtonMask)Enum.ToObject(typeof(MouseButtonMask), button_mask);
+    }
+
     private static Node LoadScene(string resourcePath)
     {
         if (!ResourceLoader.Exists(resourcePath))
@@ -347,9 +328,21 @@ internal sealed class SceneRunner : ISceneRunner
         return ((PackedScene)ResourceLoader.Load(resourcePath)).Instantiate();
     }
 
+    // ReSharper disable once UnusedMethodReturnValue.Local
+    private static bool HandleActionEvent(InputEventAction actionEvent)
+    {
+        if (!InputMap.EventIsAction(actionEvent, actionEvent.Action, true))
+            return false;
+        if (actionEvent.IsPressed())
+            Input.ActionPress(actionEvent.Action, InputMap.ActionGetDeadzone(actionEvent.Action));
+        else
+            Input.ActionRelease(actionEvent.Action);
+        return true;
+    }
+
     private void ResetInputToDefault()
     {
-        // reset all mouse button to initial state if is need
+        // reset all mouse buttons to the initial state if it needs
         foreach (var button in mouseButtonOnPress)
         {
             if (Input.IsMouseButtonPressed(button))
@@ -377,10 +370,6 @@ internal sealed class SceneRunner : ISceneRunner
         Input.FlushBufferedEvents();
     }
 
-    /// <summary>
-    ///     copy over current active modifiers.
-    /// </summary>
-    /// <param name="inputEvent"></param>
     private void ApplyInputModifiers(InputEventWithModifiers inputEvent)
     {
         if (LastInputEvent is InputEventWithModifiers lastInputEvent)
@@ -392,13 +381,9 @@ internal sealed class SceneRunner : ISceneRunner
         }
     }
 
-    /// <summary>
-    ///     copy over current active mouse mask and combine with current mask.
-    /// </summary>
-    /// <param name="inputEvent"></param>
     private void ApplyInputMouseMask(InputEvent inputEvent)
     {
-        // first apply last mask
+        // first apply the last mask
         if (LastInputEvent is InputEventMouse lastInputEvent && inputEvent is InputEventMouse ie)
             ie.ButtonMask |= lastInputEvent.ButtonMask;
         if (inputEvent is InputEventMouseButton inputEventMouseButton)
@@ -411,16 +396,6 @@ internal sealed class SceneRunner : ISceneRunner
         }
     }
 
-    internal static MouseButtonMask ToMouseButtonMask(MouseButton button)
-    {
-        var button_mask = 1 << ((int)button - 1);
-        return (MouseButtonMask)Enum.ToObject(typeof(MouseButtonMask), button_mask);
-    }
-
-    /// <summary>
-    ///     copy over last mouse position if is need.
-    /// </summary>
-    /// <param name="inputEvent"></param>
     private void ApplyInputMousePosition(InputEvent inputEvent)
     {
         if (LastInputEvent is InputEventMouse lastInputEvent && inputEvent is InputEventMouseButton ie)
@@ -430,8 +405,6 @@ internal sealed class SceneRunner : ISceneRunner
     /// <summary>
     ///     for handling read https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html?highlight=inputevent#how-does-it-work.
     /// </summary>
-    /// <param name="inputEvent"></param>
-    /// <returns></returns>
     private SceneRunner HandleInputEvent(InputEvent inputEvent)
     {
         if (inputEvent is InputEventMouse mouseEvent)
@@ -451,21 +424,9 @@ internal sealed class SceneRunner : ISceneRunner
             currentScene.GetViewport().SetInputAsHandled();
         }
 
-        // save last input event needs to be merged with next InputEventMouseButton
+        // save the last input event needs to be merged with the next InputEventMouseButton
         LastInputEvent = inputEvent;
         return this;
-    }
-
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    private static bool HandleActionEvent(InputEventAction actionEvent)
-    {
-        if (!InputMap.EventIsAction(actionEvent, actionEvent.Action, true))
-            return false;
-        if (actionEvent.IsPressed())
-            Input.ActionPress(actionEvent.Action, InputMap.ActionGetDeadzone(actionEvent.Action));
-        else
-            Input.ActionRelease(actionEvent.Action);
-        return true;
     }
 
     private void ActivateTimeFactor()
@@ -513,4 +474,46 @@ internal sealed class SceneRunner : ISceneRunner
         => currentScene.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null
            || currentScene.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(field => field.Name.Equals(name, StringComparison.Ordinal))
            || currentScene.GetPropertyList().Any(p => p["name"].VariantEquals(name));
+
+    private sealed class GodotMethodAwaitable<[MustBeVariant] TVariant> : IGodotMethodAwaitable<TVariant>
+        where TVariant : notnull
+    {
+        public GodotMethodAwaitable(Node instance, string methodName, params Variant[] args)
+        {
+            Instance = instance;
+            MethodName = methodName;
+            Args = args;
+            if (!Instance.HasMethod(MethodName) && Instance.GetType().GetMethod(methodName) == null)
+                throw new MissingMethodException($"The method '{MethodName}' not exist on loaded scene.");
+        }
+
+        private string MethodName { get; }
+
+        private Node Instance { get; }
+
+        private Variant[] Args { get; }
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsEqual(TVariant expected) =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsEqual(expected))
+                .ConfigureAwait(true);
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsNull() =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsNull())
+                .ConfigureAwait(true);
+
+        public async Task<IGodotMethodAwaitable<TVariant>> IsNotNull() =>
+            await CallAndWaitIsFinished(current => AssertThat(current).IsNotNull())
+                .ConfigureAwait(true);
+
+        private async Task<IGodotMethodAwaitable<TVariant>> CallAndWaitIsFinished(Action<object?> assertion)
+            => await Task.Run(async () =>
+                {
+                    // sync to the main thread
+                    await GodotObjectExtensions.SyncProcessFrame;
+                    var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args).ConfigureAwait(true);
+                    assertion(value);
+                    return this;
+                })
+                .ConfigureAwait(true);
+    }
 }

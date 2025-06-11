@@ -1,10 +1,11 @@
-﻿// Copyright (c) 2025 Mike Schulze
+// Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Discovery;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -38,7 +39,9 @@ internal static class TestCaseDiscoverer
     /// <param name="logger">Logger for discovery process information.</param>
     /// <param name="testAssembly">Path to the test assembly to scan.</param>
     /// <returns>List of discovered test case descriptors.</returns>
-    public static List<TestCaseDescriptor> Discover(TestEngineSettings settings, ITestEngineLogger logger, string testAssembly)
+#pragma warning disable IDE0060
+    public static IReadOnlyList<TestCaseDescriptor> Discover(TestEngineSettings settings, ITestEngineLogger logger, string testAssembly)
+#pragma warning restore IDE0060
     {
         logger.LogInfo($"Discover tests from assembly: {testAssembly}");
 
@@ -50,20 +53,113 @@ internal static class TestCaseDiscoverer
         using var assemblyDefinition = AssemblyDefinition.ReadAssembly(testAssembly, readerParameters);
         var testSuites = assemblyDefinition.MainModule.Types
             .Where(IsTestSuite)
-            .ToList();
+            .ToImmutableList();
 
         var testCases = testSuites
             .SelectMany(type => DiscoverTests(logger, testAssembly, type))
-            .ToList();
+            .ToImmutableList();
 
-        logger.LogInfo(testCases.Count == 0
-            ? "Discover tests done, no tests found."
-            : $"Discover tests done, {testSuites.Count} TestSuites and total {testCases.Count} Tests found.");
+        logger.LogInfo(
+            testCases.Count == 0
+                ? "Discover tests done, no tests found."
+                : $"Discover tests done, {testSuites.Count} TestSuites and total {testCases.Count} Tests found.");
 
         return testCases;
     }
 
-    internal static IEnumerable<TestCaseDescriptor> DiscoverTests(ITestEngineLogger? logger, string testAssembly, TypeDefinition type)
+    public static IReadOnlyList<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
+    {
+        ArgumentNullException.ThrowIfNull(sourceScript);
+
+        try
+        {
+            var fullScriptPath = Path.GetFullPath(ProjectSettings.GlobalizePath(sourceScript.ResourcePath));
+            var className = Path.GetFileNameWithoutExtension(fullScriptPath);
+
+            foreach (var assemblyPath in TestAssemblyLocations())
+            {
+                // Create a custom resolver that can handle GodotSharp
+                var resolver = new DefaultAssemblyResolver();
+                resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
+
+                // Create reader parameters with the custom resolver
+                var readerParameters = new ReaderParameters
+                {
+                    ReadSymbols = true,
+                    SymbolReaderProvider = new PortablePdbReaderProvider(),
+                    AssemblyResolver = resolver,
+                    ReadingMode = ReadingMode.Deferred // Use deferred loading to avoid resolving references right away
+                };
+
+                // lookup for class in the assembly
+                using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
+                var testSuite = assembly?.MainModule.Types
+                    .FirstOrDefault(definition => definition.Name == className && HasSourceFilePath(definition, fullScriptPath));
+
+                // No suite found, try the next assembly
+                if (assembly == null || testSuite == null)
+                    continue;
+
+                return DiscoverTests(null, assembly.MainModule.FileName, testSuite);
+            }
+
+            Logger.LogWarning($"Could not find assembly or test suite for {className} at {fullScriptPath}");
+            return new List<TestCaseDescriptor>();
+        }
+#pragma warning disable CA1031
+        catch (Exception e)
+#pragma warning restore CA1031
+        {
+            Logger.LogError($"Error discovering tests: {e.Message}\n{e.StackTrace}");
+            return new List<TestCaseDescriptor>();
+        }
+    }
+
+    internal static ImmutableList<TestCaseDescriptor> DiscoverTestCasesFromMethod(
+        MethodDefinition mi,
+        string assemblyPath,
+        bool classRequireEngineMode,
+        string className,
+        ImmutableList<string> classCategories,
+        ImmutableDictionary<string, List<string>> classTraits)
+    {
+        var attributes = mi.CustomAttributes
+            .Where(IsAttribute<TestCaseAttribute>)
+            .ToImmutableList();
+        var hasMultipleAttributes = attributes.Count > 1;
+        var requireRunningGodotEngine = classRequireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
+        var methodCategories = GetCategories(mi);
+        var methodTraits = GetTraits(mi);
+        var allCategories = classCategories.Concat(methodCategories).Distinct().ToImmutableList();
+        var allTraits = CombineTraits(classTraits, methodTraits);
+
+        return attributes
+            .Select((attr, index) =>
+            {
+                var navData = GetNavigationDataOrDefault(mi);
+                var testCaseAttribute = CreateTestCaseAttribute(attr);
+#pragma warning disable IDE0055
+                return new TestCaseDescriptor
+                    {
+                        Id = Guid.NewGuid(),
+                        AssemblyPath = assemblyPath,
+                        ManagedType = className,
+                        ManagedMethod = mi.Name,
+                        AttributeIndex = index,
+                        LineNumber = navData.LineNumber,
+                        CodeFilePath = navData.CodeFilePath,
+                        RequireRunningGodotEngine = requireRunningGodotEngine,
+                        Categories = allCategories,
+                        Traits = allTraits
+                    }
+                    .Build(testCaseAttribute, hasMultipleAttributes);
+#pragma warning restore IDE0055
+            })
+            .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
+            .ToImmutableList();
+    }
+
+    private static ImmutableList<TestCaseDescriptor> DiscoverTests(ITestEngineLogger? logger, string testAssembly, TypeDefinition type)
     {
         var requireEngineMode = type.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
         var typeCategories = GetCategories(type);
@@ -73,8 +169,9 @@ internal static class TestCaseDiscoverer
             .Where(m => m.CustomAttributes.Any(IsAttribute<TestCaseAttribute>))
             .ToList()
             .AsParallel()
-            .SelectMany(mi => DiscoverTestCasesFromMethod(logger, mi, testAssembly, requireEngineMode, type.FullName, typeCategories, typeTraits))
-            .ToList();
+            .SelectMany(mi => DiscoverTestCasesFromMethod(mi, testAssembly, requireEngineMode, type.FullName, typeCategories, typeTraits))
+            .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
+            .ToImmutableList();
 
         logger?.LogInfo($"Discover:  TestSuite {type.FullName} with {testCases.Count} TestCases found.");
         return testCases;
@@ -103,7 +200,9 @@ internal static class TestCaseDiscoverer
                 MethodName = definition.Name
             };
         }
+#pragma warning disable CA1031
         catch (Exception)
+#pragma warning restore CA1031
         {
             return new CodeNavigation
             {
@@ -141,68 +240,24 @@ internal static class TestCaseDiscoverer
         return definition.DebugInformation?.SequencePoints.FirstOrDefault();
     }
 
-    internal static List<TestCaseDescriptor> DiscoverTestCasesFromMethod(
-        ITestEngineLogger? logger,
-        MethodDefinition mi,
-        string assemblyPath,
-        bool classRequireEngineMode,
-        string className,
-        List<string> classCategories,
-        Dictionary<string, List<string>> classTraits)
-    {
-        var attributes = mi.CustomAttributes
-            .Where(IsAttribute<TestCaseAttribute>)
-            .ToList();
-        var hasMultipleAttributes = attributes.Count > 1;
-        var requireRunningGodotEngine = classRequireEngineMode || mi.CustomAttributes.Any(IsAttribute<RequireGodotRuntimeAttribute>);
-        var methodCategories = GetCategories(mi);
-        var methodTraits = GetTraits(mi);
-        var allCategories = classCategories.Concat(methodCategories).Distinct().ToList();
-        var allTraits = CombineTraits(classTraits, methodTraits);
-
-        return attributes
-            .Select((attr, index) =>
-            {
-                var navData = GetNavigationDataOrDefault(mi);
-                var testCaseAttribute = CreateTestCaseAttribute(attr);
-
-                return new TestCaseDescriptor
-                    {
-                        Id = Guid.NewGuid(),
-                        AssemblyPath = assemblyPath,
-                        ManagedType = className,
-                        ManagedMethod = mi.Name,
-                        AttributeIndex = index,
-                        LineNumber = navData.LineNumber,
-                        CodeFilePath = navData.CodeFilePath,
-                        RequireRunningGodotEngine = requireRunningGodotEngine,
-                        Categories = allCategories,
-                        Traits = allTraits
-                    }
-                    .Build(testCaseAttribute, hasMultipleAttributes);
-            })
-            .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
-            .ToList();
-    }
-
     /// <summary>
     ///     Extracts category information from a type or method definition.
     /// </summary>
     /// <param name="definition">The type or method definition to check for category attributes.</param>
     /// <returns>A list of categories.</returns>
-    private static List<string> GetCategories(ICustomAttributeProvider definition)
+    private static ImmutableList<string> GetCategories(ICustomAttributeProvider definition)
         => definition.CustomAttributes
             .Where(IsAttribute<TestCategoryAttribute>)
             .Where(attr => attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string)
             .Select(attr => (string)attr.ConstructorArguments[0].Value)
-            .ToList();
+            .ToImmutableList();
 
     /// <summary>
     ///     Extracts trait information from a type or method definition.
     /// </summary>
     /// <param name="definition">The type or method definition to check for trait attributes.</param>
     /// <returns>A dictionary of trait names and their values.</returns>
-    private static Dictionary<string, List<string>> GetTraits(ICustomAttributeProvider definition)
+    private static ImmutableDictionary<string, List<string>> GetTraits(ICustomAttributeProvider definition)
         => definition.CustomAttributes
             .Where(IsAttribute<TraitAttribute>)
             .Where(attr => attr.ConstructorArguments.Count >= 2
@@ -212,7 +267,7 @@ internal static class TestCaseDiscoverer
                 attr => (string)attr.ConstructorArguments[0].Value,
                 attr => (string)attr.ConstructorArguments[1].Value,
                 StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
+            .ToImmutableDictionary(
                 group => group.Key,
                 group => group.Distinct().ToList(),
                 StringComparer.OrdinalIgnoreCase);
@@ -223,13 +278,13 @@ internal static class TestCaseDiscoverer
     /// <param name="first">The first dictionary of traits.</param>
     /// <param name="second">The second dictionary of traits.</param>
     /// <returns>A combined dictionary of traits.</returns>
-    private static Dictionary<string, List<string>> CombineTraits(
-        Dictionary<string, List<string>> first,
-        Dictionary<string, List<string>> second)
+    private static ImmutableDictionary<string, List<string>> CombineTraits(
+        ImmutableDictionary<string, List<string>> first,
+        ImmutableDictionary<string, List<string>> second)
         => first
             .Concat(second)
             .GroupBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
+            .ToImmutableDictionary(
                 group => group.Key,
                 group => group
                     .SelectMany(pair => pair.Value)
@@ -279,6 +334,8 @@ internal static class TestCaseDiscoverer
                     if (prop.Argument.Value is string description)
                         testCase.Description = description;
                     break;
+
+                // ReSharper disable once RedundantEmptySwitchSection
                 default:
                     break;
             }
@@ -296,52 +353,6 @@ internal static class TestCaseDiscoverer
         && type.CustomAttributes.Any(attr => attr.AttributeType.Name == "TestSuiteAttribute")
         && type.FullName != null
         && !type.FullName.StartsWith("Microsoft.VisualStudio.TestTools");
-
-    public static List<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
-    {
-        ArgumentNullException.ThrowIfNull(sourceScript);
-
-        try
-        {
-            var fullScriptPath = Path.GetFullPath(ProjectSettings.GlobalizePath(sourceScript.ResourcePath));
-            var className = Path.GetFileNameWithoutExtension(fullScriptPath);
-
-            foreach (var assemblyPath in TestAssemblyLocations())
-            {
-                // Create a custom resolver that can handle GodotSharp
-                var resolver = new DefaultAssemblyResolver();
-                resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
-
-                // Create reader parameters with the custom resolver
-                var readerParameters = new ReaderParameters
-                {
-                    ReadSymbols = true,
-                    SymbolReaderProvider = new PortablePdbReaderProvider(),
-                    AssemblyResolver = resolver,
-                    ReadingMode = ReadingMode.Deferred // Use deferred loading to avoid resolving references right away
-                };
-
-                // lookup for class in the assembly
-                using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
-                var testSuite = assembly?.MainModule.Types
-                    .FirstOrDefault(definition => definition.Name == className && HasSourceFilePath(definition, fullScriptPath));
-
-                // No suite found, try next assembly
-                if (assembly == null || testSuite == null)
-                    continue;
-
-                return DiscoverTests(null, assembly.MainModule.FileName, testSuite).ToList();
-            }
-
-            Logger.LogWarning($"Could not find assembly or test suite for {className} at {fullScriptPath}");
-            return new List<TestCaseDescriptor>();
-        }
-        catch (Exception e)
-        {
-            Logger.LogError($"Error discovering tests: {e.Message}\n{e.StackTrace}");
-            return new List<TestCaseDescriptor>();
-        }
-    }
 
     // Initializes and caches potential assembly locations
     private static ISet<string> TestAssemblyLocations()
@@ -366,7 +377,7 @@ internal static class TestCaseDiscoverer
 
     private static HashSet<string> FindAllAssemblyPaths(ITestEngineLogger logger, string assemblyName)
     {
-        // Normalize path
+        // Normalize the path
         var projectDir = Path.GetFullPath(ProjectSettings.GlobalizePath("res://"));
         var assemblyDirs = new HashSet<string>
         {
@@ -380,7 +391,7 @@ internal static class TestCaseDiscoverer
         var assemblyLocations = new HashSet<string>();
         foreach (var dir in assemblyDirs.Where(Directory.Exists))
         {
-            // Check for assembly with project/specified name
+            // Check for assembly with a project /specified name
             var specificAssembly = Path.Combine(dir, $"{assemblyName}.dll");
             if (!File.Exists(specificAssembly))
                 continue;

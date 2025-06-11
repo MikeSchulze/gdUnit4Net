@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.Test.Discovery;
+namespace GdUnit4.TestAdapter.Test.Discovery;
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using Moq;
 [TestClass]
 public class GdUnit4TestDiscovererTest
 {
-    private static readonly string XmlSettings =
+    private const string XML_SETTINGS =
         """
         <?xml version="1.0" encoding="utf-8"?>
         <RunSettings>
@@ -46,15 +46,17 @@ public class GdUnit4TestDiscovererTest
     public void DiscoverDoNotLoadTestAssembly()
     {
         var frameworkHandle = new Mock<IFrameworkHandle>();
+
         // Setup the mock to capture discovered tests
         var mockDiscoverySink = new Mock<ITestCaseDiscoverySink>();
+
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
         mockRunContext.SetupGet(rc => rc.RunSettings)
-            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
+            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // Check initial state
-        var assemblyPath = AssemblyPaths.LibraryPath;
+        var assemblyPath = GetExampleAssemblyPath();
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded initially");
 
         // Check discovery process
@@ -77,12 +79,12 @@ public class GdUnit4TestDiscovererTest
         var discoveredTests = new List<TestCase>();
         mockDiscoverySink
             .Setup(ds => ds.SendTestCase(It.IsAny<TestCase>()))
-            .Callback<TestCase>(test => discoveredTests.Add(test));
+            .Callback<TestCase>(discoveredTests.Add);
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
         mockRunContext.SetupGet(rc => rc.RunSettings)
-            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
+            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // the first one should be excluded because it is 'TestAdapter' in the name
         // the second assembly do not contain any tests
@@ -104,13 +106,10 @@ public class GdUnit4TestDiscovererTest
                 "Informational: Discover tests done, no tests found."
             },
             logMessages,
-            "Log messages don't match expected messages"
-        );
-        // @formatter:on
+            "Log messages don't match expected messages");
 
-        Assert.IsFalse(
-            logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors"
-        );
+        // @formatter:on
+        Assert.IsFalse(logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors");
     }
 
     [TestMethod]
@@ -128,17 +127,17 @@ public class GdUnit4TestDiscovererTest
         var discoveredTests = new List<TestCase>();
         mockDiscoverySink
             .Setup(ds => ds.SendTestCase(It.IsAny<TestCase>()))
-            .Callback<TestCase>(test => discoveredTests.Add(test));
+            .Callback<TestCase>(discoveredTests.Add);
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
         mockRunContext.SetupGet(rc => rc.RunSettings)
-            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XmlSettings));
+            .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
-        //var assemblyPath = "D:\\development\\workspace\\gdUnit4Net\\test\\.godot\\mono\\temp\\bin\\Debug\\gdUnit4Test.dll"; //AssemblyPaths.LibraryPath;
-        var assemblyPath = AssemblyPaths.LibraryPath;
+        // var assemblyPath = "D:\\development\\workspace\\gdUnit4Net\\test\\.godot\\mono\\temp\\bin\\Debug\\gdUnit4Test.dll"; //AssemblyPaths.LibraryPath;
+        var assemblyPath = GetExampleAssemblyPath();
 
-        Assert.IsTrue(File.Exists(AssemblyPaths.LibraryPath), $"Can find the test assembly: '{AssemblyPaths.LibraryPath}'");
+        Assert.IsTrue(File.Exists(assemblyPath), $"Can find the test assembly: '{assemblyPath}'");
         var discoverer = new GdUnit4TestDiscoverer();
         discoverer.DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
@@ -157,35 +156,65 @@ public class GdUnit4TestDiscovererTest
                 "Informational: Discover tests done, 2 TestSuites and total 15 Tests found."
             },
             logMessages,
-            "Log messages don't match expected messages"
-        );
+            "Log messages don't match expected messages");
+
         // @formatter:on
-        Assert.IsFalse(
-            logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors"
-        );
+        Assert.IsFalse(logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors");
 
         // Verify discovered tests
         Assert.AreEqual(15, discoveredTests.Count, "Should discover any tests from assembly");
+
         // Verify properties exemplary
-        AssertTestCase(discoveredTests,
+        AssertTestCase(
+            discoveredTests,
             "Examples.ExampleTest.Success",
             "Success",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            14);
+            15);
+
         // multi testcase attribute usage
-        AssertTestCase(discoveredTests,
+        AssertTestCase(
+            discoveredTests,
             "Examples.ExampleTest.DataRows.TestA:0 (0, 1, 2)",
             "TestA:0 (0, 1, 2)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            31);
-        AssertTestCase(discoveredTests,
+            32);
+        AssertTestCase(
+            discoveredTests,
             "Examples.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
             "TestB:1 (1, 2, 3)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
-            31);
+            32);
+    }
+
+    private static bool IsAssemblyLoaded(string assemblyPath)
+        => AppDomain.CurrentDomain
+            .GetAssemblies()
+            .Any(a => a.Location == assemblyPath);
+
+    private static string GetExampleAssemblyPath()
+    {
+        // Get test assembly location
+        var testDir = Path.GetDirectoryName(typeof(GdUnit4TestDiscovererTest).Assembly.Location)!;
+
+        // Navigate up to solution root
+        var solutionRoot = Path.GetFullPath(Path.Combine(testDir, "..", "..", "..", ".."));
+
+        // Godot projects compile to .godot/mono/temp/bin/Debug/
+        var exampleAssembly = Path.Combine(solutionRoot, "Example", ".godot", "mono", "temp", "bin", "Debug", "ExampleProject.dll");
+
+        // Verify it exists
+        if (!File.Exists(exampleAssembly))
+        {
+            throw new FileNotFoundException(
+                $"Example assembly not found at {exampleAssembly}. " +
+                "Make sure the Godot Example project is built.");
+        }
+
+        return exampleAssembly;
     }
 
     private void AssertTestCase(IEnumerable<TestCase> tests, string fullyQualifiedName, string displayName, string source, string codeFilePath, int lineNumber)
@@ -199,12 +228,7 @@ public class GdUnit4TestDiscovererTest
         Assert.AreEqual(source, test.Source);
         var expectedPath = codeFilePath.Replace('\\', Path.DirectorySeparatorChar);
         var actualPath = test.CodeFilePath?.Replace('\\', Path.DirectorySeparatorChar);
-        StringAssert.EndsWith(actualPath, expectedPath);
+        StringAssert.EndsWith(actualPath, expectedPath, StringComparison.Ordinal);
         Assert.AreEqual(lineNumber, test.LineNumber);
     }
-
-    private static bool IsAssemblyLoaded(string assemblyPath)
-        => AppDomain.CurrentDomain
-            .GetAssemblies()
-            .Any(a => a.Location == assemblyPath);
 }

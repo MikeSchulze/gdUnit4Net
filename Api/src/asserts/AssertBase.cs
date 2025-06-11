@@ -6,6 +6,7 @@ namespace GdUnit4.Asserts;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
 public abstract class AssertBase<TValue> : IAssertBase<TValue>
 {
     protected AssertBase(TValue? current) => Current = current;
@@ -52,15 +53,6 @@ public abstract class AssertBase<TValue> : IAssertBase<TValue>
         return this;
     }
 
-#pragma warning disable IDE0060 // Remove unused parameter
-    protected void ThrowTestFailureReport(string message, object? current, object? expected)
-#pragma warning restore IDE0060 // Remove unused parameter
-    {
-        var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
-        CurrentFailureMessage = failureMessage;
-        throw new TestFailedException(failureMessage);
-    }
-
     internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
     {
         var left = lKey.UnboxVariant();
@@ -70,4 +62,16 @@ public abstract class AssertBase<TValue> : IAssertBase<TValue>
             return Equals(left, right);
         return ReferenceEquals(left, right);
     }
+
+#pragma warning disable IDE0060 // Remove unused parameter
+    protected void ThrowTestFailureReport(string message, object? current, object? expected)
+#pragma warning restore IDE0060 // Remove unused parameter
+    {
+#pragma warning disable CA1062
+        var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
+#pragma warning restore CA1062
+        CurrentFailureMessage = failureMessage;
+        throw new TestFailedException(failureMessage);
+    }
 }
+#pragma warning restore CS1591, SA1600

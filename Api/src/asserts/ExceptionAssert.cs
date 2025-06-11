@@ -11,23 +11,27 @@ using System.Runtime.ExceptionServices;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
 public sealed class ExceptionAssert<TException> : IExceptionAssert
     where TException : Exception
 {
-    public ExceptionAssert(Action action)
+    internal ExceptionAssert(Action action)
     {
+        ArgumentNullException.ThrowIfNull(action);
         try
         {
             action.Invoke();
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             var capturedException = ExceptionDispatchInfo.Capture(e.InnerException ?? e);
             Current = (TException)capturedException.SourceException;
         }
     }
 
-    public ExceptionAssert(TException e) => Current = e;
+    internal ExceptionAssert(TException e) => Current = e;
 
     private TException? Current { get; }
 
@@ -42,6 +46,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
 
     public IExceptionAssert HasMessage(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         expected = expected.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.Equals(expected, StringComparison.Ordinal))
@@ -53,12 +58,12 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
     {
         int currentLine;
         if (Current is TestFailedException e)
-        {
             currentLine = e.LineNumber;
-        }
+        else if (Current is null)
+            currentLine = -1;
         else
         {
-            var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+            var stackFrame = new StackTrace(Current, true).GetFrame(0);
             currentLine = stackFrame?.GetFileLineNumber() ?? -1;
         }
 
@@ -72,12 +77,12 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         var fullPath = Path.GetFullPath(fileName);
         string currentFileName;
         if (Current is TestFailedException e)
-        {
             currentFileName = e.FileName ?? string.Empty;
-        }
+        else if (Current is null)
+            currentFileName = string.Empty;
         else
         {
-            var stackFrame = new StackTrace(Current!, true).GetFrame(0);
+            var stackFrame = new StackTrace(Current, true).GetFrame(0);
             currentFileName = stackFrame?.GetFileName() ?? string.Empty;
         }
 
@@ -96,23 +101,19 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
 
     public IAssert OverrideFailureMessage(string message)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
         CustomFailureMessage = message.UnixFormat();
         return this;
     }
 
     public IExceptionAssert StartsWithMessage(string value)
     {
+        ArgumentException.ThrowIfNullOrEmpty(value);
         value = value.UnixFormat();
         var current = Current?.Message.RichTextNormalize() ?? string.Empty;
         if (!current.StartsWith(value, StringComparison.InvariantCulture))
             ThrowTestFailureReport(AssertFailures.IsEqual(current, value));
         return this;
-    }
-
-    private void ThrowTestFailureReport(string message)
-    {
-        var failureMessage = CustomFailureMessage ?? message;
-        throw new TestFailedException(failureMessage);
     }
 
     internal string? GetExceptionStackTrace()
@@ -121,4 +122,11 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
             return tfe.StackTrace;
         return Current?.StackTrace ?? null;
     }
+
+    private void ThrowTestFailureReport(string message)
+    {
+        var failureMessage = CustomFailureMessage ?? message;
+        throw new TestFailedException(failureMessage);
+    }
 }
+#pragma warning restore CS1591, SA1600

@@ -65,7 +65,7 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// </summary>
     /// <param name="sourceScript">The CSharpScript to discover test cases from.</param>
     /// <returns>A list of TestCaseDescriptor objects representing discovered test cases.</returns>
-    public static List<TestCaseDescriptor> DiscoverTestsFromScript(CSharpScript sourceScript) =>
+    public static IReadOnlyCollection<TestCaseDescriptor> DiscoverTestsFromScript(CSharpScript sourceScript) =>
         TestCaseDiscoverer.DiscoverTestCasesFromScript(sourceScript);
 
     /// <summary>
@@ -75,7 +75,7 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
     /// <param name="eventListener">A callable that will receive test execution events.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task representing the asynchronous execution of the test suites.</returns>
-    public static Task ExecuteAsync(List<TestSuiteNode> testSuiteNodes, Callable eventListener, CancellationToken cancellationToken) =>
+    public static Task ExecuteAsync(IReadOnlyCollection<TestSuiteNode> testSuiteNodes, Callable eventListener, CancellationToken cancellationToken) =>
         new GdUnit4RuntimeExecutorGodotBridge().ExecuteAsync(testSuiteNodes, eventListener, cancellationToken);
 
     /// <summary>

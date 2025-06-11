@@ -92,24 +92,30 @@ dotnet_style_qualification_for_property = true : warning
 dotnet_style_qualification_for_method = true : warning
 dotnet_style_qualification_for_event = true : warning
 
-# Member ordering rules
-dotnet_diagnostic.SA1201.severity = warning # Elements should appear in the correct order
-dotnet_diagnostic.SA1202.severity = warning # Elements should be ordered by access
-dotnet_diagnostic.SA1203.severity = warning # Constants should appear before fields
-dotnet_diagnostic.SA1204.severity = warning # Static elements should appear before instance elements
+# Format document on save - for JetBrains Rider
+resharper_apply_on_save = true
 
-# Member ordering - SA1202 fix - enforce ordering by access level
-dotnet_diagnostic.SA1202.severity = error
+
+# Member ordering
+resharper_member_order = accessibility, kind
 resharper_member_modifier_order = internal static, protected static, private static, static, internal, protected, private
-resharper_access_level_order = internal, protected, private
-resharper_member_order = accessibility, constant_fields, static_fields, fields, constructors, finalizers, properties, events, operators, methods
+resharper_kind_order = constant, field, constructor, destructor, delegate, event, enum, interface, property, indexer, operator, method, struct, class
+resharper_accessibility_order = public, internal, protected, private
+
+resharper_arrange_member_access_first = true
+resharper_arrange_static_member_qualifier = true
+resharper_arrange_type_member_modifiers = true
+resharper_arrange_type_modifiers = true
+
+# Force member reordering to be active
+resharper_member_reordering_patterns = true
+
+# Make sure ReSharper member ordering is enabled
+resharper_apply_member_ordering_pattern = true
 
 # Sort using directives
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = true
-
-# Format document on save - for JetBrains Rider
-resharper_apply_on_save = true
 
 
 # Language keywords instead of framework type names for type references
@@ -187,7 +193,21 @@ csharp_style_implicit_object_creation_when_type_is_apparent = true : warning
 # "Null" checking preferences
 csharp_style_throw_expression = true : warning
 csharp_style_conditional_delegate_call = true : warning
+# Enforce attributes on separate lines
+dotnet_diagnostic.SA1134.severity = warning
+# Alternative: Use IDE rules for attribute placement
+csharp_style_prefer_attributes_on_same_line = false
+dotnet_diagnostic.IDE0055.severity = warning
 
+# ReSharper/Rider specific settings for attribute placement
+resharper_place_attribute_on_same_line = false
+resharper_place_simple_attribute_on_same_line = false
+resharper_place_type_attribute_on_same_line = false
+resharper_place_method_attribute_on_same_line = false
+resharper_place_accessor_attribute_on_same_line = false
+resharper_place_field_attribute_on_same_line = false
+# Don't require localization for string literals
+dotnet_diagnostic.CA1303.severity = none
 
 # Code block preferences
 csharp_prefer_braces = when_multiline : warning

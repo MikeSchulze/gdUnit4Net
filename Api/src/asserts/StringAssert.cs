@@ -7,22 +7,25 @@ using System;
 
 using Core.Extensions;
 
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
 public sealed class StringAssert : AssertBase<string>, IStringAssert
 {
-    public StringAssert(string? current)
+    internal StringAssert(string? current)
         : base(current)
     {
     }
 
     public IStringAssert Contains(string expected)
     {
-        if (Current == null || !Current.Contains(expected))
+        ArgumentException.ThrowIfNullOrEmpty(expected);
+        if (Current == null || !Current.Contains(expected, StringComparison.Ordinal))
             ThrowTestFailureReport(AssertFailures.Contains(Current, expected), Current, expected);
         return this;
     }
 
     public IStringAssert ContainsIgnoringCase(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.ContainsIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -30,6 +33,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert EndsWith(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.EndsWith(expected))
             ThrowTestFailureReport(AssertFailures.EndsWith(Current, expected), Current, expected);
         return this;
@@ -64,6 +68,8 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
                 if (currentLength >= length)
                     failed = true;
                 break;
+
+            // ReSharper disable once RedundantEmptySwitchSection
             default:
                 break;
         }
@@ -82,7 +88,8 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert IsEqualIgnoringCase(string expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
+        ArgumentException.ThrowIfNullOrEmpty(expected);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -97,7 +104,8 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert IsNotEqualIgnoringCase(string expected)
     {
-        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CASE_INSENSITIVE);
+        ArgumentException.ThrowIfNullOrEmpty(expected);
+        var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqualIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -105,13 +113,15 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert NotContains(string expected)
     {
-        if (Current != null && Current.Contains(expected))
+        ArgumentException.ThrowIfNullOrEmpty(expected);
+        if (Current != null && Current.Contains(expected, StringComparison.Ordinal))
             ThrowTestFailureReport(AssertFailures.NotContains(Current, expected), Current, expected);
         return this;
     }
 
     public IStringAssert NotContainsIgnoringCase(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current != null && Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
             ThrowTestFailureReport(AssertFailures.NotContainsIgnoringCase(Current, expected), Current, expected);
         return this;
@@ -119,6 +129,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public IStringAssert StartsWith(string expected)
     {
+        ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.StartsWith(expected))
             ThrowTestFailureReport(AssertFailures.StartsWith(Current, expected), Current, expected);
         return this;
@@ -126,7 +137,9 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
 
     public new IStringAssert OverrideFailureMessage(string message)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
         base.OverrideFailureMessage(message);
         return this;
     }
 }
+#pragma warning restore CS1591, SA1600

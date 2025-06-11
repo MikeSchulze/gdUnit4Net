@@ -3,7 +3,6 @@
 
 namespace GdUnit4.Api;
 
-using System;
 using System.Collections.Generic;
 
 /// <summary>
@@ -11,58 +10,6 @@ using System.Collections.Generic;
 /// </summary>
 public interface ITestReport
 {
-    /// <summary>
-    ///     Enum to categorize the type of test report, supporting multiple flags for combined states.
-    /// </summary>
-    [Flags]
-    enum ReportType
-    {
-        /// <summary>
-        ///     Indicates that the test was executed successfully without any issues.
-        /// </summary>
-        SUCCESS,
-
-        /// <summary>
-        ///     Indicates that the test finished with warnings, but no failures occurred.
-        /// </summary>
-        WARNING,
-
-        /// <summary>
-        ///     Indicates that the test failed due to some issues or errors.
-        /// </summary>
-        FAILURE,
-
-        /// <summary>
-        ///     Indicates that the test found orphan nodes.
-        /// </summary>
-        ORPHAN,
-
-        /// <summary>
-        ///     Denotes that the test was forcibly terminated before it completed execution.
-        /// </summary>
-        TERMINATED,
-
-        /// <summary>
-        ///     Indicates that the test execution was interrupted, possibly timeout or due to runtime conditions.
-        /// </summary>
-        INTERRUPTED,
-
-        /// <summary>
-        ///     Indicates that the test was aborted, typically due to unrecoverable errors.
-        /// </summary>
-        ABORT,
-
-        /// <summary>
-        ///     Marks the test as skipped and not executed during the test run.
-        /// </summary>
-        SKIPPED,
-
-        /// <summary>
-        ///     Represents standard output logs produced during the test execution.
-        /// </summary>
-        STDOUT
-    }
-
     /// <summary>
     ///     Gets the type of the test report, indicating the outcome or status of the test.
     /// </summary>
@@ -101,6 +48,6 @@ public interface ITestReport
     /// <summary>
     ///     Serializes the test report into a dictionary representation containing its properties and values.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The report serialized as a dictionary.</returns>
     IDictionary<string, object> Serialize();
 }

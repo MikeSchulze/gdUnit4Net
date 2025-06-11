@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mike Schulze
+// MIT License - See LICENSE file in the repository root for full license text
+
 namespace GdUnit4.TestAdapter.Extensions;
 
 using System;
@@ -75,24 +78,21 @@ internal static class TestCaseExtensions
         TestPropertyAttributes.Hidden,
         typeof(TestCase));
 
-    private static readonly TestProperty HierarchyProperty = TestProperty.Register(
+    // Added property for category filtering
+    internal static readonly TestProperty TestCategoryProperty = TestProperty.Register(
+        "TestCase.TestCategory",
+        "TestCategory",
+        typeof(string[]), // "The category assigned to the test",
+        TestPropertyAttributes.Immutable,
+        typeof(TestCase));
+
+    internal static readonly TestProperty HierarchyProperty = TestProperty.Register(
         HierarchyConstants.HierarchyPropertyId,
         HierarchyConstants.HierarchyLabel,
         string.Empty,
         string.Empty,
         typeof(string[]),
         null,
-        TestPropertyAttributes.Immutable,
-        typeof(TestCase));
-
-    // Added property for category filtering
-    internal static readonly TestProperty TestCategoryProperty = TestProperty.Register(
-        "TestCase.TestCategory",
-        "TestCategory",
-        //string.Empty,
-        //"The category assigned to the test",
-        typeof(string[]),
-        //null,
         TestPropertyAttributes.Immutable,
         typeof(TestCase));
 
@@ -115,18 +115,19 @@ internal static class TestCaseExtensions
 
     public static void SetPropertyValues(this TestCase testCase, TestCaseDescriptor descriptor)
     {
-        var parts = SplitByNamespace(descriptor.ManagedType);
+        var (namespaceName, className) = SplitByNamespace(descriptor.ManagedType);
         var hierarchyValues = new string[HierarchyConstants.Levels.TotalLevelCount];
         hierarchyValues[HierarchyConstants.Levels.ContainerIndex] = Path.GetFileNameWithoutExtension(descriptor.AssemblyPath);
-        hierarchyValues[HierarchyConstants.Levels.NamespaceIndex] = parts.namespaceName;
-        hierarchyValues[HierarchyConstants.Levels.ClassIndex] = parts.className;
+        hierarchyValues[HierarchyConstants.Levels.NamespaceIndex] = namespaceName;
+        hierarchyValues[HierarchyConstants.Levels.ClassIndex] = className;
         hierarchyValues[HierarchyConstants.Levels.TestGroupIndex] = descriptor.ManagedMethod;
         testCase.SetPropertyValue(HierarchyProperty, hierarchyValues);
-        testCase.SetPropertyValue(NamespaceProperty, parts.namespaceName);
+        testCase.SetPropertyValue(NamespaceProperty, namespaceName);
         testCase.SetPropertyValue(ClassProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedTypeProperty, descriptor.ManagedType);
         testCase.SetPropertyValue(ManagedMethodProperty, descriptor.ManagedMethod);
-        //testCase.SetPropertyValue(TestCaseProperties.DisplayName, descriptor.ManagedMethod);
+
+        // testCase.SetPropertyValue(TestCaseProperties.DisplayName, descriptor.ManagedMethod);
         testCase.SetPropertyValue(TestCaseProperties.FullyQualifiedName, descriptor.FullyQualifiedName);
         testCase.SetPropertyValue(ManagedMethodAttributeIndexProperty, descriptor.AttributeIndex);
         testCase.SetPropertyValue(RequireRunningGodotEngineProperty, descriptor.RequireRunningGodotEngine);
@@ -142,16 +143,16 @@ internal static class TestCaseExtensions
     /// <summary>
     ///     Gets the property provider function for use with GetTestCaseFilter.
     /// </summary>
-    /// <returns>A function that returns a TestProperty for a given property name</returns>
+    /// <returns>A function that returns a TestProperty for a given property name.</returns>
     public static Func<string, TestProperty?> GetPropertyProvider() =>
         propertyName => SupportedProperties.GetValueOrDefault(propertyName);
 
     /// <summary>
     ///     Gets the value of a property from a test case.
     /// </summary>
-    /// <param name="testCase">The test case</param>
-    /// <param name="propertyName">The name of the property</param>
-    /// <returns>The property value or null if not found</returns>
+    /// <param name="testCase">The test case.</param>
+    /// <param name="propertyName">The name of the property.</param>
+    /// <returns>The property value or null if not found.</returns>
     internal static object? GetPropertyValue(this TestCase testCase, string propertyName) =>
         SupportedProperties.TryGetValue(propertyName, out var testProperty)
             ? testCase.GetPropertyValue(testProperty)
@@ -161,7 +162,7 @@ internal static class TestCaseExtensions
     {
         if (!testCase.Traits.Any() || !propertyName.StartsWith("Trait.", StringComparison.OrdinalIgnoreCase))
             return null;
-        var traitName = propertyName.Substring("Trait.".Length);
+        var traitName = propertyName["Trait.".Length..];
 
         return testCase.Traits
             .Where(t => string.Equals(t.Name, traitName, StringComparison.OrdinalIgnoreCase))
@@ -169,10 +170,10 @@ internal static class TestCaseExtensions
             .ToArray();
     }
 
-    private static (string namespaceName, string className) SplitByNamespace(string managedType)
+    private static (string NamespaceName, string ClassName) SplitByNamespace(string managedType)
     {
         var parts = managedType.Split('.');
-        var namespaceName = parts.Length == 1 ? "" : string.Join(".", parts.Take(parts.Length - 1));
+        var namespaceName = parts.Length == 1 ? string.Empty : string.Join(".", parts.Take(parts.Length - 1));
         var className = parts.Last();
         return (namespaceName, className);
     }

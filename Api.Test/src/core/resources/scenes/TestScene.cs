@@ -1,5 +1,6 @@
 namespace GdUnit4.Tests;
 
+using System;
 using System.Threading.Tasks;
 
 using Godot;
@@ -99,21 +100,20 @@ public partial class TestScene : Control
     public Spell CreateSpell()
     {
         var spell = new Spell();
-        spell.Connect(Spell.SignalName.SpellExplode, Callable.From<Spell>(DestroySpell));
+        spell.Connect(Spell.SignalName.SpellExplode, Callable.From<ulong>(DestroySpell));
         return spell;
     }
 
-    private void DestroySpell(Spell spell)
-    {
-        RemoveChild(spell);
-        spell.QueueFree();
-    }
+    private void DestroySpell(ulong spellId)
+        => Console.WriteLine($"Spell destroyed: {spellId}");
 
+    // spell.QueueFree();
     public override void _Input(InputEvent @event)
     {
         if (InputMap.HasAction("player_jump"))
             player_jump_action = Input.IsActionJustReleased("player_jump", true);
-        if (@event.IsActionReleased("ui_accept")) AddChild(CreateSpell());
+        if (@event.IsActionReleased("ui_accept"))
+            AddChild(CreateSpell());
     }
 
     public int Add(int a, int b)

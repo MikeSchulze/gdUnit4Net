@@ -9,10 +9,11 @@ using System.Linq;
 
 using CommandLine;
 
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
 public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
     where TKey : notnull
 {
-    public DictionaryAssert(IDictionary<TKey, TValue>? current)
+    internal DictionaryAssert(IDictionary<TKey, TValue>? current)
         : base(current)
     {
     }
@@ -166,9 +167,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     public new IDictionaryAssert<TKey, TValue> OverrideFailureMessage(string message)
         => (IDictionaryAssert<TKey, TValue>)base.OverrideFailureMessage(message);
 
-#pragma warning disable CA1000 // Do not declare static members on generic types
-    public static DictionaryAssert<TKey, TValue> From(IDictionary? current)
-#pragma warning restore CA1000 // Do not declare static members on generic types
+    internal static DictionaryAssert<TKey, TValue> From(IDictionary? current)
         => new(current);
 
     private TValue? TryGetValue(TKey key)
@@ -184,3 +183,4 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
             ThrowTestFailureReport(AssertFailures.IsNotNull(), base.Current, null);
     }
 }
+#pragma warning restore CS1591, SA1600

@@ -19,15 +19,15 @@ concurrency:
 jobs:
 
   setup-dotnet:
-    name: "🔧 Setup .NET"
+    name: "🔧 Setup .NET8"
     runs-on: 'ubuntu-22.04'
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
+          dotnet-version: 8.0.410
+        #  global-json-file: 'global.json'
 
   compile:
     name: "🔨 Compile Projects"
@@ -39,8 +39,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
+          dotnet-version: 8.0.410
 
       - name: "Build Projects"
         run: |
@@ -70,19 +69,13 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
-
-      - name: "Install dotnet-format"
-        if: ${{ !cancelled() }}
-        run: dotnet tool install -g dotnet-format
+          dotnet-version: 8.0.410
 
       - name: "Check Code Formatting"
         if: ${{ !cancelled() }}
-        id: format
         run: |
-          dotnet format ./Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
-          dotnet format ./Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Analyzers/GdUnit4Analyzers.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format Analyzers.Test/GdUnit4Analyzers.Tests.csproj --verify-no-changes --verbosity diagnostic
 
 
   analyzer-tests:
@@ -96,8 +89,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
+          dotnet-version: 8.0.410
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -122,11 +114,47 @@ jobs:
           retention-days: 10
           name: artifact_analyzer
           path: |
-            ./Analyzers.Test/TestResults/test-result.trx
-            ./Analyzers.Test/TestResults/test-result.html
+            Analyzers.Test/TestResults/test-result.trx
+            Analyzers.Test/TestResults/test-result.html
 
+  # API
+  api-style-check:
+    name: "🔍 Check Style: API"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
 
-  # Adapter jobs
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet format Api/GdUnit4Api.csproj --verify-no-changes --verbosity diagnostic
+        # dotnet format Api.Test/GdUnit4ApiTest.csproj --verify-no-changes --verbosity diagnostic
+
+  # Test Adapter
+  adapter-style-check:
+    name: "🔍 Check Style: Test Adapter"
+    needs: setup-dotnet
+    runs-on: 'ubuntu-22.04'
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.410
+
+      - name: "Check Code Formatting"
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet format TestAdapter/GdUnit4TestAdapter.csproj --verify-no-changes --verbosity diagnostic
+          dotnet format TestAdapter.Test/GdUnit4TestAdapter.Tests.csproj --verify-no-changes --verbosity diagnostic
+
   test-adapter-test:
     name: "🧪 Test: TestAdapter"
     needs: compile
@@ -137,8 +165,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          global-json-file: './global.json'
+          dotnet-version: 8.0.410
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -167,7 +194,7 @@ jobs:
             ./TestAdapter.Test/TestResults/test-result.html
 
 
-  unit-tests:
+  api-tests:
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -180,7 +207,7 @@ jobs:
 
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
-    needs: compile
+    needs: [ compile ]
     uses: ./.github/workflows/unit-tests.yml
     with:
       godot-version: ${{ matrix.godot-version }}
@@ -191,7 +218,7 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     name: Final Results
-    needs: [ analyzer-style-check, analyzer-tests, test-adapter-test, unit-tests ]
+    needs: [ analyzer-style-check, api-style-check, adapter-style-check, analyzer-tests, api-tests, test-adapter-test ]
     steps:
       - run: exit 1
         if: >-

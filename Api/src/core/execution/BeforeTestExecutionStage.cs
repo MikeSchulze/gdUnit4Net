@@ -18,7 +18,9 @@ internal class BeforeTestExecutionStage : ExecutionStage<BeforeTestAttribute>
         if (!context.IsSkipped)
         {
             context.MemoryPool.SetActive(StageName, true);
-            await base.Execute(context);
+            await base
+                .Execute(context)
+                .ConfigureAwait(true);
             context.MemoryPool.StopMonitoring();
         }
     }

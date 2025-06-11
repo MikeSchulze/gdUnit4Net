@@ -28,7 +28,7 @@ internal static partial class GdUnitExtensions
     internal static string ToSnakeCase(this string? input)
     {
         if (string.IsNullOrEmpty(input))
-            return "";
+            return string.Empty;
 
         // Use regular expressions to match and replace camel case patterns
         return RegexToSnakeCase().Replace(input, "$1_$2").ToLower();

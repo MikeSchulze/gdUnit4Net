@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Mike Schulze
+// Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
 namespace GdUnit4.Core.Data;
@@ -84,10 +84,7 @@ internal static class DataPointValueProvider
                          throw new ArgumentNullException($"Value returned by property or method {dataPoint.DataPointSource} shouldn't be null.");
 
         if (!TryGetData(dataSource, out var data))
-        {
-            throw new ArgumentException(
-                $"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IEnumerable<object?[]> or IEnumerable<object?>");
-        }
+            throw new ArgumentException($"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IEnumerable<object?[]> or IEnumerable<object?>");
 
         return data;
     }
@@ -108,6 +105,41 @@ internal static class DataPointValueProvider
 
         await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout))
             yield return item;
+    }
+
+    internal static bool IsAsyncDataPoint(TestCase testCase)
+    {
+        var dataPoint = testCase.DataPoint;
+        if (dataPoint == null)
+            return false;
+
+        var declaringType = dataPoint.DataPointDeclaringType ?? testCase.MethodInfo.DeclaringType;
+        if (declaringType == null)
+            return false;
+
+        // Check property
+        var property = declaringType.GetProperty(
+            dataPoint.DataPointSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+
+        if (property != null)
+        {
+            var propertyType = property.PropertyType;
+            return IsAsyncEnumerableType(propertyType);
+        }
+
+        // Check method
+        var method = declaringType.GetMethod(
+            dataPoint.DataPointSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+
+        if (method != null)
+        {
+            var returnType = method.ReturnType;
+            return IsAsyncEnumerableType(returnType);
+        }
+
+        return false;
     }
 
     private static async IAsyncEnumerable<object?[]> StreamAsyncData(object asyncSource, Type returnType, TimeSpan timeout)
@@ -159,9 +191,7 @@ internal static class DataPointValueProvider
                     yield return (object?[])current;
                 }
                 else
-                {
                     yield return new[] { current };
-                }
             }
         }
         finally
@@ -169,7 +199,7 @@ internal static class DataPointValueProvider
             try
             {
                 if (enumerator is IAsyncDisposable disposable)
-                    await disposable.DisposeAsync();
+                    await disposable.DisposeAsync().ConfigureAwait(true);
             }
             catch (Exception e) when (e is NotImplementedException or NotSupportedException)
             {
@@ -192,7 +222,7 @@ internal static class DataPointValueProvider
         while (reader.ReadLine() is { } line)
         {
             // If the line contains the class keyword and the class name, it's a likely candidate
-            if (line.Contains($"class {className}"))
+            if (line.Contains($"class {className}", StringComparison.Ordinal))
                 return true;
         }
 
@@ -204,7 +234,7 @@ internal static class DataPointValueProvider
         try
         {
             var sourceType = asyncSource.GetType();
-            if (!sourceType.Name.Contains("d__"))
+            if (!sourceType.Name.Contains("d__", StringComparison.Ordinal))
                 return "at unknown location";
 
             var originalType = sourceType.DeclaringType;
@@ -237,7 +267,9 @@ internal static class DataPointValueProvider
             // For now, return basic information while we examine the debug output
             return $"at {originalType.FullName}.{methodName}()";
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             Console.Error.WriteLine($"Error getting source location: {e}");
             return "at unknown location";
@@ -254,10 +286,7 @@ internal static class DataPointValueProvider
         if (property != null)
         {
             if (!property.CanRead)
-            {
-                throw new ArgumentException(
-                    $"Property '{dataPoint.DataPointSource}' in {declaringType.FullName} must have a getter");
-            }
+                throw new ArgumentException($"Property '{dataPoint.DataPointSource}' in {declaringType.FullName} must have a getter");
 
             returnType = property.PropertyType;
 
@@ -292,41 +321,6 @@ internal static class DataPointValueProvider
             if (providedValue != null && !parameterType.IsInstanceOfType(providedValue))
                 throw new ArgumentException($"Parameter {i} of method '{method.Name}' expects type {parameterType.Name} but got {providedValue.GetType().Name}");
         }
-    }
-
-    internal static bool IsAsyncDataPoint(TestCase testCase)
-    {
-        var dataPoint = testCase.DataPoint;
-        if (dataPoint == null)
-            return false;
-
-        var declaringType = dataPoint.DataPointDeclaringType ?? testCase.MethodInfo.DeclaringType;
-        if (declaringType == null)
-            return false;
-
-        // Check property
-        var property = declaringType.GetProperty(
-            dataPoint.DataPointSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-
-        if (property != null)
-        {
-            var propertyType = property.PropertyType;
-            return IsAsyncEnumerableType(propertyType);
-        }
-
-        // Check method
-        var method = declaringType.GetMethod(
-            dataPoint.DataPointSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-
-        if (method != null)
-        {
-            var returnType = method.ReturnType;
-            return IsAsyncEnumerableType(returnType);
-        }
-
-        return false;
     }
 
     private static bool IsAsyncEnumerableType(Type type)

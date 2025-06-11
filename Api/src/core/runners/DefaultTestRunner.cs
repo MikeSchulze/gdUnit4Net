@@ -4,6 +4,7 @@
 namespace GdUnit4.Core.Runners;
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 using Api;
@@ -13,10 +14,14 @@ using Execution;
 /// <summary>
 ///     Default test runner implementation that executes tests directly in the current process.
 /// </summary>
-public sealed class DefaultTestRunner : BaseTestRunner
+[SuppressMessage(
+    "Reliability",
+    "CA2000:Dispose objects before losing scope",
+    Justification = "DirectCommandExecutor ownership is transferred to base class which handles disposal")]
+internal sealed class DefaultTestRunner : BaseTestRunner
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="DefaultTestRunner"/> class.
+    ///     Initializes a new instance of the <see cref="DefaultTestRunner" /> class.
     ///     Initializes a new instance of the DefaultTestRunner.
     /// </summary>
     /// <param name="logger">The test engine logger for diagnostic output.</param>

@@ -9,15 +9,7 @@ using Godot.NativeInterop;
 
 internal static class DebuggerUtils
 {
-    private static readonly MethodInfo? DebuggerIsActiveMethod;
-
-    static DebuggerUtils()
-    {
-        var nativeFuncType = typeof(NativeFuncs);
-        DebuggerIsActiveMethod = nativeFuncType.GetMethod(
-            "godotsharp_internal_script_debugger_is_active",
-            BindingFlags.NonPublic | BindingFlags.Static);
-    }
+    private static readonly MethodInfo? DebuggerIsActiveMethod = IsDebuggerUtils();
 
     public static bool IsDebuggerActive()
     {
@@ -26,5 +18,13 @@ internal static class DebuggerUtils
 
         var isDebuggerActive = (godot_bool)DebuggerIsActiveMethod.Invoke(null, null)!;
         return isDebuggerActive.ToBool();
+    }
+
+    private static MethodInfo? IsDebuggerUtils()
+    {
+        var nativeFuncType = typeof(NativeFuncs);
+        return nativeFuncType.GetMethod(
+            "godotsharp_internal_script_debugger_is_active",
+            BindingFlags.NonPublic | BindingFlags.Static);
     }
 }

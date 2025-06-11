@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 using core.resources.scenes;
 
+using GdUnit4.Asserts;
 using GdUnit4.Core.Execution.Exceptions;
-using GdUnit4.Core.Extensions;
 
 using Godot;
 
@@ -205,7 +205,17 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // AwaitOnSignal must fail after a maximum timeout of 500ms because no signal 'panel_color_change' with given args color=Yellow is emitted
         await AssertThrown(sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, Colors.Yellow).WithTimeout(700))
-            .ContinueWith(result => result.Result?.IsInstanceOf<ExecutionTimeoutException>().HasMessage("Assertion: Timed out after 700ms."));
+            .ContinueWith(result => result.Result?
+                .IsInstanceOf<TestFailedException>()
+                .HasMessage("""
+                    Expecting do emitting signal:
+                        "PanelColorChange([$colorRectId, (1, 1, 0, 1)])"
+                     by
+                        $sceneId
+                    """
+                    .Replace("$colorRectId", AssertFailures.AsObjectId(box1))
+                    .Replace("$sceneId", AssertFailures.AsObjectId(sceneRunner.Scene()))
+                ));
         // verify the box is still green
         AssertObject(box1.Color).IsEqual(Colors.Green);
     }
@@ -213,21 +223,21 @@ public sealed class SceneRunnerCSharpSceneTest
     [TestCase(Description = "Example to simulate the enter key is pressed to shoot a spell", Timeout = 2000)]
     public async Task RunSceneSimulateKeyPressed()
     {
-        // initial no spell is fired
+        // initially no spell is fired
         AssertObject(sceneRunner.FindChild("Spell")).IsNull();
 
-        // fire spell be pressing enter key
+        // fire spell be pressing an enter key
         sceneRunner.SimulateKeyPressed(Key.Enter);
-        // wait until next frame
+        // wait until the next frame
         await sceneRunner.AwaitInputProcessed();
 
         // verify a spell is created
         AssertObject(sceneRunner.FindChild("Spell")).IsNotNull();
 
-        // wait until spell is explode after around 1s
+        // wait until the spell is exploded after around 1 s
         var spell = sceneRunner.FindChild("Spell");
         // wait spell is exploded
-        await spell.AwaitSignal(Spell.SignalName.SpellExplode, spell).WithTimeout(1100);
+        await spell.AwaitSignal(Spell.SignalName.SpellExplode, spell.GetInstanceId()).WithTimeout(1100);
 
         // verify spell is removed when is exploded
         AssertObject(sceneRunner.FindChild("Spell")).IsNull();

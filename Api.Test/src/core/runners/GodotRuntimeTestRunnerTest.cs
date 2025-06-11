@@ -88,7 +88,7 @@ public class GodotRuntimeTestRunnerTest
     ///     Test successful execution of InstallTestRunnerClasses
     /// </summary>
     [TestCase]
-    public void TestInstallTestRunnerClassesSuccess()
+    public void ReCompileGodotProject()
     {
         // Arrange
         CreateSuccessScript();
@@ -98,25 +98,21 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for successful compilation").IsTrue();
 
         // Verify logger was called with success messages
-        VerifyLoggerInfo("Installing GdUnit4 Godot Runtime Test Runner");
+        VerifyLoggerInfo("Rebuild Godot Project ...");
         VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
-
-        // Verify the runner file was created in the correct location
-        var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
-        AssertThat(File.Exists(runnerPath)).OverrideFailureMessage($"Runner file should exist at {runnerPath}").IsTrue();
     }
 
     /// <summary>
     ///     Test a process that takes nearly the full timeout but still completes successfully
     /// </summary>
     [TestCase]
-    public void TestInstallTestRunnerClassesNearTimeout()
+    public void ReCompileGodotProjectNearTimeout()
     {
         // Create a script that runs for 4 seconds (near the timeout but should complete)
         CreateNearTimeoutScript();
@@ -126,18 +122,14 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act, Set a longer timeout for this test
-        var result = CreateTestRunner(5000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(5000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for a process that completes just before timeout").IsTrue();
 
         // Verify success messages were logged
-        VerifyLoggerInfo("Installing GdUnit4 Godot Runtime Test Runner");
+        VerifyLoggerInfo("Rebuild Godot Project ...");
         VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
-
-        // Verify the runner file was created and not cleaned up
-        var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
-        AssertThat(File.Exists(runnerPath)).OverrideFailureMessage($"Runner file should exist at {runnerPath}").IsTrue();
 
         // Verify that no timeout error was logged
         LoggerMock.Verify(l => l.LogError(It.Is<string>(s =>
@@ -148,7 +140,7 @@ public class GodotRuntimeTestRunnerTest
     ///     Test timeout scenario in InstallTestRunnerClasses
     /// </summary>
     [TestCase]
-    public void TestInstallTestRunnerClassesTimeout()
+    public void ReCompileGodotProjectTimeout()
     {
         // Arrange
         CreateTimeoutScript();
@@ -158,7 +150,7 @@ public class GodotRuntimeTestRunnerTest
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on timeout").IsFalse();
@@ -177,28 +169,47 @@ public class GodotRuntimeTestRunnerTest
     ///     Test compilation failure scenario
     /// </summary>
     [TestCase]
-    public void TestInstallTestRunnerClassesCompilationFailure()
+    public void TestInstallTestRunnerCompilationFailure()
     {
-        // Arrange
-        CreateFailureScript();
-
         // Create a separate temp working directory
         var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_failure");
         Directory.CreateDirectory(workingDirectory);
 
         // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, MockGodotBinPath);
+        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory);
 
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on compilation failure").IsFalse();
 
         // Verify error message was logged
-        VerifyLoggerError("Rebuild Godot Project ends with exit code: 1");
+        VerifyLoggerError("dotnet build failed with exit code: 1");
 
         // Verify the runner file was cleaned up after failure
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
         AssertThat(File.Exists(runnerPath)).OverrideFailureMessage("Runner file should be cleaned up after compilation failure").IsFalse();
     }
+
+    [TestCase]
+    public void TestInstallTestRunnerSuccess()
+    {
+        // Create a separate temp working directory
+        var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_failure");
+        Directory.CreateDirectory(workingDirectory);
+
+        // Act
+        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, false);
+
+        // Assert
+        AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
+
+        // Verify error message was logged
+        VerifyLoggerInfo("======== Installing GdUnit4 Godot Runtime Test Runner ========");
+
+        // Verify the runner file was created in the correct location
+        var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
+        AssertThat(File.Exists(runnerPath)).OverrideFailureMessage($"Runner file should exist at {runnerPath}").IsTrue();
+    }
+
 
     #region Helper Methods
 

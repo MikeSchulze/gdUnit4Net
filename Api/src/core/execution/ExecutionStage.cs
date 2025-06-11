@@ -21,7 +21,7 @@ using Monitoring;
 
 using Reporting;
 
-using static Api.ITestReport.ReportType;
+using static Api.ReportType;
 
 using Environment = System.Environment;
 
@@ -39,6 +39,8 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     protected ExecutionStage(string name, MethodInfo method, TestStageAttribute stageAttribute) => InitExecutionAttributes(name, method, stageAttribute);
 
+    internal bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
+
     protected string StageName { get; private set; } = string.Empty;
 
     private bool IsAsync { get; set; }
@@ -51,14 +53,12 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private TestStageAttribute? StageAttribute { get; set; }
 
-    internal bool IsMonitoringOnGodotExceptionsEnabled { get; set; }
-
     public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
         if (Method == null)
         {
-            await Task.Run(() => { });
+            await Task.Run(() => { }).ConfigureAwait(true);
             return;
         }
 
@@ -67,8 +67,11 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             // if the method is defined asynchronously, the return type must be a Task
             if (IsAsync != IsTask)
             {
-                context.ReportCollector.Consume(new TestReport(FAILURE, ExecutionLineNumber(context),
-                    $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
+                context.ReportCollector.Consume(
+                    new TestReport(
+                        Failure,
+                        ExecutionLineNumber(context),
+                        $"Invalid method signature found at: {StageName}.\n You must return a <Task> for an asynchronously specified method."));
                 return;
             }
 
@@ -78,9 +81,13 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 godotExceptionMonitor.Start();
             }
 
-            await ExecuteStage(context);
-            if (IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
-                await godotExceptionMonitor!.StopThrow();
+            await ExecuteStage(context).ConfigureAwait(true);
+            if (godotExceptionMonitor != null && IsMonitoringOnGodotExceptionsEnabled && context.IsEngineMode)
+            {
+                await godotExceptionMonitor
+                    .StopThrow()
+                    .ConfigureAwait(true);
+            }
 
             ValidateForExpectedException(context);
         }
@@ -89,13 +96,15 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (ValidateForExpectedException(context, e))
                 return;
             if (context.FailureReporting)
-                context.ReportCollector.Consume(new TestReport(INTERRUPTED, e.LineNumber, e.Message));
+                context.ReportCollector.Consume(new TestReport(Interrupted, e.LineNumber, e.Message));
         }
         catch (TestFailedException e)
         {
             ReportAsFailure(context, e);
         }
+#pragma warning disable CA1031
         catch (Exception e)
+#pragma warning restore CA1031
         {
             if (e.GetBaseException() is TestFailedException ex)
                 ReportAsFailure(context, ex);
@@ -104,6 +113,39 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 // handle unexpected exceptions
                 ReportUnexpectedException(context, e);
         }
+    }
+
+    internal static string TrimStackTrace(string stackTrace)
+    {
+        if (stackTrace.Length == 0)
+            return stackTrace;
+
+        StringBuilder result = new(stackTrace.Length);
+        var stackFrames = Regex.Split(stackTrace, Environment.NewLine);
+
+        foreach (var stackFrame in stackFrames)
+        {
+            if (string.IsNullOrEmpty(stackFrame) || stackFrame.Contains("Microsoft.VisualStudio.TestTools", StringComparison.Ordinal))
+                continue;
+
+            result.Append(stackFrame);
+            result.Append(Environment.NewLine);
+        }
+
+        return result.ToString();
+    }
+
+    private static int ScanFailureLineNumber(StackTrace stack)
+    {
+        foreach (var frame in stack.GetFrames().Reverse())
+        {
+            if (frame.GetFileName() == null)
+                continue;
+            if (frame.GetMethod()?.IsDefined(typeof(TestCaseAttribute)) ?? false)
+                return frame.GetFileLineNumber();
+        }
+
+        return stack.FrameCount > 1 ? stack.GetFrame(0)!.GetFileLineNumber() : -1;
     }
 
     private void InitExecutionAttributes(string stageName, MethodInfo? method, TestStageAttribute stageAttribute)
@@ -156,50 +198,19 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                 return;
             var stack = new StackTrace(exception, true);
             var lineNumber = ScanFailureLineNumber(stack);
-            context.ReportCollector.Consume(new TestReport(FAILURE, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
+            context.ReportCollector.Consume(new TestReport(Failure, lineNumber, exception.Message, TrimStackTrace(stack.ToString())));
         }
-    }
-
-    private static int ScanFailureLineNumber(StackTrace stack)
-    {
-        foreach (var frame in stack.GetFrames().Reverse())
-        {
-            if (frame.GetFileName() == null)
-                continue;
-            if (frame.GetMethod()?.IsDefined(typeof(TestCaseAttribute)) ?? false)
-                return frame.GetFileLineNumber();
-        }
-
-        return stack.FrameCount > 1 ? stack.GetFrame(0)!.GetFileLineNumber() : -1;
-    }
-
-    internal static string TrimStackTrace(string stackTrace)
-    {
-        if (stackTrace.Length == 0)
-            return stackTrace;
-
-        StringBuilder result = new(stackTrace.Length);
-        var stackFrames = Regex.Split(stackTrace, Environment.NewLine);
-
-        foreach (var stackFrame in stackFrames)
-        {
-            if (string.IsNullOrEmpty(stackFrame) || stackFrame.Contains("Microsoft.VisualStudio.TestTools"))
-                continue;
-
-            result.Append(stackFrame);
-            result.Append(Environment.NewLine);
-        }
-
-        return result.ToString();
     }
 
     private async Task ExecuteStage(ExecutionContext context)
     {
         var timeout = TimeSpan.FromMilliseconds(StageAttribute?.Timeout ?? DefaultTimeout);
         var task = Method?.Invoke(context.TestSuite.Instance, context.MethodArguments) as Task ?? Task.CompletedTask;
-        var completedTask = await Task.WhenAny(task, Task.Delay(timeout));
+        var completedTask = await Task
+            .WhenAny(task, Task.Delay(timeout))
+            .ConfigureAwait(true);
         if (completedTask == task)
-            await task; // Propagate exceptions from the original task
+            await task.ConfigureAwait(true); // Propagate exceptions from the original task
         else
             throw new ExecutionTimeoutException($"The execution has timed out after {timeout.Humanize()}.", ExecutionLineNumber(context));
     }

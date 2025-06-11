@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.TestAdapter.test;
+namespace GdUnit4.TestAdapter.Test;
 
 using Api;
 

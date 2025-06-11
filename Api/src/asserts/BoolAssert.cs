@@ -3,9 +3,10 @@
 
 namespace GdUnit4.Asserts;
 
+#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
 public sealed class BoolAssert : AssertBase<bool>, IBoolAssert
 {
-    public BoolAssert(bool current)
+    internal BoolAssert(bool current)
         : base(current)
     {
     }
@@ -27,3 +28,4 @@ public sealed class BoolAssert : AssertBase<bool>, IBoolAssert
     public new IBoolAssert OverrideFailureMessage(string message)
         => (IBoolAssert)base.OverrideFailureMessage(message);
 }
+#pragma warning restore CS1591, SA1600
