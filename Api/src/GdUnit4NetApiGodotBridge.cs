@@ -20,7 +20,6 @@ using Godot;
 using Godot.Collections;
 
 using static System.ArgumentException;
-using static System.ArgumentNullException;
 
 /// <summary>
 ///     The Godot Editor bridge to run C# tests inside the Godot Editor.
@@ -45,19 +44,6 @@ public partial class GdUnit4NetApiGodotBridge : RefCounted
         if (result.ContainsKey("path"))
             result["path"] = testSuitePath;
         return result.ToGodotDictionary();
-    }
-
-    /// <summary>
-    ///     Determines if a given CSharpScript is a test suite by checking for the TestSuiteAttribute.
-    /// </summary>
-    /// <param name="script">The CSharpScript to check.</param>
-    /// <returns>True if the script is a test suite, false otherwise.</returns>
-    public static bool IsTestSuite(CSharpScript script)
-    {
-        ThrowIfNull(script);
-
-        var type = GdUnitTestSuiteBuilder.ParseType(NormalizedPath(script.ResourcePath), true);
-        return type != null && Attribute.IsDefined(type, typeof(TestSuiteAttribute));
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 namespace GdUnit4.Tests;
 
+#if GDUNIT4NET_API_V5
 using System.IO;
 
 using Godot;
@@ -59,3 +60,4 @@ public class UtilsTest
         AssertThat(ErrorAsString(100)).IsEqual("The error: 100 is not defined in Godot.");
     }
 }
+#endif

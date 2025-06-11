@@ -91,7 +91,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          global-json-file: 'global.json'
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
@@ -151,7 +151,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.410
+          global-json-file: 'global.json'
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
