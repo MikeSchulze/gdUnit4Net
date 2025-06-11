@@ -20,7 +20,7 @@ jobs:
 
   setup-dotnet:
     name: "🔧 Setup .NET8"
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
   compile:
     name: "🔨 Compile Projects"
     needs: setup-dotnet
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
   analyzer-style-check:
     name: "🔍 Check Style: Analyzers"
     needs: setup-dotnet
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +80,7 @@ jobs:
   analyzer-tests:
     name: "🧪 Test: Analyzers"
     needs: compile
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 2
 
     steps:
@@ -120,7 +120,7 @@ jobs:
   api-style-check:
     name: "🔍 Check Style: API"
     needs: setup-dotnet
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
@@ -139,7 +139,7 @@ jobs:
   adapter-style-check:
     name: "🔍 Check Style: Test Adapter"
     needs: setup-dotnet
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
@@ -157,7 +157,7 @@ jobs:
   test-adapter-test:
     name: "🧪 Test: TestAdapter"
     needs: compile
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 3
 
     steps:
