@@ -5,16 +5,10 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-
-    <!-- Note: Keep GodotVersion in sync with global.json msbuild-sdks.Godot.NET.Sdk -->
-    <GodotVersion>4.3</GodotVersion>
-    <GodotNetSdkVersion>$(GodotVersion)</GodotNetSdkVersion>
-    <CommonTargetFrameworks Condition="'$(CommonTargetFrameworks)' == ''">net7.0;net8.0</CommonTargetFrameworks>
-    <LangVersion>11.0</LangVersion>
   </PropertyGroup>
 
-  <!-- Default .NET 8 compatible versions -->
-  <ItemGroup>
+  <!-- Analyzer packages for netstandard2.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.9.2"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0"/>
@@ -30,8 +24,49 @@
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.507"/>
     <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
     <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
+  </ItemGroup>
 
 
+  <!-- .NET 8 compatible versions when targeting net8.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.9.2"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.2"/>
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0"/>
+    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.9.0"/>
+
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.2.0"/>
+    <PackageVersion Include="MSTest.TestFramework" Version="3.2.0"/>
+
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.507"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
+  </ItemGroup>
+
+  <!-- .NET 9 compatible versions when targeting net9.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.11.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0"/>
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.12.0"/>
+    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.12.0"/>
+
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2"/>
+    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2"/>
+
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
     <PackageVersion Include="Godot.NET.Sdk" Version="$(GodotNetSdkVersion)"/>
     <PackageVersion Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
     <PackageVersion Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>

@@ -3,8 +3,8 @@
 
 namespace GdUnit4.Analyzers;
 
+using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 
 using Microsoft.CodeAnalysis;
@@ -30,7 +30,8 @@ public class DataPointAttributeAnalyzer : DiagnosticAnalyzer
     /// <param name="context">The analysis context to initialize.</param>
     public override void Initialize(AnalysisContext context)
     {
-        Debug.Assert(context != null, nameof(context) + " != null");
+        if (context is null)
+            throw new ArgumentNullException(nameof(context));
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeMethodSymbol, SymbolKind.Method);

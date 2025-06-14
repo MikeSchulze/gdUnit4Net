@@ -13,13 +13,6 @@ using System.Runtime.CompilerServices;
 public interface ITestEngineLogger
 {
     /// <summary>
-    ///     Sends a message to the enabled loggers.
-    /// </summary>
-    /// <param name="logLevel">Level of the message.</param>
-    /// <param name="message">The message to be sent.</param>
-    protected void SendMessage(LogLevel logLevel, string message);
-
-    /// <summary>
     ///     Logs an informational message.
     /// </summary>
     /// <param name="message">The informational message to log.</param>
@@ -39,4 +32,11 @@ public interface ITestEngineLogger
     /// <param name="message">The error message to log.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void LogError(string message) => SendMessage(LogLevel.Error, message);
+
+    /// <summary>
+    ///     Sends a message to the enabled loggers.
+    /// </summary>
+    /// <param name="logLevel">Level of the message.</param>
+    /// <param name="message">The message to be sent.</param>
+    protected void SendMessage(LogLevel logLevel, string message);
 }
