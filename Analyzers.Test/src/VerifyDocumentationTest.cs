@@ -87,7 +87,7 @@ public partial class VerifyDocumentationTest
         foreach (var field in dataPointType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         {
             if (field.FieldType == typeof(DiagnosticDescriptor) && field.IsInitOnly)
-                yield return ((DiagnosticDescriptor)field.GetValue(null), field.Name.Replace("Attribute", string.Empty, StringComparison.Ordinal));
+                yield return ((DiagnosticDescriptor)field.GetValue(null)!, field.Name.Replace("Attribute", string.Empty, StringComparison.Ordinal));
         }
 
         // Get GodotEngine diagnostics
@@ -95,7 +95,7 @@ public partial class VerifyDocumentationTest
         foreach (var field in godotEngineType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         {
             if (field.FieldType == typeof(DiagnosticDescriptor) && field.IsInitOnly)
-                yield return ((DiagnosticDescriptor)field.GetValue(null), field.Name);
+                yield return ((DiagnosticDescriptor)field.GetValue(null)!, field.Name);
         }
     }
 
@@ -109,12 +109,13 @@ public partial class VerifyDocumentationTest
             var match = rowRegex.Match(line);
             if (match.Success)
             {
-                tableRows.Add(new DiagnosticRuleTableRecord
-                {
-                    Id = match.Groups[1].Value.Trim(),
-                    Severity = match.Groups[2].Value.Trim(),
-                    Title = match.Groups[3].Value.Trim()
-                });
+                tableRows.Add(
+                    new DiagnosticRuleTableRecord
+                    {
+                        Id = match.Groups[1].Value.Trim(),
+                        Severity = match.Groups[2].Value.Trim(),
+                        Title = match.Groups[3].Value.Trim()
+                    });
             }
         }
 

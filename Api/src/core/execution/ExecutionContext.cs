@@ -218,7 +218,7 @@ internal sealed class ExecutionContext : IDisposable
     {
         var orphanCount = MemoryPool.OrphanCount;
         if (recursive)
-            orphanCount += SubExecutionContexts.Select(context => context.MemoryPool.OrphanCount).Sum();
+            orphanCount += SubExecutionContexts.Sum(context => context.MemoryPool.OrphanCount);
         return orphanCount;
     }
 

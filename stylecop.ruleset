@@ -14,5 +14,13 @@
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
     <Rule Id="IDE0011" Action="None"/> <!-- Disable Add braces to 'if' statement -->
+    <!-- Disable C# 12 collection expression suggestions -->
+    <Rule Id="IDE0028" Action="None"/>
+    <Rule Id="IDE0290" Action="None"/>
+    <Rule Id="IDE0300" Action="None"/>
+    <Rule Id="IDE0301" Action="None"/>
+    <Rule Id="IDE0303" Action="None"/>
+    <Rule Id="IDE0305" Action="None"/>
+    <Rule Id="IDE0306" Action="None"/>
   </Rules>
 </RuleSet>
