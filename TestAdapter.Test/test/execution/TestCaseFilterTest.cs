@@ -40,8 +40,9 @@ public class TestCaseFilterTest
     private static List<TestCase> testsExamples;
 
     [ClassInitialize]
-    public static void SetUp()
+    public static void SetUp(TestContext testContext)
     {
+        _ = testContext; // Explicitly discard to show intent and satisfy IDE0060
         var testDescriptors = new List<TestCaseDescriptor>
         {
             new()
