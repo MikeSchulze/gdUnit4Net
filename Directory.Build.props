@@ -45,7 +45,7 @@
     StyleCop.Analyzers: Enforces style and consistency rules
     Helps ensure readable and maintainable code across the codebase
     -->
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
