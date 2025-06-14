@@ -48,6 +48,20 @@ jobs:
         with:
           lfs: true
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: 'global.json'
+
+      - name: "Restore Build Cache"
+        if: ${{ !cancelled() }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/obj
+            **/bin
+            **/nupkg
+          key: ${{ runner.os }}-build-${{ github.sha }}-${{ github.run_id }}
+
       # the vstest filter is actual not implemented and the argument 'paths' on gdUnit4-action@v1.0.8 will have no affect
       - name: 'Temp solution, we delete the failing test for now.'
         shell: bash
