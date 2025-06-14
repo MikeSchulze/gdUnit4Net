@@ -1,0 +1,7 @@
+﻿<Project>
+  <PropertyGroup>
+    <GdUnitAnalyzersVersion>1.0.0-rc7</GdUnitAnalyzersVersion>
+    <GdUnitAPIVersion>5.0.0-rc3</GdUnitAPIVersion>
+    <GdUnitTestAdapterVersion>3.0.0-rc1</GdUnitTestAdapterVersion>
+  </PropertyGroup>
+</Project>

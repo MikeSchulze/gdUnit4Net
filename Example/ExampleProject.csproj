@@ -1,13 +1,14 @@
 <Project Sdk="Godot.NET.Sdk">
-    <Import Project="../PackageVersions.props"/>
     <PropertyGroup>
+        <!-- Disable Central Package Management for Godot projects -->
+        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
         <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>11.0</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <NullableReferenceTypes>true</NullableReferenceTypes>
         <RootNamespace>Examples</RootNamespace>
     </PropertyGroup>
+
     <PropertyGroup>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
@@ -16,13 +17,14 @@
         <VSTestTestAdapterPath>none</VSTestTestAdapterPath>
         <TestFramework>GdUnit4</TestFramework>
     </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
         <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions, but set it to private to prevent conflicts -->
         <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
-        <PackageReference Include="gdUnit4.api" Version="5.0.0-rc3"/>
-        <PackageReference Include="gdUnit4.test.adapter" Version="3.0.0-rc1"/>
-        <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc7">
+        <PackageReference Include="gdUnit4.api" Version="5.0.0-rc*"/>
+        <PackageReference Include="gdUnit4.test.adapter" Version="3.0.0-rc*"/>
+        <PackageReference Include="gdUnit4.analyzers" Version="1.0.0-rc*">
             <PrivateAssets>none</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

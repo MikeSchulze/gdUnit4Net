@@ -1,7 +1,5 @@
 ﻿<!-- gdUnit4Analyzers.csproj -->
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../PackageVersions.props"/>
-
   <PropertyGroup>
     <Title>gdUnit4Analyzers</Title>
     <Version>$(GdUnit4AnalyzersVersion)</Version>
@@ -17,7 +15,6 @@
   <PropertyGroup>
     <RootNamespace>GdUnit4.Analyzers</RootNamespace>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>11.0</LangVersion>
     <OutputType>Library</OutputType>
     <OutputPath>./nupkg</OutputPath>
 
@@ -67,8 +64,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpVersion)" PrivateAssets="all"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
