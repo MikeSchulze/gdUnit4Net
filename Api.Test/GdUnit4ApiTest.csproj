@@ -1,30 +1,29 @@
 <Project Sdk="Godot.NET.Sdk">
-    <Import Project="../PackageVersions.props"/>
     <PropertyGroup>
         <Version>5.0.0</Version>
         <Copyright>© 2025 Mike Schulze</Copyright>
         <Authors>Mike Schulze</Authors>
         <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>11.0</LangVersion>
         <Nullable>enable</Nullable>
         <NullableReferenceTypes>true</NullableReferenceTypes>
         <RootNamespace>GdUnit4.Tests</RootNamespace>
     </PropertyGroup>
     <PropertyGroup>
+        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
         <AssemblyName>GdUnit4ApiTest</AssemblyName>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <!--Disable warning/error of invalid/incompatible GodotSharp version, the package GdUnit4.API is build by V4.2.0-->
-        <NoWarn>NU1605</NoWarn>
+        <NoWarn>NU1605,CS8785</NoWarn>
         <!-- Prevent MSTest adapter from being discovered -->
         <VSTestTestAdapterPath>none</VSTestTestAdapterPath>
         <TestFramework>GdUnit4</TestFramework>
         <DefineConstants>$(DefineConstants);GDUNIT4NET_API_V5</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftSdkVersion)"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
         <!-- We only include here the MSTest framework to run tests mixed with MSTest assertions, but set it to private to prevent conflicts -->
         <PackageReference Include="MSTest.TestFramework" Version="3.0.2" ExcludeAssets="build;analyzers;native"/>
         <ProjectReference Include="..\Api\GdUnit4Api.csproj"/>
