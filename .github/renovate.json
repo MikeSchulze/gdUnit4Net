@@ -3,13 +3,5 @@
   "extends": [
     "config:recommended",
     "github>MikeSchulze/renovate-config"
-  ],
-  "packageRules": [
-    {
-      "matchPackageNames": [
-        "Microsoft.CodeAnalysis.Analyzers"
-      ],
-      "allowedVersions": "<=4.10.0"
-    }
   ]
 }
