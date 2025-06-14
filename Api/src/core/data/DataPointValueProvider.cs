@@ -103,7 +103,7 @@ internal static class DataPointValueProvider
         if (!IsAsyncEnumerableType(returnType!))
             throw new ArgumentException($"Data source '{dataPoint.DataPointSource}' in {declaringType.FullName} must return IAsyncEnumerable<T>");
 
-        await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout))
+        await foreach (var item in StreamAsyncData(dataSource, returnType!, timeout).ConfigureAwait(false))
             yield return item;
     }
 
