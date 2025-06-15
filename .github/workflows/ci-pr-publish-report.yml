@@ -27,7 +27,7 @@ jobs:
         godot-status: [ 'stable' ]
         include:
           - godot-version: '4.5'
-            godot-status: 'dev3'
+            godot-status: 'dev5'
 
     steps:
       - uses: actions/checkout@v4
