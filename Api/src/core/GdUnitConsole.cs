@@ -3,8 +3,6 @@
 
 namespace GdUnit4.Core;
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 internal sealed class GdUnitConsole
@@ -63,7 +61,7 @@ internal sealed class GdUnitConsole
         if (savedCursorsByName.TryGetValue(name, out var position))
         {
             Console.SetCursorPosition(position.Left, position.Top);
-            savedCursorsByName.Remove(name);
+            _ = savedCursorsByName.Remove(name);
         }
     }
 
@@ -109,7 +107,7 @@ internal sealed class GdUnitConsole
 
     private Color ToColor(ConsoleColor color)
     {
-        var colorName = Enum.GetName(typeof(ConsoleColor), color);
+        var colorName = Enum.GetName(color);
         return Color.FromName(colorName!);
     }
 

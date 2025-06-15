@@ -3,18 +3,14 @@
 
 namespace GdUnit4.Core.Signals;
 
-using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Extensions;
 
 using Godot;
 
-using static System.Console;
+using static Console;
 
 using Array = Godot.Collections.Array;
 using Error = Godot.Error;
@@ -67,9 +63,9 @@ internal sealed partial class GodotSignalCollector : RefCounted
                         {
                             Thread.Sleep(sleepTimeInMs);
                             if (isProcess && IsInstanceValid(emitter))
-                                emitter.CallDeferred("_Process", sleepTimeInMs);
+                                _ = emitter.CallDeferred("_Process", sleepTimeInMs);
                             if (isPhysicsProcess && IsInstanceValid(emitter))
-                                emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
+                                _ = emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
 
                             // ReSharper disable once AccessToDisposedClosure
                             if (signalCancellationToken.IsCancellationRequested)
@@ -119,7 +115,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
             if (error != Error.Ok)
                 WriteLine($"Error on connecting signal {signalName}, Error: {error}");
 
-            emitterSignals.TryAdd(signalName, new ConcurrentBag<Variant[]>());
+            _ = emitterSignals.TryAdd(signalName, new ConcurrentBag<Variant[]>());
         }
     }
 
@@ -167,7 +163,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
         }
 
         if (IsInstanceValid(emitter))
-            CollectedSignals.TryRemove(emitter, out _);
+            _ = CollectedSignals.TryRemove(emitter, out _);
 
         // DebugSignalList("UnregisterEmitter");
     }

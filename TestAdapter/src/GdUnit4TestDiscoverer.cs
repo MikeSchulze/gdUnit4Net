@@ -3,10 +3,7 @@
 
 namespace GdUnit4.TestAdapter;
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 using Api;
 
@@ -38,8 +35,8 @@ using TestCaseDescriptor = Core.Discovery.TestCaseDescriptor;
 ///     The class is decorated with VSTest adapter attributes that register it as a test discoverer
 ///     for .dll and .exe files in the managed code category.
 /// </remarks>
-[DefaultExecutorUri(GdUnit4TestExecutor.ExecutorUri)]
-[ExtensionUri(GdUnit4TestExecutor.ExecutorUri)]
+[DefaultExecutorUri(GdUnit4TestExecutor.EXECUTOR_URI)]
+[ExtensionUri(GdUnit4TestExecutor.EXECUTOR_URI)]
 [FileExtension(".dll")]
 [FileExtension(".exe")]
 [Category("managed")]
@@ -154,7 +151,7 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
     /// </remarks>
     internal static TestCase BuildTestCase(TestCaseDescriptor descriptor, GdUnit4Settings settings)
     {
-        TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.ExecutorUri), descriptor.AssemblyPath)
+        TestCase testCase = new(descriptor.FullyQualifiedName, new Uri(GdUnit4TestExecutor.EXECUTOR_URI), descriptor.AssemblyPath)
         {
             Id = descriptor.Id,
             DisplayName = GetDisplayName(descriptor, settings),

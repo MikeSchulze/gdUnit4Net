@@ -3,8 +3,6 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
-
 using Core.Extensions;
 
 #pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
@@ -138,7 +136,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
     public new IStringAssert OverrideFailureMessage(string message)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
-        base.OverrideFailureMessage(message);
+        _ = base.OverrideFailureMessage(message);
         return this;
     }
 }

@@ -3,12 +3,8 @@
 
 namespace GdUnit4.Core.Runners;
 
-using System;
-using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -23,7 +19,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     private readonly SemaphoreSlim processLock = new(1, 1);
 
     public GodotGdUnit4RestServer(ITestEngineLogger logger)
-        : base(new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
+        : base(new NamedPipeServerStream(PIPE_NAME, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
         => Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
 
     public bool IsFailed { get; set; }
@@ -51,7 +47,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
         if (!IsConnected)
             return;
 
-        await GodotObjectExtensions.SyncProcessFrame;
+        _ = await GodotObjectExtensions.SyncProcessFrame;
         if (!await processLock
                 .WaitAsync(TimeSpan.FromSeconds(1))
                 .ConfigureAwait(true))
@@ -85,7 +81,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
         }
         finally
         {
-            processLock.Release();
+            _ = processLock.Release();
         }
     }
 
@@ -109,7 +105,7 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
             }
             finally
             {
-                processLock.Release();
+                _ = processLock.Release();
             }
         }
         else

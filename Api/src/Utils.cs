@@ -3,11 +3,7 @@
 
 namespace GdUnit4;
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Godot;
 
@@ -55,7 +51,7 @@ public static class Utils
     {
         var tempFolder = Path.Combine(GodotTempDir(), path);
         if (!new FileInfo(tempFolder).Exists)
-            Directory.CreateDirectory(tempFolder);
+            _ = Directory.CreateDirectory(tempFolder);
         return tempFolder;
     }
 

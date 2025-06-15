@@ -3,11 +3,9 @@
 
 namespace GdUnit4.Core.Hooks;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 [SuppressMessage("Style", "IDE1006", Justification = "Unix system call names follow C naming conventions")]
 [SuppressMessage(
@@ -53,6 +51,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
             throw new InvalidOperationException($"Failed to create fcntl. Error: {hResult}");
     }
 
+    [SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "Method called for side effects only, return value intentionally ignored")]
     public void Dispose()
     {
         StopCapture();
@@ -79,6 +78,7 @@ internal sealed class UnixStdOutHook : IStdOutHook
         readThread.Start();
     }
 
+    [SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "Method called for side effects only, return value intentionally ignored")]
     public void StopCapture()
     {
         stdOutHook.StopCapture();

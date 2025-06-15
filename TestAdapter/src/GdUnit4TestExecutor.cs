@@ -3,9 +3,6 @@
 
 namespace GdUnit4.TestAdapter;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 
 using Api;
@@ -43,13 +40,13 @@ using Utilities;
 ///     The executor works in conjunction with the discoverer to provide a complete
 ///     VSTest adapter implementation that bridges GdUnit4 tests with the VSTest platform.
 /// </remarks>
-[ExtensionUri(ExecutorUri)]
+[ExtensionUri(EXECUTOR_URI)]
 public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
 {
     /// <summary>
     ///     The Uri used to identify the GdUnit4 Executor.
     /// </summary>
-    public const string ExecutorUri = "executor://GdUnit4.TestAdapter";
+    public const string EXECUTOR_URI = "executor://GdUnit4.TestAdapter";
 
     /// <summary>
     ///     The default test session timeout is set to 10min (600000ms).

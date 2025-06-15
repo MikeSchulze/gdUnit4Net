@@ -3,11 +3,7 @@
 
 namespace GdUnit4.Core;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 
 using Godot;
 
@@ -68,7 +64,7 @@ internal static class GdUnitTestSuiteBuilder
             // create a directory if not exists
             var dir = Path.GetDirectoryName(testSuitePath);
             if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir!);
+                _ = Directory.CreateDirectory(dir!);
 
             if (!File.Exists(testSuitePath))
             {

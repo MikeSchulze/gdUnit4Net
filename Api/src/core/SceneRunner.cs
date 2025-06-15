@@ -3,13 +3,7 @@
 
 namespace GdUnit4.Core;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -44,7 +38,7 @@ internal sealed class SceneRunner : ISceneRunner
         this.currentScene = currentScene;
         SceneTree.Root.AddChild(this.currentScene);
         SavedIterationsPerSecond = Engine.PhysicsTicksPerSecond;
-        SetTimeFactor();
+        _ = SetTimeFactor();
     }
 
     private SceneTree SceneTree { get; }
@@ -74,8 +68,8 @@ internal sealed class SceneRunner : ISceneRunner
 
     public ISceneRunner SimulateActionPressed(string action)
     {
-        SimulateActionPress(action);
-        SimulateActionRelease(action);
+        _ = SimulateActionPress(action);
+        _ = SimulateActionRelease(action);
         return this;
     }
 
@@ -86,7 +80,7 @@ internal sealed class SceneRunner : ISceneRunner
             Pressed = false,
             Action = action
         };
-        actionOnPress.Remove(action);
+        _ = actionOnPress.Remove(action);
         return HandleInputEvent(inputEvent);
     }
 
@@ -109,8 +103,8 @@ internal sealed class SceneRunner : ISceneRunner
 
     public ISceneRunner SimulateKeyPressed(Key keyCode, bool shift = false, bool control = false)
     {
-        SimulateKeyPress(keyCode, shift, control);
-        SimulateKeyRelease(keyCode, shift, control);
+        _ = SimulateKeyPress(keyCode, shift, control);
+        _ = SimulateKeyRelease(keyCode, shift, control);
         return this;
     }
 
@@ -127,7 +121,7 @@ internal sealed class SceneRunner : ISceneRunner
             CtrlPressed = controlPressed || keyCode == Key.Ctrl
         };
         ApplyInputModifiers(inputEvent);
-        keyOnPress.Remove(keyCode);
+        _ = keyOnPress.Remove(keyCode);
         return HandleInputEvent(inputEvent);
     }
 
@@ -177,8 +171,8 @@ internal sealed class SceneRunner : ISceneRunner
 
     public ISceneRunner SimulateMouseButtonPressed(MouseButton buttonIndex, bool doubleClick = false)
     {
-        SimulateMouseButtonPress(buttonIndex, doubleClick);
-        SimulateMouseButtonRelease(buttonIndex);
+        _ = SimulateMouseButtonPress(buttonIndex, doubleClick);
+        _ = SimulateMouseButtonRelease(buttonIndex);
         return this;
     }
 
@@ -207,7 +201,7 @@ internal sealed class SceneRunner : ISceneRunner
             Pressed = false
         };
 
-        mouseButtonOnPress.Remove(buttonIndex);
+        _ = mouseButtonOnPress.Remove(buttonIndex);
         ApplyInputMousePosition(inputEvent);
         ApplyInputMouseMask(inputEvent);
         ApplyInputModifiers(inputEvent);
@@ -237,7 +231,7 @@ internal sealed class SceneRunner : ISceneRunner
     {
         var timeShiftFrames = Math.Max(1, frames / TimeFactor);
         for (var frame = 0; frame <= timeShiftFrames; frame++)
-            await ISceneRunner.SyncProcessFrame;
+            _ = await ISceneRunner.SyncProcessFrame;
     }
 
     public Node Scene() => currentScene;
@@ -346,7 +340,7 @@ internal sealed class SceneRunner : ISceneRunner
         foreach (var button in mouseButtonOnPress)
         {
             if (Input.IsMouseButtonPressed(button))
-                SimulateMouseButtonRelease(button);
+                _ = SimulateMouseButtonRelease(button);
         }
 
         mouseButtonOnPress.Clear();
@@ -354,7 +348,7 @@ internal sealed class SceneRunner : ISceneRunner
         foreach (var key in keyOnPress)
         {
             if (Input.IsKeyPressed(key))
-                SimulateKeyRelease(key);
+                _ = SimulateKeyRelease(key);
         }
 
         keyOnPress.Clear();
@@ -362,7 +356,7 @@ internal sealed class SceneRunner : ISceneRunner
         foreach (var action in actionOnPress)
         {
             if (Input.IsActionPressed(action))
-                SimulateActionRelease(action);
+                _ = SimulateActionRelease(action);
         }
 
         actionOnPress.Clear();
@@ -411,16 +405,16 @@ internal sealed class SceneRunner : ISceneRunner
             Input.WarpMouse(mouseEvent.Position);
         Input.ParseInputEvent(inputEvent);
         if (inputEvent is InputEventAction actionEvent)
-            HandleActionEvent(actionEvent);
+            _ = HandleActionEvent(actionEvent);
         Input.FlushBufferedEvents();
 
         if (GodotObject.IsInstanceValid(currentScene))
         {
             Print($"	process event {currentScene} ({SceneName()}) <- {inputEvent.AsText()}");
             if (currentScene.HasMethod("_gui_input"))
-                currentScene.Call("_gui_input", inputEvent);
+                _ = currentScene.Call("_gui_input", inputEvent);
             if (currentScene.HasMethod("_unhandled_input"))
-                currentScene.Call("_unhandled_input", inputEvent);
+                _ = currentScene.Call("_unhandled_input", inputEvent);
             currentScene.GetViewport().SetInputAsHandled();
         }
 
@@ -509,7 +503,7 @@ internal sealed class SceneRunner : ISceneRunner
             => await Task.Run(async () =>
                 {
                     // sync to the main thread
-                    await GodotObjectExtensions.SyncProcessFrame;
+                    _ = await GodotObjectExtensions.SyncProcessFrame;
                     var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args).ConfigureAwait(true);
                     assertion(value);
                     return this;

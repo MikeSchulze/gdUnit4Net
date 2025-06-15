@@ -53,7 +53,7 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
@@ -101,7 +101,7 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
@@ -149,7 +149,7 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
@@ -197,7 +197,7 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),
@@ -226,7 +226,7 @@ public class GodotRuntimeRequireOnTestHookAttributeTest
         var errorLine = new LinePosition(15, 17); // Position at the class level
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnClassId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnClass.MessageFormat.ToString(),

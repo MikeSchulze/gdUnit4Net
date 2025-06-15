@@ -4,7 +4,6 @@
 namespace GdUnit4.Asserts;
 
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 using Core.Execution.Exceptions;
 using Core.Signals;
@@ -24,8 +23,8 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     public async Task<ISignalAssert> IsEmitted(string signal, params Variant[] args)
     {
-        IsNotNull();
-        IsSignalExists(signal);
+        _ = IsNotNull();
+        _ = IsSignalExists(signal);
 
         var lineNumber = new StackFrame(3, true).GetFileLineNumber();
         var isEmitted = await IsEmittedTask(signal, args).ConfigureAwait(true);
@@ -36,8 +35,8 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     public async Task<ISignalAssert> IsNotEmitted(string signal, params Variant[] args)
     {
-        IsNotNull();
-        IsSignalExists(signal);
+        _ = IsNotNull();
+        _ = IsSignalExists(signal);
 
         var lineNumber = new StackFrame(3, true).GetFileLineNumber();
         var isEmitted = await IsEmittedTask(signal, args).ConfigureAwait(true);
@@ -48,7 +47,7 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     public ISignalAssert IsSignalExists(string signal)
     {
-        IsNotNull();
+        _ = IsNotNull();
         if (!Current!.HasSignal(signal))
             ThrowTestFailureReport(AssertFailures.IsSignalExists(Current, signal), Current, signal);
         return this;
@@ -56,8 +55,8 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
 
     public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Variant[] args)
     {
-        IsNotNull();
-        IsSignalExists(signal);
+        _ = IsNotNull();
+        _ = IsSignalExists(signal);
         var count = GodotSignalCollector.Instance.Count(Current!, signal, args);
         if (count != expectedCount)
             ThrowTestFailureReport($"Expecting emitted count is {expectedCount} but was {count}", Current, signal);

@@ -3,14 +3,10 @@
 
 namespace GdUnit4.Core.Runners;
 
-using System;
 using System.Buffers.Binary;
-using System.IO;
 using System.IO.Pipes;
 using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -21,7 +17,7 @@ using Newtonsoft.Json;
 internal class InOutPipeProxy<TPipe> : IAsyncDisposable
     where TPipe : PipeStream
 {
-    protected const string PipeName = "gdunit4-message-pipe";
+    protected const string PIPE_NAME = "gdunit4-message-pipe";
 
     protected InOutPipeProxy(TPipe pipe, ITestEngineLogger logger)
     {

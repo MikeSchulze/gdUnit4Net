@@ -3,11 +3,9 @@
 
 namespace GdUnit4.Core.Hooks;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 using Microsoft.Win32.SafeHandles;
 
@@ -69,7 +67,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
         readThread = null;
 
         // Restore original stdout
-        SetStdHandle(STD_OUTPUT_HANDLE, originalStdOutHandle);
+        _ = SetStdHandle(STD_OUTPUT_HANDLE, originalStdOutHandle);
     }
 
     public string GetCapturedOutput() => stdOutHook.GetCapturedOutput();
@@ -93,7 +91,7 @@ internal sealed class WindowsStdOutHook : IStdOutHook
             // Dispose unmanaged resources
             if (readEvent != IntPtr.Zero)
             {
-                CloseHandle(readEvent);
+                _ = CloseHandle(readEvent);
                 readEvent = IntPtr.Zero;
             }
 

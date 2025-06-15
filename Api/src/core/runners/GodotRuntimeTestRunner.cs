@@ -3,20 +3,16 @@
 
 namespace GdUnit4.Core.Runners;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 
 using Api;
 
 using Execution;
 
-using Environment = System.Environment;
+using Environment = Environment;
 
 /// <summary>
 ///     Test runner implementation that executes tests in a separate Godot runtime process.
@@ -95,7 +91,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         lock (ProcessLock)
         {
             process?.Kill(true);
-            process?.WaitForExit(1000);
+            _ = process?.WaitForExit(1000);
             CloseProcess(process);
         }
     }
@@ -136,16 +132,16 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 };
                 process.ErrorDataReceived += StdErrorProcessor;
                 process.Exited += ExitHandler("GdUnit4 Godot Runtime Test Runner");
-                process.Start();
+                _ = process.Start();
                 process.BeginErrorReadLine();
                 process.BeginOutputReadLine();
                 if (DebuggerFramework.IsDebugAttach)
-                    DebuggerFramework.AttachDebuggerToProcess(process);
+                    _ = DebuggerFramework.AttachDebuggerToProcess(process);
             }
 
             base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
-            process.WaitForExit(2000);
+            _ = process.WaitForExit(2000);
 
             // wait until the process has finished
             var waitRetry = 0;
@@ -167,7 +163,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
         if (!Directory.Exists(destinationFolderPath))
-            Directory.CreateDirectory(destinationFolderPath);
+            _ = Directory.CreateDirectory(destinationFolderPath);
 
         var sceneRunnerSource = Path.Combine(destinationFolderPath, "GdUnit4TestRunnerScene.cs");
 
@@ -232,7 +228,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
-            compileProcess.WaitForExit(100);
+            _ = compileProcess.WaitForExit(100);
 
             // The compile project can take a while, and we need to wait until it finishes
             // Calculate how many iterations we need based on the compile process timeout

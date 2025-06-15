@@ -3,8 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Settings;
 
-using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -49,14 +47,14 @@ public static class RunSettingsProvider
 
         // over all EnvironmentVariables
         using var variables = reader.ReadSubtree();
-        variables.MoveToContent();
-        variables.Read(); // Move past the EnvironmentVariables element
+        _ = variables.MoveToContent();
+        _ = variables.Read(); // Move past the EnvironmentVariables element
         while (!variables.EOF)
         {
             if (variables.IsStartElement())
                 envVars[variables.Name] = variables.ReadElementContentAsString();
             else
-                variables.Read();
+                _ = variables.Read();
         }
 
         return envVars;

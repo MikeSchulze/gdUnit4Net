@@ -1,9 +1,6 @@
 namespace GdUnit4.TestAdapter.Test;
 
-using System;
-using System.IO;
-
-public static class TestUtils
+internal static class TestUtils
 {
     public static string GetResourcePath(string resourcePath)
     {

@@ -3,7 +3,6 @@
 
 namespace GdUnit4.Core.Execution.Exceptions;
 
-using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -103,7 +102,7 @@ public sealed class TestFailedException : Exception
                 {
                     LineNumber = LineNumber == -1 ? frame.GetFileLineNumber() : LineNumber;
                     FileName ??= frame.GetFileName();
-                    stackFrames.Append(new StackTrace(frame));
+                    stackFrames = stackFrames.Append(new StackTrace(frame));
                 }
 
                 // end collect frames at test case attribute

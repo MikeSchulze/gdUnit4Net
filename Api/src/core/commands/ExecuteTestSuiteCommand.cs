@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Core.Commands;
 
-using System;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -71,7 +68,7 @@ internal class ExecuteTestSuiteCommand : BaseCommand
                     IsEngineMode);
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
-                    await GodotObjectExtensions.SyncProcessFrame;
+                    _ = await GodotObjectExtensions.SyncProcessFrame;
                 await new TestSuiteExecutionStage(testSuite)
                     .Execute(context)
                     .ConfigureAwait(true);

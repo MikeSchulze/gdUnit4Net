@@ -1,10 +1,5 @@
 namespace GdUnit4.TestAdapter.Test.Discovery;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 using Api;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -52,10 +47,10 @@ public class GdUnit4TestDiscovererTest
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
-        mockRunContext.SetupGet(rc => rc.RunSettings)
+        _ = mockRunContext.SetupGet(rc => rc.RunSettings)
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
-        // Check initial state
+        // Check the initial state
         var assemblyPath = GetExampleAssemblyPath();
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded initially");
 
@@ -70,20 +65,20 @@ public class GdUnit4TestDiscovererTest
         var frameworkHandle = new Mock<IFrameworkHandle>();
         var logMessages = new List<string>();
 
-        frameworkHandle
+        _ = frameworkHandle
             .Setup(logger => logger.SendMessage(It.IsAny<TestMessageLevel>(), It.IsAny<string>()))
             .Callback<TestMessageLevel, string>((level, message) => logMessages.Add($"{level}: {message}"));
 
         // Setup the mock to capture discovered tests
         var mockDiscoverySink = new Mock<ITestCaseDiscoverySink>();
         var discoveredTests = new List<TestCase>();
-        mockDiscoverySink
+        _ = mockDiscoverySink
             .Setup(ds => ds.SendTestCase(It.IsAny<TestCase>()))
             .Callback<TestCase>(discoveredTests.Add);
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
-        mockRunContext.SetupGet(rc => rc.RunSettings)
+        _ = mockRunContext.SetupGet(rc => rc.RunSettings)
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // the first one should be excluded because it is 'TestAdapter' in the name
@@ -118,20 +113,20 @@ public class GdUnit4TestDiscovererTest
         var frameworkHandle = new Mock<IFrameworkHandle>();
         var logMessages = new List<string>();
 
-        frameworkHandle
+        _ = frameworkHandle
             .Setup(logger => logger.SendMessage(It.IsAny<TestMessageLevel>(), It.IsAny<string>()))
             .Callback<TestMessageLevel, string>((level, message) => logMessages.Add($"{level}: {message}"));
 
         // Setup the mock to capture discovered tests
         var mockDiscoverySink = new Mock<ITestCaseDiscoverySink>();
         var discoveredTests = new List<TestCase>();
-        mockDiscoverySink
+        _ = mockDiscoverySink
             .Setup(ds => ds.SendTestCase(It.IsAny<TestCase>()))
             .Callback<TestCase>(discoveredTests.Add);
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
-        mockRunContext.SetupGet(rc => rc.RunSettings)
+        _ = mockRunContext.SetupGet(rc => rc.RunSettings)
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // var assemblyPath = "D:\\development\\workspace\\gdUnit4Net\\test\\.godot\\mono\\temp\\bin\\Debug\\gdUnit4Test.dll"; //AssemblyPaths.LibraryPath;
@@ -224,7 +219,7 @@ public class GdUnit4TestDiscovererTest
         Assert.IsNotNull(test.Id);
         Assert.AreEqual(fullyQualifiedName, test.FullyQualifiedName);
         Assert.AreEqual(displayName, test.DisplayName);
-        Assert.AreEqual(new Uri(GdUnit4TestExecutor.ExecutorUri), test.ExecutorUri);
+        Assert.AreEqual(new Uri(GdUnit4TestExecutor.EXECUTOR_URI), test.ExecutorUri);
         Assert.AreEqual(source, test.Source);
         var expectedPath = codeFilePath.Replace('\\', Path.DirectorySeparatorChar);
         var actualPath = test.CodeFilePath?.Replace('\\', Path.DirectorySeparatorChar);

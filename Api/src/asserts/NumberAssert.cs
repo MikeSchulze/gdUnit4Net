@@ -3,7 +3,6 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Numerics;
 
 #pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
@@ -112,7 +111,7 @@ public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
 
     public new INumberAssert<TValue> OverrideFailureMessage(string message)
     {
-        base.OverrideFailureMessage(message);
+        _ = base.OverrideFailureMessage(message);
         return this;
     }
 }

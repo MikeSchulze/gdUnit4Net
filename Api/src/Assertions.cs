@@ -1,15 +1,11 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
-
 namespace GdUnit4;
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 using Asserts;
 
@@ -239,7 +235,7 @@ public static class Assertions
     /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
     /// <param name="current">The current dictionary value to verify.</param>
     /// <returns>An instance of IDictionaryAssert for further assertions.</returns>
-    public static IDictionaryAssert<TKey, TValue> AssertThat<[MustBeVariant] TKey, [MustBeVariant] TValue>(Godot.Collections.Dictionary<TKey, TValue>? current)
+    public static IDictionaryAssert<TKey, TValue> AssertThat<[MustBeVariant] TKey, [MustBeVariant] TValue>(Dictionary<TKey, TValue>? current)
         where TKey : notnull
         where TValue : notnull
         => new DictionaryAssert<TKey, TValue>(current);
@@ -467,7 +463,7 @@ public static class Assertions
 
         try
         {
-            await task.ConfigureAwait(true);
+            _ = await task.ConfigureAwait(true);
             return default;
         }
         catch (Exception e)
@@ -521,7 +517,7 @@ public static class Assertions
         where TNode : Node
     {
         if (autoFree)
-            AutoFree(node);
+            _ = AutoFree(node);
         var tree = Engine.GetMainLoop() as SceneTree;
         tree!.Root.AddChild(node);
         return node;

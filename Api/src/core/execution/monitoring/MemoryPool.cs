@@ -3,10 +3,6 @@
 
 namespace GdUnit4.Core.Execution.Monitoring;
 
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
 using Extensions;
 
 using Godot;
@@ -46,7 +42,7 @@ internal class MemoryPool
         currentPool?.registeredObjects.Clear();
         StopMonitoring();
         if (OrphanMonitor != null)
-            await GodotObjectExtensions.SyncProcessFrame;
+            _ = await GodotObjectExtensions.SyncProcessFrame;
     }
 
     public void StopMonitoring() => OrphanMonitor?.Stop();
