@@ -388,16 +388,16 @@ public static class Assertions
             var constructor = (assertType.GetConstructor(
                                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                                    null,
-                                   new[] { constructorArgType },
+                                   [constructorArgType],
                                    null)
                                ?? assertType.GetConstructor(
                                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                                    null,
-                                   new[] { valueType },
+                                   [valueType],
                                    null))
                               ?? throw new InvalidOperationException($"No suitable constructor found for {assertType.Name}");
 
-            var instance = constructor.Invoke(new object[] { current! });
+            var instance = constructor.Invoke([current!]);
             return instance;
         }
 
@@ -411,16 +411,16 @@ public static class Assertions
             var constructor = assertType.GetConstructor(
                                   BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                                   null,
-                                  new[] { constructorArgType },
+                                  [constructorArgType],
                                   null)
                               ?? assertType.GetConstructor(
                                   BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                                   null,
-                                  new[] { valueType },
+                                  [valueType],
                                   null)
                               ?? throw new InvalidOperationException($"No suitable constructor found for {assertType.Name}");
 
-            var instance = constructor.Invoke(new object[] { current! });
+            var instance = constructor.Invoke([current!]);
             return instance;
         }
 

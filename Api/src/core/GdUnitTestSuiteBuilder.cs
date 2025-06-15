@@ -295,7 +295,7 @@ internal static class GdUnitTestSuiteBuilder
 
         var newBody = SyntaxFactory.Block(SyntaxFactory.ParseStatement("AssertNotYetImplemented();"));
         method = method.ReplaceNode(method.Body!, newBody);
-        return root.InsertNodesAfter(insertAt, new[] { method }).NormalizeWhitespace("\t", "\n");
+        return root.InsertNodesAfter(insertAt, [method]).NormalizeWhitespace("\t", "\n");
     }
 
     internal class ClassDefinition : IEquatable<object>

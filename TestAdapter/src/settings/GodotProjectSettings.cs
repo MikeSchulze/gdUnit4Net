@@ -41,7 +41,7 @@ internal class GodotProjectSettings
             if (string.IsNullOrEmpty(currentSection) || !trimmedLine.Contains('=', StringComparison.Ordinal))
                 continue;
 
-            var parts = trimmedLine.Split(new[] { '=' }, 2);
+            var parts = trimmedLine.Split(['='], 2);
             if (parts.Length == 2)
             {
                 var key = parts[0].Trim();
@@ -170,9 +170,9 @@ internal class GodotProjectSettings
         {
             public string Name { get; set; } = string.Empty;
 
-            public string[] Tags { get; set; } = Array.Empty<string>();
+            public string[] Tags { get; set; } = [];
 
-            public string[] Features { get; set; } = Array.Empty<string>();
+            public string[] Features { get; set; } = [];
 
             public string Icon { get; set; } = string.Empty;
         }
@@ -192,7 +192,7 @@ internal class GodotProjectSettings
 
     public class EditorPluginsSection : ISettingsSection
     {
-        public string[] Enabled { get; set; } = Array.Empty<string>();
+        public string[] Enabled { get; set; } = [];
     }
 
     public class GdUnit4Section : ISettingsSection

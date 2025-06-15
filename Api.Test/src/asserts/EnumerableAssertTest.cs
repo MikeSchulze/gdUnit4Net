@@ -17,10 +17,10 @@ using Array = System.Array;
 public partial class EnumerableAssertTest
 {
     // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
-    private static readonly object[] TestDataPointEmptyArrays = { Array.Empty<object>(), new List<object>(), new Godot.Collections.Array(), new Array<RefCounted>() };
+    private static readonly object[] TestDataPointEmptyArrays = [Array.Empty<object>(), new List<object>(), new Godot.Collections.Array(), new Array<RefCounted>()];
 
     private static readonly object[] TestDataPointStringValues =
-    {
+    [
         new object[] { new[] { "a", "b", "c", "a" }, new[] { "a", "b", "c", "a" }, "X" }, new object[]
         {
             new List<string>
@@ -75,10 +75,10 @@ public partial class EnumerableAssertTest
             },
             "X"
         }
-    };
+    ];
 
     public static readonly object[] TestDataPointObjectValues =
-    {
+    [
         new object[] { new object[] { new(), new(), new(), new() }, new object[] { new(), new(), new(), new() }, new() }, new object[]
         {
             new List<object>
@@ -133,7 +133,7 @@ public partial class EnumerableAssertTest
             },
             new RDUniform { Binding = 10 }
         }
-    };
+    ];
 
     [TestCase(0, TestName = "Array")]
     [TestCase(1, TestName = "List")]
@@ -177,9 +177,9 @@ public partial class EnumerableAssertTest
     [RequireGodotRuntime]
     public void IsEqual()
     {
-        AssertArray(Array.Empty<object>()).IsEqual(Array.Empty<object>());
-        AssertArray(Array.Empty<int>()).IsEqual(Array.Empty<int>());
-        AssertArray(new[] { 1, 2, 4, 5 }).IsEqual(new[] { 1, 2, 4, 5 });
+        AssertArray([]).IsEqual([]);
+        AssertArray(Array.Empty<int>()).IsEqual([]);
+        AssertArray(new[] { 1, 2, 4, 5 }).IsEqual([1, 2, 4, 5]);
         AssertArray(new Godot.Collections.Array()).IsEqual(new Godot.Collections.Array());
         AssertArray(new Array<Variant>()).IsEqual(new Array<Variant>());
         AssertArray(new Godot.Collections.Array
@@ -209,7 +209,7 @@ public partial class EnumerableAssertTest
             5
         });
 
-        AssertThrown(() => AssertArray(new[] { 1, 2, 4, 5 }).IsEqual(new[] { 1, 2, 3, 4, 2, 5 }))
+        AssertThrown(() => AssertArray(new[] { 1, 2, 4, 5 }).IsEqual([1, 2, 3, 4, 2, 5]))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(212)
             .HasMessage("""
@@ -241,7 +241,7 @@ public partial class EnumerableAssertTest
                          but is
                             [1, 2, 4, 5]
                         """);
-        AssertThrown(() => AssertArray<object>(null).IsEqual(Array.Empty<object>()))
+        AssertThrown(() => AssertArray<object>(null).IsEqual([]))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(244)
             .HasMessage("""
@@ -256,8 +256,8 @@ public partial class EnumerableAssertTest
     [RequireGodotRuntime]
     public void IsEqualIgnoringCase()
     {
-        AssertArray(new[] { "this", "is", "a", "message" })
-            .IsEqualIgnoringCase(new[] { "This", "is", "a", "Message" });
+        AssertArray(["this", "is", "a", "message"])
+            .IsEqualIgnoringCase(["This", "is", "a", "Message"]);
         AssertArray(new List<string>
             {
                 "this",
@@ -301,8 +301,8 @@ public partial class EnumerableAssertTest
                 "Message"
             });
         // should fail because the array not contains same elements
-        AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
-                .IsEqualIgnoringCase(new[] { "This", "is", "an", "Message" }))
+        AssertThrown(() => AssertArray(["this", "is", "a", "message"])
+                .IsEqualIgnoringCase(["This", "is", "an", "Message"]))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(304)
             .HasMessage("""
@@ -333,7 +333,7 @@ public partial class EnumerableAssertTest
                             ["this", "is", "a", "message"]
                         """);
         AssertThrown(() => AssertArray<object>(null)
-                .IsEqualIgnoringCase(new[] { "This", "is" }))
+                .IsEqualIgnoringCase(["This", "is"]))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
                         Expecting be equal (ignoring case):
@@ -347,8 +347,8 @@ public partial class EnumerableAssertTest
     [RequireGodotRuntime]
     public void IsNotEqual()
     {
-        AssertArray<int>(null).IsNotEqual(new[] { 1, 2, 3, 4, 5 });
-        AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual(new[] { 1, 2, 3, 4, 5, 6 });
+        AssertArray<int>(null).IsNotEqual([1, 2, 3, 4, 5]);
+        AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual([1, 2, 3, 4, 5, 6]);
         AssertArray(new List<int>
         {
             1,
@@ -398,7 +398,7 @@ public partial class EnumerableAssertTest
             6
         });
         // should fail because the array  contains same elements
-        AssertThrown(() => AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual(new[] { 1, 2, 3, 4, 5 }))
+        AssertThrown(() => AssertArray(new[] { 1, 2, 3, 4, 5 }).IsNotEqual([1, 2, 3, 4, 5]))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(401)
             .HasMessage("""
@@ -435,8 +435,8 @@ public partial class EnumerableAssertTest
     [RequireGodotRuntime]
     public void IsNotEqualIgnoringCase()
     {
-        AssertArray(null).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
-        AssertArray(new[] { "this", "is", "a", "message" }).IsNotEqualIgnoringCase(new[] { "This", "is", "an", "Message" });
+        AssertArray(null).IsNotEqualIgnoringCase(["This", "is", "an", "Message"]);
+        AssertArray(["this", "is", "a", "message"]).IsNotEqualIgnoringCase(["This", "is", "an", "Message"]);
         AssertArray(new List<string>
         {
             "this",
@@ -477,8 +477,8 @@ public partial class EnumerableAssertTest
             "Message"
         });
         // should fail because the array contains same elements ignoring case-sensitive
-        AssertThrown(() => AssertArray(new[] { "this", "is", "a", "message" })
-                .IsNotEqualIgnoringCase(new[] { "This", "is", "a", "Message" }))
+        AssertThrown(() => AssertArray(["this", "is", "a", "message"])
+                .IsNotEqualIgnoringCase(["This", "is", "a", "Message"]))
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(480)
             .HasMessage("""
@@ -1096,20 +1096,20 @@ public partial class EnumerableAssertTest
     public void Extract()
     {
         // try to extract on base types
-        AssertArray(new object?[] { 1, false, 3.14, null, Colors.AliceBlue }).Extract("GetClass")
+        AssertArray([1, false, 3.14, null, Colors.AliceBlue]).Extract("GetClass")
             .ContainsExactly("n.a.", "n.a.", "n.a.", null, "n.a.");
         // extracting by a func without arguments
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("GetClass")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("GetClass")
             .ContainsExactly("RefCounted", "n.a.", "AStarGrid2D", "Node");
         // extracting by a func with arguments
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("HasSignal", "tree_entered")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("HasSignal", "tree_entered")
             .ContainsExactly(false, "n.a.", false, true);
 
         // try extract on object via a func that not exists
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("InvalidMethod")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("InvalidMethod")
             .ContainsExactly("n.a.", "n.a.", "n.a.", "n.a.");
         // try extract on object via a func that has no return value
-        AssertArray(new object[] { new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())! }).Extract("RemoveMeta", "")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("RemoveMeta", "")
             .ContainsExactly(null, "n.a.", null, null);
         // must fail we can't extract from a null instance
         AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))
@@ -1130,11 +1130,11 @@ public partial class EnumerableAssertTest
     public void ExtractV()
     {
         // single extract
-        AssertArray(new object?[] { 1, false, 3.14, null, Colors.AliceBlue })
+        AssertArray([1, false, 3.14, null, Colors.AliceBlue])
             .ExtractV(Extr("GetClass"))
             .ContainsExactly("n.a.", "n.a.", "n.a.", null, "n.a.");
         // tuple of two
-        AssertArray(new object[] { new TestObj("A", 10), new TestObj("B", "foo"), Colors.AliceBlue, new TestObj("C", 11) })
+        AssertArray([new TestObj("A", 10), new TestObj("B", "foo"), Colors.AliceBlue, new TestObj("C", 11)])
             .ExtractV(Extr("GetName"), Extr("GetValue"))
             .ContainsExactly(Tuple("A", 10), Tuple("B", "foo"), Tuple("n.a.", "n.a."), Tuple("C", 11));
         // tuple of three
@@ -1230,7 +1230,7 @@ public partial class EnumerableAssertTest
 
     [TestCase]
     public void OverrideFailureMessage()
-        => AssertThrown(() => AssertArray(Array.Empty<object>())
+        => AssertThrown(() => AssertArray([])
                 .OverrideFailureMessage("Custom failure message")
                 .IsNull())
             .IsInstanceOf<TestFailedException>()
@@ -1244,7 +1244,7 @@ public partial class EnumerableAssertTest
         if (ExecutionContext.Current != null)
             ExecutionContext.Current.FailureReporting = false;
         // try to fail
-        AssertArray(Array.Empty<object>()).IsNotEmpty();
+        AssertArray([]).IsNotEmpty();
 
         // expect this line will never call because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();

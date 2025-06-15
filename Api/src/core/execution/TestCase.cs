@@ -72,7 +72,7 @@ internal sealed class TestCase
     {
         if (input is IValueProvider provider)
             return provider.GetValues();
-        return new[] { input };
+        return [input];
     }
 
     private List<object> InitialParameters()

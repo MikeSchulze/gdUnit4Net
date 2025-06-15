@@ -16,7 +16,7 @@ public partial class VerifyDocumentationTest
     private static readonly string ProjectRoot = Directory.GetCurrentDirectory()
         .Split(Path.DirectorySeparatorChar)
         .TakeWhile(dir => dir != "Analyzers.Test")
-        .Concat(new[] { "Analyzers" })
+        .Concat(["Analyzers"])
         .Aggregate(Path.Combine);
 
     [TestMethod]

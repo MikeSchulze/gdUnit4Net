@@ -269,8 +269,8 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         IEnumerable<TValue?>? expected,
         bool referenceEquals = false)
     {
-        var ll = current?.ToArray() ?? System.Array.Empty<TValue?>();
-        var rr = expected?.ToArray() ?? System.Array.Empty<TValue?>();
+        var ll = current?.ToArray() ?? [];
+        var rr = expected?.ToArray() ?? [];
 
         var notExpected = ll.Where(left =>
             !rr.Any(e => referenceEquals ? left.IsSame(e) : left.IsEquals(e))).ToList();
@@ -289,8 +289,8 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         IEnumerable<TValue?>? expected,
         bool referenceEquals = false)
     {
-        var ll = current?.ToArray() ?? System.Array.Empty<TValue?>();
-        var rr = expected?.ToArray() ?? System.Array.Empty<TValue?>();
+        var ll = current?.ToArray() ?? [];
+        var rr = expected?.ToArray() ?? [];
 
         var notExpected = new List<TValue?>();
         var notFound = new List<TValue?>();

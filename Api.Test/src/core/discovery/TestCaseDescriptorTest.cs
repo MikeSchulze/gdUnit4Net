@@ -31,7 +31,7 @@ public class TestCaseDescriptorTest
                 "CategoryA",
                 "Foo"
             },
-            Traits = new Dictionary<string, List<string>> { ["Category"] = new() { "Foo" } }
+            Traits = new Dictionary<string, List<string>> { ["Category"] = ["Foo"] }
         };
 
         var dsB = new TestCaseDescriptor
@@ -51,7 +51,7 @@ public class TestCaseDescriptorTest
                 "CategoryA",
                 "Foo"
             },
-            Traits = new Dictionary<string, List<string>> { ["Category"] = new() { "Foo" } }
+            Traits = new Dictionary<string, List<string>> { ["Category"] = ["Foo"] }
         };
 
         AssertBool(dsA.Equals(dsB)).IsTrue();

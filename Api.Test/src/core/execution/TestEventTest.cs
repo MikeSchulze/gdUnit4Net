@@ -31,7 +31,7 @@ public class TestEventTest
             { TestEvent.StatisticKey.Skipped, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(ReportType.Failure, 42, "test failed") };
+        List<ITestReport> reports = [new TestReport(ReportType.Failure, 42, "test failed")];
         var testEvent = TestEvent.Before("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", 100, statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
 
@@ -67,7 +67,7 @@ public class TestEventTest
             { TestEvent.StatisticKey.Skipped, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(ReportType.Failure, 42, "test failed") };
+        List<ITestReport> reports = [new TestReport(ReportType.Failure, 42, "test failed")];
 
         var testEvent = TestEvent.After("foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);
@@ -104,7 +104,7 @@ public class TestEventTest
             { TestEvent.StatisticKey.Skipped, true }
         };
 
-        List<ITestReport> reports = new() { new TestReport(ReportType.Failure, 42, "test failed") };
+        List<ITestReport> reports = [new TestReport(ReportType.Failure, 42, "test failed")];
 
         var testEvent = TestEvent.AfterTest(Guid.Empty, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA", statistics, reports);
         var json = JsonConvert.SerializeObject(testEvent);

@@ -49,7 +49,7 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
     public bool IsWarning => Type == ReportType.Warning;
 
     private IEnumerable<ReportType> ErrorTypes
-        => new[] { ReportType.Terminated, ReportType.Interrupted, ReportType.Abort };
+        => [ReportType.Terminated, ReportType.Interrupted, ReportType.Abort];
 
     public static bool operator ==(TestReport lhs, TestReport rhs) => lhs.Equals(rhs);
 

@@ -190,7 +190,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
     [TestCase]
     public async Task SimulateKeyPress()
     {
-        Key[] keys = { Key.A, Key.D, Key.X, Key.Key0 };
+        Key[] keys = [Key.A, Key.D, Key.X, Key.Key0];
 
         foreach (var key in keys)
         {
@@ -309,8 +309,8 @@ public sealed class SceneRunnerInputEventIntegrationTest
         var isControl = false;
         var isShift = false;
 
-        Key[] modifiers = { Key.Shift, Key.Ctrl, Key.Alt };
-        MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+        Key[] modifiers = [Key.Shift, Key.Ctrl, Key.Alt];
+        MouseButton[] buttons = [MouseButton.Left, MouseButton.Middle, MouseButton.Right];
 
         foreach (var modifier in modifiers)
         {
@@ -622,7 +622,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
     [TestCase]
     public async Task SimulateMouseButtonPressed()
     {
-        MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+        MouseButton[] buttons = [MouseButton.Left, MouseButton.Middle, MouseButton.Right];
         foreach (var mouse_button in buttons)
         {
             // simulate mouse button press and release
@@ -661,7 +661,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
     [TestCase]
     public async Task SimulateMouseButtonPressedDoubleClick()
     {
-        MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+        MouseButton[] buttons = [MouseButton.Left, MouseButton.Middle, MouseButton.Right];
         foreach (var mouse_button in buttons)
         {
             // simulate mouse button press and release by double_click
@@ -702,7 +702,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
     [TestCase]
     public async Task SimulateMouseButtonPressAndRelease()
     {
-        MouseButton[] buttons = { MouseButton.Left, MouseButton.Middle, MouseButton.Right };
+        MouseButton[] buttons = [MouseButton.Left, MouseButton.Middle, MouseButton.Right];
         foreach (var mouse_button in buttons)
         {
             var gmp = sceneRunner.GetGlobalMousePosition();

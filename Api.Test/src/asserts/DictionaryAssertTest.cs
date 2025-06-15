@@ -21,17 +21,17 @@ public class DictionaryAssertTest
 {
     // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
     private static readonly object[] TestDataPointA =
-    {
+    [
         // system dictionary types
         new object[] { new Hashtable { { "a1", new object() } } }, new object[] { new System.Collections.Generic.Dictionary<string, object> { { "a1", new object() } } },
         new object[] { new SortedDictionary<string, object> { { "a1", new object() } } },
         // Godot dictionary types
         new object[] { new Godot.Collections.Dictionary<string, Variant> { { "a1", new RefCounted() } } }, new object[] { new Dictionary { { "a1", new RefCounted() } } }
-    };
+    ];
 
     // TODO: replace it by https://github.com/MikeSchulze/gdUnit4Net/issues/46
     public static readonly object[] TestDataPointB =
-    {
+    [
         // system dictionary types
         new object[]
         {
@@ -99,12 +99,12 @@ public class DictionaryAssertTest
                 { "a2", 200 }
             }
         }
-    };
+    ];
 
-    private static readonly string[] TestKeys = { new("a1"), new("aa2"), new("aaa3"), new("aaaa4") };
+    private static readonly string[] TestKeys = [new("a1"), new("aa2"), new("aaa3"), new("aaaa4")];
 
     private static readonly object[] TestDataPointKeys =
-    {
+    [
         // system dictionary types
         new ListDictionary
         {
@@ -127,7 +127,7 @@ public class DictionaryAssertTest
             { TestKeys[0], 100 },
             { TestKeys[1], 200 }
         }
-    };
+    ];
 
     [TestCase]
     [RequireGodotRuntime]

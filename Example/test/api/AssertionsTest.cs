@@ -97,7 +97,7 @@ public class AssertionsTest
     {
         AssertObject(AssertThat(Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
-        AssertObject(AssertThat(new BitArray(new[] { true, false }))).IsInstanceOf<IEnumerableAssert<bool>>();
+        AssertObject(AssertThat(new BitArray([true, false]))).IsInstanceOf<IEnumerableAssert<bool>>();
         AssertObject(AssertThat(new HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new List<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert<Variant>>();

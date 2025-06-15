@@ -55,7 +55,7 @@ public class GdUnit4TestDiscovererTest
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded initially");
 
         // Check discovery process
-        new GdUnit4TestDiscoverer().DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
+        new GdUnit4TestDiscoverer().DiscoverTests([assemblyPath], mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
         Assert.IsFalse(IsAssemblyLoaded(assemblyPath), "Assembly should not be loaded after DiscoverTests execution");
     }
 
@@ -85,7 +85,7 @@ public class GdUnit4TestDiscovererTest
         // the second assembly do not contain any tests
         var assemblyPath = typeof(GdUnit4TestDiscovererTest).Assembly.Location;
         var discoverer = new GdUnit4TestDiscoverer();
-        discoverer.DiscoverTests(new[] { "MSTest.TestAdapter.dll", assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
+        discoverer.DiscoverTests(["MSTest.TestAdapter.dll", assemblyPath], mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
         // Verify SendTestCase was never called
         mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Never());
@@ -134,7 +134,7 @@ public class GdUnit4TestDiscovererTest
 
         Assert.IsTrue(File.Exists(assemblyPath), $"Can find the test assembly: '{assemblyPath}'");
         var discoverer = new GdUnit4TestDiscoverer();
-        discoverer.DiscoverTests(new[] { assemblyPath }, mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
+        discoverer.DiscoverTests([assemblyPath], mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
         // Verify SendTestCase was never called
         mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(15));
