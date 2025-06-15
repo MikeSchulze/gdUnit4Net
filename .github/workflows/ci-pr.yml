@@ -202,7 +202,7 @@ jobs:
         godot-status: [ 'stable' ]
         include:
           - godot-version: '4.5'
-            godot-status: 'dev3'
+            godot-status: 'dev5'
 
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
