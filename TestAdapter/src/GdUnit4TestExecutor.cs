@@ -260,56 +260,59 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
     private static List<TestAssemblyNode> ToGdUnitTestNodes(IEnumerable<TestCase> testCases) =>
 
         // Group test cases by assembly path
-        testCases
-            .GroupBy(tc => tc.Source)
-            .Select(assemblyGroup =>
-            {
-                // Create the assembly node
-                var assembly = new TestAssemblyNode
+        [
+            .. testCases
+                .GroupBy(tc => tc.Source)
+                .Select(assemblyGroup =>
                 {
-                    Id = Guid.NewGuid(),
-                    ParentId = Guid.Empty,
-                    AssemblyPath = assemblyGroup.Key,
-                    Suites = []
-                };
-
-                // Group test cases by managed type (suites)
-                var suites = assemblyGroup
-                    .GroupBy(t => t.CodeFilePath)
-                    .Select(tests =>
+                    // Create the assembly node
+                    var assembly = new TestAssemblyNode
                     {
-                        var t = tests.First();
+                        Id = Guid.NewGuid(),
+                        ParentId = Guid.Empty,
+                        AssemblyPath = assemblyGroup.Key,
+                        Suites = []
+                    };
 
-                        var managedType = t.GetPropertyValue(TestCaseExtensions.ManagedTypeProperty, string.Empty);
-                        var suite = new TestSuiteNode
+                    // Group test cases by managed type (suites)
+                    var suites = assemblyGroup
+                        .GroupBy(t => t.CodeFilePath)
+                        .Select(tests =>
                         {
-                            Id = Guid.NewGuid(),
-                            ParentId = assembly.Id,
-                            ManagedType = managedType,
-                            AssemblyPath = assembly.AssemblyPath,
-                            SourceFile = t.CodeFilePath ?? "Unknown",
-                            Tests = []
-                        };
+                            var t = tests.First();
 
-                        suite.Tests.AddRange(
-                            tests
-                                .Select(test => new TestCaseNode
-                                {
-                                    Id = test.Id,
-                                    ParentId = suite.Id,
-                                    ManagedMethod = test.GetPropertyValue(TestCaseExtensions.ManagedMethodProperty, string.Empty),
-                                    AttributeIndex = test.GetPropertyValue(TestCaseExtensions.ManagedMethodAttributeIndexProperty, 0),
-                                    LineNumber = test.LineNumber,
-                                    RequireRunningGodotEngine = test.GetPropertyValue(TestCaseExtensions.RequireRunningGodotEngineProperty, false)
-                                }).ToList());
+                            var managedType = t.GetPropertyValue(TestCaseExtensions.ManagedTypeProperty, string.Empty);
+                            var suite = new TestSuiteNode
+                            {
+                                Id = Guid.NewGuid(),
+                                ParentId = assembly.Id,
+                                ManagedType = managedType,
+                                AssemblyPath = assembly.AssemblyPath,
+                                SourceFile = t.CodeFilePath ?? "Unknown",
+                                Tests = []
+                            };
 
-                        return suite;
-                    });
+                            suite.Tests.AddRange(
+                            [
+                                .. tests
+                                    .Select(test => new TestCaseNode
+                                    {
+                                        Id = test.Id,
+                                        ParentId = suite.Id,
+                                        ManagedMethod = test.GetPropertyValue(TestCaseExtensions.ManagedMethodProperty, string.Empty),
+                                        AttributeIndex = test.GetPropertyValue(TestCaseExtensions.ManagedMethodAttributeIndexProperty, 0),
+                                        LineNumber = test.LineNumber,
+                                        RequireRunningGodotEngine = test.GetPropertyValue(TestCaseExtensions.RequireRunningGodotEngineProperty, false)
+                                    })
+                            ]);
 
-                assembly.Suites.AddRange(suites);
-                return assembly;
-            })
-            .ToList();
+                            return suite;
+                        });
+
+                    assembly.Suites.AddRange(suites);
+                    return assembly;
+                })
+        ];
 
     /// <summary>
     ///     Detects if the test execution is running within JetBrains Rider IDE.

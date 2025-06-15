@@ -3,9 +3,6 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using Api;
@@ -55,14 +52,16 @@ internal sealed class TestSuite : IDisposable
     }
 
     private static List<TestCase> LoadTestCases(Type type, List<TestCaseNode> includedTests)
-        => type.GetMethods()
-            .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
-            .Join(
-                includedTests,
-                m => m.Name,
-                test => test.ManagedMethod,
-                (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
-            .ToList();
+        =>
+        [
+            .. type.GetMethods()
+                .Where(m => m.IsDefined(typeof(TestCaseAttribute)))
+                .Join(
+                    includedTests,
+                    m => m.Name,
+                    test => test.ManagedMethod,
+                    (mi, test) => new TestCase(test.Id, mi, test.LineNumber, test.AttributeIndex))
+        ];
 
     private static Type FindTypeOnAssembly(string assemblyPath, string clazz)
     {

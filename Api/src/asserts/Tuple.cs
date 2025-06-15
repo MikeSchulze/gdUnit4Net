@@ -3,10 +3,6 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Core.Extensions;
 
 // A tuple implementation to hold two or many values
@@ -14,7 +10,7 @@ internal sealed class Tuple : ITuple
 {
     private readonly IEnumerable<object?> values;
 
-    public Tuple(params object?[] args) => values = args.ToList();
+    public Tuple(params object?[] args) => values = [.. args];
 
     public IEnumerable<object?> Values
     {

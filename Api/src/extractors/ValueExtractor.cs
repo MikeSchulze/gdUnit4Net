@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Extractors;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 
 using Asserts;
@@ -23,7 +20,7 @@ internal sealed class ValueExtractor : IValueExtractor
     public ValueExtractor(string methodName, params object[] args)
     {
         methodNames = methodName.Split('.');
-        this.args = args.ToList();
+        this.args = [.. args];
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Method purpose is to capture and handle value as 'n.a.' if it fails.")]
@@ -62,7 +59,7 @@ internal sealed class ValueExtractor : IValueExtractor
                 return go.Callv(GdUnitExtensions.ToSnakeCase(method.Name), godotArray).UnboxVariant();
             }
 
-            return method.Invoke(instance, args.ToArray());
+            return method.Invoke(instance, [.. args]);
         }
 
         var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

@@ -49,10 +49,6 @@
 
     <!-- C# 12 Collection Expression Rules - Set as suggestions -->
     <Rule Id="IDE0290" Action="None"/> <!-- Use primary constructor -->
-    <Rule Id="IDE0301" Action="None"/> <!-- Simplify collection initialization (empty collection) -->
-    <Rule Id="IDE0303" Action="None"/> <!-- Simplify collection initialization (create) -->
-    <Rule Id="IDE0305" Action="None"/> <!-- Simplify collection initialization (fluent) -->
-    <Rule Id="IDE0306" Action="None"/> <!-- Simplify collection initialization (spread) -->
 
   </Rules>
 

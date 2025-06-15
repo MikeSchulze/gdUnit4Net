@@ -70,7 +70,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
                 tasks.Add(task);
             }
 
-            Task.WaitAll(tasks.ToArray(), cancellationSource.Token);
+            Task.WaitAll([.. tasks], cancellationSource.Token);
         }
         catch (OperationCanceledException)
         {
@@ -100,7 +100,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             try
             {
                 // Wait for tasks to complete cancellation
-                _ = Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(2));
+                _ = Task.WaitAll([.. tasks], TimeSpan.FromSeconds(2));
             }
             catch (Exception ex)
             {
