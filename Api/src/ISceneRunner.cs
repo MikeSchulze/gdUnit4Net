@@ -3,9 +3,6 @@
 
 namespace GdUnit4;
 
-using System;
-using System.Threading.Tasks;
-
 using Api;
 
 using Asserts;
@@ -277,8 +274,8 @@ public interface ISceneRunner : IDisposable
         if (Scene().ProcessMode != Node.ProcessModeEnum.Disabled)
             Input.FlushBufferedEvents();
 
-        await SyncProcessFrame;
-        await SyncPhysicsFrame;
+        _ = await SyncProcessFrame;
+        _ = await SyncPhysicsFrame;
     }
 
     /// <summary>

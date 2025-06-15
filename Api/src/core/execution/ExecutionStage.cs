@@ -3,15 +3,12 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using Exceptions;
 
@@ -23,7 +20,7 @@ using Reporting;
 
 using static Api.ReportType;
 
-using Environment = System.Environment;
+using Environment = Environment;
 
 internal abstract class ExecutionStage<T> : IExecutionStage
 {
@@ -89,7 +86,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
                     .ConfigureAwait(true);
             }
 
-            ValidateForExpectedException(context);
+            _ = ValidateForExpectedException(context);
         }
         catch (ExecutionTimeoutException e)
         {
@@ -128,8 +125,9 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (string.IsNullOrEmpty(stackFrame) || stackFrame.Contains("Microsoft.VisualStudio.TestTools", StringComparison.Ordinal))
                 continue;
 
-            result.Append(stackFrame);
-            result.Append(Environment.NewLine);
+            result = result
+                .Append(stackFrame)
+                .Append(Environment.NewLine);
         }
 
         return result.ToString();

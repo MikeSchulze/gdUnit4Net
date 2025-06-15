@@ -3,14 +3,13 @@
 
 namespace GdUnit4.TestAdapter.Settings;
 
-using System;
 using System.Xml;
 using System.Xml.Serialization;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-[SettingsName(GdUnit4Settings.RunSettingsXmlNode)]
+[SettingsName(GdUnit4Settings.RUN_SETTINGS_XML_NODE)]
 
 // ReSharper disable once ClassNeverInstantiated.Global
 internal sealed class GdUnit4SettingsProvider : ISettingsProvider
@@ -23,7 +22,7 @@ internal sealed class GdUnit4SettingsProvider : ISettingsProvider
     {
         try
         {
-            if (reader.Read() && reader.Name == GdUnit4Settings.RunSettingsXmlNode)
+            if (reader.Read() && reader.Name == GdUnit4Settings.RUN_SETTINGS_XML_NODE)
             {
                 var settings = Serializer.Deserialize(reader) as GdUnit4Settings;
                 Settings = settings ?? new GdUnit4Settings();
@@ -39,7 +38,7 @@ internal sealed class GdUnit4SettingsProvider : ISettingsProvider
 
     internal static GdUnit4Settings LoadSettings(IDiscoveryContext discoveryContext)
     {
-        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RunSettingsXmlNode) as GdUnit4SettingsProvider;
+        var gdUnitSettingsProvider = discoveryContext.RunSettings?.GetSettings(GdUnit4Settings.RUN_SETTINGS_XML_NODE) as GdUnit4SettingsProvider;
         return gdUnitSettingsProvider?.Settings ?? new GdUnit4Settings();
     }
 }

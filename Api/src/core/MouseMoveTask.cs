@@ -2,8 +2,7 @@
 // MIT License - See LICENSE file in the repository root for full license text
 namespace GdUnit4.Core;
 
-using System;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 using Godot;
 
@@ -29,6 +28,10 @@ internal partial class MouseMoveTask : Node, IDisposable
         GC.SuppressFinalize(this);
     }
 
+    [SuppressMessage(
+        "Style",
+        "IDE0058:Expression value is never used",
+        Justification = "Method called for side effects only, return value intentionally ignored")]
     public async Task WaitOnFinalPosition(ISceneRunner sceneRunner, double time, Tween.TransitionType transitionType)
     {
         using var tween = sceneRunner.Scene().CreateTween();

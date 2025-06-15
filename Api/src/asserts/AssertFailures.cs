@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Core.Extensions;
@@ -542,7 +539,7 @@ internal static class AssertFailures
         {
             object? key = entry.Key.UnboxVariant();
             object? value = entry.Value.UnboxVariant();
-            keyValues.Add($"{{{key.Formatted()}, {value.Formatted()}}}");
+            _ = keyValues.Add($"{{{key.Formatted()}, {value.Formatted()}}}");
         }
 
         var pairs = string.Join("; ", keyValues.ToArray());

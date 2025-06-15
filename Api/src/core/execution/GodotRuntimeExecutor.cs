@@ -3,12 +3,9 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
 using System.IO.Pipes;
 using System.Net;
 using System.Security.Principal;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -33,7 +30,7 @@ using static Api.ReportType;
 internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
 {
     public GodotRuntimeExecutor(ITestEngineLogger logger)
-        : base(new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
+        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
         => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
 
     public async Task StartAsync()
@@ -55,7 +52,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None)
+            _ = await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None)
                 .ConfigureAwait(true);
 
             // Give server time to process shutdown

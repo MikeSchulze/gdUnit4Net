@@ -1,9 +1,6 @@
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 namespace GdUnit4.TestAdapter.Test.Execution;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using Api;
@@ -167,7 +164,7 @@ public class TestCaseFilterTest
     [TestMethod]
     public void GetPropertyValueTestCategoryAsProperty()
     {
-        var test = new TestCase("Test1", new Uri(GdUnit4TestExecutor.ExecutorUri), "GdUnit4Net");
+        var test = new TestCase("Test1", new Uri(GdUnit4TestExecutor.EXECUTOR_URI), "GdUnit4Net");
         test.SetPropertyValue(TestCaseExtensions.TestCategoryProperty, new[] { "CategoryA", "CategoryB" });
         var value = test.GetPropertyValue("TestCategory") as string[];
 

@@ -3,8 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Extensions;
 
-using System;
-using System.Linq;
 using System.Text;
 
 using Api;
@@ -36,12 +34,12 @@ internal static class StringExtensions
         switch (reportType)
         {
             case Stdout:
-                sb.AppendLine($"{ANSI_BLUE}{ANSI_BOLD}Standard Output: {ANSI_ITALIC}{ANSI_RESET}");
-                sb.AppendLine($"{ANSI_BLUE}──────────────────────────────────────────{ANSI_RESET}");
+                _ = sb.AppendLine($"{ANSI_BLUE}{ANSI_BOLD}Standard Output: {ANSI_ITALIC}{ANSI_RESET}");
+                _ = sb.AppendLine($"{ANSI_BLUE}──────────────────────────────────────────{ANSI_RESET}");
 
                 break;
             case Warning:
-                sb.AppendLine($"{ANSI_YELLOW}{ANSI_BOLD}Warning:{ANSI_ITALIC}{ANSI_RESET}");
+                _ = sb.AppendLine($"{ANSI_YELLOW}{ANSI_BOLD}Warning:{ANSI_ITALIC}{ANSI_RESET}");
 
                 break;
             case Success:
@@ -55,7 +53,7 @@ internal static class StringExtensions
                 break;
         }
 
-        sb
+        _ = sb
             .Append(message)
             .Append(Environment.NewLine);
         return sb.ToString();

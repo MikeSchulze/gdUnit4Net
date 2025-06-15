@@ -31,7 +31,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -54,7 +54,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -80,7 +80,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -119,7 +119,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -128,7 +128,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
 
         var expectedB = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -159,7 +159,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -186,7 +186,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         // Both methods should trigger the diagnostic because they use Godot types
         var expectedA = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -266,7 +266,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(23, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -297,7 +297,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(19, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),
@@ -359,7 +359,7 @@ public class GodotRuntimeRequireOnTestCaseAttributeTest
         var errorLine = new LinePosition(49, 12);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.RequiresGodotRuntimeOnMethodId,
+                DiagnosticRules.RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.GodotEngine.RequiresGodotRuntimeOnMethod.MessageFormat.ToString(),

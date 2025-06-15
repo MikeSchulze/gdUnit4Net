@@ -2,7 +2,7 @@ namespace GdUnit4.TestAdapter.Test;
 
 using Api;
 
-public sealed class NoOpLogger : ITestEngineLogger
+internal sealed class NoOpLogger : ITestEngineLogger
 {
     public void SendMessage(LogLevel logLevel, string message)
     {

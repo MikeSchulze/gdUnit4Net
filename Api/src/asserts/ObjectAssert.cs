@@ -44,7 +44,7 @@ public sealed class ObjectAssert : AssertBase<object>, IObjectAssert
 
     public new IObjectAssert OverrideFailureMessage(string message)
     {
-        base.OverrideFailureMessage(message);
+        _ = base.OverrideFailureMessage(message);
         return this;
     }
 }

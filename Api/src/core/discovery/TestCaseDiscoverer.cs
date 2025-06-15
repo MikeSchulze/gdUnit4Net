@@ -3,11 +3,7 @@
 
 namespace GdUnit4.Core.Discovery;
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Api;
@@ -45,26 +41,52 @@ internal static class TestCaseDiscoverer
     {
         logger.LogInfo($"Discover tests from assembly: {testAssembly}");
 
-        var readerParameters = new ReaderParameters
+        AssemblyDefinition? assemblyDefinition = null;
+        try
         {
-            ReadSymbols = true,
-            SymbolReaderProvider = new PortablePdbReaderProvider()
-        };
-        using var assemblyDefinition = AssemblyDefinition.ReadAssembly(testAssembly, readerParameters);
-        var testSuites = assemblyDefinition.MainModule.Types
-            .Where(IsTestSuite)
-            .ToImmutableList();
+            // Try reading with symbols first
+            var readerParameters = new ReaderParameters
+            {
+                ReadSymbols = true,
+                SymbolReaderProvider = new PortablePdbReaderProvider()
+            };
 
-        var testCases = testSuites
-            .SelectMany(type => DiscoverTests(logger, testAssembly, type))
-            .ToImmutableList();
+            assemblyDefinition = AssemblyDefinition.ReadAssembly(testAssembly, readerParameters);
+        }
+        catch (Exception ex) when (ex is BadImageFormatException or FileNotFoundException or InvalidOperationException)
+        {
+            // Fallback: try reading without symbols if PDB reading fails
+            try
+            {
+                var fallbackParameters = new ReaderParameters { ReadSymbols = false };
+                assemblyDefinition = AssemblyDefinition.ReadAssembly(testAssembly, fallbackParameters);
+            }
+#pragma warning disable CA1031
+            catch (Exception fallbackEx)
+#pragma warning restore CA1031
+            {
+                logger.LogError($"Failed to read assembly {testAssembly}: {fallbackEx.Message}");
+                return Array.Empty<TestCaseDescriptor>();
+            }
+        }
 
-        logger.LogInfo(
-            testCases.Count == 0
-                ? "Discover tests done, no tests found."
-                : $"Discover tests done, {testSuites.Count} TestSuites and total {testCases.Count} Tests found.");
+        using (assemblyDefinition)
+        {
+            var testSuites = assemblyDefinition.MainModule.Types
+                .Where(IsTestSuite)
+                .ToImmutableList();
 
-        return testCases;
+            var testCases = testSuites
+                .SelectMany(type => DiscoverTests(logger, testAssembly, type))
+                .ToImmutableList();
+
+            logger.LogInfo(
+                testCases.Count == 0
+                    ? "Discover tests done, no tests found."
+                    : $"Discover tests done, {testSuites.Count} TestSuites and total {testCases.Count} Tests found.");
+
+            return testCases;
+        }
     }
 
     public static IReadOnlyList<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
@@ -395,7 +417,7 @@ internal static class TestCaseDiscoverer
             var specificAssembly = Path.Combine(dir, $"{assemblyName}.dll");
             if (!File.Exists(specificAssembly))
                 continue;
-            assemblyLocations.Add(specificAssembly);
+            _ = assemblyLocations.Add(specificAssembly);
             logger.LogInfo($"Found named assembly: {specificAssembly}");
 
             // Check for other assemblies in the directory

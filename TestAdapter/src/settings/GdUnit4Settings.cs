@@ -3,7 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Settings;
 
-using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -49,13 +48,13 @@ public enum DisplayNameOptions
 ///     - Compilation timeout for projects that require extended build times
 ///     These settings are loaded by <see cref="GdUnit4SettingsProvider" /> during test discovery and execution.
 /// </remarks>
-[XmlRoot(RunSettingsXmlNode)]
+[XmlRoot(RUN_SETTINGS_XML_NODE)]
 public class GdUnit4Settings : TestRunSettings
 {
     /// <summary>
     ///     The XML node name used to identify GdUnit4 settings in .runsettings files.
     /// </summary>
-    public const string RunSettingsXmlNode = "GdUnit4";
+    public const string RUN_SETTINGS_XML_NODE = "GdUnit4";
 
     private static readonly XmlSerializer Serializer = new(typeof(GdUnit4Settings));
 
@@ -63,7 +62,7 @@ public class GdUnit4Settings : TestRunSettings
     ///     Initializes a new instance of the <see cref="GdUnit4Settings" /> class.
     /// </summary>
     public GdUnit4Settings()
-        : base(RunSettingsXmlNode)
+        : base(RUN_SETTINGS_XML_NODE)
     {
     }
 

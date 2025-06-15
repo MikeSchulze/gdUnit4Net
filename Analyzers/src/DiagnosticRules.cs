@@ -25,17 +25,17 @@ internal static class DiagnosticRules
         /// <summary>
         ///     Rule ID for detecting when a method with a DataPoint attribute has multiple TestCase attributes.
         /// </summary>
-        public const string DataPointWithMultipleTestCase = "GdUnit0201";
+        public const string DATA_POINT_WITH_MULTIPLE_TEST_CASE = "GdUnit0201";
 
         /// <summary>
         ///     Rule ID for detecting when a test class using Godot functionality needs the RequireGodotRuntime attribute.
         /// </summary>
-        public const string RequiresGodotRuntimeOnClassId = "GdUnit0500";
+        public const string REQUIRES_GODOT_RUNTIME_ON_CLASS_ID = "GdUnit0500";
 
         /// <summary>
         ///     Rule ID for detecting when a test method using Godot functionality needs the RequireGodotRuntime attribute.
         /// </summary>
-        public const string RequiresGodotRuntimeOnMethodId = "GdUnit0501";
+        public const string REQUIRES_GODOT_RUNTIME_ON_METHOD_ID = "GdUnit0501";
     }
 
     /// <summary>
@@ -49,14 +49,14 @@ internal static class DiagnosticRules
         ///     DataPoint methods should only have a single TestCase attribute to avoid undefined behavior.
         /// </summary>
         public static readonly DiagnosticDescriptor MultipleTestCaseAttributes = new(
-            RuleIds.DataPointWithMultipleTestCase,
+            RuleIds.DATA_POINT_WITH_MULTIPLE_TEST_CASE,
             "Multiple TestCase attributes not allowed with DataPoint",
             "Method '{0}' cannot have multiple TestCase attributes when DataPoint attribute is present",
-            Categories.AttributeUsage,
+            Categories.ATTRIBUTE_USAGE,
             DiagnosticSeverity.Error,
             true,
             "Methods decorated with DataPoint attribute can only have one TestCase attribute. Multiple TestCase attributes on a method that uses DataPoint will result in undefined behavior.",
-            $"{HELP_LINK}/{RuleIds.DataPointWithMultipleTestCase}.md",
+            $"{HELP_LINK}/{RuleIds.DATA_POINT_WITH_MULTIPLE_TEST_CASE}.md",
             WellKnownDiagnosticTags.Compiler);
 
         // Future TestCase rules can be added here
@@ -73,10 +73,10 @@ internal static class DiagnosticRules
         ///     is missing the RequireGodotRuntime attribute.
         /// </summary>
         public static readonly DiagnosticDescriptor RequiresGodotRuntimeOnMethod = new(
-            RuleIds.RequiresGodotRuntimeOnMethodId,
+            RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID,
             "Godot Runtime Required for Test Method",
             "Test method '{0}' uses Godot functionality but is not annotated with `[RequireGodotRuntime]`",
-            Categories.AttributeUsage,
+            Categories.ATTRIBUTE_USAGE,
             DiagnosticSeverity.Error,
             true,
             """
@@ -86,7 +86,7 @@ internal static class DiagnosticRules
 
             Add `[RequireGodotRuntime]` to either test method or class level.
             """,
-            $"{HELP_LINK}/{RuleIds.RequiresGodotRuntimeOnMethodId}.md",
+            $"{HELP_LINK}/{RuleIds.REQUIRES_GODOT_RUNTIME_ON_METHOD_ID}.md",
             WellKnownDiagnosticTags.Compiler);
 
         /// <summary>
@@ -94,10 +94,10 @@ internal static class DiagnosticRules
         ///     is missing the RequireGodotRuntime attribute.
         /// </summary>
         public static readonly DiagnosticDescriptor RequiresGodotRuntimeOnClass = new(
-            RuleIds.RequiresGodotRuntimeOnClassId,
+            RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID,
             "Godot Runtime Required for Test Class",
             "Test class '{0}' uses Godot native types or calls in test hooks but is not annotated with `[RequireGodotRuntime]`",
-            Categories.AttributeUsage,
+            Categories.ATTRIBUTE_USAGE,
             DiagnosticSeverity.Error,
             true,
             """
@@ -107,7 +107,7 @@ internal static class DiagnosticRules
 
             Add `[RequireGodotRuntime]` to the test class level.
             """,
-            $"{HELP_LINK}/{RuleIds.RequiresGodotRuntimeOnClassId}.md",
+            $"{HELP_LINK}/{RuleIds.REQUIRES_GODOT_RUNTIME_ON_CLASS_ID}.md",
             WellKnownDiagnosticTags.Compiler);
     }
 
@@ -120,6 +120,6 @@ internal static class DiagnosticRules
         /// <summary>
         ///     Category for rules related to proper usage of attributes.
         /// </summary>
-        public const string AttributeUsage = "Attribute Usage";
+        public const string ATTRIBUTE_USAGE = "Attribute Usage";
     }
 }

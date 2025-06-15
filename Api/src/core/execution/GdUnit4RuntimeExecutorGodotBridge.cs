@@ -3,12 +3,7 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -95,9 +90,9 @@ internal class GdUnit4TestEventListener : ITestEventListener
 
     public void PublishEvent(ITestEvent testEvent) => EmitTestEvent(testEvent as TestEvent);
 
-    private static Godot.Collections.Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.StatisticKey, object> statistics)
+    private static Dictionary<Variant, Variant> ToGdUnitEventStatistics(IDictionary<TestEvent.StatisticKey, object> statistics)
     {
-        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
+        var converted = new Dictionary<Variant, Variant>();
         foreach (var (key, value) in statistics)
             converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
         return converted;
@@ -125,6 +120,6 @@ internal class GdUnit4TestEventListener : ITestEventListener
             data.Add("reports", serializedReports);
         }
 
-        listener.Call(data);
+        _ = listener.Call(data);
     }
 }

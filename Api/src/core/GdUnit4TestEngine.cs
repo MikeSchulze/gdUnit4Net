@@ -3,13 +3,7 @@
 
 namespace GdUnit4.Core;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Api;
 
@@ -106,7 +100,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             try
             {
                 // Wait for tasks to complete cancellation
-                Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(2));
+                _ = Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(2));
             }
             catch (Exception ex)
             {
@@ -197,7 +191,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             var godotRunner = new GodotRuntimeTestRunner(Logger, debuggerFramework, Settings);
             ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
-            ActiveTestRunners.Remove(godotRunner);
+            _ = ActiveTestRunners.Remove(godotRunner);
         }
 
         // Run tests that don't require Godot runtime
@@ -206,7 +200,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             var directRunner = new DefaultTestRunner(Logger, Settings);
             ActiveTestRunners.Add(directRunner);
             directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
-            ActiveTestRunners.Remove(directRunner);
+            _ = ActiveTestRunners.Remove(directRunner);
         }
     }
 

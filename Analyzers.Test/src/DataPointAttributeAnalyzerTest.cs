@@ -66,7 +66,7 @@ public class DataPointAttributeAnalyzerTest
         var errorLine = new LinePosition(20, 1);
         var expected = ExpectedDiagnostic
             .Create(
-                DiagnosticRules.RuleIds.DataPointWithMultipleTestCase,
+                DiagnosticRules.RuleIds.DATA_POINT_WITH_MULTIPLE_TEST_CASE,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     DiagnosticRules.DataPoint.MultipleTestCaseAttributes.MessageFormat.ToString(),

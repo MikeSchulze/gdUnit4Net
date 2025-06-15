@@ -1,7 +1,5 @@
 namespace GdUnit4.TestAdapter.Test.Execution;
 
-using System;
-
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -48,7 +46,7 @@ public class GdUnit4TestExecutorTest
 
         // Setup mock RunContext with RunSettings
         var mockRunContext = new Mock<IRunContext>();
-        mockRunContext.SetupGet(rc => rc.RunSettings)
+        _ = mockRunContext.SetupGet(rc => rc.RunSettings)
             .Returns(Mock.Of<IRunSettings>(rs => rs.SettingsXml == XML_SETTINGS));
 
         // run

@@ -76,7 +76,7 @@ internal static class GdUnit4Settings
     public static void SetUpdateNotification(bool enable)
     {
         ProjectSettings.SetSetting(UPDATE_NOTIFICATION_ENABLED, enable);
-        ProjectSettings.Save();
+        _ = ProjectSettings.Save();
     }
 
     public static string GetLogPath()
@@ -86,7 +86,7 @@ internal static class GdUnit4Settings
     {
         ProjectSettings.SetSetting(STDOUT_ENABLE_TO_FILE, true);
         ProjectSettings.SetSetting(STDOUT_WRITE_TO_FILE, path);
-        ProjectSettings.Save();
+        _ = ProjectSettings.Save();
     }
 
     // the configured server connection timeout in ms

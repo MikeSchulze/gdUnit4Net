@@ -3,15 +3,10 @@
 
 namespace GdUnit4.Core.Execution.Monitoring;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
-using System.Threading.Tasks;
 
 using Exceptions;
 
@@ -19,7 +14,7 @@ using Extensions;
 
 using Godot;
 
-using FileAccess = System.IO.FileAccess;
+using FileAccess = FileAccess;
 
 internal class GodotExceptionMonitor
 {
@@ -56,7 +51,7 @@ internal class GodotExceptionMonitor
         {
             using var fileStream = new FileStream(godotLogFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var reader = new StreamReader(fileStream);
-            fileStream.Seek(0, SeekOrigin.End);
+            _ = fileStream.Seek(0, SeekOrigin.End);
             eof = fileStream.Length;
         }
         catch (IOException ex)
@@ -73,7 +68,7 @@ internal class GodotExceptionMonitor
             return;
 
         // we need to wait the current Godot main tread has processed all nodes
-        await GodotObjectExtensions.SyncProcessFrame;
+        _ = await GodotObjectExtensions.SyncProcessFrame;
 
         try
         {
@@ -128,8 +123,8 @@ internal class GodotExceptionMonitor
                 var methodInfo = match.Groups[1].Value;
                 fileName = NormalizedPath(match.Groups[2].Value);
                 lineNumber = int.Parse(match.Groups[3].Value);
-                stackFrames.Append($"  at: {methodInfo} in {fileName}:line {lineNumber}");
-                stackFrames.AppendLine();
+                _ = stackFrames.Append($"  at: {methodInfo} in {fileName}:line {lineNumber}");
+                _ = stackFrames.AppendLine();
             }
         }
 
@@ -196,7 +191,7 @@ internal class GodotExceptionMonitor
             using var reader = new StreamReader(fileStream);
 
             // Seek to the last known position
-            fileStream.Seek(eof, SeekOrigin.Begin);
+            _ = fileStream.Seek(eof, SeekOrigin.Begin);
 
             var records = new List<string>();
             while (reader.ReadLine() is { } line)
