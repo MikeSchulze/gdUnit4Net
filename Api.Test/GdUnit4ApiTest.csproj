@@ -3,7 +3,7 @@
         <Version>5.0.0</Version>
         <Copyright>© 2025 Mike Schulze</Copyright>
         <Authors>Mike Schulze</Authors>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <NullableReferenceTypes>true</NullableReferenceTypes>
         <RootNamespace>GdUnit4.Tests</RootNamespace>
