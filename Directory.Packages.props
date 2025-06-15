@@ -11,7 +11,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
@@ -31,7 +31,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
