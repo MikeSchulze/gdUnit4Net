@@ -381,6 +381,9 @@ dotnet_diagnostic.SA1637.severity = none # File header must contain file name
 dotnet_diagnostic.SA1638.severity = none # File header file name documentation must match file name
 dotnet_diagnostic.SA1634.severity = none # File header must show copyright
 
+# IDE rules overrides
+dotnet_diagnostic.IDE0130.severity = none # Namespace does not match folder structure
+
 # Allow underscore in constant names (for SCREAMING_SNAKE_CASE)
 dotnet_diagnostic.SA1310.severity = none
 

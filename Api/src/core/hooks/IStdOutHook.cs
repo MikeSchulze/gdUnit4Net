@@ -35,7 +35,7 @@ using Godot;
 ///     </para>
 /// </remarks>
 /// <seealso cref="Console" />
-/// <seealso cref="System.IO.TextWriter" />
+/// <seealso cref="TextWriter" />
 /// <seealso cref="GD.PrintS" />
 internal interface IStdOutHook : IDisposable
 {
