@@ -1,8 +1,7 @@
 <h2 align="center">The Unit Testing Framework in C# for Godot</h2>
-<p align="center">This version of GdUnit4.api is based on Godot <strong>v4.3.stable.mono.official [77dcf97d8] (master branch)</p>
-</h2>
+<p align="center">This version of GdUnit4.api is based on Godot <strong>v4.3.stable.mono.official [77dcf97d8]</strong> (master branch)</p>
 
-<h1 align="center">Supported Godot Versions</h2>
+<h1 align="center">Supported Godot Versions</h1>
 <p align="center">
   <img src="https://img.shields.io/badge/Godot-v4.3.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
   <img src="https://img.shields.io/badge/Godot-v4.4.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
@@ -21,8 +20,8 @@ This project provides an API and a VS test adapter to run your Godot C# test in 
       </td>
       <td>
         <strong style="color: #FFD700; font-size: 18px; animation: blinker 1s linear infinite;">ADVICE</strong><br>
-        The documentation references version 4.4.0, which is not yet officially released. 
-This is intentional as these changes will be part of the upcoming 4.4.0 release.
+        The documentation references version 5.0.0, which is not yet officially released. 
+This is intentional as these changes will be part of the upcoming 5.0.0 release.
       </td>
     </tr>
   </table>
@@ -64,29 +63,58 @@ This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/exa
 adapter.
 It contains a single test suite as an example with two tests, the first test will succeed and the second test will fail.
 
-```c#
-namespace Examples;
-
-using GdUnit4;
-using static GdUnit4.Assertions;
-
-[TestSuite]
-public class ExampleTest
+```csharp
+namespace GdUnit4.Tests
 {
-    [TestCase]
-    public void success()
+    using static Assertions;
+
+    [TestSuite]
+    public class StringAssertTest
     {
-        AssertBool(true).IsTrue();
+        [TestCase]
+        public void IsEqual()
+        {
+            AssertThat("This is a test message").IsEqual("This is a test message");
+        }
+        
+        [TestCase] 
+        [RequireGodotRuntime] // ← Add this for Godot-dependent tests
+        public void IsEqual()
+        {
+             AssertThat(new Node2D()).IsNotNull();
+        }
+        
+        [Test]
+        [RequireGodotRuntime]
+        [GodotExceptionMonitor]  // ← Monitor Godot exceptions
+        public void TestNodeCallback()
+        {
+            var node = new MyNode(); // Will catch exceptions in _Ready()
+            AddChild(node);
+        }
+        
+        [Test]
+        [DataPoint(nameof(TestData))]  // ← Data-driven tests
+        public void TestCalculations(int a, int b, int expected)
+        {
+            AssertThat(Calculator.Add(a, b)).IsEqual(expected);
+        }
+        
+        [Test]
+        [ThrowsException(typeof(ArgumentNullException), "Value cannot be null")]
+        public void TestValidation()
+        {
+            Calculator.Add(null, 5); // Expects specific exception
+        }
+        
+        // Data source for parameterized tests
+        public static IEnumerable<object[]> TestData => new[]
+        {
+            new object[] { 1, 2, 3 },
+            new object[] { 5, 7, 12 }
+        };
     }
-
-
-    [TestCase]
-    public void failed()
-    {
-        AssertBool(false).IsTrue();
-    }
-
-}
+ }
 ```
 
 The test run looks like this.

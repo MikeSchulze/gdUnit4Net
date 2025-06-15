@@ -6,7 +6,7 @@ gdUnit4.api is the C# package to enable GdUnit4 to run/write unit tests in C#.
 
 ## Features
 
-* **Writing And Executing Tests** in C# for Net7.0 and Net8.0
+* **Writing And Executing Tests** in C# for Net8.0 and Net9.0 C#12
 * **Convenient interface** for running test-suites directly from Godot<br>
   One of the main features of GdUnit4 is the ability to run test-suites directly from the Godot editor using the context menu. You can run test-suites from the FileSystem panel,
   the ScriptEditor, or the GdUnit Inspector. To do this, simply right-click on the desired test-suite or test-case and select "Run Test(s)" from the context menu. This will run the
@@ -27,7 +27,7 @@ gdUnit4.api is the C# package to enable GdUnit4 to run/write unit tests in C#.
 You can install the GdUnit4 API by adding it as a package reference to your project:
 
 ```xml
-<PackageReference Include="gdUnit4.api" Version="4.4.0"/>
+<PackageReference Include="gdUnit4.api" Version="5.0.0"/>
 ```
 
 ## Related Packages
@@ -50,6 +50,43 @@ namespace GdUnit4.Tests
         {
             AssertThat("This is a test message").IsEqual("This is a test message");
         }
+        
+        [TestCase] 
+        [RequireGodotRuntime] // ← Add this for Godot-dependent tests
+        public void IsEqual()
+        {
+             AssertThat(new Node2D()).IsNotNull();
+        }
+        
+        [Test]
+        [RequireGodotRuntime]
+        [GodotExceptionMonitor]  // ← Monitor Godot exceptions
+        public void TestNodeCallback()
+        {
+            var node = new MyNode(); // Will catch exceptions in _Ready()
+            AddChild(node);
+        }
+        
+        [Test]
+        [DataPoint(nameof(TestData))]  // ← Data-driven tests
+        public void TestCalculations(int a, int b, int expected)
+        {
+            AssertThat(Calculator.Add(a, b)).IsEqual(expected);
+        }
+        
+        [Test]
+        [ThrowsException(typeof(ArgumentNullException), "Value cannot be null")]
+        public void TestValidation()
+        {
+            Calculator.Add(null, 5); // Expects specific exception
+        }
+        
+        // Data source for parameterized tests
+        public static IEnumerable<object[]> TestData => new[]
+        {
+            new object[] { 1, 2, 3 },
+            new object[] { 5, 7, 12 }
+        };
     }
  }
 ```
