@@ -10,7 +10,7 @@ using Api;
 
 internal sealed class TestReportCollector
 {
-    public List<ITestReport> Reports { get; } = new();
+    public List<ITestReport> Reports { get; } = [];
 
     public IEnumerable<ITestReport> Failures => Reports.Where(r => r.IsFailure);
 

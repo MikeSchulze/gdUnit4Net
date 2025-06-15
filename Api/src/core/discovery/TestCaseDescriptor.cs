@@ -3,10 +3,6 @@
 
 namespace GdUnit4.Core.Discovery;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Execution;
 
 using Newtonsoft.Json;
@@ -70,7 +66,7 @@ public sealed class TestCaseDescriptor : IEquatable<TestCaseDescriptor>
     ///     Gets the list of categories associated with this test case.
     ///     Categories are set by the TestCategory attributes.
     /// </summary>
-    public IReadOnlyCollection<string> Categories { get; init; } = new List<string>();
+    public IReadOnlyCollection<string> Categories { get; init; } = [];
 
     /// <summary>
     ///     Gets the collection of traits associated with this test case.

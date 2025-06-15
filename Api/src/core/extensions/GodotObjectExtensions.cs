@@ -100,11 +100,11 @@ internal static class GodotObjectExtensions
 
     internal static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this IEnumerable<TVariant> elements)
         where TVariant : notnull
-        => new(elements);
+        => [.. elements];
 
     internal static Array<TVariant> ToGodotArray<[MustBeVariant] TVariant>(this TVariant[] args)
         where TVariant : notnull
-        => new(args);
+        => [.. args];
 
     internal static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
         where TKey : notnull
@@ -222,8 +222,8 @@ internal static class GodotObjectExtensions
     {
         if (left is GodotObject lo && right is GodotObject ro)
         {
-            var l = GodotObject2Dictionary(lo, new System.Collections.Generic.Dictionary<object, bool>());
-            var r = GodotObject2Dictionary(ro, new System.Collections.Generic.Dictionary<object, bool>());
+            var l = GodotObject2Dictionary(lo, []);
+            var r = GodotObject2Dictionary(ro, []);
             return l.VariantEquals(r, compareMode);
         }
 

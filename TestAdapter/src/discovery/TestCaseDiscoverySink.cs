@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 internal sealed class TestCaseDiscoverySink : ITestCaseDiscoverySink
 {
-    private readonly ConcurrentBag<TestCase> testCases = new();
+    private readonly ConcurrentBag<TestCase> testCases = [];
 
     public IReadOnlyList<TestCase> TestCases => testCases.OrderBy(tc => tc.FullyQualifiedName).ToList();
 

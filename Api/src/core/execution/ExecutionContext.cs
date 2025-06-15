@@ -32,8 +32,8 @@ internal sealed class ExecutionContext : IDisposable
         TestSuite = testInstance;
         EventListeners = eventListeners;
         ReportCollector = new TestReportCollector();
-        SubExecutionContexts = new List<ExecutionContext>();
-        Disposables = new List<IDisposable>();
+        SubExecutionContexts = [];
+        Disposables = [];
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
     }

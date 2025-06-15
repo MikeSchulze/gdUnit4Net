@@ -31,7 +31,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     private int ItemCount => IsGeneric ? CurrentTyped?.Count ?? 0 : Current?.Count ?? 0;
 
-    private ICollection<TKey> Keys => (IsGeneric ? CurrentTyped?.Keys : Current?.Keys.Cast<TKey>().ToList()) ?? new List<TKey>();
+    private ICollection<TKey> Keys => (IsGeneric ? CurrentTyped?.Keys : Current?.Keys.Cast<TKey>().ToList()) ?? [];
 
     public IDictionaryAssert<TKey, TValue> IsEmpty()
     {

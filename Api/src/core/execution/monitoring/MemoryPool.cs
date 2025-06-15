@@ -10,7 +10,7 @@ using Godot;
 internal class MemoryPool
 {
     private static readonly ThreadLocal<MemoryPool?> CurrentPool = new();
-    private readonly List<GodotObject> registeredObjects = new();
+    private readonly List<GodotObject> registeredObjects = [];
 
     public MemoryPool(bool reportOrphanNodesEnabled) => OrphanMonitor = reportOrphanNodesEnabled ? new OrphanNodesMonitor() : null;
 

@@ -270,7 +270,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
                     Id = Guid.NewGuid(),
                     ParentId = Guid.Empty,
                     AssemblyPath = assemblyGroup.Key,
-                    Suites = new List<TestSuiteNode>()
+                    Suites = []
                 };
 
                 // Group test cases by managed type (suites)
@@ -288,7 +288,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
                             ManagedType = managedType,
                             AssemblyPath = assembly.AssemblyPath,
                             SourceFile = t.CodeFilePath ?? "Unknown",
-                            Tests = new List<TestCaseNode>()
+                            Tests = []
                         };
 
                         suite.Tests.AddRange(

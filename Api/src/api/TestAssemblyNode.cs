@@ -3,8 +3,6 @@
 
 namespace GdUnit4.Api;
 
-using System.Collections.Generic;
-
 using Newtonsoft.Json;
 
 /// <summary>
@@ -28,6 +26,6 @@ public record TestAssemblyNode : TestNode
     /// </summary>
     [JsonIgnore]
 #pragma warning disable CA1002
-    public List<TestSuiteNode> Suites { get; init; } = new();
+    public List<TestSuiteNode> Suites { get; init; } = [];
 #pragma warning restore CA1002
 }

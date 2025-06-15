@@ -35,7 +35,7 @@ public static class RunSettingsProvider
     public static Dictionary<string, string> GetEnvironmentVariables(string? settingsXml)
     {
         if (string.IsNullOrEmpty(settingsXml))
-            return new Dictionary<string, string>();
+            return [];
 
         using var stringReader = new StringReader(settingsXml);
         using var reader = XmlReader.Create(stringReader, ReaderSettings);

@@ -48,7 +48,6 @@
     <Rule Id="IDE0130" Action="None"/> <!-- Namespace does not match folder structure -->
 
     <!-- C# 12 Collection Expression Rules - Set as suggestions -->
-    <Rule Id="IDE0028" Action="None"/> <!-- Simplify collection initialization -->
     <Rule Id="IDE0290" Action="None"/> <!-- Use primary constructor -->
     <Rule Id="IDE0300" Action="None"/> <!-- Simplify collection initialization (collection expression) -->
     <Rule Id="IDE0301" Action="None"/> <!-- Simplify collection initialization (empty collection) -->

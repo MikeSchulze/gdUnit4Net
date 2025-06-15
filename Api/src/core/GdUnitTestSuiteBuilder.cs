@@ -40,7 +40,7 @@ internal static class GdUnitTestSuiteBuilder
     private const string TAG_SOURCE_CLASS_VARNAME = "${source_var}";
     private const string TAG_SOURCE_RESOURCE_PATH = "${source_resource_path}";
 
-    private static readonly Dictionary<string, Type> ClazzCache = new();
+    private static readonly Dictionary<string, Type> ClazzCache = [];
 
     public static Dictionary<string, object> Build(string sourcePath, int lineNumber, string testSuitePath)
     {
