@@ -200,9 +200,9 @@ jobs:
       matrix:
         godot-version: [ '4.2', '4.2.1', '4.2.2', '4.3', '4.4' ]
         godot-status: [ 'stable' ]
-      #  include:
-      #    - godot-version: '4.4'
-      #      godot-status: 'dev3'
+        include:
+          - godot-version: '4.5'
+            godot-status: 'dev3'
 
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"
