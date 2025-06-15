@@ -16,4 +16,4 @@ Integration:
 Technical Details:
 - Implementation based on Roslyn analyzer framework
 - IDE support for real-time error detection
-- Includes help link to documentation
+- Includes a help link to documentation

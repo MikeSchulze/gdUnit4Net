@@ -31,7 +31,7 @@ The GdUnit4.TestAdapter implements the Microsoft test adapter framework [VSTest]
 Add the Test Adapter to your test project:
 
 ```xml
-<PackageReference Include="gdUnit4.test.adapter" Version="2.1.0" />
+<PackageReference Include="gdUnit4.test.adapter" Version="3.0.0" />
 ```
 
 ## Test Filtering

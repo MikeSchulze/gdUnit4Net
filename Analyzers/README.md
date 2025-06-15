@@ -10,8 +10,8 @@ test attributes and helps developers catch configuration errors early in the dev
 The analyzer must be included by referencing the gdUnit4.analyzer package:
 
 ```xml
-<PackageReference Include="gdUnit4.api" Version="4.4.0"/>
-<PackageReference Include="gdUnit4.test.adapter" Version="2.1.0"/>
+<PackageReference Include="gdUnit4.api" Version="5.0.0"/>
+<PackageReference Include="gdUnit4.test.adapter" Version="3.0.0"/>
 <PackageReference Include="gdUnit4.analyzers" Version="1.0.0">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
