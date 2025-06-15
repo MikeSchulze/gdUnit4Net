@@ -119,11 +119,11 @@ public class TestCaseDiscovererTest
                 Categories = new List<string> { "CategoryA" },
                 Traits = new Dictionary<string, List<string>>
                 {
-                    ["Category"] = new()
-                    {
+                    ["Category"] =
+                    [
                         "Foo",
                         "Bar"
-                    }
+                    ]
                 }
             });
     }
@@ -298,7 +298,7 @@ public class TestCaseDiscovererTest
                 AttributeIndex = 0,
                 RequireRunningGodotEngine = false,
                 Categories = new List<string> { "CategoryA" },
-                Traits = new Dictionary<string, List<string>> { ["Category"] = new() { "Foo" } }
+                Traits = new Dictionary<string, List<string>> { ["Category"] = ["Foo"] }
             }, new TestCaseDescriptor
             {
                 SimpleName = "TestCaseA:0 (1, 2, 3, 6)",
@@ -369,8 +369,8 @@ public class TestCaseDiscovererTest
             Categories = new List<string>(),
             Traits = new Dictionary<string, List<string>>
             {
-                ["Category"] = new() { "Unit" },
-                ["Custom"] = new() { "CaseA", "CaseB" }
+                ["Category"] = ["Unit"],
+                ["Custom"] = ["CaseA", "CaseB"]
             }
         });
     }

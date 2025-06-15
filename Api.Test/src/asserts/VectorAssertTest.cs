@@ -18,40 +18,40 @@ using static Assertions;
 [TestSuite]
 public class VectorAssertTest
 {
-    private static IEnumerable<object[]> GodotVectorApproximateDataPoints => new[]
-    {
+    private static IEnumerable<object[]> GodotVectorApproximateDataPoints =>
+    [
         // Vector2
-        new object[] { new Vector2(0, 1), new Vector2(0.04f, 0.04f) }, new object[] { new Vector2(3, 3), new Vector2(0.04f, 0.04f) },
-        new object[] { new Vector2(-3, -3), new Vector2(0.04f, 0.04f) },
+        [new Vector2(0, 1), new Vector2(0.04f, 0.04f)], [new Vector2(3, 3), new Vector2(0.04f, 0.04f)],
+        [new Vector2(-3, -3), new Vector2(0.04f, 0.04f)],
         // Vector2I
-        new object[] { new Vector2I(1, 1), new Vector2I(1, 1) }, new object[] { new Vector2I(3, 3), new Vector2I(1, 1) }, new object[] { new Vector2I(-3, -3), new Vector2I(1, 1) },
+        [new Vector2I(1, 1), new Vector2I(1, 1)], [new Vector2I(3, 3), new Vector2I(1, 1)], [new Vector2I(-3, -3), new Vector2I(1, 1)],
         // Vector3
-        new object[] { new Vector3(0, 1, 0), new Vector3(0.04f, 0.04f, 0.04f) }, new object[] { new Vector3(3, 3, 3), new Vector3(0.04f, 0.04f, 0.04f) },
-        new object[] { new Vector3(-3, -3, -3), new Vector3(0.04f, 0.04f, 0.04f) },
+        [new Vector3(0, 1, 0), new Vector3(0.04f, 0.04f, 0.04f)], [new Vector3(3, 3, 3), new Vector3(0.04f, 0.04f, 0.04f)],
+        [new Vector3(-3, -3, -3), new Vector3(0.04f, 0.04f, 0.04f)],
         // Vector3I
-        new object[] { new Vector3I(1, 1, 1), new Vector3I(1, 1, 1) }, new object[] { new Vector3I(3, 3, 3), new Vector3I(1, 1, 1) },
-        new object[] { new Vector3I(-3, -3, -3), new Vector3I(1, 1, 1) },
+        [new Vector3I(1, 1, 1), new Vector3I(1, 1, 1)], [new Vector3I(3, 3, 3), new Vector3I(1, 1, 1)],
+        [new Vector3I(-3, -3, -3), new Vector3I(1, 1, 1)],
         // Vector4
-        new object[] { new Vector4(0, 1, 0, 0), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) }, new object[] { new Vector4(3, 3, 3, 3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) },
-        new object[] { new Vector4(-3, -3, -3, -3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f) },
+        [new Vector4(0, 1, 0, 0), new Vector4(0.04f, 0.04f, 0.04f, 0.04f)], [new Vector4(3, 3, 3, 3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f)],
+        [new Vector4(-3, -3, -3, -3), new Vector4(0.04f, 0.04f, 0.04f, 0.04f)],
         // Vector4I
-        new object[] { new Vector4I(0, 1, 0, 0), new Vector4I(1, 1, 1, 1) }, new object[] { new Vector4I(3, 3, 3, 3), new Vector4I(1, 1, 1, 1) },
-        new object[] { new Vector4I(-3, -3, -3, -3), new Vector4I(1, 1, 1, 1) }
-    };
+        [new Vector4I(0, 1, 0, 0), new Vector4I(1, 1, 1, 1)], [new Vector4I(3, 3, 3, 3), new Vector4I(1, 1, 1, 1)],
+        [new Vector4I(-3, -3, -3, -3), new Vector4I(1, 1, 1, 1)]
+    ];
 
-    private static IEnumerable<object[]> SystemVectorApproximateDataPoints => new[]
-    {
+    private static IEnumerable<object[]> SystemVectorApproximateDataPoints =>
+    [
         // System Vector2
-        new object[] { new SystemVector2(0, 1), new SystemVector2(0.04f, 0.04f) }, new object[] { new SystemVector2(3, 3), new SystemVector2(0.04f, 0.04f) },
-        new object[] { new SystemVector2(-3, -3), new SystemVector2(0.04f, 0.04f) },
+        [new SystemVector2(0, 1), new SystemVector2(0.04f, 0.04f)], [new SystemVector2(3, 3), new SystemVector2(0.04f, 0.04f)],
+        [new SystemVector2(-3, -3), new SystemVector2(0.04f, 0.04f)],
         // System Vector3
-        new object[] { new SystemVector3(0, 1, 0), new SystemVector3(0.04f, 0.04f, 0.04f) }, new object[] { new SystemVector3(3, 3, 3), new SystemVector3(0.04f, 0.04f, 0.04f) },
-        new object[] { new SystemVector3(-3, -3, -3), new SystemVector3(0.04f, 0.04f, 0.04f) },
+        [new SystemVector3(0, 1, 0), new SystemVector3(0.04f, 0.04f, 0.04f)], [new SystemVector3(3, 3, 3), new SystemVector3(0.04f, 0.04f, 0.04f)],
+        [new SystemVector3(-3, -3, -3), new SystemVector3(0.04f, 0.04f, 0.04f)],
         // System Vector4
-        new object[] { new SystemVector4(0, 1, 0, 0), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) },
-        new object[] { new SystemVector4(3, 3, 3, 3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) },
-        new object[] { new SystemVector4(-3, -3, -3, -3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f) }
-    };
+        [new SystemVector4(0, 1, 0, 0), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f)],
+        [new SystemVector4(3, 3, 3, 3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f)],
+        [new SystemVector4(-3, -3, -3, -3), new SystemVector4(0.04f, 0.04f, 0.04f, 0.04f)]
+    ];
 
     [BeforeTest]
     public void Setup() =>

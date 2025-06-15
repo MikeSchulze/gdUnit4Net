@@ -107,7 +107,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public string TestCaseName { get; set; } = string.Empty;
 
-    public object?[] MethodArguments { get; private set; } = Array.Empty<object?>();
+    public object?[] MethodArguments { get; private set; } = [];
 
     public int CurrentIteration
     {

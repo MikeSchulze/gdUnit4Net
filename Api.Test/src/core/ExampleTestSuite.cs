@@ -92,9 +92,9 @@ public sealed class ExampleTestSuite
     {
         public static IEnumerable<object[]> GetTestData()
         {
-            yield return new object[] { 1, 2, 3 };
-            yield return new object[] { 5, 5, 10 };
-            yield return new object[] { -1, 1, 0 };
+            yield return [1, 2, 3];
+            yield return [5, 5, 10];
+            yield return [-1, 1, 0];
         }
     }
 }

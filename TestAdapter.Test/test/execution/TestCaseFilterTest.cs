@@ -61,8 +61,8 @@ public class TestCaseFilterTest
                 },
                 Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new() { "TeamA" },
-                    ["Priority"] = new() { "High" }
+                    ["Owner"] = ["TeamA"],
+                    ["Priority"] = ["High"]
                 }
             },
             new()
@@ -79,9 +79,9 @@ public class TestCaseFilterTest
                 Categories = new List<string> { "IntegrationTest" },
                 Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new() { "TeamB" },
-                    ["Priority"] = new() { "Medium" },
-                    ["Component"] = new() { "Database" }
+                    ["Owner"] = ["TeamB"],
+                    ["Priority"] = ["Medium"],
+                    ["Component"] = ["Database"]
                 }
             },
             new()
@@ -98,9 +98,9 @@ public class TestCaseFilterTest
                 Categories = new List<string> { "SlowTest" },
                 Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new() { "TeamC" },
-                    ["Priority"] = new() { "Low" },
-                    ["Feature"] = new() { "Reporting" }
+                    ["Owner"] = ["TeamC"],
+                    ["Priority"] = ["Low"],
+                    ["Feature"] = ["Reporting"]
                 }
             },
             new()
@@ -121,13 +121,13 @@ public class TestCaseFilterTest
                 },
                 Traits = new Dictionary<string, List<string>>
                 {
-                    ["Owner"] = new()
-                    {
+                    ["Owner"] =
+                    [
                         "TeamA",
                         "TeamC"
-                    }, // Multiple values for a trait
-                    ["Priority"] = new() { "Medium" },
-                    ["Component"] = new() { "UI" }
+                    ], // Multiple values for a trait
+                    ["Priority"] = ["Medium"],
+                    ["Component"] = ["UI"]
                 }
             }
         };

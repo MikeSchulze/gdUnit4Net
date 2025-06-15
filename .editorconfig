@@ -416,7 +416,6 @@ dotnet_analyzer_diagnostic.category-Usage.severity = warning
 
 # C# 12 collection expression rules (enable selectively)
 dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
-dotnet_diagnostic.IDE0300.severity = suggestion # Use collection expression for array
 dotnet_diagnostic.IDE0301.severity = suggestion # Use collection expression for empty
 dotnet_diagnostic.IDE0303.severity = suggestion # Use collection expression for create
 dotnet_diagnostic.IDE0305.severity = suggestion # Use collection expression for fluent

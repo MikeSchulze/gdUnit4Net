@@ -66,7 +66,7 @@ internal static class TestCaseDiscoverer
 #pragma warning restore CA1031
             {
                 logger.LogError($"Failed to read assembly {testAssembly}: {fallbackEx.Message}");
-                return Array.Empty<TestCaseDescriptor>();
+                return [];
             }
         }
 

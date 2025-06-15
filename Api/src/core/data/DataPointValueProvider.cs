@@ -154,7 +154,7 @@ internal static class DataPointValueProvider
         // Get the GetAsyncEnumerator method
         var getEnumeratorMethod = enumerableInterface.GetMethod("GetAsyncEnumerator")
                                   ?? throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on {enumerableInterface.FullName}");
-        var enumerator = getEnumeratorMethod.Invoke(asyncSource, new object[] { cancellationToken.Token })
+        var enumerator = getEnumeratorMethod.Invoke(asyncSource, [cancellationToken.Token])
                          ?? throw new InvalidOperationException("GetAsyncEnumerator returned null");
         var moveNextMethod = enumeratorInterface.GetMethod("MoveNextAsync")
                              ?? throw new InvalidOperationException("Could not find MoveNextAsync method");
@@ -191,7 +191,7 @@ internal static class DataPointValueProvider
                     yield return (object?[])current;
                 }
                 else
-                    yield return new[] { current };
+                    yield return [current];
             }
         }
         finally
@@ -361,7 +361,7 @@ internal static class DataPointValueProvider
                 if (item is object?[] array)
                     resultList.Add(array);
                 else
-                    resultList.Add(new[] { item });
+                    resultList.Add([item]);
             }
 
             if (resultList.Count == 0)

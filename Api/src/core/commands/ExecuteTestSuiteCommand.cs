@@ -63,7 +63,7 @@ internal class ExecuteTestSuiteCommand : BaseCommand
 
                 using ExecutionContext context = new(
                     testSuite,
-                    new[] { testEventListener },
+                    [testEventListener],
                     IsReportOrphanNodesEnabled,
                     IsEngineMode);
                 context.IsCaptureStdOut = IsCaptureStdOut;

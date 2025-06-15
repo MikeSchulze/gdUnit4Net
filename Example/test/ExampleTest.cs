@@ -8,8 +8,8 @@ using static GdUnit4.Assertions;
 [TestSuite]
 public class ExampleTest
 {
-    public static IEnumerable<object[]> ArrayDataPointProperty => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
-    public static IEnumerable<object[]> ArrayDataPointMethod() => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
+    public static IEnumerable<object[]> ArrayDataPointProperty => [[1, 2, 3], [4, 5, 9]];
+    public static IEnumerable<object[]> ArrayDataPointMethod() => [[1, 2, 3], [4, 5, 9]];
 
     [TestCase]
     public void Success() => AssertBool(true).IsTrue();

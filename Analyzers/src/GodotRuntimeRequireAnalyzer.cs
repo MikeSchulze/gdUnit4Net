@@ -79,7 +79,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 {
     private const string REQUIRE_GODOT_RUNTIME_ATTRIBUTE = "GdUnit4.RequireGodotRuntimeAttribute";
     private const string TEST_CASE_ATTRIBUTE = "GdUnit4.TestCaseAttribute";
-    private static readonly string[] TestHookAttributes = { "GdUnit4.BeforeAttribute", "GdUnit4.AfterAttribute", "GdUnit4.BeforeTestAttribute", "GdUnit4.AfterTestAttribute" };
+    private static readonly string[] TestHookAttributes = ["GdUnit4.BeforeAttribute", "GdUnit4.AfterAttribute", "GdUnit4.BeforeTestAttribute", "GdUnit4.AfterTestAttribute"];
 
     private static readonly ConcurrentDictionary<string, bool> GodotTypeCache = new();
 
@@ -89,9 +89,10 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
     ///     Gets the supported diagnostics.
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(
-            GodotEngine.RequiresGodotRuntimeOnClass,
-            GodotEngine.RequiresGodotRuntimeOnMethod);
+    [
+        GodotEngine.RequiresGodotRuntimeOnClass,
+            GodotEngine.RequiresGodotRuntimeOnMethod
+    ];
 
     /// <summary>
     ///     Initializes the analyzer with the analysis context.

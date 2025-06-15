@@ -13,22 +13,22 @@ using static Assertions;
 [TestSuite]
 public class TestSuiteWithDynamicDataPoints
 {
-    public static IEnumerable<object[]> ArrayDataPointProperty => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
-    public static IEnumerable<int> SingleDataPointProperty => new[] { 1, 2, 3 };
-    public static IEnumerable<object[]> ArrayDataPointMethod() => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
-    public static IEnumerable<object[]> PublicTestDataFactory(int factor) => new[] { new object[] { 1 * factor, 1 * factor }, new object[] { 2 * factor, 2 * factor } };
+    public static IEnumerable<object[]> ArrayDataPointProperty => [[1, 2, 3], [4, 5, 9]];
+    public static IEnumerable<int> SingleDataPointProperty => [1, 2, 3];
+    public static IEnumerable<object[]> ArrayDataPointMethod() => [[1, 2, 3], [4, 5, 9]];
+    public static IEnumerable<object[]> PublicTestDataFactory(int factor) => [[1 * factor, 1 * factor], [2 * factor, 2 * factor]];
 
 #pragma warning disable CA1859 // #warning directive
-    private static IEnumerable<object[]> PrivateArrayDataPointProperty => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
-    private static IEnumerable<object[]> PrivateArrayDataPointMethod() => new[] { new object[] { 1, 2, 3 }, new object[] { 4, 5, 9 } };
-    private static IEnumerable<object[]> PrivateTestDataFactory(int factor) => new[] { new object[] { 1 * factor, 1 * factor }, new object[] { 2 * factor, 2 * factor } };
+    private static IEnumerable<object[]> PrivateArrayDataPointProperty => [[1, 2, 3], [4, 5, 9]];
+    private static IEnumerable<object[]> PrivateArrayDataPointMethod() => [[1, 2, 3], [4, 5, 9]];
+    private static IEnumerable<object[]> PrivateTestDataFactory(int factor) => [[1 * factor, 1 * factor], [2 * factor, 2 * factor]];
 #pragma warning restore CS1030 // #warning directive
 
 
     internal static IEnumerable<object[]> YieldedDataPointMethod()
     {
-        yield return new object[] { 1, 2, 3 };
-        yield return new object[] { 4, 5, 9 };
+        yield return [1, 2, 3];
+        yield return [4, 5, 9];
     }
 
     #region private_data_points
@@ -95,14 +95,14 @@ public class TestSuiteWithDynamicDataPoints
         {
             // Simulate async work for each item
             await Task.Delay(10);
-            yield return new object?[] { i, i + 1, i + i + 1 };
+            yield return [i, i + 1, i + i + 1];
         }
     }
 
     public static async IAsyncEnumerable<object?[]> AsyncArrayDataPointBlocked()
     {
         await Task.Delay(500);
-        yield return new object?[] { 1, 2, 3 };
+        yield return [1, 2, 3];
     }
 
     public static async IAsyncEnumerable<int> AsyncSingleDataPoint()
