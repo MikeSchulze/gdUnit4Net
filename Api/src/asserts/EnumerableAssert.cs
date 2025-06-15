@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 using Core.Extensions;
 
@@ -260,7 +257,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
             .Where(currentItem =>
                 expectedList.Any(expectedItem =>
                     referenceEquals ? currentItem.IsSame(expectedItem) : currentItem.IsEquals(expectedItem)))
-            .ToList() ?? new List<TValue?>();
+            .ToList() ?? [];
 
         if (found.Count != 0)
             ThrowTestFailureReport(AssertFailures.NotContains(Current, expectedList, found), Current, expected);
@@ -335,9 +332,9 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
 
     private class ArrayDiff
     {
-        public List<TValue?> NotExpected { get; init; } = new();
+        public List<TValue?> NotExpected { get; init; } = [];
 
-        public List<TValue?> NotFound { get; init; } = new();
+        public List<TValue?> NotFound { get; init; } = [];
     }
 }
 #pragma warning restore CS1591, SA1600

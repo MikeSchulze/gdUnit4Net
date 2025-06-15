@@ -14,7 +14,7 @@ internal sealed class GdUnitConsole
     private const string CSI_ITALIC = "\u001b[3m";
     private const string CSI_UNDERLINE = "\u001b[4m";
     private static readonly object LockObj = new();
-    private readonly Dictionary<string, (int Left, int Top)> savedCursorsByName = new();
+    private readonly Dictionary<string, (int Left, int Top)> savedCursorsByName = [];
 
     public GdUnitConsole PrintError(string message)
     {

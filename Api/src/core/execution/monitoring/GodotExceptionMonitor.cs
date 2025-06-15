@@ -19,15 +19,15 @@ using FileAccess = FileAccess;
 internal class GodotExceptionMonitor
 {
     // Types of exceptions that should be ignored during test execution
-    private static readonly HashSet<Type> IgnoredExceptionTypes = new()
-    {
+    private static readonly HashSet<Type> IgnoredExceptionTypes =
+    [
         typeof(TestFailedException)
 
         // typeof(AssertFailedException),
         // typeof(UnitTestAssertException)
-    };
+    ];
 
-    private static readonly List<Exception> CaughtExceptions = new();
+    private static readonly List<Exception> CaughtExceptions = [];
 
     private readonly string godotLogFile;
     private long eof;

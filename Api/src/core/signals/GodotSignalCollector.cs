@@ -115,7 +115,7 @@ internal sealed partial class GodotSignalCollector : RefCounted
             if (error != Error.Ok)
                 WriteLine($"Error on connecting signal {signalName}, Error: {error}");
 
-            _ = emitterSignals.TryAdd(signalName, new ConcurrentBag<Variant[]>());
+            _ = emitterSignals.TryAdd(signalName, []);
         }
     }
 

@@ -25,7 +25,7 @@ internal static class TestCaseDiscoverer
 #pragma warning restore CA1859
 
     // Static cache for assembly locations and names
-    private static readonly Dictionary<string, ISet<string>> AssemblyLocationCache = new();
+    private static readonly Dictionary<string, ISet<string>> AssemblyLocationCache = [];
     private static string? cachedAssemblyName;
 
     /// <summary>
@@ -126,14 +126,14 @@ internal static class TestCaseDiscoverer
             }
 
             Logger.LogWarning($"Could not find assembly or test suite for {className} at {fullScriptPath}");
-            return new List<TestCaseDescriptor>();
+            return [];
         }
 #pragma warning disable CA1031
         catch (Exception e)
 #pragma warning restore CA1031
         {
             Logger.LogError($"Error discovering tests: {e.Message}\n{e.StackTrace}");
-            return new List<TestCaseDescriptor>();
+            return [];
         }
     }
 

@@ -3,12 +3,9 @@
 
 namespace GdUnit4.Analyzers;
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -86,12 +83,7 @@ public class GodotRuntimeRequireAnalyzer : DiagnosticAnalyzer
 
     private static readonly ConcurrentDictionary<string, bool> GodotTypeCache = new();
 
-    private static readonly HashSet<string> GodotDependentTypes = new()
-    {
-        "GdUnit4.ISceneRunner"
-
-        // Add any other GdUnit4 types that require Godot runtime
-    };
+    private static readonly HashSet<string> GodotDependentTypes = ["GdUnit4.ISceneRunner"];
 
     /// <summary>
     ///     Gets the supported diagnostics.

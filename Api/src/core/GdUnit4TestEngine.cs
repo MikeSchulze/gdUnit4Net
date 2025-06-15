@@ -28,7 +28,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
 
     private ITestEngineLogger Logger { get; }
 
-    private List<ITestRunner> ActiveTestRunners { get; } = new();
+    private List<ITestRunner> ActiveTestRunners { get; } = [];
 
     public void Dispose() => cancellationSource?.Dispose();
 

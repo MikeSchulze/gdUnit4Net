@@ -3,8 +3,6 @@
 
 namespace GdUnit4.Api;
 
-using System.Collections.Generic;
-
 /// <summary>
 ///     Represents the configuration for the test runner, holding information about which test suites should be run.
 ///     For each test suite, a set of 'TestCaseConfig' instances is attached to specify included tests.
@@ -14,12 +12,12 @@ public class TestRunnerConfig
     /// <summary>
     ///     Gets the included test suites along with their associated test case configurations.
     /// </summary>
-    public Dictionary<string, IEnumerable<TestCaseConfig>> Included { get; } = new();
+    public Dictionary<string, IEnumerable<TestCaseConfig>> Included { get; } = [];
 
     /// <summary>
     ///     Gets holds test run properties to control the test execution.
     /// </summary>
-    public Dictionary<string, object> Properties { get; } = new();
+    public Dictionary<string, object> Properties { get; } = [];
 
     /// <summary>
     ///     Gets or sets a value indicating whether when set to true, standard output (stdout) from test cases is captured and included in the test result. This can be

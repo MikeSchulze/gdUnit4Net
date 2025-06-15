@@ -24,7 +24,7 @@ public record TestSuiteNode : TestNode
     ///     Gets the collection of test cases contained within this test suite.
     /// </summary>
 #pragma warning disable CA1002
-    public required List<TestCaseNode> Tests { get; init; } = new();
+    public required List<TestCaseNode> Tests { get; init; } = [];
 #pragma warning restore CA1002
 
     /// <summary>

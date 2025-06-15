@@ -41,7 +41,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         TestName = testName;
         Statistics = statistics ?? new Dictionary<StatisticKey, object>();
         Statistics[StatisticKey.TotalCount] = totalCount;
-        Reports = reports?.ToList() ?? new List<ITestReport>();
+        Reports = reports?.ToList() ?? [];
         FullyQualifiedName = string.Empty;
     }
 
@@ -53,7 +53,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         SuiteName = suiteName;
         TestName = testName;
         Statistics = new Dictionary<StatisticKey, object> { [StatisticKey.TotalCount] = 0 };
-        Reports = new List<ITestReport>();
+        Reports = [];
         FullyQualifiedName = string.Empty;
     }
 
@@ -89,7 +89,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 
     [JsonProperty]
     [JsonConverter(typeof(TestReportListConverter))]
-    public ICollection<ITestReport> Reports { get; private init; } = new List<ITestReport>();
+    public ICollection<ITestReport> Reports { get; private init; } = [];
 
     public int TotalCount => GetByKeyOrDefault(StatisticKey.TotalCount, 0);
 
@@ -158,7 +158,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
         new(EventType.TestAfter, id, resourcePath, suiteName, testName)
         {
             Statistics = statistics ?? new Dictionary<StatisticKey, object>(),
-            Reports = reports ?? new List<ITestReport>()
+            Reports = reports ?? []
         };
 
     public bool Equals(TestEvent? other)
@@ -241,7 +241,7 @@ internal class TestReportListConverter : JsonConverter<List<ITestReport>>
     public override List<ITestReport> ReadJson(JsonReader reader, Type objectType, List<ITestReport>? existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         var reports = serializer.Deserialize<List<TestReport>>(reader);
-        return reports?.Cast<ITestReport>().ToList() ?? new List<ITestReport>();
+        return reports?.Cast<ITestReport>().ToList() ?? [];
     }
 
     public override void WriteJson(JsonWriter writer, List<ITestReport>? value, JsonSerializer serializer)
