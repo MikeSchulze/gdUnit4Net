@@ -7,75 +7,39 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
-  <!-- Analyzer packages for netstandard2.0 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.14.1"/>
-
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2"/>
-    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2"/>
-
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
-  </ItemGroup>
-
-
-  <!-- .NET 8 compatible versions when targeting net8.0 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.14.1"/>
-
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2"/>
-    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2"/>
-
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
-  </ItemGroup>
-
-  <!-- .NET 9 compatible versions when targeting net9.0 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.14.1"/>
-    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.14.1"/>
-
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2"/>
-    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2"/>
-
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
-    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
-  </ItemGroup>
-
-
+  <!-- Common package versions (used across all target frameworks) -->
   <ItemGroup>
+    <!-- Microsoft Test Platform -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+    <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.14.1"/>
+    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.14.1"/>
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.2"/>
+    <PackageVersion Include="MSTest.TestFramework" Version="3.9.2"/>
+
+    <!-- Roslyn/Code Analysis (compatible with all target frameworks) -->
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2"/>
+
+    <!-- Static Analysis Tools -->
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts" Version="4.3.0"/>
+    <PackageVersion Include="Gu.Roslyn.Asserts.Analyzers" Version="4.0.0"/>
+
+    <!-- Godot -->
     <PackageVersion Include="Godot.NET.Sdk" Version="$(GodotNetSdkVersion)"/>
     <PackageVersion Include="GodotSharp" Version="$(GodotNetSdkVersion)"/>
     <PackageVersion Include="Godot.SourceGenerators" Version="$(GodotNetSdkVersion)"/>
     <PackageVersion Include="GodotSharpEditor" Version="$(GodotNetSdkVersion)"/>
 
+    <!-- GdUnit4 -->
     <PackageVersion Include="gdUnit4.analyzers" Version="$(GdUnitAnalyzersVersion)"/>
     <PackageVersion Include="gdUnit4.api" Version="$(GdUnitAPIVersion)"/>
     <PackageVersion Include="gdUnit4.test.adapter" Version="$(GdUnitTestAdapterVersion)"/>
 
+    <!-- Utilities -->
     <PackageVersion Include="CommandLineParser" Version="2.9.1"/>
     <PackageVersion Include="coverlet.collector" Version="6.0.4"/>
     <PackageVersion Include="Mono.Cecil" Version="0.11.6"/>
