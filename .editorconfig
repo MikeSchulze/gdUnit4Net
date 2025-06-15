@@ -414,9 +414,6 @@ dotnet_diagnostic.CA1861.severity = none # Allow constant arrays as arguments
 # Usage category warnings
 dotnet_analyzer_diagnostic.category-Usage.severity = warning
 
-# C# 12 collection expression rules (enable selectively)
-dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
-
 # Test-specific rules
 [**/*Test.cs]
 dotnet_diagnostic.CA1515.severity = none

@@ -46,10 +46,6 @@
     <!-- Disable overly strict IDE rules -->
     <Rule Id="IDE0011" Action="None"/> <!-- Add braces -->
     <Rule Id="IDE0130" Action="None"/> <!-- Namespace does not match folder structure -->
-
-    <!-- C# 12 Collection Expression Rules - Set as suggestions -->
-    <Rule Id="IDE0290" Action="None"/> <!-- Use primary constructor -->
-
   </Rules>
 
   <!-- .NET Code Analysis Rules -->
