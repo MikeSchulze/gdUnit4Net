@@ -3,9 +3,6 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 using Extensions;
@@ -28,13 +25,13 @@ internal sealed class TestCase
     public int Line { get; private set; }
 
     public List<TestCaseAttribute> TestCaseAttributes
-        => MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter).ToList();
+        => [.. MethodInfo.GetCustomAttributes<TestCaseAttribute>().Where(TestParametersFilter)];
 
     public TestCaseAttribute TestCaseAttribute { get; init; }
 
     public MethodInfo MethodInfo { get; set; }
 
-    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : Parameters.SelectMany(ResolveParam).ToArray();
+    public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : [.. Parameters.SelectMany(ResolveParam)];
 
     public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
 
@@ -76,13 +73,15 @@ internal sealed class TestCase
     }
 
     private List<object> InitialParameters()
-        => MethodInfo.GetParameters()
-            .SelectMany(pi => pi.GetCustomAttributesData()
-                .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
-                .Select(attr =>
-                {
-                    var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
-                    return attr.Constructor.Invoke(arguments);
-                }))
-            .ToList();
+        =>
+        [
+            .. MethodInfo.GetParameters()
+                .SelectMany(pi => pi.GetCustomAttributesData()
+                    .Where(attr => attr.AttributeType == typeof(FuzzerAttribute))
+                    .Select(attr =>
+                    {
+                        var arguments = attr.ConstructorArguments.Select(arg => arg.Value).ToArray();
+                        return attr.Constructor.Invoke(arguments);
+                    }))
+        ];
 }

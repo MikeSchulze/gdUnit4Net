@@ -4,8 +4,6 @@
 namespace GdUnit4.TestAdapter.Discovery;
 
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -14,7 +12,7 @@ internal sealed class TestCaseDiscoverySink : ITestCaseDiscoverySink
 {
     private readonly ConcurrentBag<TestCase> testCases = [];
 
-    public IReadOnlyList<TestCase> TestCases => testCases.OrderBy(tc => tc.FullyQualifiedName).ToList();
+    public IReadOnlyList<TestCase> TestCases => [.. testCases.OrderBy(tc => tc.FullyQualifiedName)];
 
     public void SendTestCase(TestCase test) => testCases.Add(test);
 }

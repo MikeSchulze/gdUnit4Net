@@ -202,21 +202,21 @@ internal class GodotExceptionMonitor
 
             for (var index = 0; index < records.Count; index++)
             {
-                var extractException = ErrorLogEntry.ExtractException(records.ToArray(), index);
+                var extractException = ErrorLogEntry.ExtractException([.. records], index);
                 if (extractException != null)
                 {
                     logEntries.Add(extractException);
                     continue;
                 }
 
-                var extractPushError = ErrorLogEntry.ExtractPushError(records.ToArray(), index);
+                var extractPushError = ErrorLogEntry.ExtractPushError([.. records], index);
                 if (extractPushError != null)
                 {
                     logEntries.Add(extractPushError);
                     continue;
                 }
 
-                logEntries.Add(ErrorLogEntry.ExtractPushWarning(records.ToArray(), index));
+                logEntries.Add(ErrorLogEntry.ExtractPushWarning([.. records], index));
             }
         }
         catch (IOException ex)

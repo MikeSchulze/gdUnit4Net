@@ -3,11 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Extensions;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 using Core.Discovery;
 
 using Microsoft.TestPlatform.AdapterUtilities;
@@ -164,10 +159,12 @@ internal static class TestCaseExtensions
             return null;
         var traitName = propertyName["Trait.".Length..];
 
-        return testCase.Traits
-            .Where(t => string.Equals(t.Name, traitName, StringComparison.OrdinalIgnoreCase))
-            .Select(t => t.Value)
-            .ToArray();
+        return
+        [
+            .. testCase.Traits
+                .Where(t => string.Equals(t.Name, traitName, StringComparison.OrdinalIgnoreCase))
+                .Select(t => t.Value)
+        ];
     }
 
     private static (string NamespaceName, string ClassName) SplitByNamespace(string managedType)

@@ -3,9 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Execution;
 
-using System.Collections.Generic;
-using System.Linq;
-
 using Api;
 
 using Extensions;
@@ -42,7 +39,7 @@ internal class TestCaseFilter
     public List<TestCase> Execute(List<TestCase> testCases) =>
         filterExpression == null
             ? testCases
-            : testCases.Where(MatchTestCase).ToList();
+            : [.. testCases.Where(MatchTestCase)];
 
     /// <summary>
     ///     Determines if a test case matches the filter criteria.

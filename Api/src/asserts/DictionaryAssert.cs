@@ -4,8 +4,6 @@
 namespace GdUnit4.Asserts;
 
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 using CommandLine;
 
@@ -31,7 +29,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     private int ItemCount => IsGeneric ? CurrentTyped?.Count ?? 0 : Current?.Count ?? 0;
 
-    private ICollection<TKey> Keys => (IsGeneric ? CurrentTyped?.Keys : Current?.Keys.Cast<TKey>().ToList()) ?? [];
+    private ICollection<TKey> Keys => GetKeys() ?? [];
 
     public IDictionaryAssert<TKey, TValue> IsEmpty()
     {
@@ -69,7 +67,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     }
 
     public IDictionaryAssert<TKey, TValue> ContainsKeys(IEnumerable expected)
-        => ContainsKeys(expected.Cast<TKey>().ToArray());
+        => ContainsKeys([.. Enumerable.Cast<TKey>(expected)]);
 
     public IDictionaryAssert<TKey, TValue> NotContainsKeys(params TKey[] expected)
     {
@@ -81,7 +79,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     }
 
     public IDictionaryAssert<TKey, TValue> NotContainsKeys(IEnumerable expected)
-        => NotContainsKeys(expected.Cast<TKey>().ToArray());
+        => NotContainsKeys([.. Enumerable.Cast<TKey>(expected)]);
 
     public IDictionaryAssert<TKey, TValue> ContainsKeyValue(TKey key, TValue value)
     {
@@ -108,7 +106,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     }
 
     public IDictionaryAssert<TKey, TValue> NotContainsSameKeys(IEnumerable expected)
-        => NotContainsSameKeys(expected.Cast<TKey>().ToArray());
+        => NotContainsSameKeys([.. Enumerable.Cast<TKey>(expected)]);
 
     public IDictionaryAssert<TKey, TValue> ContainsSameKeys(params TKey[] expected)
     {
@@ -120,7 +118,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
     }
 
     public IDictionaryAssert<TKey, TValue> ContainsSameKeys(IEnumerable expected)
-        => ContainsSameKeys(expected.Cast<TKey>().ToArray());
+        => ContainsSameKeys([.. Enumerable.Cast<TKey>(expected)]);
 
     public IDictionaryAssert<TKey, TValue> ContainsSameKeyValue(TKey key, TValue value)
     {
@@ -169,6 +167,17 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     internal static DictionaryAssert<TKey, TValue> From(IDictionary? current)
         => new(current);
+
+    private ICollection<TKey>? GetKeys()
+    {
+        if (IsGeneric)
+            return CurrentTyped?.Keys;
+
+        if (Current?.Keys is not { } keys)
+            return [];
+
+        return [.. Enumerable.Cast<TKey>(keys)];
+    }
 
     private TValue? TryGetValue(TKey key)
     {

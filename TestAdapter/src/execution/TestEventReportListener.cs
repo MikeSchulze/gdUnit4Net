@@ -3,9 +3,6 @@
 
 namespace GdUnit4.TestAdapter.Execution;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Encodings.Web;
 
 using Api;
@@ -334,5 +331,5 @@ internal sealed class TestEventReportListener : ITestEventListener
         => TestCases.Any(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal));
 
     private List<TestCase> FindChildTestCases(ITestEvent e)
-        => TestCases.Where(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal)).ToList();
+        => [.. TestCases.Where(t => t.FullyQualifiedName.StartsWith(e.FullyQualifiedName, StringComparison.Ordinal))];
 }

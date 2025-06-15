@@ -79,7 +79,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> Contains(params TValue?[] expected)
-        => CheckContains(expected.ToList(), false);
+        => CheckContains([.. expected], false);
 
     public IEnumerableAssert<TValue?> Contains(IEnumerable<TValue?> expected)
         => CheckContains(expected, false);
@@ -91,7 +91,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> ContainsSame(params TValue?[] expected)
-        => CheckContains(expected.ToList(), true);
+        => CheckContains([.. expected], true);
 
     public IEnumerableAssert<TValue?> ContainsSame(IEnumerable<TValue?> expected)
         => CheckContains(expected, true);
@@ -103,7 +103,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> ContainsExactly(params TValue?[] expected)
-        => CheckContainsExactly(expected.ToList(), false);
+        => CheckContainsExactly([.. expected], false);
 
     public IEnumerableAssert<TValue?> ContainsExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, false);
@@ -115,7 +115,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> ContainsSameExactly(params TValue?[] expected)
-        => CheckContainsExactly(expected.ToList(), true);
+        => CheckContainsExactly([.. expected], true);
 
     public IEnumerableAssert<TValue?> ContainsSameExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, true);
@@ -127,7 +127,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> ContainsExactlyInAnyOrder(params TValue?[] expected)
-        => CheckContainsExactlyInAnyOrder(expected.ToList(), false);
+        => CheckContainsExactlyInAnyOrder([.. expected], false);
 
     public IEnumerableAssert<TValue?> ContainsExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, false);
@@ -139,7 +139,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> ContainsSameExactlyInAnyOrder(params TValue?[] expected)
-        => CheckContainsExactlyInAnyOrder(expected.ToList(), true);
+        => CheckContainsExactlyInAnyOrder([.. expected], true);
 
     public IEnumerableAssert<TValue?> ContainsSameExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, true);
@@ -151,7 +151,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> NotContains(params TValue?[] expected)
-        => CheckNotContains(expected.ToList(), false);
+        => CheckNotContains([.. expected], false);
 
     public IEnumerableAssert<TValue?> NotContains(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, false);
@@ -163,7 +163,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     }
 
     public IEnumerableAssert<TValue?> NotContainsSame(params TValue?[] expected)
-        => CheckNotContains(expected.ToList(), true);
+        => CheckNotContains([.. expected], true);
 
     public IEnumerableAssert<TValue?> NotContainsSame(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, true);

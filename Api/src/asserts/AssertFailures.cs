@@ -252,7 +252,7 @@ internal static class AssertFailures
                          do contains (in same order)
                         {FormatExpected(expected).Indentation(1)}
                          but there has differences in order:
-                        {ListDifferences(notFound.ToList(), notExpected.ToList())}
+                        {ListDifferences([.. notFound], [.. notExpected])}
                         """;
             }
         }

@@ -155,30 +155,32 @@ internal static class TestCaseDiscoverer
         var allCategories = classCategories.Concat(methodCategories).Distinct().ToImmutableList();
         var allTraits = CombineTraits(classTraits, methodTraits);
 
-        return attributes
-            .Select((attr, index) =>
-            {
-                var navData = GetNavigationDataOrDefault(mi);
-                var testCaseAttribute = CreateTestCaseAttribute(attr);
+        return
+        [
+            .. attributes
+                .Select((attr, index) =>
+                {
+                    var navData = GetNavigationDataOrDefault(mi);
+                    var testCaseAttribute = CreateTestCaseAttribute(attr);
 #pragma warning disable IDE0055
-                return new TestCaseDescriptor
-                    {
-                        Id = Guid.NewGuid(),
-                        AssemblyPath = assemblyPath,
-                        ManagedType = className,
-                        ManagedMethod = mi.Name,
-                        AttributeIndex = index,
-                        LineNumber = navData.LineNumber,
-                        CodeFilePath = navData.CodeFilePath,
-                        RequireRunningGodotEngine = requireRunningGodotEngine,
-                        Categories = allCategories,
-                        Traits = allTraits
-                    }
-                    .Build(testCaseAttribute, hasMultipleAttributes);
+                    return new TestCaseDescriptor
+                        {
+                            Id = Guid.NewGuid(),
+                            AssemblyPath = assemblyPath,
+                            ManagedType = className,
+                            ManagedMethod = mi.Name,
+                            AttributeIndex = index,
+                            LineNumber = navData.LineNumber,
+                            CodeFilePath = navData.CodeFilePath,
+                            RequireRunningGodotEngine = requireRunningGodotEngine,
+                            Categories = allCategories,
+                            Traits = allTraits
+                        }
+                        .Build(testCaseAttribute, hasMultipleAttributes);
 #pragma warning restore IDE0055
-            })
-            .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
-            .ToImmutableList();
+                })
+                .OrderBy(test => $"{test.ManagedMethod}:{test.AttributeIndex}")
+        ];
     }
 
     private static ImmutableList<TestCaseDescriptor> DiscoverTests(ITestEngineLogger? logger, string testAssembly, TypeDefinition type)
@@ -268,11 +270,13 @@ internal static class TestCaseDiscoverer
     /// <param name="definition">The type or method definition to check for category attributes.</param>
     /// <returns>A list of categories.</returns>
     private static ImmutableList<string> GetCategories(ICustomAttributeProvider definition)
-        => definition.CustomAttributes
-            .Where(IsAttribute<TestCategoryAttribute>)
-            .Where(attr => attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string)
-            .Select(attr => (string)attr.ConstructorArguments[0].Value)
-            .ToImmutableList();
+        =>
+        [
+            .. definition.CustomAttributes
+                .Where(IsAttribute<TestCategoryAttribute>)
+                .Where(attr => attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string)
+                .Select(attr => (string)attr.ConstructorArguments[0].Value)
+        ];
 
     /// <summary>
     ///     Extracts trait information from a type or method definition.
@@ -323,14 +327,16 @@ internal static class TestCaseDiscoverer
         var firstArg = attribute.ConstructorArguments[0];
         if (firstArg.Value is CustomAttributeArgument[] constructorArgs)
         {
-            args = constructorArgs
-                .Select(arg =>
-                {
-                    if (arg.Value is CustomAttributeArgument customAttribute)
-                        return customAttribute.Value;
-                    return arg.Value;
-                })
-                .ToArray();
+            args =
+            [
+                .. constructorArgs
+                    .Select(arg =>
+                    {
+                        if (arg.Value is CustomAttributeArgument customAttribute)
+                            return customAttribute.Value;
+                        return arg.Value;
+                    })
+            ];
         }
 
         // Create the TestCase attribute instance with constructor arguments
