@@ -553,6 +553,23 @@ public static class Assertions
     }
 
     /// <summary>
+    ///     Waits for the specified signal to be emitted by a particular source node.
+    ///     If the signal is not emitted within the given timeout, the operation fails.
+    /// </summary>
+    /// <example>
+    ///     <code>
+    ///      // Waits for the signal "mySignal" is emitted by myNode.
+    ///      await runner.AwaitSignalOn(myNode, "mySignal");
+    ///   </code>
+    /// </example>
+    /// <param name="source">The object from which the signal is emitted.</param>
+    /// <param name="signal">The name of the signal to wait.</param>
+    /// <param name="args">An optional set of signal arguments.</param>
+    /// <returns>Task to wait.</returns>
+    public static async Task<ISignalAssert> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
+        await ISceneRunner.AwaitSignalOn(source, signal, args).ConfigureAwait(true);
+
+    /// <summary>
     ///     Provides the expected line number via compiler state.
     ///     Is primarily designed to use on internal test coverage to validate the reported error line is correct.
     /// </summary>

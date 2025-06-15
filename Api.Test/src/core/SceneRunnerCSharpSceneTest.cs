@@ -334,6 +334,27 @@ public sealed class SceneRunnerCSharpSceneTest
     }
 
     [TestCase]
+    public async Task AwaitSignalOnSpell()
+    {
+        // fire spell be pressing an enter key
+        sceneRunner.SimulateKeyPressed(Key.Enter);
+        // wait until the next frame
+        await sceneRunner.AwaitInputProcessed();
+
+        var spell = sceneRunner.FindChild("Spell");
+        // wait until the spell is exploded after around 1 s
+        await ISceneRunner.AwaitSignalOn(spell, Spell.SignalName.SpellExplode, spell.GetInstanceId()).WithTimeout(1100);
+
+        // fire next spell be pressing an enter key
+        sceneRunner.SimulateKeyPressed(Key.Enter);
+        // wait until the next frame
+        await sceneRunner.AwaitInputProcessed();
+        spell = sceneRunner.FindChild("Spell");
+        // use global AwaitSignalOn
+        await AwaitSignalOn(spell, Spell.SignalName.SpellExplode, spell.GetInstanceId()).WithTimeout(1100);
+    }
+
+    [TestCase]
     public async Task DisposeSceneRunner()
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);

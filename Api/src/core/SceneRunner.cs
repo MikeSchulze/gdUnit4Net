@@ -248,7 +248,8 @@ internal sealed class SceneRunner : ISceneRunner
     }
 
     public async Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args) =>
-        await new SignalAssert(currentScene).IsEmitted(signal, args)
+        await new SignalAssert(currentScene)
+            .IsEmitted(signal, args)
             .ConfigureAwait(true);
 
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
