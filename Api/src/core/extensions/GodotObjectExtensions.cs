@@ -3,13 +3,9 @@
 
 namespace GdUnit4.Core.Extensions;
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 using Godot;
 using Godot.Collections;
@@ -106,11 +102,11 @@ internal static class GodotObjectExtensions
         where TVariant : notnull
         => [.. args];
 
-    internal static Godot.Collections.Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
+    internal static Dictionary<Variant, Variant> ToGodotTypedDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue>(this IDictionary<TKey, TValue> dict)
         where TKey : notnull
         where TValue : notnull
     {
-        var converted = new Godot.Collections.Dictionary<Variant, Variant>();
+        var converted = new Dictionary<Variant, Variant>();
         foreach (var (key, value) in dict)
             converted[key.ToVariant()] = value.ToVariant();
         return converted;

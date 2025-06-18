@@ -33,7 +33,7 @@ internal class GdUnit4RuntimeExecutorGodotBridge
             await Task.Run(
                     async () =>
                     {
-                        var testListener = new GdUnit4TestEventListener(listener);
+                        var testListener = new GdUnit4TestEventListener(listener, Logger);
 
                         foreach (var testSuiteNode in testSuiteNodes)
                         {
@@ -77,8 +77,13 @@ internal class GdUnit4TestEventListener : ITestEventListener
 #pragma warning restore SA1402
 {
     private readonly Callable listener;
+    private readonly ITestEngineLogger logger;
 
-    internal GdUnit4TestEventListener(Callable listener) => this.listener = listener;
+    internal GdUnit4TestEventListener(Callable listener, ITestEngineLogger logger)
+    {
+        this.listener = listener;
+        this.logger = logger;
+    }
 
     public int CompletedTests { get; set; }
 
@@ -94,7 +99,7 @@ internal class GdUnit4TestEventListener : ITestEventListener
     {
         var converted = new Dictionary<Variant, Variant>();
         foreach (var (key, value) in statistics)
-            converted[key.ToString().ToLower().ToVariant()] = value.ToVariant();
+            converted[GdUnitExtensions.ToSnakeCase(key.ToString()).ToVariant()] = value.ToVariant();
         return converted;
     }
 
@@ -103,23 +108,30 @@ internal class GdUnit4TestEventListener : ITestEventListener
         if (testEvent == null)
             return;
 
-        using var data = new Dictionary
+        using var data = new Dictionary();
+        try
         {
-            { "type", testEvent.Type.ToVariant() },
-            { "guid", testEvent.Id.ToString() },
-            { "resource_path", testEvent.ResourcePath.ToVariant() },
-            { "suite_name", testEvent.SuiteName.ToVariant() },
-            { "test_name", testEvent.TestName.ToVariant() },
-            { "total_count", testEvent.TotalCount.ToVariant() },
-            { "statistics", ToGdUnitEventStatistics(testEvent.Statistics) }
-        };
+            data.Add("type", testEvent.Type.ToVariant());
+            data.Add("guid", testEvent.Id.ToString());
+            data.Add("resource_path", testEvent.ResourcePath.ToVariant());
+            data.Add("suite_name", testEvent.SuiteName.ToVariant());
+            data.Add("test_name", testEvent.TestName.ToVariant());
+            data.Add("total_count", testEvent.TotalCount.ToVariant());
+            data.Add("statistics", ToGdUnitEventStatistics(testEvent.Statistics));
 
-        if (testEvent.Reports.Count != 0)
-        {
-            var serializedReports = testEvent.Reports.Select(report => report.Serialize()).ToGodotArray();
-            data.Add("reports", serializedReports);
+            if (testEvent.Reports.Count != 0)
+            {
+                var serializedReports = testEvent.Reports.Select(report => report.Serialize().ToGodotTypedDictionary()).ToGodotArray();
+                data.Add("reports", serializedReports);
+            }
+
+            _ = listener.Call(data);
         }
-
-        _ = listener.Call(data);
+#pragma warning disable CA1031
+        catch (Exception ex)
+#pragma warning restore CA1031
+        {
+            logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+        }
     }
 }
