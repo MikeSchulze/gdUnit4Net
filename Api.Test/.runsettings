@@ -34,10 +34,6 @@
         </Loggers>
     </LoggerRunSettings>
 
-    <TestRunParameters>
-        <Parameter name="TEST_PARAM" value="test" />
-    </TestRunParameters>
-
     <GdUnit4>
         <!-- Additional Godot runtime parameters. These are passed to the Godot executable when running tests.-->
         <Parameters>"--verbose"</Parameters>

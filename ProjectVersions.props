@@ -1,9 +1,9 @@
 ﻿<Project>
   <!-- GdUnit4 Component Versions -->
   <PropertyGroup>
-    <GdUnitAnalyzersVersion>1.0.0-rc8</GdUnitAnalyzersVersion>
-    <GdUnitAPIVersion>5.0.0-rc5</GdUnitAPIVersion>
-    <GdUnitTestAdapterVersion>3.0.0-rc2</GdUnitTestAdapterVersion>
+    <GdUnitAnalyzersVersion>1.0.0</GdUnitAnalyzersVersion>
+    <GdUnitAPIVersion>5.0.0</GdUnitAPIVersion>
+    <GdUnitTestAdapterVersion>3.0.0</GdUnitTestAdapterVersion>
   </PropertyGroup>
 
   <!-- Godot Configuration -->

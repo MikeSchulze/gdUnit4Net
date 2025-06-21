@@ -12,38 +12,45 @@
   <img src="https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet&logoColor=white">
   <img src="https://img.shields.io/badge/.NET-9.0-blue?logo=dotnet&logoColor=white">
   <img src="https://img.shields.io/badge/C%23-12.0-239120?logo=csharp&logoColor=white">
+  <img src="https://img.shields.io/badge/VSTest-Compatible-green?logo=visualstudio&logoColor=white">
 </p>
 
 ## What is gdUnit4Net
 
-This project provides an API and a VS test adapter to run your Godot C# test in Visual Studio (Code) and JetBrains Rider.
+GdUnit4Net is a **feature-complete unit testing framework** for Godot C# projects that is **fully compatible with the VSTest standard**. It provides an API and VS test adapter to
+run your Godot C# tests seamlessly in Visual Studio (Code), JetBrains Rider, and any VSTest-compatible environment.
 
+### Key Highlights
 
-<div style="border: 2px solid #FFD700; background-color: #545454; padding: 15px; border-radius: 8px; margin: 20px 0;">
-  <table>
-    <tr>
-      <td style="vertical-align: top; padding-right: 10px; font-size: 32px;">
-        ⚠️
-      </td>
-      <td>
-        <strong style="color: #FFD700; font-size: 18px; animation: blinker 1s linear infinite;">ADVICE</strong><br>
-        The documentation references version 5.0.0, which is not yet officially released. 
-This is intentional as these changes will be part of the upcoming 5.0.0 release.
-      </td>
-    </tr>
-  </table>
-</div>
+🚀 **High Performance**: Up to 10x faster test execution for logic-only tests  
+🎯 **VSTest Compatible**: Full integration with Visual Studio Test Platform  
+⚡ **Smart Runtime**: Tests run without Godot runtime by default, with opt-in Godot features  
+🔧 **Feature Complete**: All standard testing features you expect from modern frameworks
 
 ### Main Features
 
-* Writing, executing and debugging tests
-* Wide range of assertion methods for verifying the behavior and output of your code
-* Parameterized Tests (Test Cases) for testing functions with multiple sets of inputs and expected outputs
-* Scene runner for simulating different kinds of inputs and actions, such as mouse clicks and keyboard inputs<br>
+* **Writing, executing and debugging tests** with full IDE integration
+* **Wide range of assertion methods** for verifying the behavior and output of your code
+* **Parameterized Tests (Test Cases and DataPoints)** for testing functions with multiple sets of inputs and expected outputs
+* **Advanced Test Filtering** with VSTest filter support, test categories, and traits
+* **Scene runner** for simulating different kinds of inputs and actions, such as mouse clicks and keyboard inputs  
   For example, you can simulate mouse clicks and keyboard inputs by calling the appropriate methods on the runner instance. Additionally, you can wait for a specific signal to be
   emitted by the scene, or you can wait for a specific function to return a certain value.
-* Visual Studio Test Adapter to run and debug your tests
-* Powerful test filtering capabilities to selectively run tests based on various criteria
+* **VSTest Adapter** to run and debug your tests with full VSTest compatibility
+* **Powerful test filtering capabilities** to selectively run tests based on various criteria
+* **Exception monitoring** with automatic capture of Godot exceptions and runtime errors
+* **Test output capture** including stdout and Godot log integration
+* **Roslyn Analyzers** for compile-time validation of test attributes and combinations
+* **Flexible test execution** - tests run without Godot runtime by default for maximum performance, with `[RequireGodotRuntime]` for Godot-specific features
+
+### Architecture Redesign (v5.0+)
+
+GdUnit4Net v5.0 introduces a **major architecture overhaul** that revolutionizes test performance and compatibility:
+
+* **Smart Runtime Detection**: Tests run in lightweight mode by default, only spinning up Godot runtime when explicitly needed
+* **Performance Boost**: Logic-only tests execute up to **10x faster** than previous versions
+* **VSTest Standard Compliance**: Full compatibility with Visual Studio Test Platform and all VSTest features
+* **Selective Godot Integration**: Use `[RequireGodotRuntime]` attribute only for tests that actually need Godot features
 
 There are three packages available in this project:
 
@@ -67,8 +74,7 @@ For compile-time validation of your test code, check out the [gdUnit4.analyzers 
 ### Example Project
 
 This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/example) gives you a short insight into how to set up a Godot project to use the GdUnit4 API and test
-adapter.
-It contains a single test suite as an example with two tests, the first test will succeed and the second test will fail.
+adapter. It demonstrates the new v5.0 features including selective Godot runtime usage and advanced testing capabilities.
 
 ```csharp
 namespace GdUnit4.Tests
@@ -78,54 +84,115 @@ namespace GdUnit4.Tests
     [TestSuite]
     public class StringAssertTest
     {
+        // Fast execution - no Godot runtime needed
         [TestCase]
         public void IsEqual()
         {
             AssertThat("This is a test message").IsEqual("This is a test message");
         }
         
+        // Godot runtime required for Node operations
         [TestCase] 
-        [RequireGodotRuntime] // ← Add this for Godot-dependent tests
-        public void IsEqual()
+        [RequireGodotRuntime]
+        public void TestGodotNode()
         {
              AssertThat(new Node2D()).IsNotNull();
         }
         
+        // Exception monitoring for Godot-specific errors
         [Test]
         [RequireGodotRuntime]
-        [GodotExceptionMonitor]  // ← Monitor Godot exceptions
+        [GodotExceptionMonitor]
         public void TestNodeCallback()
         {
             var node = new MyNode(); // Will catch exceptions in _Ready()
             AddChild(node);
         }
         
+        // Data-driven tests with dynamic test data
         [Test]
-        [DataPoint(nameof(TestData))]  // ← Data-driven tests
+        [DataPoint(nameof(TestData))]
         public void TestCalculations(int a, int b, int expected)
         {
             AssertThat(Calculator.Add(a, b)).IsEqual(expected);
         }
         
+        // Exception validation with specific messages
         [Test]
         [ThrowsException(typeof(ArgumentNullException), "Value cannot be null")]
         public void TestValidation()
         {
-            Calculator.Add(null, 5); // Expects specific exception
+            Calculator.Add(null, 5);
+        }
+        
+        // Test categories and traits for filtering
+        [Test]
+        [Category("Integration")]
+        [Trait("Speed", "Fast")]
+        public void FastIntegrationTest()
+        {
+            // This test can be filtered by category or trait
         }
         
         // Data source for parameterized tests
         public static IEnumerable<object[]> TestData => new[]
         {
             new object[] { 1, 2, 3 },
-            new object[] { 5, 7, 12 }
+            new object[] { 5, 7, 12 },
+            new object[] { -1, 1, 0 }
         };
     }
- }
+}
 ```
 
-The test run looks like this.
+### VSTest Integration Example
+
+Run tests with advanced filtering using VSTest standard syntax:
+
+```bash
+# Run only fast tests
+dotnet test --filter "Trait=Speed:Fast"
+
+# Run integration tests
+dotnet test --filter "Category=Integration"
+
+# Run tests by name pattern
+dotnet test --filter "FullyQualifiedName~Calculator"
+
+# Combine multiple filters
+dotnet test --filter "(Category=Integration)|(Trait=Speed:Fast)"
+```
+
+The test run looks like this:
 <p align="center"><a href="https://github.com/MikeSchulze/gdUnit4Net"><img src="https://github.com/MikeSchulze/gdUnit4Net/blob/master/Example/assets/TestExplorerRun.png" width="100%"/></p><br/>
+
+## What's New in v5.0
+
+### 🚀 Performance Revolution
+
+- **Up to 10x faster** test execution for logic-only tests
+- Tests run without Godot runtime by default
+- Only use `[RequireGodotRuntime]` when you actually need Godot features
+
+### 🎯 VSTest Standard Compliance
+
+- Full compatibility with Visual Studio Test Platform
+- Advanced test filtering with categories and traits
+- Seamless integration with CI/CD pipelines
+
+### 📊 Enhanced Test Capabilities
+
+- **DataPoint attributes** for dynamic parameterized tests
+- **Exception monitoring** with automatic Godot error capture
+- **Output capture** including stdout and Godot logs
+- **Roslyn analyzers** for compile-time validation
+
+### 🔧 Developer Experience
+
+- Better error reporting and diagnostics
+- Improved test discovery and execution
+- Enhanced debugging capabilities
+- Environment variable support from runsettings
 
 ## Documentation
 
@@ -140,6 +207,16 @@ The test run looks like this.
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
   <a href="TestAdapter/TestFilterGuide.md">Test Filtering Guide</a>
 </p>
+
+### Migration from v4.x to v5.0
+
+**Important**: v5.0 includes breaking changes that require minimal code updates:
+
+1. **Add `[RequireGodotRuntime]`** to tests that use Godot features (Nodes, Scenes, Resources)
+2. **Remove unnecessary Godot dependencies** from pure logic tests for better performance
+3. **Update test filtering** to use new VSTest-compatible syntax
+
+See our [Migration Guide](MIGRATION.md) for detailed instructions.
 
 ### You Are Welcome To
 
