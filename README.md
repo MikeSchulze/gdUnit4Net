@@ -1,5 +1,5 @@
 <h2 align="center">The Unit Testing Framework in C# for Godot</h2>
-<p align="center">This version of GdUnit4.api is based on Godot <strong>v4.3.stable.mono.official [77dcf97d8]</strong> (master branch)</p>
+<p align="center">This version of GdUnit4.api is based on Godot <strong>v4.4.stable.mono.official [4c311cbee]</strong> (master branch)</p>
 
 <h1 align="center">Supported Godot Versions</h1>
 <p align="center">
