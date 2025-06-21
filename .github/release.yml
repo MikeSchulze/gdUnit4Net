@@ -1,0 +1,71 @@
+# .github/release.yml
+# Configuration for automatically generated release notes
+
+changelog:
+  exclude:
+    labels:
+      - exclude from release nodes
+      - duplicate
+      - question
+      - invalid
+      - wontfix
+      - dependencies  # Exclude dependency updates if desired
+    authors:
+      - octocat
+      - dependabot[bot]
+      - renovate[bot]
+      
+  categories:
+    - title: ✨ New Features
+      labels:
+        - enhancement
+        - feature
+        
+    - title: 🪲 Bug Fixes
+      labels:
+        - bug
+        
+    - title: ⚠️ Breaking Changes
+      labels:
+        - breaking
+        - breaking-change
+        
+    - title: 🛡️ Security
+      labels:
+        - security
+        - vulnerability
+        
+    - title: 📈 Performance
+      labels:
+        - performance
+        
+    - title: 📖 Documentation
+      labels:
+        - documentation
+        
+    - title: 🧹 Maintenance
+      labels:
+        - refactor
+        - cleanup
+        
+    - title: 📦 Dependencies
+      labels:
+        - dependencies
+        - deps
+        
+    - title: 🔄 CI/CD
+      labels:
+        - ci
+        - cd
+        - github-actions
+        - workflow
+        
+    - title: 🧪 Testing
+      labels:
+        - test
+        - testing
+        
+    # Catch-all category for unlabeled PRs
+    - title: 📋 Other Changes
+      labels:
+        - "*"
