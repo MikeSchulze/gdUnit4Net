@@ -217,7 +217,6 @@ The test run looks like this:
 2. **Remove unnecessary Godot dependencies** from pure logic tests for better performance
 3. **Update test filtering** to use new VSTest-compatible syntax
 
-See our [Migration Guide](MIGRATION.md) for detailed instructions.
 
 ### You Are Welcome To
 
