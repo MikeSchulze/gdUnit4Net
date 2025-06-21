@@ -5,6 +5,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Godot-v4.3.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
   <img src="https://img.shields.io/badge/Godot-v4.4.0-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
+  <img src="https://img.shields.io/badge/Godot-v4.4.1-%23478cbf?logo=godot-engine&logoColor=cyian&color=green">
 </p>
 
 <h1 align="center">Supported .NET Versions</h1>
