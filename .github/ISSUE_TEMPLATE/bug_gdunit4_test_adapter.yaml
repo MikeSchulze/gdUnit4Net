@@ -19,13 +19,14 @@ body:
       label: The used Test Adapter version
       description: Which **gdunit4.test.adapter** version are you using?
       options:
-        - 2.1.0 (Pre Release/Master branch)
+        - dev (master branch, development)
+        - 3.0.0 (latest release)
         - 2.0.0
         - 1.2.0
         - 1.1.1
         - 1.1.0
         - 1.0.0
-      default: 0
+      default: 1
     validations:
       required: true
 
@@ -72,7 +73,7 @@ body:
       placeholder: Describe the steps to reproduce the issue.
       value: |
         Example:
-        1. Creata a test like described below
+        1. Create a test like described below
         2. Use the Test Explorer and check the listed tests
         The name is not displayed as configured, it shows `MyTest` and should show `BugedName`
 

@@ -7,22 +7,33 @@ v5.0.0
 * Migration Required: Tests using Godot features (scenes, nodes, resources) must now be marked with `[RequireGodotRuntime]` attribute
 * Significant performance improvements for logic-only tests (up to 10x faster)
 
-Improvements:
-* GD-27: Added VSTest filter support with test categories and traits
-* GD-46: Added support of DataPoint attributes, which make it possible to define parameterized tests with dynamic test data
-* GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
-* GD-144: Added AwaitInputProcessed to SceneRunner
-* GD-149: Add error to the execution log when the test session timeout occurs
-* GD-153: Add Roslyn Analyzer to validate TestCase and DataPoint attribute combinations
-* GD-156: Add an exception hook to report exceptions as test failures that are normally caught and hidden by Godot
-* GD-160: Apply runsettings environment variables to the test execution context
-* GD-163: Collect the Godot log file into test report
+✨ New Features
+GD-138: Add capture test case execution stdout to the test report by @MikeSchulze in #139
+GD-144: Add AwaitInputProcessed to SceneRunner by @MikeSchulze in #145
+GD-46: Added support of DataPoint attributes, which make it possible to define parameterized tests with dynamic test data by @MikeSchulze in #147
+GD-153: Add Roslyn Analyzer to validate TestCase and DataPoint attribute combinations by @MikeSchulze in #154
+GD-156: Add an exception hook to report exceptions as test failures that are caught by Godot by @MikeSchulze in #157
+GD-160: Apply runsettings environment variables to the test execution context by @MikeSchulze in #161
+GD-163: Collect the Godot log file into test report by @MikeSchulze in #164
+GD-156: Install Godot exception handler and forward uncaught exceptions as test failure. by @MikeSchulze in #162
+GD-682: Rework on GdUnit4Net API Godot bridge by @MikeSchulze in #197
+GD-27: Add VSTest filter support with test categories and traits by @MikeSchulze in #201
+GD-240: Add GDUNIT4NET_API_V5 Conditional Compilation Constant by @MikeSchulze in #241
+Upgrade to .NET 8/9 with C# 12 support by @MikeSchulze in #267
+GD-211: Implement missing AwaitSignalOn by @MikeSchulze in #282
 
-Bug Fixes:
-* GD-199: TestRunner install ends with abnormal exit on large projects
-* GD-203: Handle failure reporting for test stages [Before] and [After]
-* GD-212: Fix vector assertion `IsEqualApprox`
+🪲 Bug Fixes
+GD-149: Add error to the execution log when the test session timeout occurs by @MikeSchulze in #150
+GD-152: Fix test case display name for dynamic test data driven tests by @MikeSchulze in #176
+Fixes Godot exception monitoring issues by @MikeSchulze in #187
+Make WithTimeout public by @MikeSchulze in #189
+GD-199: TestRunner install ends with abnormal exit on large projects by @MikeSchulze in #200
+GD-203: Handle failure reporting for test stages [Before] and [After] by @MikeSchulze in #204
+GD-212: Fix vector assertion IsEqualApprox by @MikeSchulze in #214
+GD-284: Fix test failure causes the entire test execution if it is executed in the Godot Editor by @MikeSchulze in #285
 
+🧹 Maintenance
+GD-140: GdUnit4 API: code cleanup and formatting by @MikeSchulze in https://github.com/MikeSchulze/gdUni...
 
 ## 📋 Migration Guide:
 

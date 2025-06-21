@@ -36,8 +36,8 @@ Add the Test Adapter to your test project:
 
 ## Test Filtering
 
-GdUnit4 now supports powerful test filtering capabilities, allowing you to selectively run tests based on various criteria such as test name, class, namespace, category, and custom
-traits.
+GdUnit4Net now supports powerful test filtering capabilities, allowing you to selectively run tests based on various criteria such as test name, class, namespace, category, and
+custom traits.
 
 ### Basic Filter Syntax
 
@@ -62,6 +62,154 @@ TestCategory=UnitTest&Trait.Owner=TeamA
 ```
 
 For detailed information about test filtering capabilities, including syntax, operators, examples, and best practices, see the [Test Filter Guide](TestFilterGuide.md).
+
+## Configuration with .runsettings
+
+GdUnit4Net Test Adapter supports extensive configuration through `.runsettings` files, allowing you to customize test execution behavior, environment variables, and
+GdUnit4-specific settings.
+
+### Basic .runsettings Setup
+
+Create a `.runsettings` file in your solution root:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <RunConfiguration>
+        <MaxCpuCount>1</MaxCpuCount>
+        <TestAdaptersPaths>.</TestAdaptersPaths>
+        <ResultsDirectory>./TestResults</ResultsDirectory>
+        <TestSessionTimeout>1800000</TestSessionTimeout>
+        <TreatNoTestsAsError>true</TreatNoTestsAsError>
+        
+        <!-- Environment variables available to tests -->
+        <EnvironmentVariables>
+            <GODOT_BIN>C:\Path\To\Godot_v4.4-stable_mono_win64.exe</GODOT_BIN>
+        </EnvironmentVariables>
+    </RunConfiguration>
+
+    <!-- Test result loggers -->
+    <LoggerRunSettings>
+        <Loggers>
+            <Logger friendlyName="console" enabled="True">
+                <Configuration>
+                    <Verbosity>normal</Verbosity>
+                </Configuration>
+            </Logger>
+            <Logger friendlyName="html" enabled="True">
+                <Configuration>
+                    <LogFileName>test-result.html</LogFileName>
+                </Configuration>
+            </Logger>
+            <Logger friendlyName="trx" enabled="True">
+                <Configuration>
+                    <LogFileName>test-result.trx</LogFileName>
+                </Configuration>
+            </Logger>
+        </Loggers>
+    </LoggerRunSettings>
+
+    <!-- GdUnit4-specific configuration -->
+    <GdUnit4>
+        <!-- Additional Godot runtime parameters -->
+        <Parameters>"--verbose"</Parameters>
+        
+        <!-- Test display name format: SimpleName or FullyQualifiedName -->
+        <DisplayName>FullyQualifiedName</DisplayName>
+        
+        <!-- Capture stdout from test cases -->
+        <CaptureStdOut>true</CaptureStdOut>
+        
+        <!-- Compilation timeout for large projects (milliseconds) -->
+        <CompileProcessTimeout>20000</CompileProcessTimeout>
+    </GdUnit4>
+</RunSettings>
+```
+
+### GdUnit4 Configuration Options
+
+| Setting                 | Description                                       | Default      | Example                  |
+|-------------------------|---------------------------------------------------|--------------|--------------------------|
+| `Parameters`            | Additional command-line arguments passed to Godot | `""`         | `"--verbose --headless"` |
+| `DisplayName`           | Test name format in results                       | `SimpleName` | `FullyQualifiedName`     |
+| `CaptureStdOut`         | Capture test output in results                    | `false`      | `true`                   |
+| `CompileProcessTimeout` | Godot compilation timeout (ms)                    | `20000`      | `30000`                  |
+
+### Using .runsettings
+
+**Visual Studio**:
+
+- Test → Configure Run Settings → Select Solution Wide runsettings File
+- Or place `.runsettings` in solution root (auto-detected)
+
+**Command Line**:
+
+```bash
+dotnet test --settings .runsettings
+```
+
+**VS Code**: Configure in settings.json:
+
+```json
+{
+    "dotnet-test-explorer.runSettingsPath": ".runsettings"
+}
+```
+
+### Environment Variables
+
+Environment variables defined in `.runsettings` are available to your tests:
+
+```xml
+<EnvironmentVariables>
+    <GODOT_BIN>C:\Godot\Godot.exe</GODOT_BIN>
+    <TEST_DATA_PATH>./TestData</TEST_DATA_PATH>
+    <DEBUG_MODE>true</DEBUG_MODE>
+</EnvironmentVariables>
+```
+
+Access in tests:
+
+```csharp
+[Test]
+public void TestWithEnvironmentVariable()
+{
+    var godotPath = Environment.GetEnvironmentVariable("GODOT_BIN");
+    var debugMode = Environment.GetEnvironmentVariable("DEBUG_MODE");
+    // Use environment variables in your tests
+}
+```
+
+### Advanced Logging Configuration
+
+Configure multiple output formats for comprehensive test reporting:
+
+```xml
+<LoggerRunSettings>
+    <Loggers>
+        <!-- Console output -->
+        <Logger friendlyName="console" enabled="True">
+            <Configuration>
+                <Verbosity>detailed</Verbosity>
+            </Configuration>
+        </Logger>
+        
+        <!-- HTML report -->
+        <Logger friendlyName="html" enabled="True">
+            <Configuration>
+                <LogFileName>TestResults/test-report.html</LogFileName>
+            </Configuration>
+        </Logger>
+        
+        <!-- TRX format for CI/CD -->
+        <Logger friendlyName="trx" enabled="True">
+            <Configuration>
+                <LogFileName>TestResults/test-results.trx</LogFileName>
+            </Configuration>
+        </Logger>
+    </Loggers>
+</LoggerRunSettings>
+```
 
 ## Related Packages
 
