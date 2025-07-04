@@ -180,6 +180,23 @@ public partial class SignalAssertTest
         await AssertSignal(emitter).IsEmitted(NonNodeEmitter.SignalName.SignalA).WithTimeout(50);
     }
 
+    [TestCase]
+    public async Task AwaitSignalOn_Process()
+    {
+        var runner = AutoFree(new TimedEmitter { RunTime = 0.1f });
+
+        // verify await on a node not attached to the scene tree
+        await AssertSignal(runner)
+            .IsEmitted(TimedEmitter.SignalName.OnFinished)
+            .WithTimeout(150);
+
+        // verify await on a node is attached to the scene tree
+        AddNode(runner);
+        await AssertSignal(runner)
+            .IsEmitted(TimedEmitter.SignalName.OnFinished)
+            .WithTimeout(150);
+    }
+
     private sealed partial class TestEmitter : Node
     {
         [Signal]
@@ -233,5 +250,25 @@ public partial class SignalAssertTest
         public delegate void SignalAEventHandler();
 
         public void DoEmitSignalA() => EmitSignal(SignalName.SignalA);
+    }
+
+    public partial class TimedEmitter : Node
+    {
+        [Signal]
+        public delegate void OnFinishedEventHandler();
+
+        private float elapsedTime;
+
+        public float RunTime { get; set; }
+
+        public override void _Process(double delta)
+        {
+            elapsedTime += (float)delta;
+
+            if (!(elapsedTime >= RunTime))
+                return;
+
+            EmitSignal(SignalName.OnFinished);
+        }
     }
 }

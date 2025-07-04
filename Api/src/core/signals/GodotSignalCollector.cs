@@ -37,6 +37,24 @@ internal sealed partial class GodotSignalCollector : RefCounted
         ConnectAllSignals(emitter);
     }
 
+    internal static (bool NeedsCallProcessing, bool NeedsCallPhysicsProcessing) DoesNodeProcessing(GodotObject emitter)
+    {
+        var isProcessing = false;
+        var isPhysicsProcessing = false;
+
+        // Check the object (Node) is attached to the current scene tree
+        var sceneTree = Engine.GetMainLoop() as SceneTree;
+        var nodePath = sceneTree?.Root.GetPathTo(emitter as Node);
+        if (nodePath?.IsEmpty ?? false)
+        {
+            // Does the emitter have implemented the `_Process` or `_PhysicsProcess`.
+            isProcessing = emitter.HasMethod("_Process");
+            isPhysicsProcessing = emitter.HasMethod("_PhysicsProcess");
+        }
+
+        return (isProcessing, isPhysicsProcessing);
+    }
+
     internal int Count(GodotObject emitter, string signalName, Variant[] args)
         => IsSignalCollecting(emitter, signalName)
             ? CollectedSignals[emitter][signalName].Count(signalArgs => signalArgs.VariantEquals(args))
@@ -56,16 +74,17 @@ internal sealed partial class GodotSignalCollector : RefCounted
                 {
                     try
                     {
-                        var isProcess = emitter.HasMethod("_Process");
-                        var isPhysicsProcess = emitter.HasMethod("_PhysicsProcess");
-                        var sleepTimeInMs = 10;
+                        var (needsCallProcessing, needsCallPhysicsProcessing) = DoesNodeProcessing(emitter);
+                        const int sleepTimeInMs = 10;
                         while (IsInstanceValid(emitter) && !Match(emitter, signal, args))
                         {
                             Thread.Sleep(sleepTimeInMs);
-                            if (isProcess && IsInstanceValid(emitter))
-                                _ = emitter.CallDeferred("_Process", sleepTimeInMs);
-                            if (isPhysicsProcess && IsInstanceValid(emitter))
-                                _ = emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs);
+
+                            if (needsCallProcessing && IsInstanceValid(emitter))
+                                _ = emitter.CallDeferred("_Process", sleepTimeInMs / 1000.0);
+
+                            if (needsCallPhysicsProcessing && IsInstanceValid(emitter))
+                                _ = emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs / 1000.0);
 
                             // ReSharper disable once AccessToDisposedClosure
                             if (signalCancellationToken.IsCancellationRequested)

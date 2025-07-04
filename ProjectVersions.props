@@ -2,7 +2,7 @@
   <!-- GdUnit4 Component Versions -->
   <PropertyGroup>
     <GdUnitAnalyzersVersion>1.0.0</GdUnitAnalyzersVersion>
-    <GdUnitAPIVersion>5.0.0</GdUnitAPIVersion>
+    <GdUnitAPIVersion>5.0.1</GdUnitAPIVersion>
     <GdUnitTestAdapterVersion>3.0.0</GdUnitTestAdapterVersion>
   </PropertyGroup>
 
