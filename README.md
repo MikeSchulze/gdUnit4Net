@@ -53,6 +53,9 @@ GdUnit4Net v5.0 introduces a **major architecture overhaul** that revolutionizes
 * **VSTest Standard Compliance**: Full compatibility with Visual Studio Test Platform and all VSTest features
 * **Selective Godot Integration**: Use `[RequireGodotRuntime]` attribute only for tests that actually need Godot features
 
+⚠️ Please read the [release notes](https://github.com/MikeSchulze/gdUnit4Net/releases/tag/v5.0.0) about braking changes. ⚠️
+
+
 There are three packages available in this project:
 
 * **[gdUnit4.api](Api/README.md)** - The core package to enable writing and running unit tests in C#.
@@ -212,6 +215,7 @@ The test run looks like this:
 ### Migration from v4.x to v5.0
 
 **Important**: v5.0 includes breaking changes that require minimal code updates:
+⚠️ Please read the [release notes](https://github.com/MikeSchulze/gdUnit4Net/releases/tag/v5.0.0) about braking changes. ⚠️
 
 1. **Add `[RequireGodotRuntime]`** to tests that use Godot features (Nodes, Scenes, Resources)
 2. **Remove unnecessary Godot dependencies** from pure logic tests for better performance
