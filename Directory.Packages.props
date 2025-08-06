@@ -13,8 +13,8 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.14.1"/>
     <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.14.1"/>
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.9.3"/>
-    <PackageVersion Include="MSTest.TestFramework" Version="3.9.3"/>
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.10.1"/>
+    <PackageVersion Include="MSTest.TestFramework" Version="3.10.1"/>
 
     <!-- Roslyn/Code Analysis (compatible with all target frameworks) -->
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="4.14.0"/>
