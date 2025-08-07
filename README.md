@@ -77,7 +77,7 @@ For compile-time validation of your test code, check out the [gdUnit4.analyzers 
 
 ### Example Project
 
-This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/example) gives you a short insight into how to set up a Godot project to use the GdUnit4 API and test
+This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/Example) gives you a short insight into how to set up a Godot project to use the GdUnit4 API and test
 adapter. It demonstrates the new v5.0 features including selective Godot runtime usage and advanced testing capabilities.
 
 ```csharp
