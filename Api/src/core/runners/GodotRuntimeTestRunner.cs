@@ -196,7 +196,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 if (string.IsNullOrEmpty(message))
                     return;
 
-                hasCSharpOptions = message.Contains("--build-solutions", StringComparison.OrdinalIgnoreCase);
+                hasCSharpOptions = hasCSharpOptions || message.Contains("--build-solutions", StringComparison.OrdinalIgnoreCase);
             };
 
             if (!godotProcess.Start())
@@ -210,37 +210,38 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             if (!hasCSharpOptions)
             {
-                Logger.LogWarning($"""
+                Logger.LogWarning(
+                    $"""
 
-                                   ╔═════════════════════ NO Godot C# SUPPORT NOT DETECTED ═══════════════════════════════╗
+                     ╔═════════════════════ NO Godot C# SUPPORT NOT DETECTED ═══════════════════════════════╗
 
-                                     The Godot binary at '{godotBinary}' does not appear to support C# development.
+                       The Godot binary at '{godotBinary}' does not appear to support C# development.
 
-                                     SOLUTION:
-                                     Please ensure you're using a Godot build with C# support:
+                       SOLUTION:
+                       Please ensure you're using a Godot build with C# support:
 
-                                      1. Verify your .runsettings file (Recommended for projects):
-                                         Add the GODOT_BIN setting to <EnvironmentVariables>:
+                        1. Verify your .runsettings file (Recommended for projects):
+                           Add the GODOT_BIN setting to <EnvironmentVariables>:
 
-                                           <RunSettings>
-                                               <RunConfiguration>
-                                                   <EnvironmentVariables>
-                                                       <GODOT_BIN>D:\path\to\Godot_v4.x-stable_mono_win64.exe</GODOT_BIN>
-                                                   </EnvironmentVariables>
-                                               </RunConfiguration>
-                                           </RunSettings>
+                             <RunSettings>
+                                 <RunConfiguration>
+                                     <EnvironmentVariables>
+                                         <GODOT_BIN>D:\path\to\Godot_v4.x-stable_mono_win64.exe</GODOT_BIN>
+                                     </EnvironmentVariables>
+                                 </RunConfiguration>
+                             </RunSettings>
 
-                                     2. Or set the GODOT_BIN environment variable:
-                                        - Windows: set GODOT_BIN=C:\path\to\Godot_v4.x-stable_mono_win64.exe
-                                        - Linux:   export GODOT_BIN=/path/to/Godot_v4.x-stable_mono_linux.x86_64
-                                        - macOS:   export GODOT_BIN=/path/to/Godot.app/Contents/MacOS/Godot
+                       2. Or set the GODOT_BIN environment variable:
+                          - Windows: set GODOT_BIN=C:\path\to\Godot_v4.x-stable_mono_win64.exe
+                          - Linux:   export GODOT_BIN=/path/to/Godot_v4.x-stable_mono_linux.x86_64
+                          - macOS:   export GODOT_BIN=/path/to/Godot.app/Contents/MacOS/Godot
 
-                                     RESULT:
-                                     All Godot runtime tests will be skipped until C# support is available.
+                       RESULT:
+                       All Godot runtime tests will be skipped until C# support is available.
 
-                                   ╚═══════════════════════════════════════════════════════════════════════════════════════╝
+                     ╚═══════════════════════════════════════════════════════════════════════════════════════╝
 
-                                   """);
+                     """);
                 return false;
             }
 

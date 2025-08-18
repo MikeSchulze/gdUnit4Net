@@ -38,7 +38,6 @@ public sealed class ExampleTestSuite
     [TestCase]
     [TestCategory("CategoryA")]
     [Trait("Category", "Foo")]
-    [RequireGodotRuntime]
     public void TestFoo()
     {
 #pragma warning disable IDE0022 // Use expression body for method
