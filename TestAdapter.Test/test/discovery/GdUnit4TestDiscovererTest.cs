@@ -1,11 +1,12 @@
 namespace GdUnit4.TestAdapter.Test.Discovery;
 
+using System.Runtime.InteropServices;
+
 using Api;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Moq;
 
@@ -93,12 +94,18 @@ public class GdUnit4TestDiscovererTest
 
         // Verify log messages
         // @formatter:off
+        var assembly = typeof(GdUnit4TestDiscoverer).Assembly;
+        var name = assembly.GetName();
+        var version = name.Version;
+        var bitness = Environment.Is64BitProcess ? "64-bit" : "32-bit";
+        var runtime = RuntimeInformation.FrameworkDescription;
         CollectionAssert.AreEquivalent(
             new[]
             {
-                $"Informational: Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
-                $"Informational: Discover tests from assembly: {assemblyPath}",
-                "Informational: Discover tests done, no tests found."
+                $"Informational: [GdUnit4] VSTest Adapter: GdUnit4.TestAdapter {version} ({bitness} {runtime})",
+                $"Informational: [GdUnit4] Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
+                $"Informational: [GdUnit4] Discover tests from assembly: {assemblyPath}",
+                "Informational: [GdUnit4] Discover tests done, no tests found."
             },
             logMessages,
             "Log messages don't match expected messages");
@@ -141,14 +148,20 @@ public class GdUnit4TestDiscovererTest
 
         // Verify log messages
         // @formatter:off
+        var assembly = typeof(GdUnit4TestDiscoverer).Assembly;
+        var name = assembly.GetName();
+        var version = name.Version;
+        var bitness = Environment.Is64BitProcess ? "64-bit" : "32-bit";
+        var runtime = RuntimeInformation.FrameworkDescription;
         CollectionAssert.AreEquivalent(
             new[]
             {
-                $"Informational: Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
-                $"Informational: Discover tests from assembly: {assemblyPath}",
-                "Informational: Discover:  TestSuite Examples.ExampleTest with 6 TestCases found.",
-                "Informational: Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 9 TestCases found.",
-                "Informational: Discover tests done, 2 TestSuites and total 15 Tests found."
+                $"Informational: [GdUnit4] VSTest Adapter: GdUnit4.TestAdapter {version} ({bitness} {runtime})",
+                $"Informational: [GdUnit4] Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
+                $"Informational: [GdUnit4] Discover tests from assembly: {assemblyPath}",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.ExampleTest with 6 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 9 TestCases found.",
+                "Informational: [GdUnit4] Discover tests done, 2 TestSuites and total 15 Tests found."
             },
             logMessages,
             "Log messages don't match expected messages");

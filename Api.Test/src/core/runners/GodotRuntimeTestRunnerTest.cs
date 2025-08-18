@@ -203,7 +203,7 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
 
         // Verify error message was logged
-        VerifyLoggerInfo("======== Installing GdUnit4 Godot Runtime Test Runner ========");
+        VerifyLoggerInfo("Installing GdUnit4TestRunnerScene at");
 
         // Verify the runner file was created in the correct location
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
