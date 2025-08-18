@@ -112,7 +112,7 @@ Create a `.runsettings` file in your solution root:
     <!-- GdUnit4-specific configuration -->
     <GdUnit4>
         <!-- Additional Godot runtime parameters -->
-        <Parameters>"--verbose"</Parameters>
+        <Parameters>--verbose</Parameters>
         
         <!-- Test display name format: SimpleName or FullyQualifiedName -->
         <DisplayName>FullyQualifiedName</DisplayName>

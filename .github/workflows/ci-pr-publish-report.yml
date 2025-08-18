@@ -30,13 +30,13 @@ jobs:
             godot-status: 'dev5'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: .github
 
       # publish Analyzer Tests results
       - name: Download Analyzer tests artifacts
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v5.0.0
         with:
           name: artifact_analyzer
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
 
       # publish TestAdapter Tests results
       - name: Download TestAdapter tests artifacts
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v5.0.0
         with:
           name: artifact_adapter_tests
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
 
 
       - name: Publish API Test Results
-        uses: dorny/test-reporter@v2.1.0
+        uses: dorny/test-reporter@v2.1.1
         with:
           name: artifact_analyzer
           # using artifact to download is broken since download-artifact@v4 see https://github.com/dorny/test-reporter/issues/363
@@ -70,7 +70,7 @@ jobs:
 
       # publish Run gdUnit4-action results
       - name: Download action tests artifacts
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v5.0.0
         with:
           name: artifact_action_example_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
       - name: Publish action Test Results
-        uses: dorny/test-reporter@v2.1.0
+        uses: dorny/test-reporter@v2.1.1
         with:
           name: report_action_example_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           # using artifact to download is broken since download-artifact@v4 see https://github.com/dorny/test-reporter/issues/363
@@ -92,7 +92,7 @@ jobs:
 
       # publish API Tests results
       - name: Download API tests artifacts
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v5.0.0
         with:
           name: artifact_api_tests_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +100,7 @@ jobs:
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
       - name: Publish API Test Results
-        uses: dorny/test-reporter@v2.1.0
+        uses: dorny/test-reporter@v2.1.1
         with:
           name: report_api_tests_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           # using artifact to download is broken since download-artifact@v4 see https://github.com/dorny/test-reporter/issues/363
