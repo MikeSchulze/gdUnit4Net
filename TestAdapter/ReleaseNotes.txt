@@ -1,3 +1,9 @@
+v3.0.1
+
+✨ Improvements
+* GD-311: Increase default compile timeout `CompileProcessTimeout` to 2 minutes.
+          Added prefix `[GdUnit4]` to the logged messages.
+
 v3.0.0
 * GD-27: Added VSTest filter support with test categories and traits
 * GD-138: Added capture test case execution stdout to the test report if `CaptureStdOut` is enabled
