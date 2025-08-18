@@ -29,7 +29,7 @@ internal sealed class TestEventReportListener : ITestEventListener
         Framework = framework;
         TestCases = testCases;
         DetailedOutput = new[] { Ide.VisualStudio, Ide.VisualStudioCode, Ide.JetBrainsRider }.Contains(IdeType);
-        framework.SendMessage(TestMessageLevel.Informational, $"Detected IDE {IdeType}");
+        framework.SendMessage(TestMessageLevel.Informational, $"[GdUnit4] Detected IDE {IdeType}");
     }
 
     public IFrameworkHandle Framework { get; }

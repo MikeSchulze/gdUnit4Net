@@ -111,7 +111,7 @@ public class GdUnit4Settings : TestRunSettings
     ///     Gets the maximum duration allowed for a compilation process in milliseconds.
     /// </summary>
     /// <value>
-    ///     The timeout value in milliseconds. Default is 20000 milliseconds (20 seconds).
+    ///     The timeout value in milliseconds. Default is 120000 milliseconds (2 minutes).
     /// </value>
     /// <remarks>
     ///     <para>
@@ -129,7 +129,7 @@ public class GdUnit4Settings : TestRunSettings
     /// CompileProcessTimeout = 60000; // 60 seconds
     /// </code>
     /// </example>
-    public int CompileProcessTimeout { get; init; } = 20000;
+    public int CompileProcessTimeout { get; init; } = 120000;
 
     /// <summary>
     ///     Converts the current settings instance to an XML element for inclusion in .runsettings files.

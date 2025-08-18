@@ -65,8 +65,8 @@ public sealed class TestEngineSettings
     /// </summary>
     /// <remarks>
     ///     After this timeout period expires, the compilation process is forcefully terminated.
-    ///     Default value is 20000 milliseconds (20 seconds)
+    ///     Default value is 120000 milliseconds (2 minutes)
     ///     Set to a higher value for projects that require more compilation time.
     /// </remarks>
-    public int CompileProcessTimeout { get; init; } = 20000;
+    public int CompileProcessTimeout { get; init; } = 120000;
 }

@@ -31,19 +31,21 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     public GodotRuntimeExecutor(ITestEngineLogger logger)
         : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
-        => Logger.LogInfo("Starting GodotGdUnit4RestClient.");
+    {
+    }
 
     public async Task StartAsync()
     {
         try
         {
+            Logger.LogInfo("Starting GodotRuntimeExecutor");
             await Proxy
                 .ConnectAsync(10000)
                 .ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Logger.LogError($"Starting GodotRuntimeExecutor failed.\n\t {e.Message}");
             throw;
         }
     }
@@ -52,6 +54,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
+            Logger.LogInfo("Stop GodotRuntimeExecutor");
             _ = await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None)
                 .ConfigureAwait(true);
 
@@ -63,7 +66,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Logger.LogError($"Stop GodotRuntimeExecutor failed.\n{e}");
             throw;
         }
     }
@@ -71,15 +74,28 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     public async Task<Response> ExecuteCommand<T>(T command, ITestEventListener testEventListener, CancellationToken cancellationToken)
         where T : BaseCommand
     {
-        if (!IsConnected)
-            throw new InvalidOperationException("Client is not connected");
+        try
+        {
+            if (!IsConnected)
+                throw new InvalidOperationException("Client is not connected");
 
-        // do not run the command if cancellation requested
-        cancellationToken.ThrowIfCancellationRequested();
+            // do not run the command if cancellation requested
+            cancellationToken.ThrowIfCancellationRequested();
 
-        // commit command
-        await WriteCommand(command)
-            .ConfigureAwait(false);
+            // commit command
+            await WriteCommand(command)
+                .ConfigureAwait(false);
+        }
+#pragma warning disable CA1031
+        catch (Exception ex)
+#pragma warning restore CA1031
+        {
+            return new Response
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Payload = JsonConvert.SerializeObject(ex),
+            };
+        }
 
         // read incoming data until is command response or canceled
         TestEvent? lastTestEvent = null;
@@ -118,7 +134,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                 return new Response
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
-                    Payload = JsonConvert.SerializeObject(ex)
+                    Payload = JsonConvert.SerializeObject(ex),
                 };
             }
         }
@@ -126,7 +142,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         return new Response
         {
             StatusCode = HttpStatusCode.InternalServerError,
-            Payload = string.Empty
+            Payload = string.Empty,
         };
     }
 }

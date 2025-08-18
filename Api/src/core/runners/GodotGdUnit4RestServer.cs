@@ -20,7 +20,8 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
 
     public GodotGdUnit4RestServer(ITestEngineLogger logger)
         : base(new NamedPipeServerStream(PIPE_NAME, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous), logger)
-        => Logger.LogInfo("GodotGdUnit4RestApi:: Starting GdUnit4 RestApi Server.");
+    {
+    }
 
     public bool IsFailed { get; set; }
 
@@ -35,8 +36,6 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     {
         Logger.LogInfo("Closing GdUnit4 RestApi.");
         processLock.Dispose();
-        if (IsConnected)
-            Proxy.Disconnect();
         await base
             .DisposeAsync()
             .ConfigureAwait(false);
@@ -98,15 +97,8 @@ internal sealed class GodotGdUnit4RestServer : InOutPipeProxy<NamedPipeServerStr
     {
         if (await processLock.WaitAsync(TimeSpan.FromMilliseconds(1000)).ConfigureAwait(false))
         {
-            try
-            {
-                await DisposeAsync()
-                    .ConfigureAwait(false);
-            }
-            finally
-            {
-                _ = processLock.Release();
-            }
+            await DisposeAsync()
+                .ConfigureAwait(false);
         }
         else
             Logger.LogWarning("GodotGdUnit4RestApi:: Stop requested but processing is in progress.");
