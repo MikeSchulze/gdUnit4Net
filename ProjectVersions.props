@@ -3,7 +3,7 @@
   <PropertyGroup>
     <GdUnitAnalyzersVersion>1.0.0</GdUnitAnalyzersVersion>
     <GdUnitAPIVersion>5.0.1</GdUnitAPIVersion>
-    <GdUnitTestAdapterVersion>3.0.0</GdUnitTestAdapterVersion>
+    <GdUnitTestAdapterVersion>3.0.1</GdUnitTestAdapterVersion>
   </PropertyGroup>
 
   <!-- Godot Configuration -->

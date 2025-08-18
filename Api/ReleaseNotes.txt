@@ -1,3 +1,17 @@
+v5.0.1
+
+🪲 Bug Fixes
+* GD-311: Catch possible exceptions on command execution and report them as InternalServerError.
+
+
+✨ Improvements
+* GD-311: Verify the Godot binary has C# support before running godot runtime tests to avoid invalid test execution.
+          If the binary not supports C#, all tests marked with [RequireGodotRuntime] will be skipped.
+          The logger now uses the prefix `[GdUnit4]` and additionally marks the output with a tag
+          - `:build:` for compilation tasks
+          - `:stdout:` for standard output messages.
+          - `:stderr:` for standard error messages
+
 v5.0.0
 
 ## Major Architecture Overhaul
