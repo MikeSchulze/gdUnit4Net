@@ -23,6 +23,11 @@
     <DebugType>portable</DebugType>
     <!-- warning CS8785, prevent Godot ScriptPathAttributeGenerator errors-->
     <IsGodotToolsProject>true</IsGodotToolsProject>
+
+    <!-- Exclude from test discovery -->
+    <IsTestProject>false</IsTestProject>
+    <VSTestNoBuild>true</VSTestNoBuild>
+    <GenerateTestDiscoveryFile>false</GenerateTestDiscoveryFile>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -82,7 +82,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             return;
 
         // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        Logger.LogInfo($":: {message}");
+        Logger.LogInfo($":stderr: {message}");
     };
 
     public override void Cancel()
@@ -101,6 +101,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         lock (ProcessLock)
         {
             var godotBinary = GodotBin;
+            if (!VerifyGodotCSharpSupport(godotBinary))
+                return;
+
             if (!InstallTestRunnerClasses(Environment.CurrentDirectory))
                 return;
 
@@ -114,7 +117,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                     StandardOutputEncoding = Encoding.Default,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    RedirectStandardInput = true,
+                    RedirectStandardInput = false,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
@@ -129,6 +132,14 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 {
                     StartInfo = processStartInfo,
                     EnableRaisingEvents = true
+                };
+                process.OutputDataReceived += (_, args) =>
+                {
+                    var message = args.Data?.Trim();
+                    if (string.IsNullOrEmpty(message))
+                        return;
+
+                    Logger.LogInfo($":stdout: {message}");
                 };
                 process.ErrorDataReceived += StdErrorProcessor;
                 process.Exited += ExitHandler("GdUnit4 Godot Runtime Test Runner");
@@ -159,6 +170,96 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         }
     }
 
+    internal bool VerifyGodotCSharpSupport(string godotBinary)
+    {
+        using var godotProcess = new Process();
+        try
+        {
+            // recompile the project
+            var processStartInfo = new ProcessStartInfo($"{godotBinary}", "--help")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = false,
+                RedirectStandardInput = false,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = Environment.CurrentDirectory
+            };
+
+            var hasCSharpOptions = false;
+            godotProcess.StartInfo = processStartInfo;
+            godotProcess.EnableRaisingEvents = true;
+            godotProcess.OutputDataReceived += (_, args) =>
+            {
+                var message = args.Data?.Trim();
+                if (string.IsNullOrEmpty(message))
+                    return;
+
+                hasCSharpOptions = hasCSharpOptions || message.Contains("--build-solutions", StringComparison.OrdinalIgnoreCase);
+            };
+
+            if (!godotProcess.Start())
+            {
+                Logger.LogError("Checking Godot C# supports fails on process start, exit ..");
+                return false;
+            }
+
+            godotProcess.BeginOutputReadLine();
+            _ = godotProcess.WaitForExit(500);
+
+            if (!hasCSharpOptions)
+            {
+                Logger.LogWarning(
+                    $"""
+
+                     ╔═════════════════════ NO Godot C# SUPPORT NOT DETECTED ═══════════════════════════════╗
+
+                       The Godot binary at '{godotBinary}' does not appear to support C# development.
+
+                       SOLUTION:
+                       Please ensure you're using a Godot build with C# support:
+
+                        1. Verify your .runsettings file (Recommended for projects):
+                           Add the GODOT_BIN setting to <EnvironmentVariables>:
+
+                             <RunSettings>
+                                 <RunConfiguration>
+                                     <EnvironmentVariables>
+                                         <GODOT_BIN>D:\path\to\Godot_v4.x-stable_mono_win64.exe</GODOT_BIN>
+                                     </EnvironmentVariables>
+                                 </RunConfiguration>
+                             </RunSettings>
+
+                       2. Or set the GODOT_BIN environment variable:
+                          - Windows: set GODOT_BIN=C:\path\to\Godot_v4.x-stable_mono_win64.exe
+                          - Linux:   export GODOT_BIN=/path/to/Godot_v4.x-stable_mono_linux.x86_64
+                          - macOS:   export GODOT_BIN=/path/to/Godot.app/Contents/MacOS/Godot
+
+                       RESULT:
+                       All Godot runtime tests will be skipped until C# support is available.
+
+                     ╚═══════════════════════════════════════════════════════════════════════════════════════╝
+
+                     """);
+                return false;
+            }
+
+            return godotProcess.ExitCode == 0;
+        }
+#pragma warning disable CA1031
+        catch (Exception e)
+#pragma warning restore CA1031
+        {
+            Logger.LogError($"Verifying the Godot binary fails with: {e.Message}\n {e.StackTrace}");
+            return false;
+        }
+        finally
+        {
+            CloseProcess(godotProcess);
+        }
+    }
+
     internal bool InstallTestRunnerClasses(string workingDirectory, bool reCompile = true)
     {
         var destinationFolderPath = Path.Combine(workingDirectory, @$"{TEMP_TEST_RUNNER_DIR}");
@@ -171,7 +272,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         if (File.Exists(sceneRunnerSource))
             return true;
 
-        Logger.LogInfo("======== Installing GdUnit4 Godot Runtime Test Runner ========");
         Logger.LogInfo($"Installing GdUnit4TestRunnerScene at {destinationFolderPath}");
 
         var assembly = Assembly.GetExecutingAssembly();
@@ -195,7 +295,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             // recompile the project
-            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . -e --headless --quit-after 1000 --verbose")
+            var processStartInfo = new ProcessStartInfo($"{godotBinary}", @"--path . -e --headless --quit-after 100 --verbose")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -216,13 +316,13 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 if (string.IsNullOrEmpty(message))
                     return;
 
-                Logger.LogInfo($".. {message}");
+                Logger.LogInfo($":stdout: {message}");
             };
             compileProcess.ErrorDataReceived += StdErrorProcessor;
             compileProcess.Exited += ExitHandler("Rebuild Godot Project");
             if (!compileProcess.Start())
             {
-                Logger.LogError(@"Rebuild Godot Project fails on process start, exit ..");
+                Logger.LogError("Rebuild Godot Project fails on process start, exit ..");
                 return false;
             }
 
@@ -244,6 +344,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             {
                 Logger.LogError(
                     $"""
+
                      ╔═══════════════════════ Godot compilation TIMEOUT ═════════════════════════════════════════════════════════════════════╗
 
                        Godot project compilation did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.
@@ -293,12 +394,14 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             Logger.LogInfo("Running dotnet build to ensure dependencies are available...");
-            var arguments = "build --configuration Debug " +
-                            "--verbosity normal " +
-                            "--no-restore " +
-                            "/p:BuildProjectReferences=false " + // Don't rebuild project refs
-                            "/p:_GetChildProjectCopyToOutputDirectoryItems=false " + // Don't copy child project items
-                            "/p:SkipCopyingFrameworkReferences=true "; // Skip framework refs (already present)
+            var arguments = "build --configuration Debug "
+                            + "--verbosity normal "
+                            + "--no-restore "
+                            + "/p:BuildProjectReferences=false " // Don't rebuild project refs
+                            + "/p:_GetChildProjectCopyToOutputDirectoryItems=false " // Don't copy child project items
+                            + "/p:SkipCopyingFrameworkReferences=true " // Skip framework refs (already present)
+                            + "/p:EnforceCodeStyleInBuild=false "
+                            + "/p:TreatWarningsAsErrors=false ";
             var processStartInfo = new ProcessStartInfo("dotnet", arguments)
             {
                 RedirectStandardOutput = true,
@@ -317,14 +420,14 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             {
                 var message = args.Data?.Trim();
                 if (!string.IsNullOrEmpty(message))
-                    Logger.LogInfo($"build: {message}");
+                    Logger.LogInfo($":build: {message}");
             };
 
             restoreProcess.ErrorDataReceived += (_, args) =>
             {
                 var message = args.Data?.Trim();
                 if (!string.IsNullOrEmpty(message))
-                    Logger.LogInfo($"error: {message}");
+                    Logger.LogInfo($":stderr: {message}");
             };
 
             if (!restoreProcess.Start())

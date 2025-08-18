@@ -1,15 +1,19 @@
 # Project-specific ignores
 .history
 .idea
-.godot
 obj/
 bin/
 nupkg/*
 .generated/
-*.*.import
 TestResults/
 gdunit4_testadapter*/
 **GdUnitRunner_*.cfg
+
+
+# Godot
+.godot
+**.*.import
+**.uid
 
 # Mono-specific ignores
 .mono/

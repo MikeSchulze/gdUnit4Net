@@ -87,6 +87,12 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
         try
         {
             Logger = new Logger(logger);
+            var assembly = typeof(GdUnit4TestDiscoverer).Assembly;
+            var name = assembly.GetName();
+            var version = name.Version;
+            var bitness = Environment.Is64BitProcess ? "64-bit" : "32-bit";
+            var runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+            Logger.LogInfo($"VSTest Adapter: {name.Name} {version} ({bitness} {runtime})");
             if (ITestEngine.EngineVersion() < MinRequiredGdUnit4ApiVersion)
             {
                 Logger.LogError($"Wrong GdUnit4Api, Version={ITestEngine.EngineVersion()} found, you need to upgrade to minimum version: '{MinRequiredGdUnit4ApiVersion}'");
@@ -102,7 +108,6 @@ public sealed class GdUnit4TestDiscoverer : ITestDiscoverer
             };
             var testEngine = ITestEngine.GetInstance(engineSettings, Logger);
             Logger.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
-
             var filteredAssembles = FilterWithoutTestAdapter(sources);
 
             foreach (var assemblyPath in filteredAssembles)

@@ -39,8 +39,8 @@ public class Logger : ITestEngineLogger
     public void SendMessage(LogLevel logLevel, string message)
     {
         if (LevelMap.TryGetValue(logLevel, out var testLogLevel))
-            delegator.SendMessage(testLogLevel, message);
+            delegator.SendMessage(testLogLevel, $"[GdUnit4] {message}");
         else
-            delegator.SendMessage(TestMessageLevel.Error, $"Can't parse logging level {logLevel}");
+            delegator.SendMessage(TestMessageLevel.Error, $"[GdUnit4] Can't parse logging level {logLevel}");
     }
 }

@@ -112,7 +112,6 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
         };
 
         testEngine = ITestEngine.GetInstance(engineSettings, Log);
-        Log.LogInfo($"Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}");
         Log.LogInfo(
             runConfiguration.TestSessionTimeout == 0
                 ? $"No 'TestSessionTimeout' is specified. Set default test session timeout to: {TimeSpan.FromMilliseconds(DEFAULT_SESSION_TIMEOUT)}"
