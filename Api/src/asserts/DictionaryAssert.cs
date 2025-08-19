@@ -1,14 +1,14 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
-
 namespace GdUnit4.Asserts;
 
 using System.Collections;
 
 using CommandLine;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, IDictionaryAssert<TKey, TValue>
+using Constraints;
+
+internal sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable, IDictionaryConstraint<TKey, TValue>>, IDictionaryAssert<TKey, TValue>
     where TKey : notnull
 {
     internal DictionaryAssert(IDictionary<TKey, TValue>? current)
@@ -31,7 +31,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
 
     private ICollection<TKey> Keys => GetKeys() ?? [];
 
-    public IDictionaryAssert<TKey, TValue> IsEmpty()
+    public IDictionaryConstraint<TKey, TValue> IsEmpty()
     {
         if (Current == null && CurrentTyped == null)
             ThrowTestFailureReport(AssertFailures.IsEmpty(ItemCount, true), ItemCount, null);
@@ -40,7 +40,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> IsNotEmpty()
+    public IDictionaryConstraint<TKey, TValue> IsNotEmpty()
     {
         CheckNotNull();
         if (ItemCount == 0)
@@ -48,7 +48,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> HasSize(int expected)
+    public IDictionaryConstraint<TKey, TValue> HasSize(int expected)
     {
         CheckNotNull();
         if (ItemCount != expected)
@@ -56,7 +56,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> ContainsKeys(params TKey[] expected)
+    public IDictionaryConstraint<TKey, TValue> ContainsKeys(params TKey[] expected)
     {
         CheckNotNull();
         var notFound = expected.Where(key => !Keys.Contains(key)).ToList();
@@ -66,10 +66,10 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> ContainsKeys(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> ContainsKeys(IEnumerable expected)
         => ContainsKeys([.. Enumerable.Cast<TKey>(expected)]);
 
-    public IDictionaryAssert<TKey, TValue> NotContainsKeys(params TKey[] expected)
+    public IDictionaryConstraint<TKey, TValue> NotContainsKeys(params TKey[] expected)
     {
         CheckNotNull();
         var found = expected.Where(Keys.Contains).ToList();
@@ -78,10 +78,10 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> NotContainsKeys(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> NotContainsKeys(IEnumerable expected)
         => NotContainsKeys([.. Enumerable.Cast<TKey>(expected)]);
 
-    public IDictionaryAssert<TKey, TValue> ContainsKeyValue(TKey key, TValue value)
+    public IDictionaryConstraint<TKey, TValue> ContainsKeyValue(TKey key, TValue value)
     {
         CheckNotNull();
         var hasKey = Keys.Contains(key);
@@ -96,7 +96,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> NotContainsSameKeys(params TKey[] expected)
+    public IDictionaryConstraint<TKey, TValue> NotContainsSameKeys(params TKey[] expected)
     {
         CheckNotNull();
         var found = expected.Where(key => Keys.Any(k => IsSame(k, key))).ToList();
@@ -105,10 +105,10 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> NotContainsSameKeys(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> NotContainsSameKeys(IEnumerable expected)
         => NotContainsSameKeys([.. Enumerable.Cast<TKey>(expected)]);
 
-    public IDictionaryAssert<TKey, TValue> ContainsSameKeys(params TKey[] expected)
+    public IDictionaryConstraint<TKey, TValue> ContainsSameKeys(params TKey[] expected)
     {
         CheckNotNull();
         var notFound = expected.Where(key => !Keys.Any(k => IsSame(k, key))).ToList();
@@ -117,10 +117,10 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> ContainsSameKeys(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> ContainsSameKeys(IEnumerable expected)
         => ContainsSameKeys([.. Enumerable.Cast<TKey>(expected)]);
 
-    public IDictionaryAssert<TKey, TValue> ContainsSameKeyValue(TKey key, TValue value)
+    public IDictionaryConstraint<TKey, TValue> ContainsSameKeyValue(TKey key, TValue value)
     {
         CheckNotNull();
         var hasKey = Keys.Any(k => IsSame(k, key));
@@ -134,36 +134,33 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> IsSame(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> IsSame(IEnumerable expected)
     {
         if (!ReferenceEquals(base.Current, expected))
             ThrowTestFailureReport(AssertFailures.IsSame(base.Current, expected), base.Current, expected);
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> IsSame(IDictionary<TKey, TValue> expected)
+    public IDictionaryConstraint<TKey, TValue> IsSame(IDictionary<TKey, TValue> expected)
     {
         if (!ReferenceEquals(base.Current, expected))
             ThrowTestFailureReport(AssertFailures.IsSame(base.Current, expected), base.Current, expected);
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> IsNotSame(IEnumerable expected)
+    public IDictionaryConstraint<TKey, TValue> IsNotSame(IEnumerable expected)
     {
         if (ReferenceEquals(base.Current, expected))
             ThrowTestFailureReport(AssertFailures.IsSame(base.Current, expected), base.Current, expected);
         return this;
     }
 
-    public IDictionaryAssert<TKey, TValue> IsNotSame(IDictionary<TKey, TValue> expected)
+    public IDictionaryConstraint<TKey, TValue> IsNotSame(IDictionary<TKey, TValue> expected)
     {
         if (ReferenceEquals(base.Current, expected))
             ThrowTestFailureReport(AssertFailures.IsSame(base.Current, expected), base.Current, expected);
         return this;
     }
-
-    public new IDictionaryAssert<TKey, TValue> OverrideFailureMessage(string message)
-        => (IDictionaryAssert<TKey, TValue>)base.OverrideFailureMessage(message);
 
     internal static DictionaryAssert<TKey, TValue> From(IDictionary? current)
         => new(current);
@@ -192,4 +189,3 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable>, ID
             ThrowTestFailureReport(AssertFailures.IsNotNull(), base.Current, null);
     }
 }
-#pragma warning restore CS1591, SA1600

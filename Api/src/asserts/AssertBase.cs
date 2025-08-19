@@ -3,11 +3,13 @@
 
 namespace GdUnit4.Asserts;
 
+using CommandLine;
+
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public abstract class AssertBase<TValue> : IAssertBase<TValue>
+internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAssertMessage<TAssert>
+    where TAssert : IAssert
 {
     protected AssertBase(TValue? current) => Current = current;
 
@@ -47,10 +49,11 @@ public abstract class AssertBase<TValue> : IAssertBase<TValue>
         return this;
     }
 
-    public IAssert OverrideFailureMessage(string message)
+    public TAssert OverrideFailureMessage(string message)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
         CustomFailureMessage = message;
-        return this;
+        return this.Cast<TAssert>();
     }
 
     internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)

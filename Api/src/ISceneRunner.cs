@@ -7,6 +7,8 @@ using Api;
 
 using Asserts;
 
+using Constraints;
+
 using Core;
 using Core.Extensions;
 
@@ -238,7 +240,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args);
+    Task<ISignalConstraint> AwaitSignal(string signal, params Variant[] args);
 
     /// <summary>
     ///     Waits for the specified signal to be emitted by a particular source node.
@@ -254,7 +256,7 @@ public interface ISceneRunner : IDisposable
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    static async Task<ISignalAssert> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
+    static async Task<ISignalConstraint> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
         await new SignalAssert(source)
             .IsEmitted(signal, args)
             .ConfigureAwait(true);

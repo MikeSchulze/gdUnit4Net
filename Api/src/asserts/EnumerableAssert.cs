@@ -1,9 +1,10 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
-
 namespace GdUnit4.Asserts;
 
 using System.Collections;
+
+using Constraints;
 
 using Core.Extensions;
 
@@ -11,8 +12,7 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>, IEnumerableAssert<TValue?>
+internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>, IEnumerableConstraint<TValue?>>, IEnumerableAssert<TValue?>
 {
     internal EnumerableAssert(IEnumerable? current)
         : base(current?.Cast<TValue?>())
@@ -24,7 +24,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
     {
     }
 
-    public IEnumerableAssert<TValue?> IsEqualIgnoringCase(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> IsEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (!result.Valid)
@@ -32,7 +32,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         return this;
     }
 
-    public IEnumerableAssert<TValue?> IsNotEqualIgnoringCase(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> IsNotEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
         if (result.Valid)
@@ -40,7 +40,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         return this;
     }
 
-    public IEnumerableAssert<TValue?> IsEmpty()
+    public IEnumerableConstraint<TValue?> IsEmpty()
     {
         var count = Current?.Count() ?? -1;
         if (count != 0)
@@ -48,7 +48,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         return this;
     }
 
-    public IEnumerableAssert<TValue?> IsNotEmpty()
+    public IEnumerableConstraint<TValue?> IsNotEmpty()
     {
         var count = Current?.Count() ?? -1;
         if (count == 0)
@@ -56,21 +56,21 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         return this;
     }
 
-    public IEnumerableAssert<TValue?> IsSame(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> IsSame(IEnumerable<TValue?> expected)
     {
         if (!ReferenceEquals(Current, expected))
             ThrowTestFailureReport(AssertFailures.IsSame(Current, expected), Current, expected);
         return this;
     }
 
-    public IEnumerableAssert<TValue?> IsNotSame(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> IsNotSame(IEnumerable<TValue?> expected)
     {
         if (ReferenceEquals(Current, expected))
             ThrowTestFailureReport(AssertFailures.IsNotSame(expected), Current, expected);
         return this;
     }
 
-    public IEnumerableAssert<TValue?> HasSize(int expected)
+    public IEnumerableConstraint<TValue?> HasSize(int expected)
     {
         var count = Current?.Count();
         if (count != expected)
@@ -78,109 +78,109 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         return this;
     }
 
-    public IEnumerableAssert<TValue?> Contains(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> Contains(params TValue?[] expected)
         => CheckContains([.. expected], false);
 
-    public IEnumerableAssert<TValue?> Contains(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> Contains(IEnumerable<TValue?> expected)
         => CheckContains(expected, false);
 
-    public IEnumerableAssert<TValue?> Contains(Array expected)
+    public IEnumerableConstraint<TValue?> Contains(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContains(expected_!, false);
     }
 
-    public IEnumerableAssert<TValue?> ContainsSame(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> ContainsSame(params TValue?[] expected)
         => CheckContains([.. expected], true);
 
-    public IEnumerableAssert<TValue?> ContainsSame(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> ContainsSame(IEnumerable<TValue?> expected)
         => CheckContains(expected, true);
 
-    public IEnumerableAssert<TValue?> ContainsSame(Array expected)
+    public IEnumerableConstraint<TValue?> ContainsSame(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContains(expected_!, true);
     }
 
-    public IEnumerableAssert<TValue?> ContainsExactly(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> ContainsExactly(params TValue?[] expected)
         => CheckContainsExactly([.. expected], false);
 
-    public IEnumerableAssert<TValue?> ContainsExactly(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> ContainsExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, false);
 
-    public IEnumerableAssert<TValue?> ContainsExactly(Array expected)
+    public IEnumerableConstraint<TValue?> ContainsExactly(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactly(expected_!, false);
     }
 
-    public IEnumerableAssert<TValue?> ContainsSameExactly(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactly(params TValue?[] expected)
         => CheckContainsExactly([.. expected], true);
 
-    public IEnumerableAssert<TValue?> ContainsSameExactly(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, true);
 
-    public IEnumerableAssert<TValue?> ContainsSameExactly(Array expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactly(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactly(expected_!, true);
     }
 
-    public IEnumerableAssert<TValue?> ContainsExactlyInAnyOrder(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(params TValue?[] expected)
         => CheckContainsExactlyInAnyOrder([.. expected], false);
 
-    public IEnumerableAssert<TValue?> ContainsExactlyInAnyOrder(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, false);
 
-    public IEnumerableAssert<TValue?> ContainsExactlyInAnyOrder(Array expected)
+    public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactlyInAnyOrder(expected_!, false);
     }
 
-    public IEnumerableAssert<TValue?> ContainsSameExactlyInAnyOrder(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(params TValue?[] expected)
         => CheckContainsExactlyInAnyOrder([.. expected], true);
 
-    public IEnumerableAssert<TValue?> ContainsSameExactlyInAnyOrder(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, true);
 
-    public IEnumerableAssert<TValue?> ContainsSameExactlyInAnyOrder(Array expected)
+    public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactlyInAnyOrder(expected_!, true);
     }
 
-    public IEnumerableAssert<TValue?> NotContains(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> NotContains(params TValue?[] expected)
         => CheckNotContains([.. expected], false);
 
-    public IEnumerableAssert<TValue?> NotContains(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> NotContains(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, false);
 
-    public IEnumerableAssert<TValue?> NotContains(Array expected)
+    public IEnumerableConstraint<TValue?> NotContains(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckNotContains(expected_!, false);
     }
 
-    public IEnumerableAssert<TValue?> NotContainsSame(params TValue?[] expected)
+    public IEnumerableConstraint<TValue?> NotContainsSame(params TValue?[] expected)
         => CheckNotContains([.. expected], true);
 
-    public IEnumerableAssert<TValue?> NotContainsSame(IEnumerable<TValue?> expected)
+    public IEnumerableConstraint<TValue?> NotContainsSame(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, true);
 
-    public IEnumerableAssert<TValue?> NotContainsSame(Array expected)
+    public IEnumerableConstraint<TValue?> NotContainsSame(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckNotContains(expected_!, true);
     }
 
-    public IEnumerableAssert<object?> Extract(string methodName, params object[] args)
+    public IEnumerableConstraint<object?> Extract(string methodName, params object[] args)
     {
         ArgumentException.ThrowIfNullOrEmpty(methodName);
         return ExtractV(new ValueExtractor(methodName, args));
     }
 
-    public IEnumerableAssert<object?> ExtractV(params IValueExtractor[] extractors)
+    public IEnumerableConstraint<object?> ExtractV(params IValueExtractor[] extractors)
         => new EnumerableAssert<object?>(
             Current?.Select(v =>
                 {
@@ -188,9 +188,6 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
                     return values.Length == 1 ? values.First() : new Tuple(values);
                 })
                 .ToList());
-
-    public new IEnumerableAssert<TValue?> OverrideFailureMessage(string message)
-        => (IEnumerableAssert<TValue?>)base.OverrideFailureMessage(message);
 
     private EnumerableAssert<TValue?> CheckContains(IEnumerable<TValue?> expected, bool referenceEquals)
     {
@@ -203,7 +200,9 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         // Create list once to avoid multiple enumerations
         var notFound = expectedList.Where(expectedItem =>
                 Current?.Any(currentItem =>
-                    referenceEquals ? expectedItem.IsSame(currentItem) : expectedItem.IsEquals(currentItem)) != true) // This pattern maintains the original null handling
+                    referenceEquals
+                        ? expectedItem.IsSame<TValue, EnumerableAssert<TValue?>>(currentItem)
+                        : expectedItem.IsEquals(currentItem)) != true) // This pattern maintains the original null handling
             .ToList();
 
         if (notFound.Count > 0)
@@ -256,7 +255,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var found = Current?
             .Where(currentItem =>
                 expectedList.Any(expectedItem =>
-                    referenceEquals ? currentItem.IsSame(expectedItem) : currentItem.IsEquals(expectedItem)))
+                    referenceEquals ? currentItem.IsSame<TValue, EnumerableAssert<TValue?>>(expectedItem) : currentItem.IsEquals(expectedItem)))
             .ToList() ?? [];
 
         if (found.Count != 0)
@@ -273,9 +272,9 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         var rr = expected?.ToArray() ?? [];
 
         var notExpected = ll.Where(left =>
-            !rr.Any(e => referenceEquals ? left.IsSame(e) : left.IsEquals(e))).ToList();
+            !rr.Any(e => referenceEquals ? left.IsSame<TValue, EnumerableAssert<TValue?>>(e) : left.IsEquals(e))).ToList();
         var notFound = rr.Where(right =>
-            !ll.Any(e => referenceEquals ? right.IsSame(e) : right.IsEquals(e))).ToList();
+            !ll.Any(e => referenceEquals ? right.IsSame<TValue, EnumerableAssert<TValue?>>(e) : right.IsEquals(e))).ToList();
 
         return new ArrayDiff
         {
@@ -305,7 +304,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
             }
 
             var right = rr[i];
-            if (!(referenceEquals ? left.IsSame(right) : left.IsEquals(right)))
+            if (!(referenceEquals ? left.IsSame<TValue, EnumerableAssert<TValue?>>(right) : left.IsEquals(right)))
                 notExpected.Add(left);
         }
 
@@ -319,7 +318,7 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
             }
 
             var left = ll[i];
-            if (!(referenceEquals ? right.IsSame(left) : right.IsEquals(left)))
+            if (!(referenceEquals ? right.IsSame<TValue, EnumerableAssert<TValue?>>(left) : right.IsEquals(left)))
                 notFound.Add(right);
         }
 
@@ -337,4 +336,3 @@ public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>>,
         public List<TValue?> NotFound { get; init; } = [];
     }
 }
-#pragma warning restore CS1591, SA1600

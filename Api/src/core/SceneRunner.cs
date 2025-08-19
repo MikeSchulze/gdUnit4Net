@@ -9,6 +9,8 @@ using Api;
 
 using Asserts;
 
+using Constraints;
+
 using Extensions;
 
 using Godot;
@@ -247,11 +249,6 @@ internal sealed class SceneRunner : ISceneRunner
             .ConfigureAwait(true);
     }
 
-    public async Task<ISignalAssert> AwaitSignal(string signal, params Variant[] args) =>
-        await new SignalAssert(currentScene)
-            .IsEmitted(signal, args)
-            .ConfigureAwait(true);
-
     public async Task AwaitIdleFrame() => await ISceneRunner.SyncProcessFrame;
 
     public Variant Invoke(string name, params Variant[] args)
@@ -306,6 +303,11 @@ internal sealed class SceneRunner : ISceneRunner
 
         IsDisposed = true;
     }
+
+    public async Task<ISignalConstraint> AwaitSignal(string signal, params Variant[] args) =>
+        await new SignalAssert(currentScene)
+            .IsEmitted(signal, args)
+            .ConfigureAwait(true);
 
     internal static MouseButtonMask ToMouseButtonMask(MouseButton button)
     {

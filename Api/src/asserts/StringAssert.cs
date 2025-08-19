@@ -3,17 +3,18 @@
 
 namespace GdUnit4.Asserts;
 
+using Constraints;
+
 using Core.Extensions;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public sealed class StringAssert : AssertBase<string>, IStringAssert
+internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStringAssert
 {
     internal StringAssert(string? current)
         : base(current)
     {
     }
 
-    public IStringAssert Contains(string expected)
+    public IStringConstraint Contains(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.Contains(expected, StringComparison.Ordinal))
@@ -21,7 +22,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert ContainsIgnoringCase(string expected)
+    public IStringConstraint ContainsIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
@@ -29,7 +30,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert EndsWith(string expected)
+    public IStringConstraint EndsWith(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.EndsWith(expected))
@@ -37,7 +38,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert HasLength(int length, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
+    public IStringConstraint HasLength(int length, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
     {
         if (Current == null)
             ThrowTestFailureReport(AssertFailures.HasLength(-1, length, comparator), Current, length);
@@ -77,14 +78,14 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert IsEmpty()
+    public IStringConstraint IsEmpty()
     {
         if (Current == null || Current.Length > 0)
             ThrowTestFailureReport(AssertFailures.IsEmpty(Current), Current, null);
         return this;
     }
 
-    public IStringAssert IsEqualIgnoringCase(string expected)
+    public IStringConstraint IsEqualIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
@@ -93,14 +94,14 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert IsNotEmpty()
+    public IStringConstraint IsNotEmpty()
     {
         if (Current?.Length == 0)
             ThrowTestFailureReport(AssertFailures.IsNotEmpty(), Current, null);
         return this;
     }
 
-    public IStringAssert IsNotEqualIgnoringCase(string expected)
+    public IStringConstraint IsNotEqualIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
@@ -109,7 +110,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert NotContains(string expected)
+    public IStringConstraint NotContains(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current != null && Current.Contains(expected, StringComparison.Ordinal))
@@ -117,7 +118,7 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert NotContainsIgnoringCase(string expected)
+    public IStringConstraint NotContainsIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current != null && Current.ToLower().Contains(expected.ToLower(), StringComparison.OrdinalIgnoreCase))
@@ -125,19 +126,11 @@ public sealed class StringAssert : AssertBase<string>, IStringAssert
         return this;
     }
 
-    public IStringAssert StartsWith(string expected)
+    public IStringConstraint StartsWith(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
         if (Current == null || !Current.StartsWith(expected))
             ThrowTestFailureReport(AssertFailures.StartsWith(Current, expected), Current, expected);
         return this;
     }
-
-    public new IStringAssert OverrideFailureMessage(string message)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(message);
-        _ = base.OverrideFailureMessage(message);
-        return this;
-    }
 }
-#pragma warning restore CS1591, SA1600
