@@ -9,6 +9,8 @@ using System.Runtime.CompilerServices;
 
 using Asserts;
 
+using Constraints;
+
 using Core.Execution.Exceptions;
 using Core.Execution.Monitoring;
 using Core.Extensions;
@@ -566,7 +568,7 @@ public static class Assertions
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    public static async Task<ISignalAssert> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
+    public static async Task<ISignalConstraint> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
         await ISceneRunner.AwaitSignalOn(source, signal, args).ConfigureAwait(true);
 
     /// <summary>

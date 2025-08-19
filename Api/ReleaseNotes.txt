@@ -11,6 +11,12 @@ v5.0.1
           - `:build:` for compilation tasks
           - `:stdout:` for standard output messages.
           - `:stderr:` for standard error messages
+* GD-314: Allows the use of `OverrideFailureMessage` only at the beginning of the assertion chain to avoid errors.
+    ```
+    AssertString("foo").OverrideFailureMessage("Custom failure message").IsEqual("bar"); // ✅
+    AssertString("foo").IsEqual("bar").OverrideFailureMessage("Custom failure message"); // ❌ Compile error
+    ```
+
 
 v5.0.0
 

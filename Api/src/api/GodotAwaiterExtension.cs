@@ -6,10 +6,10 @@ namespace GdUnit4;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Asserts;
+
+using Constraints;
 
 using Core.Execution.Exceptions;
 using Core.Extensions;
@@ -28,7 +28,7 @@ public static class GodotAwaiterExtension
     /// <param name="emitter">The signal emitter node to monitor.</param>
     /// <param name="signal">The name of the signal to wait for.</param>
     /// <param name="args">An optional set of signal arguments to match. If provided, the signal must be emitted with exactly these arguments.</param>
-    /// <returns>A task that completes with an <see cref="ISignalAssert" /> when the signal is emitted, allowing for fluent assertion chaining.</returns>
+    /// <returns>A task that completes with an <see cref="ISignalConstraint" /> when the signal is emitted, allowing for fluent assertion chaining.</returns>
     /// <exception cref="TestFailedException">Thrown if the signal is not emitted or if the signal doesn't exist on the emitter.</exception>
     /// <example>
     ///     <code>
@@ -47,7 +47,7 @@ public static class GodotAwaiterExtension
     ///     The signal monitoring continues until the expected signal is emitted or the operation is cancelled.
     ///     Use <see cref="WithTimeout{TVariant}" /> to prevent indefinite waiting.
     /// </remarks>
-    public static async Task<ISignalAssert> AwaitSignal(this Node emitter, string signal, params Variant[] args)
+    public static async Task<ISignalConstraint> AwaitSignal(this Node emitter, string signal, params Variant[] args)
         => await new SignalAssert(emitter).IsEmitted(signal, args).ConfigureAwait(true);
 
     /// <summary>

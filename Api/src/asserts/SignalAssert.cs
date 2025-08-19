@@ -5,23 +5,24 @@ namespace GdUnit4.Asserts;
 
 using System.Diagnostics;
 
+using Constraints;
+
 using Core.Execution.Exceptions;
 using Core.Signals;
 
 using Godot;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
+internal sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, ISignalAssert
 {
     internal SignalAssert(GodotObject current)
         : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
 
     // Is just a fake method that is called to register the monitor on the emitter, which is done in the constructor
-    public ISignalAssert StartMonitoring()
+    public ISignalConstraint StartMonitoring()
         => this;
 
-    public async Task<ISignalAssert> IsEmitted(string signal, params Variant[] args)
+    public async Task<ISignalConstraint> IsEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
         _ = IsSignalExists(signal);
@@ -33,7 +34,7 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         return this;
     }
 
-    public async Task<ISignalAssert> IsNotEmitted(string signal, params Variant[] args)
+    public async Task<ISignalConstraint> IsNotEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
         _ = IsSignalExists(signal);
@@ -45,7 +46,7 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         return this;
     }
 
-    public ISignalAssert IsSignalExists(string signal)
+    public ISignalConstraint IsSignalExists(string signal)
     {
         _ = IsNotNull();
         if (!Current!.HasSignal(signal))
@@ -53,7 +54,7 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         return this;
     }
 
-    public ISignalAssert IsCountEmitted(int expectedCount, string signal, params Variant[] args)
+    public ISignalConstraint IsCountEmitted(int expectedCount, string signal, params Variant[] args)
     {
         _ = IsNotNull();
         _ = IsSignalExists(signal);
@@ -72,4 +73,3 @@ public sealed class SignalAssert : AssertBase<GodotObject>, ISignalAssert
         throw new TestFailedException(CurrentFailureMessage, lineNumber);
     }
 }
-#pragma warning restore CS1591, SA1600

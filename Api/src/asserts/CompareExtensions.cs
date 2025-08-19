@@ -7,5 +7,7 @@ internal static class CompareExtensions
 {
     internal static bool IsEquals<T>(this T? c, T? e) => Comparable.IsEqual(c, e).Valid;
 
-    internal static bool IsSame<T>(this T? c, T? e) => AssertBase<T>.IsSame(c, e);
+    internal static bool IsSame<T, TAssert>(this T? c, T? e)
+        where TAssert : IAssert
+        => AssertBase<T, TAssert>.IsSame(c, e);
 }

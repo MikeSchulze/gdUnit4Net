@@ -3,8 +3,9 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Globalization;
+
+using Constraints;
 
 using Core.Extensions;
 
@@ -15,7 +16,7 @@ using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
 #pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
+internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstraint<TValue>>, IVectorAssert<TValue>
     where TValue : IEquatable<TValue>
 {
     internal VectorAssert(TValue current)
@@ -23,16 +24,16 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
     {
     }
 
-    public IVectorAssert<TValue> IsBetween(TValue min, TValue max)
+    public IVectorConstraint<TValue> IsBetween(TValue min, TValue max)
     {
         if (CompareTo(Current, min) < 0 || CompareTo(Current, max) > 0)
             ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, min);
         return this;
     }
 
-    public new IVectorAssert<TValue> IsEqual(TValue expected) => (IVectorAssert<TValue>)base.IsEqual(expected);
+    public new IVectorConstraint<TValue> IsEqual(TValue expected) => (IVectorConstraint<TValue>)base.IsEqual(expected);
 
-    public IVectorAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
+    public IVectorConstraint<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
         var (min, max) = MinMax(expected, approx);
         var isEqualApproximate = (Current, expected, approx) switch
@@ -54,44 +55,42 @@ public class VectorAssert<TValue> : AssertBase<TValue>, IVectorAssert<TValue>
         return this;
     }
 
-    public IVectorAssert<TValue> IsGreater(TValue expected)
+    public IVectorConstraint<TValue> IsGreater(TValue expected)
     {
         if (CompareTo(Current, expected) <= 0)
             ThrowTestFailureReport(AssertFailures.IsGreater(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<TValue> IsGreaterEqual(TValue expected)
+    public IVectorConstraint<TValue> IsGreaterEqual(TValue expected)
     {
         if (CompareTo(Current, expected) < 0)
             ThrowTestFailureReport(AssertFailures.IsGreaterEqual(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<TValue> IsLess(TValue expected)
+    public IVectorConstraint<TValue> IsLess(TValue expected)
     {
         if (CompareTo(Current, expected) >= 0)
             ThrowTestFailureReport(AssertFailures.IsLess(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<TValue> IsLessEqual(TValue expected)
+    public IVectorConstraint<TValue> IsLessEqual(TValue expected)
     {
         if (CompareTo(Current, expected) > 0)
             ThrowTestFailureReport(AssertFailures.IsLessEqual(Current!, expected), Current, expected);
         return this;
     }
 
-    public IVectorAssert<TValue> IsNotBetween(TValue min, TValue max)
+    public IVectorConstraint<TValue> IsNotBetween(TValue min, TValue max)
     {
         if (CompareTo(Current, min) >= 0 && CompareTo(Current, max) <= 0)
             ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, min, max), Current, min);
         return this;
     }
 
-    public new IVectorAssert<TValue> IsNotEqual(TValue expected) => (IVectorAssert<TValue>)base.IsNotEqual(expected);
-
-    public new IVectorAssert<TValue> OverrideFailureMessage(string message) => (IVectorAssert<TValue>)base.OverrideFailureMessage(message);
+    public new IVectorConstraint<TValue> IsNotEqual(TValue expected) => (IVectorConstraint<TValue>)base.IsNotEqual(expected);
 
     private static int CompareTo(TValue? left, TValue right)
     {

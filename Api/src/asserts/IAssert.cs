@@ -11,14 +11,10 @@ namespace GdUnit4.Asserts;
 ///     This interface defines the base contract that all assertion types must implement,
 ///     enabling consistent behavior across different types of assertions.
 /// </remarks>
+#pragma warning disable CA1040
 public interface IAssert
+#pragma warning restore CA1040
 {
-    /// <summary>
-    ///     Overrides the default failure message by given custom message.
-    /// </summary>
-    /// <param name="message">A custom failure message.</param>
-    /// <returns>IAssert.</returns>
-    IAssert OverrideFailureMessage(string message);
 }
 
 /// <summary>
@@ -57,4 +53,24 @@ public interface IAssertBase<in TValue> : IAssert
     /// <param name="expected">The value to be NOT equal.</param>
     /// <returns>IAssertBase.</returns>
     IAssertBase<TValue> IsNotEqual(TValue expected);
+}
+
+/// <summary>
+///     The interface that provides message customization methods.
+///     This interface is only available at the start of the assertion chain.
+/// </summary>
+/// <typeparam name="TAssert">The assertion type that will be returned after configuration.</typeparam>
+public interface IAssertMessage<out TAssert>
+    where TAssert : IAssert
+{
+    /// <summary>
+    ///     Overrides the default failure message with the given custom message.
+    /// </summary>
+    /// <param name="message">A custom failure message to use instead of the default message.</param>
+    /// <returns>The same assertion instance to enable fluent method chaining.</returns>
+    /// <remarks>
+    ///     Use this method when the default failure message doesn't provide enough context
+    ///     about the purpose of the test or why a specific validation is important.
+    /// </remarks>
+    TAssert OverrideFailureMessage(string message);
 }

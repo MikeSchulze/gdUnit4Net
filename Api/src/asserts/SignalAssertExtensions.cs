@@ -4,8 +4,8 @@ namespace GdUnit4.Asserts;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
+
+using Constraints;
 
 /// <summary>
 ///     Extension methods for signal assertions to provide additional functionality.
@@ -24,7 +24,7 @@ public static class SignalAssertExtensions
     ///     This is useful for preventing tests from hanging indefinitely when expected signals are not emitted.
     /// </remarks>
     [SuppressMessage("Performance", "CA1849", Justification = "Call async methods when in an async method")]
-    public static async Task<ISignalAssert> WithTimeout(this Task<ISignalAssert> task, int timeoutMillis)
+    public static async Task<ISignalConstraint> WithTimeout(this Task<ISignalConstraint> task, int timeoutMillis)
     {
         Debug.Assert(task != null, nameof(task) + " != null");
         using var timeoutCts = new CancellationTokenSource();

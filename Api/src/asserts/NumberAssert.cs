@@ -1,12 +1,12 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
-
 namespace GdUnit4.Asserts;
 
 using System.Numerics;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
+using Constraints;
+
+internal sealed class NumberAssert<TValue> : AssertBase<TValue, INumberConstraint<TValue>>, INumberAssert<TValue>
     where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {
@@ -15,104 +15,97 @@ public class NumberAssert<TValue> : AssertBase<TValue>, INumberAssert<TValue>
     {
     }
 
-    public INumberAssert<TValue> IsBetween(TValue min, TValue max)
+    public INumberConstraint<TValue> IsBetween(TValue min, TValue max)
     {
         if (Current?.CompareTo(min) < 0 || Current?.CompareTo(max) > 0)
             ThrowTestFailureReport(AssertFailures.IsBetween(Current, min, max), Current, new[] { min, max });
         return this;
     }
 
-    public INumberAssert<TValue> IsEven()
+    public INumberConstraint<TValue> IsEven()
     {
         if (Convert.ToInt64(Current) % 2 != 0)
             ThrowTestFailureReport(AssertFailures.IsEven(Current), Current, null);
         return this;
     }
 
-    public INumberAssert<TValue> IsGreater(TValue expected)
+    public INumberConstraint<TValue> IsGreater(TValue expected)
     {
         if (Current?.CompareTo(expected) <= 0)
             ThrowTestFailureReport(AssertFailures.IsGreater(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsGreaterEqual(TValue expected)
+    public INumberConstraint<TValue> IsGreaterEqual(TValue expected)
     {
         if (Current?.CompareTo(expected) < 0)
             ThrowTestFailureReport(AssertFailures.IsGreaterEqual(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsEqualApprox(TValue expected, TValue approx)
+    public INumberConstraint<TValue> IsEqualApprox(TValue expected, TValue approx)
         => IsBetween(expected - approx, expected + approx);
 
-    public INumberAssert<TValue> IsIn(params TValue[] expected)
+    public INumberConstraint<TValue> IsIn(params TValue[] expected)
     {
         if (Array.IndexOf(expected, Current) == -1)
             ThrowTestFailureReport(AssertFailures.IsIn(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsLess(TValue expected)
+    public INumberConstraint<TValue> IsLess(TValue expected)
     {
         if (Current?.CompareTo(expected) >= 0)
             ThrowTestFailureReport(AssertFailures.IsLess(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsLessEqual(TValue expected)
+    public INumberConstraint<TValue> IsLessEqual(TValue expected)
     {
         if (Current?.CompareTo(expected) > 0)
             ThrowTestFailureReport(AssertFailures.IsLessEqual(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsNegative()
+    public INumberConstraint<TValue> IsNegative()
     {
         if (Current?.CompareTo(0) >= 0)
             ThrowTestFailureReport(AssertFailures.IsNegative(Current), Current, null);
         return this;
     }
 
-    public INumberAssert<TValue> IsNotIn(params TValue[] expected)
+    public INumberConstraint<TValue> IsNotIn(params TValue[] expected)
     {
         if (Array.IndexOf(expected, Current) != -1)
             ThrowTestFailureReport(AssertFailures.IsNotIn(Current, expected), Current, expected);
         return this;
     }
 
-    public INumberAssert<TValue> IsNotNegative()
+    public INumberConstraint<TValue> IsNotNegative()
     {
         if (Current?.CompareTo(0) < 0)
             ThrowTestFailureReport(AssertFailures.IsNotNegative(Current), Current, null);
         return this;
     }
 
-    public INumberAssert<TValue> IsNotZero()
+    public INumberConstraint<TValue> IsNotZero()
     {
         if (Convert.ToInt64(Current) == 0)
             ThrowTestFailureReport(AssertFailures.IsNotZero(), Current, null);
         return this;
     }
 
-    public INumberAssert<TValue> IsOdd()
+    public INumberConstraint<TValue> IsOdd()
     {
         if (Convert.ToInt64(Current) % 2 == 0)
             ThrowTestFailureReport(AssertFailures.IsOdd(Current), Current, null);
         return this;
     }
 
-    public INumberAssert<TValue> IsZero()
+    public INumberConstraint<TValue> IsZero()
     {
         if (Convert.ToInt64(Current) != 0)
             ThrowTestFailureReport(AssertFailures.IsZero(Current), Current, null);
         return this;
     }
-
-    public new INumberAssert<TValue> OverrideFailureMessage(string message)
-    {
-        _ = base.OverrideFailureMessage(message);
-        return this;
-    }
 }
-#pragma warning restore CS1591, SA1600
