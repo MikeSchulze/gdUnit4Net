@@ -2,6 +2,7 @@ v5.0.1
 
 🪲 Bug Fixes
 * GD-311: Catch possible exceptions on command execution and report them as InternalServerError.
+* GD-305: Added missing AppendFailureMessage on assertions
 
 
 ✨ Improvements
