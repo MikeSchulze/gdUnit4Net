@@ -93,10 +93,26 @@ public class BoolAssertTest
 
     [TestCase]
     public void OverrideFailureMessage()
-        => AssertThrown(() => AssertBool(true).OverrideFailureMessage("Custom failure message").IsFalse())
+        => AssertThrown(() => AssertBool(true)
+                .OverrideFailureMessage("Custom failure message")
+                .IsFalse())
             .IsInstanceOf<TestFailedException>()
             .HasFileLineNumber(96)
             .HasMessage("Custom failure message");
+
+    [TestCase]
+    public void AppendFailureMessage()
+        => AssertThrown(() => AssertBool(true)
+                .AppendFailureMessage("custom data")
+                .IsFalse())
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(105)
+            .HasMessage("""
+                        Expecting: 'False' but is 'True'
+
+                        Additional info:
+                        custom data
+                        """);
 
     [TestCase]
     public void InterruptIsFailure()

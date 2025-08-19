@@ -197,6 +197,38 @@ public partial class SignalAssertTest
             .WithTimeout(150);
     }
 
+    [TestCase]
+    public void OverrideFailureMessage()
+    {
+        var emitter = AutoFree(new TimedEmitter { RunTime = 0.1f });
+        AssertThrown(() => AssertSignal(emitter)
+                .OverrideFailureMessage("custom error")
+                .IsSignalExists("foo"))
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(204)
+            .HasMessage("custom error");
+    }
+
+    [TestCase]
+    public void AppendFailureMessage()
+    {
+        var emitter = AutoFree(new TimedEmitter { RunTime = 0.1f });
+        AssertThrown(() => AssertSignal(emitter)
+                .AppendFailureMessage("custom data")
+                .IsSignalExists("foo"))
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(216)
+            .HasMessage($"""
+                         Expecting signal exists:
+                             "foo()"
+                          on
+                             {AssertFailures.AsObjectId(emitter)}
+
+                         Additional info:
+                         custom data
+                         """);
+    }
+
     private sealed partial class TestEmitter : Node
     {
         [Signal]

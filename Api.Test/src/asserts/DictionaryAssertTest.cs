@@ -150,6 +150,21 @@ public class DictionaryAssertTest
             .HasFileLineNumber(146)
             .HasMessage("Custom failure message");
 
+
+    [TestCase]
+    public void AppendFailureMessage()
+        => AssertThrown(() => AssertThat((IDictionary?)null)
+                .AppendFailureMessage("custom data")
+                .IsNotNull())
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(156)
+            .HasMessage("""
+                        Expecting be NOT <Null>:
+
+                        Additional info:
+                        custom data
+                        """);
+
     [TestCase]
     public void IsEqualHashtable()
     {
@@ -172,7 +187,7 @@ public class DictionaryAssertTest
         current.Add("a3", 300);
         AssertThrown(() => AssertThat(current).IsEqual(expected))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(173)
+            .HasFileLineNumber(188)
             .HasMessage("""
                         Expecting be equal:
                             {"a1", "100"}; {"a2", "200"}

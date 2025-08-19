@@ -1693,6 +1693,22 @@ public partial class EnumerableAssertTest
                 .Replace("$obj5", AssertFailures.AsObjectId(obj5)));
     }
 
+    [TestCase]
+    public void AppendFailureMessage()
+        => AssertThrown(() => AssertArray([])
+                .AppendFailureMessage("custom data")
+                .IsNull())
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(1698)
+            .HasMessage("""
+                        Expecting be <Null>:
+                         but is
+                            <Empty>
+
+                        Additional info:
+                        custom data
+                        """);
+
     // ReSharper disable once PartialTypeWithSinglePart
     // ReSharper disable MemberCanBePrivate.Local
     // ReSharper disable UnusedMember.Local

@@ -73,4 +73,18 @@ public interface IAssertMessage<out TAssert>
     ///     about the purpose of the test or why a specific validation is important.
     /// </remarks>
     TAssert OverrideFailureMessage(string message);
+
+    /// <summary>
+    ///     Appends additional information to the default failure message.
+    /// </summary>
+    /// <param name="message">Additional context or information to append to the failure message.</param>
+    /// <returns>The same assertion instance to enable fluent method chaining.</returns>
+    /// <remarks>
+    ///     Use this method to add extra context while preserving the original failure message.
+    ///     The appended message will be displayed after the default message, typically
+    ///     in an "Additional info:" section. This is useful for providing debugging hints,
+    ///     test context, or expected behavior explanations without losing the built-in
+    ///     assertion details.
+    /// </remarks>
+    TAssert AppendFailureMessage(string message);
 }

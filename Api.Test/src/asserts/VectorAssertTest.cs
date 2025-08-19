@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 
 using GdUnit4.Asserts;
+using GdUnit4.Core.Execution.Exceptions;
 
 using Godot;
 
@@ -310,6 +311,25 @@ public class VectorAssertTest
     [TestCase]
     [RequireGodotRuntime]
     public void OverrideFailureMessage() =>
-        AssertThrown(() => AssertThat(Vector2.One).OverrideFailureMessage("Custom Error").IsEqual(Vector2.Zero))
+        AssertThrown(() => AssertThat(Vector2.One)
+                .OverrideFailureMessage("Custom Error")
+                .IsEqual(Vector2.Zero))
+            .IsInstanceOf<TestFailedException>()
             .HasMessage("Custom Error");
+
+    [TestCase]
+    [RequireGodotRuntime]
+    public void AppendFailureMessage()
+        => AssertThrown(() => AssertThat(Vector2.One)
+                .AppendFailureMessage("custom data")
+                .IsEqual(Vector2.Zero))
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(323)
+            .HasMessage("""
+                        Expecting be equal:
+                            '(0, 0)' but is '(1, 1)'
+
+                        Additional info:
+                        custom data
+                        """);
 }
