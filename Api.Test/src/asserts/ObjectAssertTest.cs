@@ -310,6 +310,29 @@ public class ObjectAssertTest
             .HasMessage("Custom failure message");
 
     [TestCase]
+    [RequireGodotRuntime]
+    public void AppendFailureMessage()
+    {
+        var node = AutoFree(new Node());
+        AssertThrown(() =>
+            {
+                AssertObject(node)
+                    .AppendFailureMessage("custom data")
+                    .IsNull();
+            })
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(319)
+            .HasMessage($"""
+                         Expecting be <Null>:
+                          but is
+                             {AssertFailures.AsObjectId(node)}
+
+                         Additional info:
+                         custom data
+                         """);
+    }
+
+    [TestCase]
     public void InterruptIsFailure()
     {
         // we disable failure reporting until we simulate an failure

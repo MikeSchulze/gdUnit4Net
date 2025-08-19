@@ -19,6 +19,8 @@ internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAsse
 
     protected string CurrentFailureMessage { get; set; } = string.Empty;
 
+    protected string AppendingFailureMessage { get; set; } = string.Empty;
+
     public IAssertBase<TValue> IsEqual(TValue expected)
     {
         var result = Comparable.IsEqual(Current, expected);
@@ -56,6 +58,13 @@ internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAsse
         return this.Cast<TAssert>();
     }
 
+    public TAssert AppendFailureMessage(string message)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(message);
+        AppendingFailureMessage = message;
+        return this.Cast<TAssert>();
+    }
+
     internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)
     {
         var left = lKey.UnboxVariant();
@@ -73,6 +82,16 @@ internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAsse
 #pragma warning disable CA1062
         var failureMessage = (CustomFailureMessage ?? message).UnixFormat();
 #pragma warning restore CA1062
+        if (AppendingFailureMessage.Length != 0)
+        {
+            failureMessage = $"""
+                              {failureMessage}
+
+                              Additional info:
+                              {AppendingFailureMessage}
+                              """;
+        }
+
         CurrentFailureMessage = failureMessage;
         throw new TestFailedException(failureMessage);
     }

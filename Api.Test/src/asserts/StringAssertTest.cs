@@ -439,6 +439,21 @@ public class StringAssertTest
             .HasMessage("Custom failure message");
 
     [TestCase]
+    public void AppendFailureMessage()
+        => AssertThrown(() => AssertString("")
+                .AppendFailureMessage("custom data")
+                .IsNotEmpty())
+            .IsInstanceOf<TestFailedException>()
+            .HasFileLineNumber(443)
+            .HasMessage("""
+                        Expecting being NOT empty:
+                         but is empty
+
+                        Additional info:
+                        custom data
+                        """);
+
+    [TestCase]
     public void InterruptIsFailure()
     {
         // we disable failure reporting until we simulate an failure
