@@ -28,7 +28,7 @@ public partial class SignalAssertTest
     [TestCase]
     public async Task IsEmitted()
     {
-        var node = AutoFree(new TestEmitter())!;
+        var node = AutoFree(new TestEmitter());
         await AssertSignal(node).IsEmitted("SignalA").WithTimeout(200);
         await AssertSignal(node).IsEmitted("SignalB", "abc").WithTimeout(200);
         await AssertSignal(node).IsEmitted("SignalC", "abc", 100).WithTimeout(200);
@@ -96,7 +96,7 @@ public partial class SignalAssertTest
     [TestCase]
     public void IsSignalExists()
     {
-        var node = AutoFree(new Node2D())!;
+        var node = AutoFree(new Node2D());
 
         AssertSignal(node).IsSignalExists("visibility_changed")
             .IsSignalExists("draw")
@@ -119,8 +119,8 @@ public partial class SignalAssertTest
     [TestCase(Timeout = 1000)]
     public async Task MonitorOnSignal()
     {
-        var emitterA = AutoFree(new MyEmitter())!;
-        var emitterB = AutoFree(new MyEmitter())!;
+        var emitterA = AutoFree(new MyEmitter());
+        var emitterB = AutoFree(new MyEmitter());
 
         // verify initial the emitters are not monitored
         AssertThat(GodotSignalCollector.Instance.IsSignalCollecting(emitterA, MyEmitter.SignalName.SignalA)).IsFalse();
@@ -162,7 +162,7 @@ public partial class SignalAssertTest
     [TestCase(Timeout = 1000, Description = "See https://github.com/MikeSchulze/gdUnit4Net/issues/135")]
     public async Task EmitSignalOnNoneNodeObjects()
     {
-        var emitter = AutoFree(new NonNodeEmitter())!;
+        var emitter = AutoFree(new NonNodeEmitter());
 
         // verify initial the emitters are not monitored
         AssertThat(GodotSignalCollector.Instance.IsSignalCollecting(emitter, NonNodeEmitter.SignalName.SignalA)).IsFalse();

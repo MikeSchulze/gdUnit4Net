@@ -109,14 +109,6 @@ public class AssertionsTest
 
     [TestCase]
     [RequireGodotRuntime]
-    public void AutoFreeOnNull()
-    {
-        var obj = AutoFree((Node)null!);
-        AssertThat(obj).IsNull();
-    }
-
-    [TestCase]
-    [RequireGodotRuntime]
     public void AsObjectId()
     {
         var obj1 = new object();

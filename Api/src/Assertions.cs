@@ -531,7 +531,7 @@ public static class Assertions
     /// <typeparam name="TValue">The type of Godot object to register.</typeparam>
     /// <param name="obj">The Godot object to register for automatic cleanup.</param>
     /// <returns>The registered object for method chaining.</returns>
-    public static TValue? AutoFree<TValue>(TValue? obj)
+    public static TValue AutoFree<TValue>(TValue obj)
         where TValue : GodotObject
         => MemoryPool.RegisterForAutoFree(obj);
 

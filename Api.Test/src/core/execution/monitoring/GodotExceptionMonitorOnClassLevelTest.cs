@@ -62,10 +62,10 @@ public class GodotExceptionMonitorOnClassLevelTest
     {
         var tree = (SceneTree)Engine.GetMainLoop();
 
-        var eventBus = AutoFree(new ExampleEventBus())!;
+        var eventBus = AutoFree(new ExampleEventBus());
         tree.Root.AddChild(eventBus);
 
-        var myClass = AutoFree(new ExampleWithWithEventBus())!;
+        var myClass = AutoFree(new ExampleWithWithEventBus());
         tree.Root.AddChild(myClass);
 
         myClass.Register(eventBus);
