@@ -20,11 +20,10 @@ internal class MemoryPool
 
     private OrphanNodesMonitor? OrphanMonitor { get; }
 
-    public static T? RegisterForAutoFree<T>(T? obj)
+    public static T RegisterForAutoFree<T>(T obj)
         where T : GodotObject
     {
-        if (obj != null)
-            CurrentPool.Value?.registeredObjects.Add(obj);
+        CurrentPool.Value?.registeredObjects.Add(obj);
         return obj;
     }
 

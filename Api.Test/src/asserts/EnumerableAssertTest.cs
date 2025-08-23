@@ -1099,17 +1099,17 @@ public partial class EnumerableAssertTest
         AssertArray([1, false, 3.14, null, Colors.AliceBlue]).Extract("GetClass")
             .ContainsExactly("n.a.", "n.a.", "n.a.", null, "n.a.");
         // extracting by a func without arguments
-        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("GetClass")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())]).Extract("GetClass")
             .ContainsExactly("RefCounted", "n.a.", "AStarGrid2D", "Node");
         // extracting by a func with arguments
-        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("HasSignal", "tree_entered")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())]).Extract("HasSignal", "tree_entered")
             .ContainsExactly(false, "n.a.", false, true);
 
         // try extract on object via a func that not exists
-        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("InvalidMethod")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())]).Extract("InvalidMethod")
             .ContainsExactly("n.a.", "n.a.", "n.a.", "n.a.");
         // try extract on object via a func that has no return value
-        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())!]).Extract("RemoveMeta", "")
+        AssertArray([new RefCounted(), 2, new AStarGrid2D(), AutoFree(new Node())]).Extract("RemoveMeta", "")
             .ContainsExactly(null, "n.a.", null, null);
         // must fail we can't extract from a null instance
         AssertThrown(() => AssertArray(null).Extract("GetClass").ContainsExactly("AStar", "Node"))

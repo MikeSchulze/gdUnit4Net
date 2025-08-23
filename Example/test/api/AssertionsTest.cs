@@ -115,14 +115,6 @@ public class AssertionsTest
         AssertObject(AssertThat(new System.Collections.Generic.Dictionary<string, object>())).IsInstanceOf<IDictionaryAssert<string, object>>();
     }
 
-    [TestCase]
-    [RequireGodotRuntime]
-    public void AutoFreeOnNull()
-    {
-        var obj = AutoFree((Node)null!);
-        AssertThat(obj).IsNull();
-    }
-
     internal enum TestEnum
     {
         Foo,

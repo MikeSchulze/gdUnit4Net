@@ -19,7 +19,7 @@ v5.0.1
     AssertString("foo").OverrideFailureMessage("Custom failure message").IsEqual("bar"); // ✅
     AssertString("foo").IsEqual("bar").OverrideFailureMessage("Custom failure message"); // ❌ Compile error
     ```
-
+* GD-332: Do not allow returning null values on AutoFree to avoid spamming warnings
 
 v5.0.0
 

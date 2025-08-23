@@ -144,7 +144,7 @@ public class GdUnit4TestDiscovererTest
         discoverer.DiscoverTests([assemblyPath], mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
         // Verify SendTestCase was never called
-        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(15));
+        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(14));
 
         // Verify log messages
         // @formatter:off
@@ -160,8 +160,8 @@ public class GdUnit4TestDiscovererTest
                 $"Informational: [GdUnit4] Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
                 $"Informational: [GdUnit4] Discover tests from assembly: {assemblyPath}",
                 "Informational: [GdUnit4] Discover:  TestSuite Examples.ExampleTest with 6 TestCases found.",
-                "Informational: [GdUnit4] Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 9 TestCases found.",
-                "Informational: [GdUnit4] Discover tests done, 2 TestSuites and total 15 Tests found."
+                "Informational: [GdUnit4] Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 8 TestCases found.",
+                "Informational: [GdUnit4] Discover tests done, 2 TestSuites and total 14 Tests found."
             },
             logMessages,
             "Log messages don't match expected messages");
@@ -170,7 +170,7 @@ public class GdUnit4TestDiscovererTest
         Assert.IsFalse(logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors");
 
         // Verify discovered tests
-        Assert.AreEqual(15, discoveredTests.Count, "Should discover any tests from assembly");
+        Assert.AreEqual(14, discoveredTests.Count, "Should discover any tests from assembly");
 
         // Verify properties exemplary
         AssertTestCase(
