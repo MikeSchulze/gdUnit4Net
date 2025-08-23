@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 
 using Godot;
 
+using static Assertions;
+
 /// <summary>
 ///     A helper to simulate a mouse moving from a source to the final position.
 /// </summary>
@@ -34,7 +36,10 @@ internal partial class MouseMoveTask : Node, IDisposable
         Justification = "Method called for side effects only, return value intentionally ignored")]
     public async Task WaitOnFinalPosition(ISceneRunner sceneRunner, double time, Tween.TransitionType transitionType)
     {
-        using var tween = sceneRunner.Scene().CreateTween();
+        AssertObject(sceneRunner.Scene()).OverrideFailureMessage("No valid scene is loaded.").IsNotNull();
+
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        using var tween = sceneRunner.Scene()!.CreateTween();
         tween.TweenProperty(this, "CurrentMousePosition", FinalMousePosition, time).SetTrans(transitionType);
         tween.Play();
 

@@ -57,7 +57,7 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
-    private Vector2 ActualMousePos() => sceneRunner.Scene().GetViewport().GetMousePosition();
+    private Vector2 ActualMousePos() => sceneRunner.Scene()?.GetViewport().GetMousePosition() ?? Vector2.Inf;
 
     // [TestCase]
     public void TestSpy()
@@ -748,7 +748,8 @@ public sealed class SceneRunnerInputEventIntegrationTest
         //var spy_scene = spy("res://addons/gdUnit4/test/core/resources/scenes/drag_and_drop/DragAndDropTestScene.tscn")
         //var runner := scene_runner(spy_scene)
 
-        var scene = dragAndDropSceneRunner.Scene();
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        var scene = dragAndDropSceneRunner.Scene()!;
         var slot_left = scene.GetNode<TextureRect>(new NodePath("/root/DragAndDropScene/left/TextureRect"));
         var slot_right = scene.GetNode<TextureRect>(new NodePath("/root/DragAndDropScene/right/TextureRect"));
 

@@ -33,6 +33,9 @@ internal sealed class SceneRunner : ISceneRunner
 
     public SceneRunner(Node currentScene, bool autoFree = false, bool verbose = false)
     {
+        AssertThat(currentScene)
+            .OverrideFailureMessage("SceneRunner requires a valid scene instance, but received null")
+            .IsNotNull();
         Verbose = verbose;
         SceneAutoFree = autoFree;
         ExecutionContext.RegisterDisposable(this);
@@ -236,7 +239,8 @@ internal sealed class SceneRunner : ISceneRunner
             _ = await ISceneRunner.SyncProcessFrame;
     }
 
-    public Node Scene() => currentScene;
+    public Node? Scene()
+        => IsDisposed ? null : currentScene;
 
     public IGodotMethodAwaitable<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
         where TVariant : notnull

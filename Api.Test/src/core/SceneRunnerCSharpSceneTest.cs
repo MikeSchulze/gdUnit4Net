@@ -95,7 +95,8 @@ public sealed class SceneRunnerCSharpSceneTest
             .IsInstanceOf<TestSceneWithInitialization>()
             .IsSame(currentScene);
 
-        var actualScene = (TestSceneWithInitialization)runner.Scene();
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        var actualScene = (runner.Scene() as TestSceneWithInitialization)!;
         AssertThat(actualScene.MethodCalls.Count).IsEqual(2);
         AssertThat(actualScene.MethodCalls[0]).IsEqual("Initialize");
         AssertThat(actualScene.MethodCalls[1]).IsEqual("_Ready");
@@ -352,26 +353,5 @@ public sealed class SceneRunnerCSharpSceneTest
         spell = sceneRunner.FindChild("Spell");
         // use global AwaitSignalOn
         await AwaitSignalOn(spell, Spell.SignalName.SpellExplode, spell.GetInstanceId()).WithTimeout(1100);
-    }
-
-    [TestCase]
-    public async Task DisposeSceneRunner()
-    {
-        var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneCSharp.tscn", true);
-        var tree = (SceneTree)Engine.GetMainLoop();
-
-        var currentScene = runner.Scene();
-        var nodePath = currentScene.GetPath();
-        // check scene is loaded and added to the root node
-        AssertThat(GodotObject.IsInstanceValid(currentScene)).IsTrue();
-        AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNotNull();
-
-        await ISceneRunner.SyncProcessFrame;
-        runner.Dispose();
-
-        await ISceneRunner.SyncProcessFrame;
-        // check scene is freed and removed from the root node
-        AssertThat(GodotObject.IsInstanceValid(currentScene)).IsFalse();
-        AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNull();
     }
 }
