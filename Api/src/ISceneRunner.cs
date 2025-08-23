@@ -293,7 +293,7 @@ public interface ISceneRunner : IDisposable
     /// </returns>
     async Task AwaitInputProcessed()
     {
-        if (Scene().ProcessMode != Node.ProcessModeEnum.Disabled)
+        if (Scene()?.ProcessMode != Node.ProcessModeEnum.Disabled)
             Input.FlushBufferedEvents();
 
         _ = await SyncProcessFrame;
@@ -302,9 +302,25 @@ public interface ISceneRunner : IDisposable
 
     /// <summary>
     ///     Access to the current running scene.
+    ///     Returns the scene instance that is currently loaded and managed by this SceneRunner.
+    ///     The scene remains available for testing and interaction until the runner is disposed
+    ///     or the scene is explicitly freed.<br />
+    ///     <br />
+    ///     Lifecycle behavior:<br />
+    ///     - Returns valid Node instance when scene is loaded and active<br />
+    ///     - Returns null when the SceneRunner has been disposed<br />
+    ///     - Returns null when autoFree has cleaned up the scene<br />
+    ///     <br />
+    ///     Usage patterns:<br />
+    ///     - Check for null before accessing scene properties or methods<br />
+    ///     - Use in assertions to verify scene state and availability<br />
+    ///     - Access child nodes through the returned scene instance.<br />
     /// </summary>
-    /// <returns>Node.</returns>
-    Node Scene();
+    /// <returns>
+    ///     The current scene Node instance, or null when the SceneRunner is disposed
+    ///     or the scene has been freed.
+    /// </returns>
+    Node? Scene();
 
     /// <summary>
     ///     Shows the running scene and moves the window to the foreground.

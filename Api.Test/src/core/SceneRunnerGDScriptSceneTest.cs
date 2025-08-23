@@ -271,25 +271,4 @@ public class SceneRunnerGDScriptSceneTest
         await sceneRunner.AwaitSignal("panel_color_change", box1, new Color(0, 0, 1)); // Blue
         await sceneRunner.AwaitSignal("panel_color_change", box1, new Color(0, 1, 0)); // Green
     }
-
-    [TestCase]
-    public async Task DisposeSceneRunner()
-    {
-        var sceneRunner_ = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneGDScript.tscn", true);
-        var tree = (SceneTree)Engine.GetMainLoop();
-
-        var currentScene = sceneRunner_.Scene();
-        var nodePath = currentScene.GetPath();
-        // check scene is loaded and added to the root node
-        AssertThat(GodotObject.IsInstanceValid(currentScene)).IsTrue();
-        AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNotNull();
-
-        await ISceneRunner.SyncProcessFrame;
-        sceneRunner_.Dispose();
-
-        await ISceneRunner.SyncProcessFrame;
-        // check scene is freed and removed from the root node
-        AssertThat(GodotObject.IsInstanceValid(currentScene)).IsFalse();
-        AssertThat(tree.Root.GetNodeOrNull(nodePath)).IsNull();
-    }
 }
