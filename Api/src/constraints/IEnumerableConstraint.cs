@@ -11,7 +11,7 @@ using Godot.Collections;
 ///     A set of constrains to verify enumerating.
 /// </summary>
 /// <typeparam name="TValue">The type of elements in the enumerable being asserted.</typeparam>
-public interface IEnumerableConstraint<in TValue> : IAssertBase<IEnumerable<TValue?>>
+public interface IEnumerableConstraint<in TValue> : IAssertBase<IEnumerable<TValue?>, IEnumerableConstraint<TValue>>
 {
     /// <summary>
     ///     Verifies that the current enumerable is equal to the given one, ignoring case considerations.
@@ -43,7 +43,7 @@ public interface IEnumerableConstraint<in TValue> : IAssertBase<IEnumerable<TVal
     ///     Verifies that the current enumerable is the same.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep comparison use <see cref="IAssertBase{TValue}.IsEqual(TValue)" />.
+    ///     Compares the current by object reference equals, for deep comparison use <see cref="IAssertBase{TValue,TAssert}.IsEqual(TValue)" />.
     /// </remarks>
     /// <param name="expected">The value to be the same.</param>
     /// <returns>IEnumerableAssert.</returns>
@@ -53,7 +53,7 @@ public interface IEnumerableConstraint<in TValue> : IAssertBase<IEnumerable<TVal
     ///     Verifies that the current enumerable is NOT the same.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep comparison use <see cref="IAssertBase{TValue}.IsNotEqual(TValue)" />.
+    ///     Compares the current by object reference equals, for deep comparison use <see cref="IAssertBase{TValue,TAssert}.IsNotEqual(TValue)" />.
     /// </remarks>
     /// <param name="expected">The value to be NOT the same.</param>
     /// <returns>IEnumerableAssert.</returns>

@@ -22,37 +22,39 @@ public interface IAssert
 ///     Provides common assertion methods that apply to most value types.
 /// </summary>
 /// <typeparam name="TValue">The type of value being tested by this assertion.</typeparam>
+/// <typeparam name="TAssert">The type of used assertion.</typeparam>
 /// <remarks>
 ///     This generic interface extends the core IAssert interface with type-specific
 ///     assertion methods for comparing values and checking nullability.
 /// </remarks>
-public interface IAssertBase<in TValue> : IAssert
+public interface IAssertBase<in TValue, out TAssert> : IAssert
+    where TAssert : IAssert
 {
     /// <summary>
     ///     Verifies that the current value is null.
     /// </summary>
     /// <returns>IAssertBase.</returns>
-    IAssertBase<TValue> IsNull();
+    TAssert IsNull();
 
     /// <summary>
     ///     Verifies that the current value is not null.
     /// </summary>
     /// <returns>IAssertBase.</returns>
-    IAssertBase<TValue> IsNotNull();
+    TAssert IsNotNull();
 
     /// <summary>
     ///     Verifies that the current value is equal to the expected one.
     /// </summary>
     /// <param name="expected">The value to be equal.</param>
     /// <returns>IAssertBase.</returns>
-    IAssertBase<TValue> IsEqual(TValue expected);
+    TAssert IsEqual(TValue expected);
 
     /// <summary>
     ///     Verifies that the current value is not equal to the expected one.
     /// </summary>
     /// <param name="expected">The value to be NOT equal.</param>
     /// <returns>IAssertBase.</returns>
-    IAssertBase<TValue> IsNotEqual(TValue expected);
+    TAssert IsNotEqual(TValue expected);
 }
 
 /// <summary>

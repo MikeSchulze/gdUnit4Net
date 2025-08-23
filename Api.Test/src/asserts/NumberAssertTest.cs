@@ -440,4 +440,11 @@ public class NumberAssertTest
         // expect this line will never called because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
+
+    [TestCase]
+    public void MethodChainingBaseAssert()
+    {
+        AssertThat(42).IsNotNull().IsGreater(10).IsLess(50);
+        AssertThat(42).IsGreater(10).IsNotNull().IsLess(50);
+    }
 }

@@ -15,7 +15,7 @@ using Asserts;
 ///     The numeric type being tested. Must implement IComparable, IComparable{TValue}, IEquatable{TValue},
 ///     IAdditionOperators{TValue, TValue, TValue}, and ISubtractionOperators{TValue, TValue, TValue}.
 /// </typeparam>
-public interface INumberConstraint<in TValue> : IAssertBase<TValue>
+public interface INumberConstraint<in TValue> : IAssertBase<TValue, INumberConstraint<TValue>>
     where TValue : IComparable, IComparable<TValue>, IEquatable<TValue>,
     IAdditionOperators<TValue, TValue, TValue>, ISubtractionOperators<TValue, TValue, TValue>
 {

@@ -8,7 +8,7 @@ using CommandLine;
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAssertMessage<TAssert>
+internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>, IAssertMessage<TAssert>
     where TAssert : IAssert
 {
     protected AssertBase(TValue? current) => Current = current;
@@ -21,34 +21,34 @@ internal abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue>, IAsse
 
     protected string AppendingFailureMessage { get; set; } = string.Empty;
 
-    public IAssertBase<TValue> IsEqual(TValue expected)
+    public TAssert IsEqual(TValue expected)
     {
         var result = Comparable.IsEqual(Current, expected);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqual(Current, expected), Current, expected);
-        return this;
+        return this.Cast<TAssert>();
     }
 
-    public IAssertBase<TValue> IsNotEqual(TValue expected)
+    public TAssert IsNotEqual(TValue expected)
     {
         var result = Comparable.IsEqual(Current, expected);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqual(Current, expected), Current, expected);
-        return this;
+        return this.Cast<TAssert>();
     }
 
-    public IAssertBase<TValue> IsNull()
+    public TAssert IsNull()
     {
         if (Current != null)
             ThrowTestFailureReport(AssertFailures.IsNull(Current), Current, null);
-        return this;
+        return this.Cast<TAssert>();
     }
 
-    public IAssertBase<TValue> IsNotNull()
+    public TAssert IsNotNull()
     {
         if (Current == null)
             ThrowTestFailureReport(AssertFailures.IsNotNull(), Current, null);
-        return this;
+        return this.Cast<TAssert>();
     }
 
     public TAssert OverrideFailureMessage(string message)

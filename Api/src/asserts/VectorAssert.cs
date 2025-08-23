@@ -31,8 +31,6 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
-    public new IVectorConstraint<TValue> IsEqual(TValue expected) => (IVectorConstraint<TValue>)base.IsEqual(expected);
-
     public IVectorConstraint<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
         var (min, max) = MinMax(expected, approx);
@@ -89,8 +87,6 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
             ThrowTestFailureReport(AssertFailures.IsNotBetween(Current, min, max), Current, min);
         return this;
     }
-
-    public new IVectorConstraint<TValue> IsNotEqual(TValue expected) => (IVectorConstraint<TValue>)base.IsNotEqual(expected);
 
     private static int CompareTo(TValue? left, TValue right)
     {

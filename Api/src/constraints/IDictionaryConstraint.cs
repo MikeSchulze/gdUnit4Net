@@ -13,7 +13,7 @@ using Asserts;
 /// </summary>
 /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
 /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
-public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable>
+public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable, IDictionaryConstraint<TKey, TValue>>
     where TKey : notnull
 {
     /// <summary>
@@ -126,7 +126,7 @@ public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable>
     ///     Verifies that the current dictionary is the same.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{T}.IsEqual" />.
+    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{TValue,TAssert}.IsEqual" />.
     /// </remarks>
     /// <param name="expected">The dictionary to be the same.</param>
     /// <returns>IDictionaryAssert for fluent method chaining.</returns>
@@ -136,7 +136,7 @@ public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable>
     ///     Verifies that the current dictionary is the same as the given enumerable.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{T}.IsEqual" />.
+    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{TValue,TAssert}.IsEqual" />.
     /// </remarks>
     /// <param name="expected">The enumerable to be the same.</param>
     /// <returns>IDictionaryAssert for fluent method chaining.</returns>
@@ -146,7 +146,7 @@ public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable>
     ///     Verifies that the current dictionary is NOT the same.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{T}.IsNotEqual" />.
+    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{TValue,TAssert}.IsNotEqual" />.
     /// </remarks>
     /// <param name="expected">The dictionary to be NOT the same.</param>
     /// <returns>IDictionaryAssert for fluent method chaining.</returns>
@@ -156,7 +156,7 @@ public interface IDictionaryConstraint<TKey, TValue> : IAssertBase<IEnumerable>
     ///     Verifies that the current dictionary is NOT the same as the given enumerable.
     /// </summary>
     /// <remarks>
-    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{T}.IsNotEqual" />.
+    ///     Compares the current by object reference equals, for deep parameter comparison use <see cref="IAssertBase{TValue,TAssert}.IsNotEqual" />.
     /// </remarks>
     /// <param name="expected">The enumerable to be NOT the same.</param>
     /// <returns>IDictionaryAssert for fluent method chaining.</returns>

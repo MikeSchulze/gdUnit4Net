@@ -8,7 +8,7 @@ using Asserts;
 /// <summary>
 ///     A set of constrains to verify string values.
 /// </summary>
-public interface IStringConstraint : IAssertBase<string>
+public interface IStringConstraint : IAssertBase<string, IStringConstraint>
 {
     /// <summary>
     ///     Verifies that the current String is equal to the given one, ignoring case considerations.

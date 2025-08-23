@@ -13,7 +13,7 @@ using Asserts;
 ///     The vector type being tested. Must implement IEquatable{TValue} to enable value comparisons.
 ///     Typically used with Godot.Vector2, Godot.Vector3, or Godot.Vector4 types.
 /// </typeparam>
-public interface IVectorConstraint<in TValue> : IAssertBase<TValue>
+public interface IVectorConstraint<in TValue> : IAssertBase<TValue, IVectorConstraint<TValue>>
     where TValue : IEquatable<TValue>
 {
     /// <summary>

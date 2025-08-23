@@ -723,4 +723,16 @@ public class DictionaryAssertTest
                             {"a1", 100}; {"a2", 200}
                         """);
     }
+
+    [TestCase]
+    [RequireGodotRuntime]
+    public void MethodChainingBaseAssert()
+    {
+        var dictionary = new Godot.Collections.Dictionary<string, string>
+        {
+            { "name", "Player" }
+        };
+        AssertThat(dictionary).IsNotNull().NotContainsKeys("A").ContainsKeys("name");
+        AssertThat(dictionary).NotContainsKeys("A").IsNotNull().ContainsKeys("name");
+    }
 }
