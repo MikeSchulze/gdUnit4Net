@@ -332,4 +332,12 @@ public class VectorAssertTest
                         Additional info:
                         custom data
                         """);
+
+    [TestCase]
+    [RequireGodotRuntime]
+    public void MethodChainingBaseAssert()
+    {
+        AssertThat(Vector3.Left).IsNotNull().IsEqual(Vector3.Left);
+        AssertThat(Vector3.Left).IsEqual(Vector3.Left).IsNotNull();
+    }
 }

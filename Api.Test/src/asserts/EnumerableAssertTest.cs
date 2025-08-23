@@ -1709,6 +1709,21 @@ public partial class EnumerableAssertTest
                         custom data
                         """);
 
+    [TestCase]
+    [RequireGodotRuntime]
+    public void MethodChainingBaseAssert()
+    {
+        var array = new Godot.Collections.Array
+        {
+            1,
+            "hello",
+            3.14,
+            true
+        };
+        AssertThat(array).IsNotNull().Contains("hello").HasSize(4);
+        AssertThat(array).Contains("hello").IsNotNull().HasSize(4);
+    }
+
     // ReSharper disable once PartialTypeWithSinglePart
     // ReSharper disable MemberCanBePrivate.Local
     // ReSharper disable UnusedMember.Local

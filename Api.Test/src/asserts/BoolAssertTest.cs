@@ -126,4 +126,11 @@ public class BoolAssertTest
         // expect this line will never called because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
+
+    [TestCase]
+    public void MethodChainingBaseAssert()
+    {
+        AssertBool(true).IsNotNull().IsTrue();
+        AssertBool(true).IsTrue().IsNotNull();
+    }
 }

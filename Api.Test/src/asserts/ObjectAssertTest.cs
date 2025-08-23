@@ -344,4 +344,12 @@ public class ObjectAssertTest
         // expect this line will never called because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
+
+    [TestCase]
+    public void MethodChainingBaseAssert()
+    {
+        var obj = new object();
+        AssertObject(obj).IsNotNull().IsSame(obj).IsInstanceOf<object>();
+        AssertObject(obj).IsSame(obj).IsNotNull().IsInstanceOf<object>();
+    }
 }

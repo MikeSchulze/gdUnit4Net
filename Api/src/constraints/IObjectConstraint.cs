@@ -8,7 +8,7 @@ using Asserts;
 /// <summary>
 ///     A set of constrains to verify object values.
 /// </summary>
-public interface IObjectConstraint : IAssertBase<object>
+public interface IObjectConstraint : IAssertBase<object, IObjectConstraint>
 {
     /// <summary>
     ///     Verifies that the current value is the same as the given one.

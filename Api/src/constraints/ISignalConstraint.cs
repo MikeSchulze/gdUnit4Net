@@ -10,7 +10,7 @@ using Godot;
 /// <summary>
 ///     A set of constrains to verify Godot signals.
 /// </summary>
-public interface ISignalConstraint : IAssertBase<GodotObject>, IGdUnitAwaitable
+public interface ISignalConstraint : IAssertBase<GodotObject, ISignalConstraint>, IGdUnitAwaitable
 {
     /// <summary>
     ///     Starts the monitoring of emitted signals during the test runtime.

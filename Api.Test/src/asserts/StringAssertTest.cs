@@ -465,4 +465,11 @@ public class StringAssertTest
         // expect this line will never called because of the test is interrupted by a failing assert
         AssertBool(true).OverrideFailureMessage("This line should never be called").IsFalse();
     }
+
+    [TestCase]
+    public void MethodChainingBaseAssert()
+    {
+        AssertObject("message").IsNotNull().IsEqual("message");
+        AssertObject("message").IsEqual("message").IsNotNull();
+    }
 }

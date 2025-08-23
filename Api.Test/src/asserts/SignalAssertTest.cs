@@ -229,6 +229,14 @@ public partial class SignalAssertTest
                          """);
     }
 
+    [TestCase]
+    public void MethodChainingBaseAssert()
+    {
+        var emitter = AutoFree(new TimedEmitter { RunTime = 0.1f });
+        AssertSignal(emitter).IsNotNull().IsSignalExists("OnFinished");
+        AssertSignal(emitter).IsSignalExists("OnFinished").IsNotNull();
+    }
+
     private sealed partial class TestEmitter : Node
     {
         [Signal]

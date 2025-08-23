@@ -8,7 +8,7 @@ using Asserts;
 /// <summary>
 ///     A set of constrains to verify boolean values.
 /// </summary>
-public interface IBoolConstraint : IAssertBase<bool>
+public interface IBoolConstraint : IAssertBase<bool, IBoolConstraint>
 {
     /// <summary>
     ///     Verifies that the current value is true.
