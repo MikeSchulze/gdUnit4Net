@@ -283,7 +283,7 @@ public class TestCaseDiscovererTest
 
         var tests = TestCaseDiscoverer.DiscoverTestCasesFromScript(script);
         AssertArray(tests)
-            .HasSize(13)
+            .HasSize(15)
             // Verify just exemplar for certain tests
             .Contains(new TestCaseDescriptor
             {
@@ -292,8 +292,8 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestFoo",
-                Id = tests[9].Id,
-                LineNumber = 42,
+                Id = tests[11].Id,
+                LineNumber = 41,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 0,
                 RequireRunningGodotEngine = false,
@@ -306,8 +306,8 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestCaseArguments",
-                Id = tests[3].Id,
-                LineNumber = 64,
+                Id = tests[5].Id,
+                LineNumber = 63,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 0,
                 RequireRunningGodotEngine = false
@@ -318,8 +318,8 @@ public class TestCaseDiscovererTest
                 AssemblyPath = assemblyPath,
                 ManagedType = "GdUnit4.Tests.Core.ExampleTestSuite",
                 ManagedMethod = "TestCaseArguments",
-                Id = tests[4].Id,
-                LineNumber = 64,
+                Id = tests[6].Id,
+                LineNumber = 63,
                 CodeFilePath = codeFilePath,
                 AttributeIndex = 1,
                 RequireRunningGodotEngine = false
