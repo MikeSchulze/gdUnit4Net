@@ -1,6 +1,5 @@
 namespace GdUnit4.Tests.Core;
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -77,11 +76,26 @@ public sealed class ExampleTestSuite
     public void ParameterizedSingleTest(bool value)
         => AssertThat(value).IsTrue();
 
+    [TestCase]
+    [IgnoreUntil(Until = "2030-08-23 22:56:00", Description = "Ignored until Aug 23, 2030 22:56 local time")]
+    public void SkippedUntilLocalDate()
+        => AssertBool(false)
+            .OverrideFailureMessage("Should never be called before Aug 23, 2030 22:56 local time")
+            .IsTrue();
 
     [TestCase]
-    [IgnoreUntil(Description = "This is an example of ignored test")]
-    public void SkippedTestCase()
-        => Console.WriteLine("SkippedTestCase");
+    [IgnoreUntil(UntilUtc = "2030-08-23 20:56:00", Description = "Ignored until Aug 23, 2030 20:56 UTC (22:56 CEST)")]
+    public void SkippedUntilUtcDate()
+        => AssertBool(false)
+            .OverrideFailureMessage("Should never be called before Aug 23, 2030 20:56 UTC")
+            .IsTrue();
+
+    [TestCase]
+    [IgnoreUntil(Description = "Permanently ignored until attribute is removed")]
+    public void Skipped()
+        => AssertBool(false)
+            .OverrideFailureMessage("Should never be called, this test is skipped")
+            .IsTrue();
 
     [TestCase]
     [DataPoint(nameof(TestDataProvider.GetTestData), typeof(TestDataProvider))]

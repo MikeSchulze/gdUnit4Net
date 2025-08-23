@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 
 using Data;
 
@@ -145,10 +142,13 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 .Execute(executionContext)
                 .ConfigureAwait(true);
 
-            using ExecutionContext context = new(executionContext, methodArguments);
-            await new TestCaseExecutionStage(context.TestCaseName, testCase, stageAttribute)
-                .Execute(context)
-                .ConfigureAwait(true);
+            if (!executionContext.IsSkipped)
+            {
+                using ExecutionContext context = new(executionContext, methodArguments);
+                await new TestCaseExecutionStage(context.TestCaseName, testCase, stageAttribute)
+                    .Execute(context)
+                    .ConfigureAwait(true);
+            }
         }
         finally
         {

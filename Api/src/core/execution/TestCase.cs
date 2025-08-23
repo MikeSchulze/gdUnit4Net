@@ -33,7 +33,7 @@ internal sealed class TestCase
 
     public object?[] Arguments => IsParameterized ? TestCaseAttribute.Arguments : [.. Parameters.SelectMany(ResolveParam)];
 
-    public bool IsSkipped => Attribute.IsDefined(MethodInfo, typeof(IgnoreUntilAttribute));
+    public bool IsSkipped => IgnoreUntilAttribute.IsSkipped(MethodInfo);
 
     public bool IsParameterized => TestCaseAttributes.Any(p => p.Arguments.Length > 0);
 
