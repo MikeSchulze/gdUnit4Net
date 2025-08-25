@@ -3,10 +3,7 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 using Api;
 
@@ -111,7 +108,7 @@ internal class TestEvent : ITestEvent, IEquatable<TestEvent>
 
     public bool IsSuccess => !IsWarning && !IsFailed && !IsError && !IsSkipped;
 
-    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(StatisticKey.ElapsedTime, 0));
+    public TimeSpan ElapsedInMs => TimeSpan.FromMilliseconds(GetByKeyOrDefault(StatisticKey.ElapsedTime, 0L));
 
     public static bool operator ==(TestEvent? lhs, TestEvent? rhs) => lhs?.Equals(rhs) ?? rhs is null;
 

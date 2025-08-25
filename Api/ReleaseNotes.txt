@@ -4,6 +4,7 @@ v5.0.1
 * GD-305: Added missing AppendFailureMessage on assertions
 * GD-311: Catch possible exceptions on command execution and report them as InternalServerError.
 * GD-317: Fixing [IgnoreUntil] is not skipping the test.
+* GD-318: Fixing object deep equal comparison.
 * GD-319: Fixing SceneRunner.Scene() returns disposed object after the scene is auto freed.
 * GD-320: Fixing method Chaining on Asserts breaks type inference after base interface methods
 
