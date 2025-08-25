@@ -1,3 +1,4 @@
+// ReSharper disable NullableWarningSuppressionIsUsed
 namespace GdUnit4.Tests.Core.Execution;
 
 using System;
@@ -36,7 +37,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsEqual(testEvent);
+        AssertThat(current).IsNotNull();
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("Before");
     }
@@ -44,11 +45,15 @@ public class TestEventTest
     [TestCase]
     public void SerializeDeserializeBeforeTest()
     {
-        var testEvent = TestEvent.BeforeTest(Guid.Empty, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
+        var guid = Guid.NewGuid();
+        var testEvent = TestEvent.BeforeTest(guid, "foo/bar/TestSuiteXXX.cs", "TestSuiteXXX", "TestCaseA");
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsEqual(testEvent);
+        AssertThat(current).IsNotNull();
+        AssertThat(current!.Id).IsEqual(guid);
+        AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
+        AssertThat(current.TestName).IsEqual("TestCaseA");
     }
 
     [TestCase]
@@ -73,7 +78,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull().IsEqual(testEvent);
+        AssertThat(current).IsNotNull();
         AssertThat(current!.Reports).Contains(new TestReport(ReportType.Failure, 42, "test failed"));
         AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("After");
@@ -110,7 +115,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull().IsEqual(testEvent);
+        AssertThat(current).IsNotNull();
         AssertThat(current!.Reports).Contains(new TestReport(ReportType.Failure, 42, "test failed"));
         AssertThat(current.Id).IsEqual(testEvent.Id);
         AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));

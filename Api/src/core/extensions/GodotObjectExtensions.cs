@@ -169,51 +169,6 @@ internal static class GodotObjectExtensions
         return result;
     }
 
-    internal static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, Mode compareMode)
-    {
-        // Handle cases where both collections are null
-        if (left is null && right is null)
-            return true;
-
-        // Handle cases where one collection is null
-        if (left is null || right is null)
-            return false;
-
-        var itLeft = left.GetEnumerator();
-        var itRight = right.GetEnumerator();
-
-        try
-        {
-            while (itLeft.MoveNext() && itRight.MoveNext())
-            {
-                var keyEquals = itLeft.Current.VariantEquals(itRight.Current, compareMode);
-                if (!keyEquals)
-                    return false;
-            }
-
-            return !(itLeft.MoveNext() || itRight.MoveNext());
-        }
-        finally
-        {
-            (itLeft as IDisposable)?.Dispose();
-            (itRight as IDisposable)?.Dispose();
-        }
-    }
-
-    internal static bool VariantEquals(this IDictionary left, IDictionary right, Mode compareMode)
-    {
-        if (left.Count != right.Count)
-            return false;
-
-        foreach (var key in left.Keys)
-        {
-            if (!right.Contains(key) || !left[key].VariantEquals(right[key], compareMode))
-                return false;
-        }
-
-        return true;
-    }
-
     internal static bool DeepEquals<T>(T? left, T? right, Mode compareMode = Mode.CaseSensitive)
         => CompareByReflectionInternal(left, right, compareMode, []);
 
