@@ -512,6 +512,11 @@ internal static class AssertFailures
 
     private static bool HasOverriddenToString(object obj)
     {
+        if (obj == null)
+            return false;
+        if (obj is string)
+            return false;
+
         var toStringMethod = obj.GetType().GetMethod("ToString");
         return toStringMethod?.DeclaringType != typeof(object);
     }

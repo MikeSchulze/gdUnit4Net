@@ -169,7 +169,7 @@ internal static class GodotObjectExtensions
         return result;
     }
 
-    private static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, Mode compareMode)
+    internal static bool VariantEquals([NotNullWhen(true)] this IEnumerable? left, IEnumerable? right, Mode compareMode)
     {
         // Handle cases where both collections are null
         if (left is null && right is null)
@@ -200,7 +200,7 @@ internal static class GodotObjectExtensions
         }
     }
 
-    private static bool VariantEquals(this IDictionary left, IDictionary right, Mode compareMode)
+    internal static bool VariantEquals(this IDictionary left, IDictionary right, Mode compareMode)
     {
         if (left.Count != right.Count)
             return false;
@@ -214,92 +214,105 @@ internal static class GodotObjectExtensions
         return true;
     }
 
-    private static bool DeepEquals<T>(T? left, T? right, Mode compareMode)
+    internal static bool DeepEquals<T>(T? left, T? right, Mode compareMode = Mode.CaseSensitive)
+        => CompareByReflectionInternal(left, right, compareMode, []);
+
+    private static bool CompareByReflectionInternal(object? obj1, object? obj2, Mode compareMode, HashSet<object> visited)
     {
-        if (left is GodotObject lo && right is GodotObject ro)
+        // Handle null cases
+        if (ReferenceEquals(obj1, obj2))
+            return true;
+        if (obj1 == null || obj2 == null)
+            return false;
+
+        // Prevent infinite recursion
+        if (visited.Contains(obj1))
+            return true;
+
+        _ = visited.Add(obj1);
+
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        if (obj1 is Variant)
+            obj1 = obj1.UnboxVariant()!;
+
+        // ReSharper disable once NullableWarningSuppressionIsUsed
+        if (obj2 is Variant)
+            obj2 = obj2.UnboxVariant()!;
+
+        var type1 = obj1.GetType();
+        var type2 = obj2.GetType();
+
+        if (type1 != type2)
+            return false;
+
+        // Handle value types and strings
+        if (type1 == typeof(string))
+            return string.Equals(obj1.ToString(), obj2.ToString(), compareMode == Mode.CaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+        if (type1.IsPrimitive)
+            return obj1.Equals(obj2);
+
+        // Handle collections
+        if (obj1 is IEnumerable enum1 && obj2 is IEnumerable enum2)
+            return CompareEnumerables(enum1, enum2, compareMode, visited);
+
+        // Compare all fields
+        var fields = type1.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(field =>
+                !field.Name.Equals("NativePtr", StringComparison.Ordinal)
+                && !field.Name.Contains("k__BackingField", StringComparison.Ordinal)
+                && !field.Name.ToLower().Contains("weakreference", StringComparison.Ordinal));
+
+        foreach (var field in fields)
         {
-            var l = GodotObject2Dictionary(lo, []);
-            var r = GodotObject2Dictionary(ro, []);
-            return l.VariantEquals(r, compareMode);
+            var value1 = field.GetValue(obj1);
+            var value2 = field.GetValue(obj2);
+
+            if (!CompareByReflectionInternal(value1, value2, compareMode, visited))
+                return false;
         }
 
-        if (left is IDictionary ld && right is IDictionary rd)
-            return ld.VariantEquals(rd, compareMode);
-        if (left is IEnumerable le && right is IEnumerable re)
-            return le.VariantEquals(re, compareMode);
-        if (left is ValueType && right is ValueType)
-            return left.Equals(right);
-        return left?.Equals(right) ?? false;
-    }
-
-    private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>> GodotObject2Dictionary(
-        GodotObject? obj,
-        System.Collections.Generic.Dictionary<object, bool> hashedObjects)
-    {
-        var r = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, object?>>();
-        if (obj == null)
-            return r;
-
-        var dict = new System.Collections.Generic.Dictionary<string, object?>();
-        var type = obj.GetType();
-        dict["@path"] = type.AssemblyQualifiedName;
-
-        // collect custom fields
-        foreach (var propertyName in type
-                     .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                     .Select(e => e.Name)
-                     .Where(name => !name.Equals("NativePtr", StringComparison.Ordinal)))
+        // Compare all properties
+        var properties = type1.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(p => p.Name != "NativeInstance");
+        foreach (var property in properties)
         {
-            var propertyValue = obj.Get(propertyName);
-            if (propertyValue.VariantType == Variant.Type.Object)
-            {
-                // prevent recursion
-                if (!hashedObjects.TryAdd(obj, true))
-                {
-                    dict[propertyName] = propertyValue.UnboxVariant();
-                    continue;
-                }
-
-                dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
-            }
-            else
-                dict[propertyName] = propertyValue.UnboxVariant();
-        }
-
-        // collect other fields
-        foreach (var property in obj.GetPropertyList())
-        {
-            var propertyName = property["name"].AsStringName();
-            var propertyType = property["type"];
-            var propertyUsage = (PropertyUsageFlags)property["usage"].AsInt64();
-            var propertyValue = obj.Get(propertyName);
-            if (propertyValue.VariantType == Variant.Type.Callable)
+            if (!property.CanRead)
                 continue;
 
-            // System.Console.WriteLine($"Property: {propertyName}:{propertyValue.VariantType}, {propertyUsage} {propertyValue.Obj}");
-            var isScriptOrDefault = (propertyUsage & (PropertyUsageFlags.ScriptVariable | PropertyUsageFlags.Default)) != 0;
-            var isCategory = (propertyUsage & PropertyUsageFlags.Category) != 0;
-            if (isScriptOrDefault
-                && !isCategory
-                && propertyUsage != PropertyUsageFlags.None)
+            try
             {
-                if (propertyType.VariantType == Variant.Type.Object)
-                {
-                    // prevent recursion
-                    if (!hashedObjects.TryAdd(obj, true))
-                    {
-                        dict[propertyName] = propertyValue.UnboxVariant();
-                        continue;
-                    }
+                var value1 = property.GetValue(obj1);
+                var value2 = property.GetValue(obj2);
 
-                    dict[propertyName] = GodotObject2Dictionary(propertyValue.AsGodotObject(), hashedObjects);
-                }
-                else
-                    dict[propertyName] = propertyValue.UnboxVariant();
+                if (!CompareByReflectionInternal(value1, value2, compareMode, visited))
+                    return false;
+            }
+#pragma warning disable CA1031
+            catch
+#pragma warning restore CA1031
+            {
+                // Skip properties that can't be read (e.g., indexers)
             }
         }
 
-        r[type.FullName!] = dict;
-        return r;
+        return true;
+    }
+
+    private static bool CompareEnumerables(IEnumerable enum1, IEnumerable enum2, Mode compareMode, HashSet<object> visited)
+    {
+        var list1 = enum1.Cast<object>().ToList();
+        var list2 = enum2.Cast<object>().ToList();
+
+        if (list1.Count != list2.Count)
+            return false;
+
+        for (var i = 0; i < list1.Count; i++)
+        {
+            if (!CompareByReflectionInternal(list1[i], list2[i], compareMode, visited))
+                return false;
+        }
+
+        return true;
     }
 }
