@@ -37,7 +37,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull();
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("Before");
     }
@@ -50,7 +50,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull();
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Id).IsEqual(guid);
         AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("TestCaseA");
@@ -78,7 +78,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull();
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(ReportType.Failure, 42, "test failed"));
         AssertThat(current.SuiteName).IsEqual("TestSuiteXXX");
         AssertThat(current.TestName).IsEqual("After");
@@ -115,7 +115,7 @@ public class TestEventTest
         var json = JsonConvert.SerializeObject(testEvent);
 
         var current = JsonConvert.DeserializeObject<TestEvent>(json);
-        AssertThat(current).IsNotNull();
+        AssertThat(current).IsNotNull().IsEqual(testEvent);
         AssertThat(current!.Reports).Contains(new TestReport(ReportType.Failure, 42, "test failed"));
         AssertThat(current.Id).IsEqual(testEvent.Id);
         AssertThat(current.ElapsedInMs).IsEqual(TimeSpan.FromMilliseconds(124));
