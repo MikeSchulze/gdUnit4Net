@@ -204,8 +204,15 @@ internal static class GodotObjectExtensions
         if (type1 == typeof(string))
             return string.Equals(obj1.ToString(), obj2.ToString(), compareMode == Mode.CaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
-        if (type1.IsPrimitive)
+        if (type1.IsPrimitive || IsIEquatable(type1))
             return obj1.Equals(obj2);
+
+        if (IsIEqualityComparer(type1))
+        {
+            var equalsMethod = obj1.GetType().GetMethod("Equals", [type1, type1]);
+            var result = equalsMethod?.Invoke(obj1, [obj1, obj2]) ?? false;
+            return result is bool b && b;
+        }
 
         // Handle collections
         if (obj1 is IEnumerable enum1 && obj2 is IEnumerable enum2)
@@ -270,4 +277,18 @@ internal static class GodotObjectExtensions
 
         return true;
     }
+
+    private static bool IsIEquatable(Type type)
+        => type
+            .GetInterfaces()
+            .Any(i =>
+                i.IsGenericType
+                && i.GetGenericTypeDefinition() == typeof(IEquatable<>));
+
+    private static bool IsIEqualityComparer(Type type)
+        => type
+            .GetInterfaces()
+            .Any(i =>
+                i.IsGenericType
+                && i.GetGenericTypeDefinition() == typeof(IEqualityComparer<>));
 }
