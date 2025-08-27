@@ -3,15 +3,13 @@
 
 namespace GdUnit4.Asserts;
 
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.ExceptionServices;
 
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
+/// <inheritdoc />
 public sealed class ExceptionAssert<TException> : IExceptionAssert
     where TException : Exception
 {
@@ -37,6 +35,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
 
     private string? CustomFailureMessage { get; set; }
 
+    /// <inheritdoc />
     public IExceptionAssert IsInstanceOf<TExpectedType>()
     {
         if (Current is not TExpectedType)
@@ -44,6 +43,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
+    /// <inheritdoc />
     public IExceptionAssert HasMessage(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -54,6 +54,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
+    /// <inheritdoc />
     public IExceptionAssert HasFileLineNumber(int lineNumber)
     {
         int currentLine;
@@ -72,6 +73,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
+    /// <inheritdoc />
     public IExceptionAssert HasFileName(string fileName)
     {
         var fullPath = Path.GetFullPath(fileName);
@@ -91,6 +93,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
+    /// <inheritdoc />
     public IExceptionAssert HasPropertyValue(string propertyName, object expected)
     {
         var value = Current?.GetType().GetProperty(propertyName)?.GetValue(Current);
@@ -99,13 +102,7 @@ public sealed class ExceptionAssert<TException> : IExceptionAssert
         return this;
     }
 
-    public IAssert OverrideFailureMessage(string message)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(message);
-        CustomFailureMessage = message.UnixFormat();
-        return this;
-    }
-
+    /// <inheritdoc />
     public IExceptionAssert StartsWithMessage(string value)
     {
         ArgumentException.ThrowIfNullOrEmpty(value);

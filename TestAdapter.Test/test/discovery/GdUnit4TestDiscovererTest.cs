@@ -144,7 +144,7 @@ public class GdUnit4TestDiscovererTest
         discoverer.DiscoverTests([assemblyPath], mockRunContext.Object, frameworkHandle.Object, mockDiscoverySink.Object);
 
         // Verify SendTestCase was never called
-        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(14));
+        mockDiscoverySink.Verify(ds => ds.SendTestCase(It.IsAny<TestCase>()), Times.Exactly(35));
 
         // Verify log messages
         // @formatter:off
@@ -159,9 +159,13 @@ public class GdUnit4TestDiscovererTest
                 $"Informational: [GdUnit4] VSTest Adapter: GdUnit4.TestAdapter {version} ({bitness} {runtime})",
                 $"Informational: [GdUnit4] Running on GdUnit4 test engine version: {ITestEngine.EngineVersion()}",
                 $"Informational: [GdUnit4] Discover tests from assembly: {assemblyPath}",
-                "Informational: [GdUnit4] Discover:  TestSuite Examples.ExampleTest with 6 TestCases found.",
-                "Informational: [GdUnit4] Discover:  TestSuite Example.Tests.API.Asserts.AssertionsTest with 8 TestCases found.",
-                "Informational: [GdUnit4] Discover tests done, 2 TestSuites and total 14 Tests found."
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.ExampleTest with 6 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.Api.AssertionsTest with 2 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.Api.GodotTypes.AssertObjectTest with 7 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.Api.GodotTypes.AssertThatCoverageTest with 6 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.Api.CSharpTypes.AssertObjectTest with 7 TestCases found.",
+                "Informational: [GdUnit4] Discover:  TestSuite Examples.Test.Api.CSharpTypes.AssertThatCoverageTest with 7 TestCases found.",
+                "Informational: [GdUnit4] Discover tests done, 6 TestSuites and total 35 Tests found."
             },
             logMessages,
             "Log messages don't match expected messages");
@@ -170,12 +174,12 @@ public class GdUnit4TestDiscovererTest
         Assert.IsFalse(logMessages.Any(msg => msg.StartsWith("Error:")), "They should not contain any errors");
 
         // Verify discovered tests
-        Assert.AreEqual(14, discoveredTests.Count, "Should discover any tests from assembly");
+        Assert.AreEqual(35, discoveredTests.Count, "Should discover any tests from assembly");
 
         // Verify properties exemplary
         AssertTestCase(
             discoveredTests,
-            "Examples.ExampleTest.Success",
+            "Examples.Test.ExampleTest.Success",
             "Success",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
@@ -184,14 +188,14 @@ public class GdUnit4TestDiscovererTest
         // multi testcase attribute usage
         AssertTestCase(
             discoveredTests,
-            "Examples.ExampleTest.DataRows.TestA:0 (0, 1, 2)",
+            "Examples.Test.ExampleTest.DataRows.TestA:0 (0, 1, 2)",
             "TestA:0 (0, 1, 2)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",
             32);
         AssertTestCase(
             discoveredTests,
-            "Examples.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
+            "Examples.Test.ExampleTest.DataRows.TestB:1 (1, 2, 3)",
             "TestB:1 (1, 2, 3)",
             assemblyPath,
             @"Example\test\ExampleTest.cs",

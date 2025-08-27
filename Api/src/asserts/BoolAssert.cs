@@ -5,13 +5,15 @@ namespace GdUnit4.Asserts;
 
 using Constraints;
 
-internal sealed class BoolAssert : AssertBase<bool, IBoolConstraint>, IBoolAssert
+/// <inheritdoc cref="IBoolAssert" />
+public sealed class BoolAssert : AssertBase<bool, IBoolConstraint>, IBoolAssert
 {
     internal BoolAssert(bool current)
         : base(current)
     {
     }
 
+    /// <inheritdoc />
     public IBoolConstraint IsFalse()
     {
         if (true.Equals(Current))
@@ -19,6 +21,7 @@ internal sealed class BoolAssert : AssertBase<bool, IBoolConstraint>, IBoolAsser
         return this;
     }
 
+    /// <inheritdoc />
     public IBoolConstraint IsTrue()
     {
         if (!true.Equals(Current))

@@ -12,7 +12,8 @@ using Extractors;
 
 using Array = Godot.Collections.Array;
 
-internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>, IEnumerableConstraint<TValue?>>, IEnumerableAssert<TValue?>
+/// <inheritdoc cref="IEnumerableAssert{TValue}" />
+public sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>, IEnumerableConstraint<TValue?>>, IEnumerableAssert<TValue?>
 {
     internal EnumerableAssert(IEnumerable? current)
         : base(current?.Cast<TValue?>())
@@ -24,6 +25,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
     {
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
@@ -32,6 +34,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsNotEqualIgnoringCase(IEnumerable<TValue?> expected)
     {
         var result = Comparable.IsEqual(Current, expected, GodotObjectExtensions.Mode.CaseInsensitive);
@@ -40,6 +43,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsEmpty()
     {
         var count = Current?.Count() ?? -1;
@@ -48,6 +52,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsNotEmpty()
     {
         var count = Current?.Count() ?? -1;
@@ -56,6 +61,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsSame(IEnumerable<TValue?> expected)
     {
         if (!ReferenceEquals(Current, expected))
@@ -63,6 +69,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> IsNotSame(IEnumerable<TValue?> expected)
     {
         if (ReferenceEquals(Current, expected))
@@ -70,6 +77,7 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> HasSize(int expected)
     {
         var count = Current?.Count();
@@ -78,108 +86,134 @@ internal sealed class EnumerableAssert<TValue> : AssertBase<IEnumerable<TValue?>
         return this;
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> Contains(params TValue?[] expected)
         => CheckContains([.. expected], false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> Contains(IEnumerable<TValue?> expected)
         => CheckContains(expected, false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> Contains(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContains(expected_!, false);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSame(params TValue?[] expected)
         => CheckContains([.. expected], true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSame(IEnumerable<TValue?> expected)
         => CheckContains(expected, true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSame(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContains(expected_!, true);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactly(params TValue?[] expected)
         => CheckContainsExactly([.. expected], false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactly(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactly(expected_!, false);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactly(params TValue?[] expected)
         => CheckContainsExactly([.. expected], true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactly(IEnumerable<TValue?> expected)
         => CheckContainsExactly(expected, true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactly(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactly(expected_!, true);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(params TValue?[] expected)
         => CheckContainsExactlyInAnyOrder([.. expected], false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsExactlyInAnyOrder(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactlyInAnyOrder(expected_!, false);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(params TValue?[] expected)
         => CheckContainsExactlyInAnyOrder([.. expected], true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(IEnumerable<TValue?> expected)
         => CheckContainsExactlyInAnyOrder(expected, true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> ContainsSameExactlyInAnyOrder(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckContainsExactlyInAnyOrder(expected_!, true);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContains(params TValue?[] expected)
         => CheckNotContains([.. expected], false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContains(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, false);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContains(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckNotContains(expected_!, false);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContainsSame(params TValue?[] expected)
         => CheckNotContains([.. expected], true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContainsSame(IEnumerable<TValue?> expected)
         => CheckNotContains(expected, true);
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<TValue?> NotContainsSame(Array expected)
     {
         var expected_ = expected as IEnumerable<TValue?>;
         return CheckNotContains(expected_!, true);
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<object?> Extract(string methodName, params object[] args)
     {
         ArgumentException.ThrowIfNullOrEmpty(methodName);
         return ExtractV(new ValueExtractor(methodName, args));
     }
 
+    /// <inheritdoc/>
     public IEnumerableConstraint<object?> ExtractV(params IValueExtractor[] extractors)
         => new EnumerableAssert<object?>(
             Current?.Select(v =>

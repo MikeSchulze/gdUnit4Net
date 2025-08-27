@@ -7,5 +7,5 @@ public class GdUnit4NetApiGodotBridgeTest
 {
     [TestCase]
     public void Version()
-        => AssertThat(GdUnit4NetApiGodotBridge.Version()).StartsWith("5.0.");
+        => AssertThat(GdUnit4NetApiGodotBridge.Version()).StartsWith("5.1.");
 }

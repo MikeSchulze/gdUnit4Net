@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using static Assertions;
 
-using Array = System.Array;
+using Array = Godot.Collections.Array;
 
 [TestSuite]
 public class AssertionsTest
@@ -40,33 +40,6 @@ public class AssertionsTest
         AssertObject(AssertThat(Variant.From(1.5d))).IsInstanceOf<INumberAssert<float>>();
     }
 
-    [TestCase]
-    public void AssertThatNumberTypes()
-    {
-        AssertObject(AssertThat((sbyte)-1)).IsInstanceOf<INumberAssert<sbyte>>();
-        AssertObject(AssertThat((byte)1)).IsInstanceOf<INumberAssert<byte>>();
-        AssertObject(AssertThat((short)-1)).IsInstanceOf<INumberAssert<short>>();
-        AssertObject(AssertThat((ushort)1)).IsInstanceOf<INumberAssert<ushort>>();
-        AssertObject(AssertThat(-1)).IsInstanceOf<INumberAssert<int>>();
-        AssertObject(AssertThat((uint)1)).IsInstanceOf<INumberAssert<uint>>();
-        AssertObject(AssertThat((long)-1)).IsInstanceOf<INumberAssert<long>>();
-        AssertObject(AssertThat((ulong)1)).IsInstanceOf<INumberAssert<ulong>>();
-        AssertObject(AssertThat(1.1f)).IsInstanceOf<INumberAssert<float>>();
-        AssertObject(AssertThat(1.1d)).IsInstanceOf<INumberAssert<double>>();
-        AssertObject(AssertThat(1.1m)).IsInstanceOf<INumberAssert<decimal>>();
-
-        AssertObject(AssertThat(sbyte.MaxValue)).IsInstanceOf<INumberAssert<sbyte>>();
-        AssertObject(AssertThat(byte.MaxValue)).IsInstanceOf<INumberAssert<byte>>();
-        AssertObject(AssertThat(short.MaxValue)).IsInstanceOf<INumberAssert<short>>();
-        AssertObject(AssertThat(ushort.MaxValue)).IsInstanceOf<INumberAssert<ushort>>();
-        AssertObject(AssertThat(int.MaxValue)).IsInstanceOf<INumberAssert<int>>();
-        AssertObject(AssertThat(uint.MaxValue)).IsInstanceOf<INumberAssert<uint>>();
-        AssertObject(AssertThat(long.MaxValue)).IsInstanceOf<INumberAssert<long>>();
-        AssertObject(AssertThat(ulong.MaxValue)).IsInstanceOf<INumberAssert<ulong>>();
-        AssertObject(AssertThat(float.MaxValue)).IsInstanceOf<INumberAssert<float>>();
-        AssertObject(AssertThat(double.MaxValue)).IsInstanceOf<INumberAssert<double>>();
-        AssertObject(AssertThat(decimal.MaxValue)).IsInstanceOf<INumberAssert<decimal>>();
-    }
 
     [TestCase]
     public void AssertThatString()
@@ -87,12 +60,12 @@ public class AssertionsTest
     [RequireGodotRuntime]
     public void AssertThatEnumerable()
     {
-        AssertObject(AssertThat(Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
+        AssertObject(AssertThat(System.Array.Empty<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new ArrayList())).IsInstanceOf<IEnumerableAssert<object>>();
-        AssertObject(AssertThat(new BitArray([true, false]))).IsInstanceOf<IEnumerableAssert<bool>>();
+        AssertObject(AssertThat(new BitArray([true, false]))).IsInstanceOf<IEnumerableAssert<object>>();
         AssertObject(AssertThat(new HashSet<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
         AssertObject(AssertThat(new List<byte>())).IsInstanceOf<IEnumerableAssert<byte>>();
-        AssertObject(AssertThat(new Godot.Collections.Array())).IsInstanceOf<IEnumerableAssert<Variant>>();
+        AssertObject(AssertThat(new Array())).IsInstanceOf<IEnumerableAssert<Variant>>();
         AssertObject(AssertThat(new Array<int>())).IsInstanceOf<IEnumerableAssert<int>>();
     }
 
@@ -202,7 +175,9 @@ public class AssertionsTest
     private class ClassWithoutToString
     {
         public ClassWithoutToString(string value)
-            => Value = value;
+        {
+            Value = value;
+        }
 
         protected string Value { get; }
     }

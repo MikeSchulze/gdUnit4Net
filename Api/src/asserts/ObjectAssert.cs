@@ -4,9 +4,10 @@ namespace GdUnit4.Asserts;
 
 using Constraints;
 
-internal sealed class ObjectAssert : AssertBase<object, IObjectConstraint>, IObjectAssert
+/// <inheritdoc cref="IObjectAssert{TValue}" />
+public sealed class ObjectAssert<TValue> : AssertBase<TValue, IObjectConstraint<TValue>>, IObjectAssert<TValue>
 {
-    internal ObjectAssert(object? current)
+    internal ObjectAssert(TValue? current)
         : base(current)
     {
         var type = current?.GetType();
@@ -14,28 +15,32 @@ internal sealed class ObjectAssert : AssertBase<object, IObjectConstraint>, IObj
             ThrowTestFailureReport($"ObjectAssert initial error: current is primitive <{type}>", Current, null);
     }
 
-    public IObjectConstraint IsNotInstanceOf<TExpectedType>()
+    /// <inheritdoc />
+    public IObjectConstraint<TValue> IsNotInstanceOf<TExpectedType>()
     {
         if (Current is TExpectedType)
             ThrowTestFailureReport(AssertFailures.NotInstanceOf(typeof(TExpectedType)), Current, typeof(TExpectedType));
         return this;
     }
 
-    public IObjectConstraint IsNotSame(object expected)
+    /// <inheritdoc />
+    public IObjectConstraint<TValue> IsNotSame(object expected)
     {
-        if (Current == expected)
+        if (ReferenceEquals(expected, Current))
             ThrowTestFailureReport(AssertFailures.IsNotSame(expected), Current, expected);
         return this;
     }
 
-    public IObjectConstraint IsSame(object expected)
+    /// <inheritdoc />
+    public IObjectConstraint<TValue> IsSame(object expected)
     {
-        if (Current != expected)
+        if (!ReferenceEquals(expected, Current))
             ThrowTestFailureReport(AssertFailures.IsSame(Current, expected), Current, expected);
         return this;
     }
 
-    public IObjectConstraint IsInstanceOf<TExpectedType>()
+    /// <inheritdoc />
+    public IObjectConstraint<TValue> IsInstanceOf<TExpectedType>()
     {
         if (Current is not TExpectedType)
             ThrowTestFailureReport(AssertFailures.IsInstanceOf(Current?.GetType(), typeof(TExpectedType)), Current, typeof(TExpectedType));

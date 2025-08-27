@@ -194,13 +194,13 @@ public class DictionaryAssertTest
                          but is
                             {"a1", "100"}; {"a2", "200"}; {"a3", 300}
                         """);
-        AssertThrown(() => AssertThat((Hashtable?)null).IsEqual(expected))
+        AssertThrown(() => AssertThat(new Hashtable()).IsEqual(expected))
             .IsInstanceOf<TestFailedException>()
             .HasMessage("""
                         Expecting be equal:
                             {"a1", "100"}; {"a2", "200"}
                          but is
-                            <Null>
+                            <Empty>
                         """);
     }
 

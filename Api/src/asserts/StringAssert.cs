@@ -7,13 +7,15 @@ using Constraints;
 
 using Core.Extensions;
 
-internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStringAssert
+/// <inheritdoc cref="IStringAssert" />
+public sealed class StringAssert : AssertBase<string, IStringConstraint>, IStringAssert
 {
     internal StringAssert(string? current)
         : base(current)
     {
     }
 
+    /// <inheritdoc />
     public IStringConstraint Contains(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -22,6 +24,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint ContainsIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -30,6 +33,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint EndsWith(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -38,6 +42,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint HasLength(int length, IStringAssert.Compare comparator = IStringAssert.Compare.EQUAL)
     {
         if (Current == null)
@@ -78,6 +83,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint IsEmpty()
     {
         if (Current == null || Current.Length > 0)
@@ -85,6 +91,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint IsEqualIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -94,6 +101,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint IsNotEmpty()
     {
         if (Current?.Length == 0)
@@ -101,6 +109,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint IsNotEqualIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -110,6 +119,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint NotContains(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -118,6 +128,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint NotContainsIgnoringCase(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);
@@ -126,6 +137,7 @@ internal sealed class StringAssert : AssertBase<string, IStringConstraint>, IStr
         return this;
     }
 
+    /// <inheritdoc />
     public IStringConstraint StartsWith(string expected)
     {
         ArgumentException.ThrowIfNullOrEmpty(expected);

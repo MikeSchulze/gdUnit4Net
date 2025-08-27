@@ -1,4 +1,4 @@
-namespace Examples;
+namespace Examples.Test;
 
 #if GDUNIT4NET_API_V5
 using GdUnit4;

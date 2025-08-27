@@ -53,6 +53,8 @@ public class AssertEnumerableTest : AssertEnumerableConditions
             .IsEqual(new Array { 1, 2, 3, 4 });
         AssertArray(new Array<Variant> { 1, 2, 4, 5 })
             .IsEqual(new Array<Variant> { 1, 2, 4, 5 });
+        AssertThat(new Array { 1, "hello", 3.14, true })
+            .IsEqual(new Array { 1, "hello", 3.14, true });
 
         AssertThrown(() => AssertArray(new Array<Variant> { 1, 2, 4, 5 })
                 .IsEqual(new Array<Variant> { 1, 2, 3, 4, 2, 5 }))
