@@ -7,6 +7,9 @@ using Constraints;
 /// <summary>
 ///     An Assertion Tool to verify object values.
 /// </summary>
-public interface IObjectAssert : IObjectConstraint, IAssertMessage<IObjectConstraint>
+/// <typeparam name="TValue">
+///     The object type being tested.
+/// </typeparam>
+public interface IObjectAssert<TValue> : IObjectConstraint<TValue>, IAssertMessage<IObjectConstraint<TValue>>
 {
 }

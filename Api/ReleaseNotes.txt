@@ -1,4 +1,4 @@
-v5.0.1
+v5.1.0
 
 🪲 Bug Fixes
 * GD-305: Added missing AppendFailureMessage on assertions
@@ -6,7 +6,8 @@ v5.0.1
 * GD-317: Fixing [IgnoreUntil] is not skipping the test.
 * GD-318: Fixing object deep equal comparison.
 * GD-319: Fixing SceneRunner.Scene() returns disposed object after the scene is auto freed.
-* GD-320: Fixing method Chaining on Asserts breaks type inference after base interface methods
+* GD-320: Fixing method Chaining on Asserts breaks type inference after base interface methods,
+          fixes also dynamic assert bindings (missing public access).
 
 ✨ Improvements
 * GD-311: Verify the Godot binary has C# support before running godot runtime tests to avoid invalid test execution.

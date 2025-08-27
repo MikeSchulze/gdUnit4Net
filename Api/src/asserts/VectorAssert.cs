@@ -15,8 +15,8 @@ using SystemVector2 = System.Numerics.Vector2;
 using SystemVector3 = System.Numerics.Vector3;
 using SystemVector4 = System.Numerics.Vector4;
 
-#pragma warning disable CS1591, SA1600 // Missing XML comment for publicly visible type or member
-internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstraint<TValue>>, IVectorAssert<TValue>
+/// <inheritdoc cref="IVectorAssert{TValue}" />
+public sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstraint<TValue>>, IVectorAssert<TValue>
     where TValue : IEquatable<TValue>
 {
     internal VectorAssert(TValue current)
@@ -24,6 +24,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
     {
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsBetween(TValue min, TValue max)
     {
         if (CompareTo(Current, min) < 0 || CompareTo(Current, max) > 0)
@@ -31,6 +32,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsEqualApprox(TValue expected, TValue approx)
     {
         var (min, max) = MinMax(expected, approx);
@@ -53,6 +55,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsGreater(TValue expected)
     {
         if (CompareTo(Current, expected) <= 0)
@@ -60,6 +63,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsGreaterEqual(TValue expected)
     {
         if (CompareTo(Current, expected) < 0)
@@ -67,6 +71,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsLess(TValue expected)
     {
         if (CompareTo(Current, expected) >= 0)
@@ -74,6 +79,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsLessEqual(TValue expected)
     {
         if (CompareTo(Current, expected) > 0)
@@ -81,6 +87,7 @@ internal sealed class VectorAssert<TValue> : AssertBase<TValue, IVectorConstrain
         return this;
     }
 
+    /// <inheritdoc />
     public IVectorConstraint<TValue> IsNotBetween(TValue min, TValue max)
     {
         if (CompareTo(Current, min) >= 0 && CompareTo(Current, max) <= 0)

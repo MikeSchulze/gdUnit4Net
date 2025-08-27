@@ -1,20 +1,22 @@
-﻿namespace GdUnit4.Tests.Asserts.CSharpTypes;
+﻿namespace Examples.Test.Api.GodotTypes;
 
-using System;
-using System.Collections.Generic;
+using GdUnit4;
 
-using static Assertions;
+using Godot;
+
+using static GdUnit4.Assertions;
 
 [TestSuite]
+[RequireGodotRuntime]
 public class AssertObjectTest
 {
     [TestCase]
     public void TestObjectEqualityByReflection()
     {
         // Create objects with same values
-        var player1 = new Player("Mage", 15, 75.0f, true);
-        var player2 = new Player("Mage", 15, 75.0f, true);
-        var player3 = new Player("Mage", 15, 75.0f, false);
+        var player1 = AutoFree(new Player("Mage", 15, 75.0f, true));
+        var player2 = AutoFree(new Player("Mage", 15, 75.0f, true));
+        var player3 = AutoFree(new Player("Mage", 15, 75.0f, false));
         var player4 = player1; // Same reference
 
         AssertObject(player1).IsNotEqual(player3);
@@ -30,9 +32,9 @@ public class AssertObjectTest
     public void TestIEquatableImplementationIsCalled()
     {
         // Create spy objects that track method calls
-        var spyPlayer1 = new SpyEquatablePlayer("Warrior", 20, 100.0f, true);
-        var spyPlayer2 = new SpyEquatablePlayer("Warrior", 20, 100.0f, true);
-        var spyPlayer3 = new SpyEquatablePlayer("Mage", 15, 75.0f, false);
+        var spyPlayer1 = AutoFree(new SpyEquatablePlayer("Warrior", 20, 100.0f, true));
+        var spyPlayer2 = AutoFree(new SpyEquatablePlayer("Warrior", 20, 100.0f, true));
+        var spyPlayer3 = AutoFree(new SpyEquatablePlayer("Mage", 15, 75.0f, false));
 
         // Test equal objects - should call IEquatable.Equals
         AssertObject(spyPlayer1).IsEqual(spyPlayer2);
@@ -54,8 +56,8 @@ public class AssertObjectTest
     [TestCase]
     public void TestEqualsMethodCallFrequency()
     {
-        var spyPlayer1 = new SpyEquatablePlayer("Paladin", 25, 120.0f, true);
-        var spyPlayer2 = new SpyEquatablePlayer("Paladin", 25, 120.0f, true);
+        var spyPlayer1 = AutoFree(new SpyEquatablePlayer("Paladin", 25, 120.0f, true));
+        var spyPlayer2 = AutoFree(new SpyEquatablePlayer("Paladin", 25, 120.0f, true));
 
         spyPlayer1.ResetSpy();
 
@@ -75,7 +77,7 @@ public class AssertObjectTest
     [TestCase]
     public void TestIEquatableWithNullComparison()
     {
-        var spyPlayer = new SpyEquatablePlayer("Rogue", 18, 80.0f, true);
+        var spyPlayer = AutoFree(new SpyEquatablePlayer("Rogue", 18, 80.0f, true));
 
         // Test comparison with null
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -89,7 +91,7 @@ public class AssertObjectTest
     [TestCase]
     public void TestIEquatableWithSelfComparison()
     {
-        var spyPlayer = new SpyEquatablePlayer("Monk", 22, 90.0f, true);
+        var spyPlayer = AutoFree(new SpyEquatablePlayer("Monk", 22, 90.0f, true));
 
         // Test self comparison (should use reference equality shortcut)
         AssertObject(spyPlayer).IsEqual(spyPlayer);
@@ -101,9 +103,9 @@ public class AssertObjectTest
     [TestCase]
     public void TestIEquatableCallDetails()
     {
-        var spyPlayer1 = new SpyEquatablePlayer("Cleric", 30, 150.0f, true);
-        var spyPlayer2 = new SpyEquatablePlayer("Cleric", 30, 150.0f, true);
-        var spyPlayer3 = new SpyEquatablePlayer("Thief", 12, 60.0f, false);
+        var spyPlayer1 = AutoFree(new SpyEquatablePlayer("Cleric", 30, 150.0f, true));
+        var spyPlayer2 = AutoFree(new SpyEquatablePlayer("Cleric", 30, 150.0f, true));
+        var spyPlayer3 = AutoFree(new SpyEquatablePlayer("Thief", 12, 60.0f, false));
 
         // Test multiple comparisons
         AssertObject(spyPlayer1).IsEqual(spyPlayer2);
@@ -124,9 +126,9 @@ public class AssertObjectTest
     public void TestIEqualityComparerImplementationIsCalled()
     {
         // Create spy objects that track method calls
-        var spyPlayer1 = new SpyEqualityComparerPlayer("Warrior", 20, 100.0f, true);
-        var spyPlayer2 = new SpyEqualityComparerPlayer("Warrior", 20, 100.0f, true);
-        var spyPlayer3 = new SpyEqualityComparerPlayer("Mage", 15, 75.0f, false);
+        var spyPlayer1 = AutoFree(new SpyEqualityComparerPlayer("Warrior", 20, 100.0f, true));
+        var spyPlayer2 = AutoFree(new SpyEqualityComparerPlayer("Warrior", 20, 100.0f, true));
+        var spyPlayer3 = AutoFree(new SpyEqualityComparerPlayer("Mage", 15, 75.0f, false));
 
         // Test equal objects - should call IEquatable.Equals
         AssertObject(spyPlayer1).IsEqual(spyPlayer2);
@@ -146,7 +148,7 @@ public class AssertObjectTest
     }
 }
 
-public class SpyEqualityComparerPlayer(string name, int level, float health, bool isAlive)
+public partial class SpyEqualityComparerPlayer(string name, int level, float health, bool isAlive)
     : Player(name, level, health, isAlive), IEqualityComparer<Player>
 {
     public int EqualsCallCount { get; private set; }
@@ -192,7 +194,7 @@ public class SpyEqualityComparerPlayer(string name, int level, float health, boo
 }
 
 // Spy wrapper that tracks method calls on real objects
-public class SpyEquatablePlayer(string name, int level, float health, bool isAlive)
+public partial class SpyEquatablePlayer(string name, int level, float health, bool isAlive)
     : EquatablePlayer(name, level, health, isAlive)
 {
     private readonly List<EquatablePlayer?> equalsCallHistory = new();
@@ -230,7 +232,7 @@ public class SpyEquatablePlayer(string name, int level, float health, bool isAli
 }
 
 // Enhanced Player class that implements IEquatable
-public class EquatablePlayer(string name, int level, float health, bool isAlive)
+public partial class EquatablePlayer(string name, int level, float health, bool isAlive)
     : Player(name, level, health, isAlive), IEquatable<EquatablePlayer>
 {
     public virtual bool Equals(EquatablePlayer? other)
@@ -249,4 +251,23 @@ public class EquatablePlayer(string name, int level, float health, bool isAlive)
 
     public override int GetHashCode()
         => HashCode.Combine(Level, Health, IsAlive, Name);
+}
+
+// Original Player class (without IEquatable for comparison)
+public partial class Player : Node
+{
+    public Player(string name, int level, float health, bool isAlive)
+    {
+        Name = name;
+        Level = level;
+        Health = health;
+        IsAlive = isAlive;
+    }
+
+    public int Level { get; private set; }
+    public float Health { get; private set; }
+    public bool IsAlive { get; private set; }
+
+    public override string ToString()
+        => $"Player(Name: {Name}, Level: {Level}, Health: {Health}, IsAlive: {IsAlive})";
 }

@@ -1,9 +1,8 @@
-﻿namespace GdUnit4.Tests.Asserts.CSharpTypes;
+﻿namespace Examples.Test.Api.CSharpTypes;
 
-using System;
-using System.Collections.Generic;
+using GdUnit4;
 
-using static Assertions;
+using static GdUnit4.Assertions;
 
 [TestSuite]
 public class AssertObjectTest

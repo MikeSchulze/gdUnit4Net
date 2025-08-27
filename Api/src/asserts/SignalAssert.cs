@@ -12,16 +12,18 @@ using Core.Signals;
 
 using Godot;
 
-internal sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, ISignalAssert
+/// <inheritdoc cref="ISignalAssert" />
+public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, ISignalAssert
 {
     internal SignalAssert(GodotObject current)
         : base(current)
         => GodotSignalCollector.Instance.RegisterEmitter(current);
 
-    // Is just a fake method that is called to register the monitor on the emitter, which is done in the constructor
+    /// <inheritdoc />
     public ISignalConstraint StartMonitoring()
         => this;
 
+    /// <inheritdoc />
     public async Task<ISignalConstraint> IsEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
@@ -34,6 +36,7 @@ internal sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>,
         return this;
     }
 
+    /// <inheritdoc />
     public async Task<ISignalConstraint> IsNotEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
@@ -46,6 +49,7 @@ internal sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>,
         return this;
     }
 
+    /// <inheritdoc />
     public ISignalConstraint IsSignalExists(string signal)
     {
         _ = IsNotNull();
@@ -54,6 +58,7 @@ internal sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>,
         return this;
     }
 
+    /// <inheritdoc />
     public ISignalConstraint IsCountEmitted(int expectedCount, string signal, params Variant[] args)
     {
         _ = IsNotNull();

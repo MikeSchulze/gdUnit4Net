@@ -45,4 +45,13 @@ public interface ISignalConstraint : IAssertBase<GodotObject, ISignalConstraint>
     /// <param name="signal">The signal name.</param>
     /// <returns>ISignalAssert.</returns>
     ISignalConstraint IsSignalExists(string signal);
+
+    /// <summary>
+    ///     Verifies if the signal emits counted.
+    /// </summary>
+    /// <param name="expectedCount">The expected count how often the signal should be emitted.</param>
+    /// <param name="signal">The signal name.</param>
+    /// <param name="args">Optional signal arguments.</param>
+    /// <returns>ISignalAssert.</returns>
+    ISignalConstraint IsCountEmitted(int expectedCount, string signal, params Variant[] args);
 }
