@@ -8,6 +8,7 @@ v5.1.0
 * GD-319: Fixing SceneRunner.Scene() returns disposed object after the scene is auto freed.
 * GD-320: Fixing method Chaining on Asserts breaks type inference after base interface methods,
           fixes also dynamic assert bindings (missing public access).
+* GD-331: Fixing SceneRunner SimulateKey to provide missing Unicode
 
 ✨ Improvements
 * GD-311: Verify the Godot binary has C# support before running godot runtime tests to avoid invalid test execution.

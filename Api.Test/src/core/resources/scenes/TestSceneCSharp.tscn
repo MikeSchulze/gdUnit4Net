@@ -44,9 +44,11 @@ text = "Test 3"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
 layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="Panel1" type="ColorRect" parent="VBoxContainer/PanelContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
@@ -98,6 +100,14 @@ default_color = Color(0.0392157, 1, 0.278431, 1)
 points = PackedVector2Array(40, 0, 60, 0)
 width = 30.0
 default_color = Color(1, 0.0392157, 0.247059, 1)
+
+[node name="TextInput" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 475.0
+offset_top = 227.0
+offset_right = 807.0
+offset_bottom = 315.0
 
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/test1" to="." method="OnTestPressed" binds= [1]]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/test2" to="." method="OnTestPressed" binds= [2]]

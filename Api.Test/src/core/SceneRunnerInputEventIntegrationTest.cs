@@ -741,6 +741,33 @@ public sealed class SceneRunnerInputEventIntegrationTest
         }
     }
 
+    /// <summary>
+    ///     Tests text input functionality.
+    ///     Validates keyboard input in text controls.
+    /// </summary>
+    /// <returns>
+    ///     A Task representing the asynchronous test operation.
+    /// </returns>
+    [TestCase]
+    public async Task TextInputProcessing()
+    {
+        var lineEdit = sceneRunner.FindChild("TextInput") as LineEdit
+                       ?? throw new InvalidOperationException("Could not find TextInput");
+
+        // Focus the text input and clear any existing content
+        lineEdit.GrabFocus();
+        AssertThat(lineEdit.HasFocus()).IsTrue();
+        lineEdit.Text = string.Empty;
+
+        // Type individual characters
+        sceneRunner.SimulateKeyPressed(Key.H);
+        sceneRunner.SimulateKeyPressed(Key.I);
+        await sceneRunner.AwaitInputProcessed();
+
+        // Verify text accumulation
+        AssertThat(lineEdit.Text).IsEqual("HI");
+    }
+
     [TestCase]
     public async Task MouseDragAndDrop()
     {
