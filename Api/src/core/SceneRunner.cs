@@ -97,6 +97,7 @@ internal sealed class SceneRunner : ISceneRunner
             Pressed = true,
             Keycode = keyCode,
             PhysicalKeycode = keyCode,
+            Unicode = (long)keyCode,
             AltPressed = keyCode == Key.Alt,
             ShiftPressed = shiftPressed || keyCode == Key.Shift,
             CtrlPressed = controlPressed || keyCode == Key.Ctrl
@@ -121,6 +122,7 @@ internal sealed class SceneRunner : ISceneRunner
             Pressed = false,
             Keycode = keyCode,
             PhysicalKeycode = keyCode,
+            Unicode = (long)keyCode,
             AltPressed = keyCode == Key.Alt,
             ShiftPressed = shiftPressed || keyCode == Key.Shift,
             CtrlPressed = controlPressed || keyCode == Key.Ctrl
