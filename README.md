@@ -75,10 +75,16 @@ powerful [test filtering capabilities](TestAdapter/TestFilterGuide.md) for selec
 
 For compile-time validation of your test code, check out the [gdUnit4.analyzers README](Analyzers/README.md).
 
-### Example Project
+# Examples
 
-This [example project](https://github.com/MikeSchulze/gdUnit4Net/tree/master/Example) gives you a short insight into how to set up a Godot project to use the GdUnit4 API and test
-adapter. It demonstrates the new v5.0 features including selective Godot runtime usage and advanced testing capabilities.
+The [gdUnit4NetExamples](https://github.com/MikeSchulze/gdUnit4NetExamples) repository provides comprehensive example projects
+demonstrating both basic and advanced GdUnit4Net usage patterns. It includes foundational examples for newcomers learning unit testing fundamentals, 
+as well as sophisticated examples covering professional configurations, complex testing scenarios, input simulation, signal testing, 
+and exception handling. These working examples showcase GdUnit4Net v5.0 features including selective Godot runtime usage, advanced scene testing, 
+and production-ready test setups.
+
+
+### Short Example
 
 ```csharp
 namespace GdUnit4.Tests
