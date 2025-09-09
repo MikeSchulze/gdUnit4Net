@@ -92,6 +92,7 @@ internal static class TestCaseDiscoverer
     public static IReadOnlyList<TestCaseDescriptor> DiscoverTestCasesFromScript(CSharpScript sourceScript)
     {
         ArgumentNullException.ThrowIfNull(sourceScript);
+        Logger.LogInfo($"Discover tests for script: {sourceScript.ResourcePath}");
 
         try
         {
@@ -457,6 +458,6 @@ internal static class TestCaseDiscoverer
         => type.Methods.Any(method =>
         {
             var navData = GetNavigationDataOrDefault(method);
-            return navData.CodeFilePath == sourceScriptPath;
+            return string.Equals(navData.CodeFilePath, sourceScriptPath, StringComparison.OrdinalIgnoreCase);
         });
 }
