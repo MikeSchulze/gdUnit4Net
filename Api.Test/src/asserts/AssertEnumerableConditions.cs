@@ -126,6 +126,9 @@ public class AssertEnumerableConditions
                 .Replace("$obj5", ValueFormatter.AsString(obj5)));
     }
 
+    protected void ContainsUsingDictionaryWithDifferentOrder(dynamic current, dynamic expected)
+        => AssertArray(current).HasSize(1).Contains(expected);
+
     protected void DoContainsSame(dynamic current, dynamic obj5)
     {
         var obj1 = current[0];

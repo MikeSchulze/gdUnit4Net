@@ -67,6 +67,44 @@ internal static class GodotObjectExtensions
         return DeepEquals(left, right, compareMode);
     }
 
+    internal static bool DictionaryEquals(this IDictionary left, IDictionary right, Mode compareMode)
+    {
+        if (left.Count != right.Count)
+            return false;
+
+        return left.Keys.Cast<object>()
+            .All(key => right.Contains(key) && left[key].VariantEquals(right[key], compareMode));
+    }
+
+    internal static bool TypedDictionaryEquals(object left, object right, Mode compareMode)
+    {
+        var type1 = left.GetType();
+        var type2 = right.GetType();
+        var count1 = (int)type1.GetProperty("Count")!.GetValue(left)!;
+        var count2 = (int)type2.GetProperty("Count")!.GetValue(right)!;
+
+        if (count1 != count2)
+            return false;
+
+        var keys = (IEnumerable)type1.GetProperty("Keys")!.GetValue(left)!;
+        var leftValues = type1.GetProperty("Item");
+        var rightValues = type2.GetProperty("Item");
+
+        if (leftValues == null || rightValues == null)
+            return false;
+
+        foreach (var key in keys)
+        {
+            var leftValue = leftValues.GetValue(left, [key]);
+            var rightValue = rightValues.GetValue(right, [key]);
+
+            if (!leftValue.VariantEquals(rightValue, compareMode))
+                return false;
+        }
+
+        return true;
+    }
+
     internal static Array ToGodotArray(this object[] args)
         => ToGodotArray((IEnumerable)args);
 
@@ -214,9 +252,16 @@ internal static class GodotObjectExtensions
             return result is bool b && b;
         }
 
+        // Handle dictionary comparison first
+        if (obj1 is IDictionary dict1 && obj2 is IDictionary dict2)
+            return DictionaryEquals(dict1, dict2, compareMode);
+
+        if (IsGenericDictionary(obj1) && IsGenericDictionary(obj2))
+            return TypedDictionaryEquals(obj1, obj2, compareMode);
+
         // Handle collections
         if (obj1 is IEnumerable enum1 && obj2 is IEnumerable enum2)
-            return CompareEnumerables(enum1, enum2, compareMode, visited);
+            return CompareEnumerable(enum1, enum2, compareMode, visited);
 
         // Compare all fields
         var fields = type1.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
@@ -261,7 +306,7 @@ internal static class GodotObjectExtensions
         return true;
     }
 
-    private static bool CompareEnumerables(IEnumerable enum1, IEnumerable enum2, Mode compareMode, HashSet<object> visited)
+    private static bool CompareEnumerable(IEnumerable enum1, IEnumerable enum2, Mode compareMode, HashSet<object> visited)
     {
         var list1 = enum1.Cast<object>().ToList();
         var list2 = enum2.Cast<object>().ToList();
@@ -291,4 +336,9 @@ internal static class GodotObjectExtensions
             .Any(i =>
                 i.IsGenericType
                 && i.GetGenericTypeDefinition() == typeof(IEqualityComparer<>));
+
+    private static bool IsGenericDictionary(object obj)
+        => obj.GetType()
+            .GetInterfaces()
+            .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
 }
