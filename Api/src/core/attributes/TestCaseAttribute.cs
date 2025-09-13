@@ -5,8 +5,6 @@
 // Need to be placed in the root namespace to be accessible by the test runner.
 namespace GdUnit4;
 
-using System;
-
 /// <summary>
 ///     Attribute used to define test cases, including both simple and parameterized tests.
 ///     This attribute can be used to mark a method as a test or to execute a test method multiple times with different input arguments.
@@ -40,9 +38,9 @@ public sealed class TestCaseAttribute : TestStageAttribute
     ///     Initializes a new instance of the <see cref="TestCaseAttribute" /> class with the specified arguments.
     /// </summary>
     /// <param name="arguments">The arguments to pass to the test method during execution.</param>
-    public TestCaseAttribute(params object?[] arguments)
+    public TestCaseAttribute(params object?[]? arguments)
         : base(string.Empty, -1)
-        => Arguments = arguments;
+        => Arguments = arguments ?? [null];
 
     /// <summary>
     ///     Gets or sets the starting point of random values by given seed.
