@@ -194,6 +194,35 @@ public class AssertEnumerableTest : AssertEnumerableConditions
         => DoContains(current, obj5);
 
     [TestCase]
+    public void ContainsUsingDictionaryWithDifferentOrder()
+        => ContainsUsingDictionaryWithDifferentOrder(new object[]
+        {
+            new Dictionary<string, object>
+            {
+                ["managed_type"] = "gdUnit4.addons.gdUnit4.test.dotnet.ExampleTestSuite",
+                ["test_name"] = "IsFoo",
+                ["source_file"] = "res://addons/gdUnit4/test/dotnet/ExampleTestSuite.cs",
+                ["line_number"] = 16,
+                ["attribute_index"] = 0,
+                ["require_godot_runtime"] = true,
+                ["code_file_path"] = "res://addons/gdUnit4/test/dotnet/ExampleTestSuite.cs",
+                ["fully_qualified_name"] = "gdUnit4.addons.gdUnit4.test.dotnet.ExampleTestSuite.IsFoo",
+                ["simple_name"] = "IsFoo"
+            }
+        }, new Dictionary<string, object>
+        {
+            ["test_name"] = "IsFoo",
+            ["source_file"] = "res://addons/gdUnit4/test/dotnet/ExampleTestSuite.cs",
+            ["line_number"] = 16,
+            ["attribute_index"] = 0,
+            ["require_godot_runtime"] = true,
+            ["code_file_path"] = "res://addons/gdUnit4/test/dotnet/ExampleTestSuite.cs",
+            ["fully_qualified_name"] = "gdUnit4.addons.gdUnit4.test.dotnet.ExampleTestSuite.IsFoo",
+            ["simple_name"] = "IsFoo",
+            ["managed_type"] = "gdUnit4.addons.gdUnit4.test.dotnet.ExampleTestSuite"
+        });
+
+    [TestCase]
     public void ContainsSame()
     {
         var current = new object[] { new SimpleObject("A1"), new SimpleObject("A2"), new SimpleObject("A3"), new SimpleObject("A4") };
