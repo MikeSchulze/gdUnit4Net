@@ -9,6 +9,7 @@ v5.1.0
 * GD-320: Fixing method Chaining on Asserts breaks type inference after base interface methods,
           fixes also dynamic assert bindings (missing public access).
 * GD-331: Fixing SceneRunner SimulateKey to provide missing Unicode
+* GD-333: Fixing broken Signal assertion task handling
 * GD-339: Fixing to allow single `NULL` value as TestCase argument e.g `[TestCase(null)]`
 * GD-340: Fixing GdUnit4NetApiGodotBridge test discovery on linux paths
 

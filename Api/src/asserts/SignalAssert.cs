@@ -30,34 +30,14 @@ public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, I
         _ = IsSignalExists(signal);
 
         var stackTrace = new StackTrace(true);
-        var signalCancellationToken = new CancellationTokenSource();
-        var continuation = IsEmittedTask(signalCancellationToken, signal, args)
-            .ContinueWith<ISignalConstraint>(
-                antecedent =>
-                {
-                    var isEmitted = antecedent.Result;
-                    if (!isEmitted)
-                        ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), stackTrace);
-                    return this;
-                },
-                CancellationToken.None,
-                TaskContinuationOptions.ExecuteSynchronously,
-                TaskScheduler.Default);
-
-        GodotSignalCollector.TaskCancellations[continuation.Id] = signalCancellationToken;
-
-        // Cleanup continuation using captured taskId
-        _ = continuation.ContinueWith(
-            _ =>
+        return BuildSignalTask(
+            signal,
+            args,
+            isEmitted =>
             {
-                if (GodotSignalCollector.TaskCancellations.TryRemove(continuation.Id, out var cts))
-                    cts.Dispose();
-            },
-            CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
-            TaskScheduler.Default);
-
-        return continuation;
+                if (!isEmitted)
+                    ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), stackTrace);
+            });
     }
 
     /// <inheritdoc />
@@ -67,33 +47,14 @@ public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, I
         _ = IsSignalExists(signal);
 
         var stackTrace = new StackTrace(true);
-        var signalCancellationToken = new CancellationTokenSource();
-        var continuation = IsEmittedTask(signalCancellationToken, signal, args)
-            .ContinueWith<ISignalConstraint>(
-                antecedent =>
-                {
-                    var isEmitted = antecedent.Result;
-                    if (isEmitted)
-                        ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), stackTrace);
-                    return this;
-                },
-                CancellationToken.None,
-                TaskContinuationOptions.ExecuteSynchronously,
-                TaskScheduler.Default);
-
-        GodotSignalCollector.TaskCancellations[continuation.Id] = signalCancellationToken;
-
-        // Cleanup continuation using captured taskId
-        _ = continuation.ContinueWith(
-            _ =>
+        return BuildSignalTask(
+            signal,
+            args,
+            isEmitted =>
             {
-                if (GodotSignalCollector.TaskCancellations.TryRemove(continuation.Id, out var cts))
-                    cts.Dispose();
-            },
-            CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
-            TaskScheduler.Default);
-        return continuation;
+                if (isEmitted)
+                    ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), stackTrace);
+            });
     }
 
     /// <inheritdoc />
@@ -116,8 +77,34 @@ public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, I
         return this;
     }
 
-    private Task<bool> IsEmittedTask(CancellationTokenSource cancellationTokenSource, string signal, params Variant[] args)
-        => GodotSignalCollector.Instance.IsEmitted(cancellationTokenSource, Current!, signal, args);
+    private Task<ISignalConstraint> BuildSignalTask(string signal, Variant[] args, Action<bool> validate)
+    {
+        var signalCancellationToken = new CancellationTokenSource();
+        var continuation = GodotSignalCollector.Instance.IsEmitted(signalCancellationToken, Current!, signal, args)
+            .ContinueWith<ISignalConstraint>(
+                antecedent =>
+                {
+                    validate.Invoke(antecedent.Result);
+                    return this;
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+        GodotSignalCollector.TaskCancellations[continuation.Id] = signalCancellationToken;
+
+        // Cleanup continuation using captured taskId
+        _ = continuation.ContinueWith(
+            _ =>
+            {
+                if (GodotSignalCollector.TaskCancellations.TryRemove(continuation.Id, out var cts))
+                    cts.Dispose();
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+        return continuation;
+    }
 
     private void ThrowTestFailureReport(string message, StackTrace stackTrace)
     {

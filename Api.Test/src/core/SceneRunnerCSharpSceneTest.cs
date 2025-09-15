@@ -337,7 +337,7 @@ public sealed class SceneRunnerCSharpSceneTest
     }
 
     [TestCase]
-    public async Task SignalAwaitSignal()
+    public async Task SceneAwaitSignal()
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
         var scene = runner.Scene() as TestSceneWithButton;
@@ -353,7 +353,7 @@ public sealed class SceneRunnerCSharpSceneTest
     }
 
     [TestCase]
-    public async Task SignalMonitorSequence()
+    public async Task MonitorSignalSequence()
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
         var scene = runner.Scene() as TestSceneWithButton;
