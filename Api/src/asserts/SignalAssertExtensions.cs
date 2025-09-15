@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 
 using Constraints;
 
+using Core.Signals;
+
 /// <summary>
 ///     Extension methods for signal assertions to provide additional functionality.
 /// </summary>
@@ -28,7 +30,6 @@ public static class SignalAssertExtensions
     {
         Debug.Assert(task != null, nameof(task) + " != null");
         using var timeoutCts = new CancellationTokenSource();
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token);
         try
         {
             var timeoutTask = Task.Delay(timeoutMillis, timeoutCts.Token);
@@ -36,15 +37,19 @@ public static class SignalAssertExtensions
             if (completedTask == task)
                 return await task.ConfigureAwait(false);
 
-            var data = Thread.GetData(Thread.GetNamedDataSlot("SignalCancellationToken"));
-            if (data is CancellationTokenSource cancelToken)
-                cancelToken.Cancel();
+            if (GodotSignalCollector.TaskCancellations.TryRemove(task.Id, out var cts))
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+
+            Debug.Assert(cts != null, $"Cant get cancellation token for task {task.Id}");
+
             return await task.ConfigureAwait(false);
         }
         finally
         {
             timeoutCts.Cancel();
-            linkedCts.Cancel();
         }
     }
 }
