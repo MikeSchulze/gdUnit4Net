@@ -12,6 +12,8 @@ using GdUnit4.Core.Execution.Exceptions;
 
 using Godot;
 
+using Resources.Scenes;
+
 using static Assertions;
 
 [RequireGodotRuntime]
@@ -332,6 +334,47 @@ public sealed class SceneRunnerCSharpSceneTest
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, new Color(1, 0, 0)); // Red
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, new Color(0, 0, 1)); // Blue
         await sceneRunner.AwaitSignal(TestScene.SignalName.PanelColorChange, box1, new Color(0, 1, 0)); // Green
+    }
+
+    [TestCase]
+    public async Task SceneAwaitSignal()
+    {
+        var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
+        var scene = runner.Scene() as TestSceneWithButton;
+
+        await ISceneRunner.SyncProcessFrame;
+
+        // Trigger start game
+        AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Initializing);
+        scene.OnButtonPressed();
+
+        // The game will stop after around 300ms
+        await scene.AwaitSignal(TestSceneWithButton.SignalName.GameStopped).WithTimeout(300);
+    }
+
+    [TestCase]
+    public async Task MonitorSignalSequence()
+    {
+        var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
+        var scene = runner.Scene() as TestSceneWithButton;
+        var monitor = AssertSignal(scene).StartMonitoring();
+
+        AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Initializing);
+
+        // Trigger game start
+        scene.OnButtonPressed();
+
+        // game start signal should be emitted and the state is running
+        await monitor.IsEmitted(TestSceneWithButton.SignalName.GameStarted).WithTimeout(1);
+        AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Running);
+
+        // the game will run about 500ms, so no stop signal is emitted yet
+        await monitor.IsNotEmitted(TestSceneWithButton.SignalName.GameStopped).WithTimeout(1);
+        AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Running);
+
+        // The game will stop after around 300ms
+        await monitor.IsEmitted(TestSceneWithButton.SignalName.GameStopped).WithTimeout(300);
+        AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Stopped);
     }
 
     [TestCase]

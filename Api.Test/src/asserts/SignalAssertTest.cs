@@ -36,6 +36,7 @@ public partial class SignalAssertTest
         await AssertThrown(AssertSignal(node).IsEmitted("SignalC", "abc", 101).WithTimeout(200))
             .ContinueWith(result => result.Result?
                 .IsInstanceOf<TestFailedException>()
+                .HasFileLineNumber(36)
                 .HasMessage("""
                     Expecting do emitting signal:
                         "SignalC(["abc", 101])"
@@ -205,7 +206,7 @@ public partial class SignalAssertTest
                 .OverrideFailureMessage("custom error")
                 .IsSignalExists("foo"))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(204)
+            .HasFileLineNumber(205)
             .HasMessage("custom error");
     }
 
@@ -217,7 +218,7 @@ public partial class SignalAssertTest
                 .AppendFailureMessage("custom data")
                 .IsSignalExists("foo"))
             .IsInstanceOf<TestFailedException>()
-            .HasFileLineNumber(216)
+            .HasFileLineNumber(217)
             .HasMessage($"""
                          Expecting signal exists:
                              "foo()"

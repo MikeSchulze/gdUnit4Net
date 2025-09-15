@@ -24,29 +24,37 @@ public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, I
         => this;
 
     /// <inheritdoc />
-    public async Task<ISignalConstraint> IsEmitted(string signal, params Variant[] args)
+    public Task<ISignalConstraint> IsEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
         _ = IsSignalExists(signal);
 
-        var lineNumber = new StackFrame(3, true).GetFileLineNumber();
-        var isEmitted = await IsEmittedTask(signal, args).ConfigureAwait(true);
-        if (!isEmitted)
-            ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), lineNumber);
-        return this;
+        var stackTrace = new StackTrace(true);
+        return BuildSignalTask(
+            signal,
+            args,
+            isEmitted =>
+            {
+                if (!isEmitted)
+                    ThrowTestFailureReport(AssertFailures.IsEmitted(Current, signal, args), stackTrace);
+            });
     }
 
     /// <inheritdoc />
-    public async Task<ISignalConstraint> IsNotEmitted(string signal, params Variant[] args)
+    public Task<ISignalConstraint> IsNotEmitted(string signal, params Variant[] args)
     {
         _ = IsNotNull();
         _ = IsSignalExists(signal);
 
-        var lineNumber = new StackFrame(3, true).GetFileLineNumber();
-        var isEmitted = await IsEmittedTask(signal, args).ConfigureAwait(true);
-        if (isEmitted)
-            ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), lineNumber);
-        return this;
+        var stackTrace = new StackTrace(true);
+        return BuildSignalTask(
+            signal,
+            args,
+            isEmitted =>
+            {
+                if (isEmitted)
+                    ThrowTestFailureReport(AssertFailures.IsNotEmitted(Current, signal, args), stackTrace);
+            });
     }
 
     /// <inheritdoc />
@@ -69,12 +77,38 @@ public sealed class SignalAssert : AssertBase<GodotObject, ISignalConstraint>, I
         return this;
     }
 
-    private async Task<bool> IsEmittedTask(string signal, params Variant[] args)
-        => await GodotSignalCollector.Instance.IsEmitted(Current!, signal, args).ConfigureAwait(true);
+    private Task<ISignalConstraint> BuildSignalTask(string signal, Variant[] args, Action<bool> validate)
+    {
+        var signalCancellationToken = new CancellationTokenSource();
+        var continuation = GodotSignalCollector.Instance.IsEmitted(signalCancellationToken, Current!, signal, args)
+            .ContinueWith<ISignalConstraint>(
+                antecedent =>
+                {
+                    validate.Invoke(antecedent.Result);
+                    return this;
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
 
-    private void ThrowTestFailureReport(string message, int lineNumber)
+        GodotSignalCollector.TaskCancellations[continuation.Id] = signalCancellationToken;
+
+        // Cleanup continuation using captured taskId
+        _ = continuation.ContinueWith(
+            _ =>
+            {
+                if (GodotSignalCollector.TaskCancellations.TryRemove(continuation.Id, out var cts))
+                    cts.Dispose();
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+        return continuation;
+    }
+
+    private void ThrowTestFailureReport(string message, StackTrace stackTrace)
     {
         CurrentFailureMessage = CustomFailureMessage ?? message;
-        throw new TestFailedException(CurrentFailureMessage, lineNumber);
+        throw new TestFailedException(CurrentFailureMessage, stackTrace);
     }
 }

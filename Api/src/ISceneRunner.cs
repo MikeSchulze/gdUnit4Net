@@ -256,10 +256,9 @@ public interface ISceneRunner : IDisposable
     /// <param name="signal">The name of the signal to wait.</param>
     /// <param name="args">An optional set of signal arguments.</param>
     /// <returns>Task to wait.</returns>
-    static async Task<ISignalConstraint> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
-        await new SignalAssert(source)
-            .IsEmitted(signal, args)
-            .ConfigureAwait(true);
+    static Task<ISignalConstraint> AwaitSignalOn(GodotObject source, string signal, params Variant[] args) =>
+        new SignalAssert(source)
+            .IsEmitted(signal, args);
 
     /// <summary>
     ///     Waits for a specific number of milliseconds.

@@ -85,10 +85,26 @@ public sealed class TestFailedException : Exception
     ///     it reaches a method marked with <see cref="TestCaseAttribute" />.
     /// </remarks>
     public TestFailedException(string message)
+        : this(message, new StackTrace(true))
+    {
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TestFailedException" /> class with automatic stack trace filtering.
+    /// </summary>
+    /// <param name="message">The message that describes the test failure.</param>
+    /// <param name="stackTrace">The current stack trace.</param>
+    /// <remarks>
+    ///     This constructor performs intelligent stack trace filtering to show only test-related frames,
+    ///     excluding GdUnit4 framework internals and system calls. It stops collecting frames when
+    ///     it reaches a method marked with <see cref="TestCaseAttribute" />.
+    /// </remarks>
+    public TestFailedException(string message, StackTrace stackTrace)
         : base(message)
     {
         var stackFrames = new StringBuilder();
-        foreach (var frame in new StackTrace(true).GetFrames())
+        Debug.Assert(stackTrace != null, nameof(stackTrace) + " != null");
+        foreach (var frame in stackTrace.GetFrames())
         {
             var mb = frame.GetMethod();
 

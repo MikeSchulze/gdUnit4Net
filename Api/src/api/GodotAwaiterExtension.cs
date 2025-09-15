@@ -47,8 +47,8 @@ public static class GodotAwaiterExtension
     ///     The signal monitoring continues until the expected signal is emitted or the operation is cancelled.
     ///     Use <see cref="WithTimeout{TVariant}" /> to prevent indefinite waiting.
     /// </remarks>
-    public static async Task<ISignalConstraint> AwaitSignal(this Node emitter, string signal, params Variant[] args)
-        => await new SignalAssert(emitter).IsEmitted(signal, args).ConfigureAwait(true);
+    public static Task<ISignalConstraint> AwaitSignal(this Node emitter, string signal, params Variant[] args)
+        => new SignalAssert(emitter).IsEmitted(signal, args);
 
     /// <summary>
     ///     Adds a timeout to any awaitable task, preventing indefinite waiting.

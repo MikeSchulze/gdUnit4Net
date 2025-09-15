@@ -19,6 +19,8 @@ internal sealed partial class GodotSignalCollector : RefCounted
 {
     internal const string SIGNAL_CANCELLATION_TOKEN_SLOT_NAME = "SignalCancellationToken";
 
+    internal static readonly ConcurrentDictionary<int, CancellationTokenSource> TaskCancellations = new();
+
     public static GodotSignalCollector Instance { get; } = new();
 
     internal ConcurrentDictionary<GodotObject, ConcurrentDictionary<string, ConcurrentBag<Variant[]>>> CollectedSignals { get; } = new();
@@ -63,56 +65,48 @@ internal sealed partial class GodotSignalCollector : RefCounted
     internal bool IsSignalCollecting(GodotObject emitter, string signalName)
         => CollectedSignals.ContainsKey(emitter) && CollectedSignals[emitter].ContainsKey(signalName);
 
-    internal async Task<bool> IsEmitted(GodotObject emitter, string signal, Variant[] args)
-    {
-        try
-        {
-            using var signalCancellationToken = new CancellationTokenSource();
-            Thread.SetData(Thread.GetNamedDataSlot(SIGNAL_CANCELLATION_TOKEN_SLOT_NAME), signalCancellationToken);
-            return await Task.Run(
-                () =>
+    internal Task<bool> IsEmitted(CancellationTokenSource cancellationTokenSource, GodotObject emitter, string signal, Variant[] args)
+        => Task.Run(
+            () =>
+            {
+                try
                 {
-                    try
+                    var (needsCallProcessing, needsCallPhysicsProcessing) = DoesNodeProcessing(emitter);
+                    var delta = 10.0d;
+
+                    while (IsInstanceValid(emitter) && !Match(emitter, signal, args))
                     {
-                        var (needsCallProcessing, needsCallPhysicsProcessing) = DoesNodeProcessing(emitter);
-                        const int sleepTimeInMs = 10;
-                        while (IsInstanceValid(emitter) && !Match(emitter, signal, args))
-                        {
-                            Thread.Sleep(sleepTimeInMs);
+                        var ticks = Time.GetTicksUsec() / 1000.0;
 
-                            if (needsCallProcessing && IsInstanceValid(emitter))
-                                _ = emitter.CallDeferred("_Process", sleepTimeInMs / 1000.0);
+                        if (needsCallProcessing && IsInstanceValid(emitter))
+                            _ = emitter.Call("_Process", delta);
 
-                            if (needsCallPhysicsProcessing && IsInstanceValid(emitter))
-                                _ = emitter.CallDeferred("_PhysicsProcess", sleepTimeInMs / 1000.0);
+                        if (needsCallPhysicsProcessing && IsInstanceValid(emitter))
+                            _ = emitter.Call("_PhysicsProcess", delta);
 
-                            // ReSharper disable once AccessToDisposedClosure
-                            if (signalCancellationToken.IsCancellationRequested)
-                                return false;
-                        }
+                        delta = (Time.GetTicksUsec() / 1000.0) - ticks;
 
-                        return true;
+                        // ReSharper disable once AccessToDisposedClosure
+                        if (cancellationTokenSource.IsCancellationRequested)
+                            return false;
                     }
+
+                    return true;
+                }
 #pragma warning disable CA1031
-                    catch (Exception e)
+                catch (Exception e)
 #pragma warning restore CA1031
-                    {
-                        WriteLine(e.Message);
-                        WriteLine(e.StackTrace);
-                        return false;
-                    }
-                    finally
-                    {
-                        ResetCollectedSignals(emitter);
-                    }
-                },
-                signalCancellationToken.Token).ConfigureAwait(true);
-        }
-        finally
-        {
-            Thread.SetData(Thread.GetNamedDataSlot(SIGNAL_CANCELLATION_TOKEN_SLOT_NAME), null);
-        }
-    }
+                {
+                    WriteLine(e.Message);
+                    WriteLine(e.StackTrace);
+                    return false;
+                }
+                finally
+                {
+                    ResetCollectedSignals(emitter);
+                }
+            },
+            cancellationTokenSource.Token);
 
     internal void Clean()
     {

@@ -310,10 +310,9 @@ internal sealed class SceneRunner : ISceneRunner
         IsDisposed = true;
     }
 
-    public async Task<ISignalConstraint> AwaitSignal(string signal, params Variant[] args) =>
-        await new SignalAssert(currentScene)
-            .IsEmitted(signal, args)
-            .ConfigureAwait(true);
+    public Task<ISignalConstraint> AwaitSignal(string signal, params Variant[] args) =>
+        new SignalAssert(currentScene)
+            .IsEmitted(signal, args);
 
     internal static MouseButtonMask ToMouseButtonMask(MouseButton button)
     {
