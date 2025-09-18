@@ -12,7 +12,6 @@ using Asserts;
 using Constraints;
 
 using Core.Execution.Exceptions;
-using Core.Extensions;
 using Core.Signals;
 
 using Godot;
@@ -103,16 +102,19 @@ public static class GodotAwaiterExtension
             if (completedTask == task)
                 return await task.ConfigureAwait(false);
 
-            var data = Thread.GetData(Thread.GetNamedDataSlot(GodotSignalCollector.SIGNAL_CANCELLATION_TOKEN_SLOT_NAME));
-            if (data is CancellationTokenSource { IsCancellationRequested: false } signalCancelToken)
-                signalCancelToken.Cancel();
-            else
+            if (GodotSignalCollector.TaskCancellations.TryRemove(task.Id, out var cts))
             {
-                var lineNumber = GdUnitExtensions.GetWithTimeoutLineNumber();
-                throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", lineNumber);
+                cts.Cancel();
+                cts.Dispose();
             }
 
+            Debug.Assert(cts != null, $"Cant get cancellation token for task {task.Id}");
+
             return await task.ConfigureAwait(false);
+        }
+        catch (ExecutionTimeoutException e)
+        {
+            throw new ExecutionTimeoutException($"Assertion: Timed out after {timeoutMillis}ms.", e);
         }
         finally
         {

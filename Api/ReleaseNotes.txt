@@ -12,6 +12,7 @@ v5.1.0
 * GD-333: Fixing broken Signal assertion task handling
 * GD-339: Fixing to allow single `NULL` value as TestCase argument e.g `[TestCase(null)]`
 * GD-340: Fixing GdUnit4NetApiGodotBridge test discovery on linux paths
+* GD-348: Fixing task handling using AwaitMethod with WithTimeout
 
 ✨ Improvements
 * GD-311: Verify the Godot binary has C# support before running godot runtime tests to avoid invalid test execution.

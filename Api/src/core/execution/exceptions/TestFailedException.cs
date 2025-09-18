@@ -27,7 +27,7 @@ using System.Text;
 ///     </para>
 /// </remarks>
 [Serializable]
-public sealed class TestFailedException : Exception
+public class TestFailedException : Exception
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="TestFailedException" /> class.
@@ -168,7 +168,7 @@ public sealed class TestFailedException : Exception
     public override string? StackTrace => OriginalStackTrace ?? base.StackTrace;
 
     /// <summary>
-    ///     Gets the line number in the source file where the test failure occurred.
+    ///     Gets or sets the line number in the source file where the test failure occurred.
     /// </summary>
     /// <value>
     ///     The line number where the failure occurred, or -1 if the line number could not be determined.
@@ -177,7 +177,7 @@ public sealed class TestFailedException : Exception
     ///     This property is automatically populated by analyzing the call stack or can be
     ///     explicitly set through constructor parameters for precise failure location reporting.
     /// </remarks>
-    public int LineNumber { get; private set; } = -1;
+    public int LineNumber { get; protected set; } = -1;
 
     /// <summary>
     ///     Gets the name of the source file where the test failure occurred.
