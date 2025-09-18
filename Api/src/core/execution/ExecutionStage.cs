@@ -93,7 +93,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
             if (ValidateForExpectedException(context, e))
                 return;
             if (context.FailureReporting)
-                context.ReportCollector.Consume(new TestReport(Interrupted, e.LineNumber, e.Message));
+                context.ReportCollector.Consume(new TestReport(Interrupted, e));
         }
         catch (TestFailedException e)
         {

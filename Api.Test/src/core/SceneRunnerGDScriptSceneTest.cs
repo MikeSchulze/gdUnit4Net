@@ -256,7 +256,10 @@ public class SceneRunnerGDScriptSceneTest
 
         // wait for returns 'red' but will never happen and expect is interrupted after 150ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("color_cycle").IsEqual("red").WithTimeout(150))
-            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
+            .ContinueWith(result
+                => result.Result?
+                    .HasMessage("Assertion: Timed out after 150ms.")
+                    .HasFileLineNumber(258));
     }
 
     [TestCase]

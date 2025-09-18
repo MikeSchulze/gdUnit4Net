@@ -27,8 +27,13 @@ internal sealed class TestReport : ITestReport, IEquatable<TestReport>
     }
 
     public TestReport(TestFailedException e)
+        : this(ReportType.Failure, e)
     {
-        Type = ReportType.Failure;
+    }
+
+    public TestReport(ReportType type, TestFailedException e)
+    {
+        Type = type;
         LineNumber = e.LineNumber;
         Message = e.Message;
         StackTrace = e.StackTrace;

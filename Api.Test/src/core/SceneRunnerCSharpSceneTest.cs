@@ -320,7 +320,10 @@ public sealed class SceneRunnerCSharpSceneTest
 
         // wait for returns 'red' but will never happen and expect is interrupted after 150ms
         await AssertThrown(sceneRunner.AwaitMethod<string>("ColorCycle").IsEqual("red").WithTimeout(150))
-            .ContinueWith(result => result.Result?.HasMessage("Assertion: Timed out after 150ms."));
+            .ContinueWith(result
+                => result.Result?
+                    .HasMessage("Assertion: Timed out after 150ms.")
+                    .HasFileLineNumber(322));
     }
 
     [TestCase]
@@ -341,6 +344,7 @@ public sealed class SceneRunnerCSharpSceneTest
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
         var scene = runner.Scene() as TestSceneWithButton;
+        Debug.Assert(scene != null, nameof(scene) + " != null");
 
         await ISceneRunner.SyncProcessFrame;
 
@@ -357,6 +361,7 @@ public sealed class SceneRunnerCSharpSceneTest
     {
         var runner = ISceneRunner.Load("res://src/core/resources/scenes/TestSceneWithButton.tscn", true);
         var scene = runner.Scene() as TestSceneWithButton;
+        Debug.Assert(scene != null, nameof(scene) + " != null");
         var monitor = AssertSignal(scene).StartMonitoring();
 
         AssertThat(scene.GameState).IsEqual(TestSceneWithButton.GState.Initializing);

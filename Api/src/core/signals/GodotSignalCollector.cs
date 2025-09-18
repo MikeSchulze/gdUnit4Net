@@ -17,8 +17,6 @@ using Error = Godot.Error;
 
 internal sealed partial class GodotSignalCollector : RefCounted
 {
-    internal const string SIGNAL_CANCELLATION_TOKEN_SLOT_NAME = "SignalCancellationToken";
-
     internal static readonly ConcurrentDictionary<int, CancellationTokenSource> TaskCancellations = new();
 
     public static GodotSignalCollector Instance { get; } = new();

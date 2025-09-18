@@ -3,6 +3,7 @@
 
 namespace GdUnit4.Core;
 
+using System.Diagnostics;
 using System.Reflection;
 
 using Api;
@@ -11,9 +12,13 @@ using Asserts;
 
 using Constraints;
 
+using Execution.Exceptions;
+
 using Extensions;
 
 using Godot;
+
+using Signals;
 
 using static Assertions;
 
@@ -246,7 +251,7 @@ internal sealed class SceneRunner : ISceneRunner
 
     public IGodotMethodAwaitable<TVariant> AwaitMethod<[MustBeVariant] TVariant>(string methodName)
         where TVariant : notnull
-        => new GodotMethodAwaitable<TVariant>(currentScene, methodName);
+        => new GodotMethodAwaitable<TVariant>(new StackTrace(true), currentScene, methodName);
 
     public async Task AwaitMillis(uint timeMillis)
     {
@@ -480,11 +485,14 @@ internal sealed class SceneRunner : ISceneRunner
     private sealed class GodotMethodAwaitable<[MustBeVariant] TVariant> : IGodotMethodAwaitable<TVariant>
         where TVariant : notnull
     {
-        public GodotMethodAwaitable(Node instance, string methodName, params Variant[] args)
+        private readonly StackTrace stackTrace;
+
+        public GodotMethodAwaitable(StackTrace stackTrace, Node instance, string methodName, params Variant[] args)
         {
             Instance = instance;
             MethodName = methodName;
             Args = args;
+            this.stackTrace = stackTrace;
             if (!Instance.HasMethod(MethodName) && Instance.GetType().GetMethod(methodName) == null)
                 throw new MissingMethodException($"The method '{MethodName}' not exist on loaded scene.");
         }
@@ -495,27 +503,46 @@ internal sealed class SceneRunner : ISceneRunner
 
         private Variant[] Args { get; }
 
-        public async Task<IGodotMethodAwaitable<TVariant>> IsEqual(TVariant expected) =>
-            await CallAndWaitIsFinished(current => AssertThat(current).IsEqual(expected))
-                .ConfigureAwait(true);
+        public Task<IGodotMethodAwaitable<TVariant>> IsEqual(TVariant expected)
+            => CallAndWaitIsFinished(current => AssertThat(current).IsEqual(expected));
 
-        public async Task<IGodotMethodAwaitable<TVariant>> IsNull() =>
-            await CallAndWaitIsFinished(current => AssertThat(current).IsNull())
-                .ConfigureAwait(true);
+        public Task<IGodotMethodAwaitable<TVariant>> IsNull()
+            => CallAndWaitIsFinished(current => AssertThat(current).IsNull());
 
-        public async Task<IGodotMethodAwaitable<TVariant>> IsNotNull() =>
-            await CallAndWaitIsFinished(current => AssertThat(current).IsNotNull())
-                .ConfigureAwait(true);
+        public Task<IGodotMethodAwaitable<TVariant>> IsNotNull()
+            => CallAndWaitIsFinished(current => AssertThat(current).IsNotNull());
 
-        private async Task<IGodotMethodAwaitable<TVariant>> CallAndWaitIsFinished(Action<object?> assertion)
-            => await Task.Run(async () =>
+        private Task<IGodotMethodAwaitable<TVariant>> CallAndWaitIsFinished(Action<object?> assertion)
+        {
+            var signalCancellationToken = new CancellationTokenSource();
+            var continuation = Task.Run<IGodotMethodAwaitable<TVariant>>(async () =>
+            {
+                // sync to the main thread
+                _ = await GodotObjectExtensions.SyncProcessFrame;
+                var invoke = GodotObjectExtensions.Invoke(Instance, MethodName, Args);
+                while (!invoke.IsCompleted)
                 {
-                    // sync to the main thread
                     _ = await GodotObjectExtensions.SyncProcessFrame;
-                    var value = await GodotObjectExtensions.Invoke(Instance, MethodName, Args).ConfigureAwait(true);
-                    assertion(value);
-                    return this;
-                })
-                .ConfigureAwait(true);
+                    if (signalCancellationToken.IsCancellationRequested)
+                        throw new ExecutionTimeoutException("CallAndWaitIsFinished cancel requested", stackTrace);
+                }
+
+                var value = await invoke.ConfigureAwait(false);
+
+                assertion(value);
+                return this;
+            });
+            GodotSignalCollector.TaskCancellations[continuation.Id] = signalCancellationToken;
+            _ = continuation.ContinueWith(
+                _ =>
+                {
+                    if (GodotSignalCollector.TaskCancellations.TryRemove(continuation.Id, out var cts))
+                        cts.Dispose();
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+            return continuation;
+        }
     }
 }
