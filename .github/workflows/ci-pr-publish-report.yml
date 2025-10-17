@@ -23,11 +23,16 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        godot-version: [ '4.3', '4.4' ]
-        godot-status: [ 'stable' ]
+        version: ['v5.1.1']
+        godot-version: ['4.3', '4.4', '4.4.1']
+        godot-status: ['stable']
+        dotnet-version: ['net9.0']
         include:
-          - godot-version: '4.5'
-            godot-status: 'dev5'
+          # Latest
+          - version: 'latest'
+            godot-version: '4.5'
+            godot-status: 'stable'
+            dotnet-version: 'net9.0'
 
     steps:
       - uses: actions/checkout@v5
