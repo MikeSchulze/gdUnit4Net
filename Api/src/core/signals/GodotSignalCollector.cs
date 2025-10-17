@@ -39,25 +39,18 @@ internal sealed partial class GodotSignalCollector : RefCounted
 
     internal static (bool NeedsCallProcessing, bool NeedsCallPhysicsProcessing) DoesNodeProcessing(GodotObject emitter)
     {
-        var isProcessing = false;
-        var isPhysicsProcessing = false;
-
-        var sceneTree = Engine.GetMainLoop() as SceneTree;
-        if (sceneTree == emitter)
-
-            // we don't need to call manually the frame/physic processing on the scene tree
+        // We don't need to call manually the frame/physic processing on non node emitters
+        if (emitter is not Node node)
             return (false, false);
 
-        // Check the object (Node) is attached to the current scene tree
-        var nodePath = sceneTree?.Root.GetPathTo(emitter as Node);
-        if (nodePath?.IsEmpty ?? false)
-        {
-            // Does the emitter have implemented the `_Process` or `_PhysicsProcess`.
-            isProcessing = emitter.HasMethod("_Process");
-            isPhysicsProcessing = emitter.HasMethod("_PhysicsProcess");
-        }
+        // If the emitter is attached to scene tre we don't need to manually process frame/physics
+        if (node.IsInsideTree())
+            return (false, false);
 
-        return (isProcessing, isPhysicsProcessing);
+        // In NOT we need to check if the emitter have implemented the `_Process` or `_PhysicsProcess`. to call manually process frame/physics
+        return (
+            node.HasMethod("_Process"),
+            node.HasMethod("_PhysicsProcess"));
     }
 
     internal int Count(GodotObject emitter, string signalName, Variant[] args)
