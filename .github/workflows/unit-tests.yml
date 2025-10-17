@@ -8,6 +8,9 @@ on:
         required: false
         type: string
         default: 'ubuntu-22.04'
+      gdunit-version:
+        required: true
+        type: string
       godot-version:
         required: true
         type: string
@@ -71,6 +74,7 @@ jobs:
       - name: 'Test Example via gdunit-action - Godot_${{ inputs.godot-version }}-${{ inputs.godot-status }}-net'
         uses: MikeSchulze/gdUnit4-action@v1
         with:
+          version: ${{ inputs.gdunit-version }}
           godot-version: ${{ inputs.godot-version }}
           godot-status: ${{ inputs.godot-status }}
           godot-net: true

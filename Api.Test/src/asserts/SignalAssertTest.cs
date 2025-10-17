@@ -238,6 +238,14 @@ public partial class SignalAssertTest
         AssertSignal(emitter).IsSignalExists("OnFinished").IsNotNull();
     }
 
+
+    [TestCase]
+    public async Task TestAwaitSignalOnSceneTree()
+    {
+        var ctrl = AddNode(new Control());
+        await AwaitSignalOn(ctrl.GetTree(), SceneTree.SignalName.ProcessFrame);
+    }
+
     private sealed partial class TestEmitter : Node
     {
         [Signal]
