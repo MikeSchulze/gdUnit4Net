@@ -3,9 +3,6 @@
 
 namespace GdUnit4.Core.Execution.Monitoring;
 
-using System;
-using System.Collections.Generic;
-
 using Godot;
 
 internal sealed class ErrorLogEntry
@@ -94,7 +91,12 @@ internal sealed class ErrorLogEntry
             return null;
 
         // Remove the pattern and trim whitespace
-        var content = record.Replace(pattern, string.Empty, StringComparison.Ordinal).Trim();
+        var content = record.Replace(pattern, string.Empty, StringComparison.Ordinal)
+            .Trim()
+
+            // On Godot version before 4.5 the exception is covered by single quotes, we need to remove it to match!
+            .TrimStart('\'')
+            .TrimEnd('\'');
 
         // Get the details from the next line if available
         var details = index + 1 < records.Length ? records[index + 1].Trim() : string.Empty;

@@ -12,7 +12,7 @@ internal static partial class GodotExceptionPattern
     public static Match ReleaseMode(string value)
         => ExceptionPatternRelease().Match(value);
 
-    [GeneratedRegex(@"'([\w\.]+Exception):\s*(.*)'", RegexOptions.Compiled)]
+    [GeneratedRegex(@"([\w\.]+Exception):\s*(.*)", RegexOptions.Compiled)]
     private static partial Regex ExceptionPatternDebug();
 
     [GeneratedRegex(@"([\w\.]+Exception):\s*(.*?)(?:\r\n|\n|$)", RegexOptions.Compiled)]
