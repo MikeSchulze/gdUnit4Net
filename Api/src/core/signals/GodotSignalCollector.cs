@@ -42,8 +42,13 @@ internal sealed partial class GodotSignalCollector : RefCounted
         var isProcessing = false;
         var isPhysicsProcessing = false;
 
-        // Check the object (Node) is attached to the current scene tree
         var sceneTree = Engine.GetMainLoop() as SceneTree;
+        if (sceneTree == emitter)
+
+            // we don't need to call manually the frame/physic processing on the scene tree
+            return (false, false);
+
+        // Check the object (Node) is attached to the current scene tree
         var nodePath = sceneTree?.Root.GetPathTo(emitter as Node);
         if (nodePath?.IsEmpty ?? false)
         {
