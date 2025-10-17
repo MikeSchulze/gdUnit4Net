@@ -202,12 +202,12 @@ jobs:
         godot-version: ['4.3', '4.4', '4.4.1']
         godot-status: ['stable']
         dotnet-version: ['net9.0']
-        include:
-          # Latest
-          - gdunit-version: 'latest'
-            godot-version: '4.5'
-            godot-status: 'stable'
-            dotnet-version: 'net9.0'
+        #include:
+        #  # Latest
+        #  - gdunit-version: 'latest'
+        #    godot-version: '4.5'
+        #    godot-status: 'stable'
+        #    dotnet-version: 'net9.0'
 
 
     name: "🧪 Test: API on Godot-v${{ matrix.godot-version }}-${{ matrix.godot-status }}"

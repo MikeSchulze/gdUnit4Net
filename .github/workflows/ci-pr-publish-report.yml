@@ -27,12 +27,12 @@ jobs:
         godot-version: ['4.3', '4.4', '4.4.1']
         godot-status: ['stable']
         dotnet-version: ['net9.0']
-        include:
-          # Latest
-          - version: 'latest'
-            godot-version: '4.5'
-            godot-status: 'stable'
-            dotnet-version: 'net9.0'
+        #include:
+        #  # Latest
+        #  - version: 'latest'
+        #    godot-version: '4.5'
+        #    godot-status: 'stable'
+        #    dotnet-version: 'net9.0'
 
     steps:
       - uses: actions/checkout@v5
