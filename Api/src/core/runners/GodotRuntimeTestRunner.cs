@@ -152,7 +152,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
-            _ = process.WaitForExit(2000);
+            var processExitedInTime = process.WaitForExit(2000);
 
             // wait until the process has finished
             var waitRetry = 0;
@@ -164,6 +164,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             {
                 Logger.LogInfo("GdUnit4 Godot Runtime Test Runner is not terminated, force process kill.");
                 process.Kill(true);
+            }
+            else if (processExitedInTime)
+            {
+                process.WaitForExit(); // Flush async output streams
             }
 
             CloseProcess(process);
@@ -206,7 +210,17 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             }
 
             godotProcess.BeginOutputReadLine();
-            _ = godotProcess.WaitForExit(500);
+
+            const int helpCommandTimeoutMs = 2000;
+            if (!godotProcess.WaitForExit(helpCommandTimeoutMs))
+            {
+                Logger.LogWarning($"Godos help command timed out after {helpCommandTimeoutMs}ms");
+                godotProcess.Kill(true);
+            }
+            else
+            {
+                godotProcess.WaitForExit(); // Flush async output streams
+            }
 
             if (!hasCSharpOptions)
             {
@@ -328,7 +342,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
-            _ = compileProcess.WaitForExit(100);
 
             // The compile project can take a while, and we need to wait until it finishes
             // Calculate how many iterations we need based on the compile process timeout
@@ -368,6 +381,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                      """);
 
                 compileProcess.Kill(true);
+            }
+            else
+            {
+                compileProcess.WaitForExit(); // Flush async output streams
             }
 
             return compileProcess.ExitCode == 0;
