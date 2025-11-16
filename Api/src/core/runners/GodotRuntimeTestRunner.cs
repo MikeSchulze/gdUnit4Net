@@ -152,7 +152,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
 
-            var processExitedInTime = process.WaitForExit(2000);
+            _ = process.WaitForExit(2000);
 
             // wait until the process has finished
             var waitRetry = 0;
@@ -164,10 +164,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             {
                 Logger.LogInfo("GdUnit4 Godot Runtime Test Runner is not terminated, force process kill.");
                 process.Kill(true);
-            }
-            else if (processExitedInTime)
-            {
-                process.WaitForExit(); // Flush async output streams
             }
 
             CloseProcess(process);
@@ -210,17 +206,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             }
 
             godotProcess.BeginOutputReadLine();
-
-            const int helpCommandTimeoutMs = 2000;
-            if (!godotProcess.WaitForExit(helpCommandTimeoutMs))
-            {
-                Logger.LogWarning($"Godos help command timed out after {helpCommandTimeoutMs}ms");
-                godotProcess.Kill(true);
-            }
-            else
-            {
-                godotProcess.WaitForExit(); // Flush async output streams
-            }
+            _ = godotProcess.WaitForExit(2000);
 
             if (!hasCSharpOptions)
             {
@@ -381,10 +367,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                      """);
 
                 compileProcess.Kill(true);
-            }
-            else
-            {
-                compileProcess.WaitForExit(); // Flush async output streams
             }
 
             return compileProcess.ExitCode == 0;
