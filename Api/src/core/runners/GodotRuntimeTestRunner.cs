@@ -206,7 +206,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             }
 
             godotProcess.BeginOutputReadLine();
-            _ = godotProcess.WaitForExit(500);
+            _ = godotProcess.WaitForExit(2000);
 
             if (!hasCSharpOptions)
             {
