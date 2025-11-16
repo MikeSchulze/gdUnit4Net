@@ -328,6 +328,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             compileProcess.BeginErrorReadLine();
             compileProcess.BeginOutputReadLine();
+            _ = compileProcess.WaitForExit(100);
 
             // The compile project can take a while, and we need to wait until it finishes
             // Calculate how many iterations we need based on the compile process timeout
