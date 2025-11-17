@@ -187,16 +187,17 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 WorkingDirectory = Environment.CurrentDirectory
             };
 
+            var outputComplete = new ManualResetEventSlim(false);
             var hasCSharpOptions = false;
             godotProcess.StartInfo = processStartInfo;
             godotProcess.EnableRaisingEvents = true;
             godotProcess.OutputDataReceived += (_, args) =>
             {
+                if (args.Data == null)
+                    outputComplete.Set();
                 var message = args.Data?.Trim();
-                if (string.IsNullOrEmpty(message))
-                    return;
-
-                hasCSharpOptions = hasCSharpOptions || message.Contains("--build-solutions", StringComparison.OrdinalIgnoreCase);
+                if (!string.IsNullOrEmpty(message))
+                    hasCSharpOptions = hasCSharpOptions || message.Contains("--build-solutions", StringComparison.OrdinalIgnoreCase);
             };
 
             if (!godotProcess.Start())
@@ -206,7 +207,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             }
 
             godotProcess.BeginOutputReadLine();
-            _ = godotProcess.WaitForExit(2000);
+            _ = godotProcess.WaitForExit(500);
+            _ = outputComplete.Wait(2000);
 
             if (!hasCSharpOptions)
             {
