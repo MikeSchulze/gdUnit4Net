@@ -165,6 +165,22 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(File.Exists(runnerPath)).OverrideFailureMessage("Runner file should be cleaned up after timeout").IsFalse();
     }
 
+    [TestCase]
+    public void VerifyGodotCSharpSupport()
+    {
+        // Create a separate temp working directory
+        var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_timeout");
+        Directory.CreateDirectory(workingDirectory);
+
+        // Act
+        var godotPath = Environment.GetEnvironmentVariable("GODOT_BIN");
+        AssertThat(File.Exists(godotPath)).IsTrue();
+        var result = CreateTestRunner(1000).VerifyGodotCSharpSupport(godotPath!);
+
+        // Assert
+        AssertThat(result).OverrideFailureMessage("VerifyGodotCSharpSupport should succeed").IsTrue();
+    }
+
     /// <summary>
     ///     Test compilation failure scenario
     /// </summary>
