@@ -55,7 +55,6 @@ GdUnit4Net v5.0 introduces a **major architecture overhaul** that revolutionizes
 
 ⚠️ Please read the [release notes](https://github.com/MikeSchulze/gdUnit4Net/releases/tag/v5.0.0) about breaking changes. ⚠️
 
-
 There are three packages available in this project:
 
 * **[gdUnit4.api](Api/README.md)** - The core package to enable writing and running unit tests in C#.
@@ -78,11 +77,10 @@ For compile-time validation of your test code, check out the [gdUnit4.analyzers 
 # Examples
 
 The [gdUnit4NetExamples](https://github.com/MikeSchulze/gdUnit4NetExamples) repository provides comprehensive example projects
-demonstrating both basic and advanced GdUnit4Net usage patterns. It includes foundational examples for newcomers learning unit testing fundamentals, 
-as well as sophisticated examples covering professional configurations, complex testing scenarios, input simulation, signal testing, 
-and exception handling. These working examples showcase GdUnit4Net v5.0 features including selective Godot runtime usage, advanced scene testing, 
+demonstrating both basic and advanced GdUnit4Net usage patterns. It includes foundational examples for newcomers learning unit testing fundamentals,
+as well as sophisticated examples covering professional configurations, complex testing scenarios, input simulation, signal testing,
+and exception handling. These working examples showcase GdUnit4Net v5.0 features including selective Godot runtime usage, advanced scene testing,
 and production-ready test setups.
-
 
 ### Short Example
 
@@ -207,11 +205,11 @@ The test run looks like this:
 ## Documentation
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
-  <a href="https://mikeschulze.github.io/gdUnit4/first_steps/install/">How to Install GdUnit</a>
+  <a href="https://mikeschulze.github.io/gdUnit4/latest/first_steps/install/">How to Install the GdUnit4 plugin</a>
 </p>
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
-  <a href="https://mikeschulze.github.io/gdUnit4/">API Documentation</a>
+  <a href="https://mikeschulze.github.io/gdUnit4/latest/csharp_project_setup/csharp-setup/">How to setup GdUnit4 for C#</a>
 </p>
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
@@ -226,7 +224,6 @@ The test run looks like this:
 1. **Add `[RequireGodotRuntime]`** to tests that use Godot features (Nodes, Scenes, Resources)
 2. **Remove unnecessary Godot dependencies** from pure logic tests for better performance
 3. **Update test filtering** to use new VSTest-compatible syntax
-
 
 ### You Are Welcome To
 
