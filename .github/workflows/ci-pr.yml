@@ -46,7 +46,7 @@ jobs:
           dotnet build /p:EnforceCodeStyleInBuild=false /p:TreatWarningsAsErrors=false
 
       - name: "Cache Build Output"
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             **/obj
@@ -92,7 +92,7 @@ jobs:
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             **/obj
@@ -168,7 +168,7 @@ jobs:
 
       - name: "Restore Build Cache"
         if: ${{ !cancelled() }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             **/obj
