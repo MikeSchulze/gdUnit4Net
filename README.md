@@ -205,11 +205,11 @@ The test run looks like this:
 ## Documentation
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
-  <a href="https://mikeschulze.github.io/gdUnit4/latest/csharp_project_setup/csharp-setup/">How to setup GdUnit4 for C#</a>
+  <a href="https://godot-gdunit-labs.github.io/gdUnit4/latest/csharp_project_setup/csharp-setup/">How to setup GdUnit4 for C#</a>
 </p>
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
-  <a href="https://mikeschulze.github.io/gdUnit4/latest/csharp_project_setup/vstest-adapter/">Supported IDE's</a>
+  <a href="https://godot-gdunit-labs.github.io/gdUnit4/latest/csharp_project_setup/vstest-adapter/">Supported IDE's</a>
 </p>
 
 <p align="left" style="font-family: Bedrock; font-size:21pt; color:#7253ed; font-style:bold">
@@ -227,10 +227,10 @@ The test run looks like this:
 
 ### You Are Welcome To
 
-* [Give Feedback](https://github.com/MikeSchulze/gdUnit4Net/discussions)
-* [Suggest Improvements](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
-* [Report a Bug related to GdUnit4 API](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
-* [Report a Bug related to GdUnit4 Test Adapter](https://github.com/MikeSchulze/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
+* [Give Feedback](https://github.com/godot-gdunit-labs/gdUnit4Net/discussions)
+* [Suggest Improvements](https://github.com/godot-gdunit-labs/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=enhancement&template=feature_request.md&title=)
+* [Report a Bug related to GdUnit4 API](https://github.com/godot-gdunit-labs/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.api&projects=projects%2F6&template=bug_gdunit4_api.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
+* [Report a Bug related to GdUnit4 Test Adapter](https://github.com/godot-gdunit-labs/gdUnit4Net/issues/new?assignees=MikeSchulze&labels=bug%2Cgdunit4.test.adapter&projects=projects%2F6&template=bug_gdunit4_test_adapter.yaml&title=GD-XXX%3A+Describe+the+issue+briefly)
 
 ---
 
