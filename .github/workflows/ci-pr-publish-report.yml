@@ -45,7 +45,7 @@ jobs:
         with:
           name: artifact_analyzer
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: MikeSchulze/gdUnit4Net
+          repository: godot-gdunit-labs/gdUnit4Net
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
 
@@ -55,7 +55,7 @@ jobs:
         with:
           name: artifact_adapter_tests
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: MikeSchulze/gdUnit4Net
+          repository: godot-gdunit-labs/gdUnit4Net
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
 
@@ -79,7 +79,7 @@ jobs:
         with:
           name: artifact_action_example_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: MikeSchulze/gdUnit4Net
+          repository: godot-gdunit-labs/gdUnit4Net
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
       - name: Publish action Test Results
@@ -101,7 +101,7 @@ jobs:
         with:
           name: artifact_api_tests_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: MikeSchulze/gdUnit4Net
+          repository: godot-gdunit-labs/gdUnit4Net
           run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
 
       - name: Publish API Test Results
