@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://github.com/godot-gdunit-labs/gdUnit4Net/issues/394">
+    <img src="assets/vote-banner.svg" alt="Community Vote: Should GdUnit4Net continue?" width="100%"/>
+  </a>
+</p>
+
 <h2 align="center">The Unit Testing Framework in C# for Godot</h2>
 <p align="center">This version of GdUnit4.api is based on Godot <strong>v4.4.stable.mono.official [4c311cbee]</strong> (master branch)</p>
 

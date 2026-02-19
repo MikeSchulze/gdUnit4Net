@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 150" width="900">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c1c2e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0d1117;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="greenBtn" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ea043;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a7431;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="redBtn" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0453a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#a82820;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="150" rx="10" fill="url(#bgGrad)"/>
+
+  <!-- Top accent border -->
+  <rect width="900" height="5" rx="3" fill="#f0883e"/>
+
+  <!-- Bottom accent border -->
+  <rect y="145" width="900" height="5" rx="3" fill="#f0883e"/>
+
+  <!-- Left glow bar -->
+  <rect width="5" height="150" rx="3" fill="#f0883e"/>
+
+  <!-- Right glow bar -->
+  <rect x="895" width="5" height="150" rx="3" fill="#f0883e"/>
+
+  <!-- Ballot box icon (simple) -->
+  <rect x="30" y="38" width="36" height="30" rx="3" fill="none" stroke="#f0883e" stroke-width="2.5"/>
+  <line x1="30" y1="50" x2="66" y2="50" stroke="#f0883e" stroke-width="2"/>
+  <polygon points="48,32 44,38 52,38" fill="#f0883e"/>
+  <line x1="48" y1="32" x2="48" y2="20" stroke="#f0883e" stroke-width="2"/>
+
+  <!-- COMMUNITY VOTE title -->
+  <text x="450" y="42" font-family="Arial, sans-serif" font-size="22" font-weight="bold"
+        fill="#f0883e" text-anchor="middle" letter-spacing="4">COMMUNITY VOTE</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="55" x2="820" y2="55" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Question -->
+  <text x="450" y="80" font-family="Arial, sans-serif" font-size="15" fill="#e6edf3" text-anchor="middle">
+    Should GdUnit4Net continue — or should the community switch to 2dog?
+  </text>
+
+  <!-- Green button: Continue -->
+  <rect x="105" y="95" width="295" height="40" rx="7" fill="url(#greenBtn)"/>
+  <rect x="105" y="95" width="295" height="40" rx="7" fill="none" stroke="#3fb950" stroke-width="1"/>
+  <text x="252" y="120" font-family="Arial, sans-serif" font-size="15" font-weight="bold"
+        fill="#ffffff" text-anchor="middle">+1  Continue GdUnit4Net</text>
+
+  <!-- Red button: Switch -->
+  <rect x="500" y="95" width="295" height="40" rx="7" fill="url(#redBtn)"/>
+  <rect x="500" y="95" width="295" height="40" rx="7" fill="none" stroke="#f85149" stroke-width="1"/>
+  <text x="647" y="120" font-family="Arial, sans-serif" font-size="15" font-weight="bold"
+        fill="#ffffff" text-anchor="middle">-1  Switch to 2dog</text>
+</svg>
