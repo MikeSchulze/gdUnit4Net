@@ -11,6 +11,8 @@ using Hooks;
 
 using Reporting;
 
+using TestExtensions;
+
 using static Api.ReportType;
 
 internal sealed class TestSuiteExecutionStage : IExecutionStage
@@ -21,6 +23,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         AfterStage = new AfterExecutionStage(testSuite);
         BeforeTestStage = new BeforeTestExecutionStage(testSuite);
         AfterTestStage = new AfterTestExecutionStage(testSuite);
+        ExtensionRegistry = new ExtensionRegistry(testSuite.Instance.GetType(), testSuite.Instance);
     }
 
     private BeforeExecutionStage BeforeStage { get; }
@@ -31,48 +34,67 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
     private AfterTestExecutionStage AfterTestStage { get; }
 
+    private ExtensionRegistry ExtensionRegistry { get; }
+
     [SuppressMessage(
         "Reliability",
         "CA2000:Dispose objects before losing scope",
         Justification = "testSuiteContext ownership is transferred to ExecutionContext which handles disposal")]
     public async Task Execute(ExecutionContext testSuiteContext)
     {
-        await BeforeStage
-            .Execute(testSuiteContext)
-            .ConfigureAwait(true);
-        using (var stdoutHook = testSuiteContext.IsCaptureStdOut ? StdOutHookFactory.CreateStdOutHook() : null)
-        {
-            foreach (var testCase in testSuiteContext.TestSuite.TestCases)
-            {
-                using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
-                if (testCase.HasDataPoint)
-                {
-                    await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase)
-                        .ConfigureAwait(true);
-                }
-                else
-                {
-                    await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments)
-                        .ConfigureAwait(true);
-                }
+        var suiteType = testSuiteContext.TestSuite.Instance.GetType();
+        var suiteExtensionContext = new ExtensionContext(suiteType, testSuiteContext.TestSuite.Instance, null, null, []);
 
-                if (testCaseContext.IsFailed || testCaseContext.IsError)
+        try
+        {
+            await ExtensionRegistry
+                .RunBeforeAll(suiteExtensionContext)
+                .ConfigureAwait(true);
+
+            await BeforeStage
+                .Execute(testSuiteContext)
+                .ConfigureAwait(true);
+
+            using (var stdoutHook = testSuiteContext.IsCaptureStdOut ? StdOutHookFactory.CreateStdOutHook() : null)
+            {
+                foreach (var testCase in testSuiteContext.TestSuite.TestCases)
                 {
-                    // break;
+                    using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
+                    if (testCase.HasDataPoint)
+                    {
+                        await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase, suiteExtensionContext)
+                            .ConfigureAwait(true);
+                    }
+                    else
+                    {
+                        await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments, suiteExtensionContext)
+                            .ConfigureAwait(true);
+                    }
+
+                    if (testCaseContext.IsFailed || testCaseContext.IsError)
+                    {
+                        // break;
+                    }
                 }
             }
-        }
 
-        await AfterStage
-            .Execute(testSuiteContext)
-            .ConfigureAwait(true);
+            await AfterStage
+                .Execute(testSuiteContext)
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            await ExtensionRegistry
+                .RunAfterAll(suiteExtensionContext)
+                .ConfigureAwait(true);
+        }
     }
 
     [SuppressMessage(
         "Reliability",
         "CA2000:Dispose objects before losing scope",
         Justification = "testSuiteContext ownership is transferred to ExecutionContext which handles disposal")]
-    private async Task RunTestCaseWithDataPoint(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase)
+    private async Task RunTestCaseWithDataPoint(IStdOutHook? stdoutHook, ExecutionContext executionContext, TestCase testCase, ExtensionContext suiteExtensionContext)
     {
         executionContext.FireBeforeTestEvent();
 
@@ -88,7 +110,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     {
                         var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
                         using ExecutionContext testCaseContext = new(executionContext, displayName);
-                        await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
+                        await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues, suiteExtensionContext)
                             .ConfigureAwait(true);
                     }
                 }
@@ -111,7 +133,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 {
                     var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
                     using ExecutionContext testCaseContext = new(executionContext, displayName);
-                    await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
+                    await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues, suiteExtensionContext)
                         .ConfigureAwait(true);
                 }
             }
@@ -131,12 +153,26 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         ExecutionContext executionContext,
         TestCase testCase,
         TestCaseAttribute stageAttribute,
-        params object?[] methodArguments)
+        object?[] methodArguments,
+        ExtensionContext suiteExtensionContext)
     {
+        var testExtensionContext = new ExtensionContext(
+            suiteExtensionContext.TestSuiteType,
+            suiteExtensionContext.TestSuiteInstance,
+            testCase.MethodInfo,
+            executionContext.TestCaseName,
+            methodArguments,
+            suiteExtensionContext.DataStore);
+
         try
         {
             // start capturing stdout if enabled
             stdoutHook?.StartCapture();
+
+            // BeforeEach extension callbacks run before [BeforeTest]
+            await ExtensionRegistry
+                .RunBeforeEach(testExtensionContext, testCase.MethodInfo)
+                .ConfigureAwait(true);
 
             await BeforeTestStage
                 .Execute(executionContext)
@@ -144,7 +180,8 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
             if (!executionContext.IsSkipped)
             {
-                using ExecutionContext context = new(executionContext, methodArguments);
+                var resolvedArguments = ExtensionRegistry.ResolveArguments(testCase.MethodInfo, testExtensionContext, methodArguments);
+                using ExecutionContext context = new(executionContext, resolvedArguments);
                 await new TestCaseExecutionStage(context.TestCaseName, testCase, stageAttribute)
                     .Execute(context)
                     .ConfigureAwait(true);
@@ -169,6 +206,11 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
             await AfterTestStage
                 .Execute(executionContext)
+                .ConfigureAwait(true);
+
+            // AfterEach extension callbacks run after [AfterTest]
+            await ExtensionRegistry
+                .RunAfterEach(testExtensionContext, testCase.MethodInfo)
                 .ConfigureAwait(true);
         }
     }
