@@ -14,7 +14,7 @@ public interface IParameterStore
     /// <typeparam name="T">The type of object to store.</typeparam>
     /// <param name="key">The key to use when retrieving the value.</param>
     /// <param name="value">The value to store.</param>
-    void Store<T>(string key, T value)
+    void Put<T>(string key, T value)
         where T : notnull;
 
     /// <summary>
