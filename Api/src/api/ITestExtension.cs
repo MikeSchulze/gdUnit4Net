@@ -3,6 +3,7 @@
 
 namespace GdUnit4.Api;
 
+#pragma warning disable CS1574, CS1584, CS1581, CS1580, CA1040
 /// <summary>
 ///     Marker interface that all test extensions implement.
 ///     Extensions add lifecycle callbacks and parameter injection to test suites.
@@ -10,6 +11,5 @@ namespace GdUnit4.Api;
 /// <remarks>
 ///     Register extensions via <see cref="ExtendWithAttribute{T}" /> or <see cref="RegisterExtensionAttribute" />.
 /// </remarks>
-#pragma warning disable CA1040
 public interface ITestExtension;
-#pragma warning restore CA1040
+#pragma warning restore CS1574, CS1584, CS1581, CS1580, CA1040
