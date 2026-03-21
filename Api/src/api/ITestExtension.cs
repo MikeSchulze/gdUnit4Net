@@ -3,7 +3,7 @@
 
 namespace GdUnit4.Api;
 
-#pragma warning disable CS1574, CS1584, CS1581, CS1580, CA1040
+#pragma warning disable CA1040
 /// <summary>
 ///     Marker interface that all test extensions implement.
 ///     Extensions add lifecycle callbacks and parameter injection to test suites.
