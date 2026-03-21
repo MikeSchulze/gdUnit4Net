@@ -31,9 +31,7 @@ public interface IExtensionContext
     /// Arguments not consumed by parameter resolvers are available here.
     /// </summary>
     /// <returns>Arguments to the test case method that have not been consumed by parameter resolvers.</returns>
-#pragma warning disable CA1002
-    List<object?> GetTestCaseArguments();
-#pragma warning restore CA1002
+ReadOnlyCollection<object?> GetTestCaseArguments();
 
     /// <summary>
     /// Get the parameter store for this extension context, which allows extensions to store and retrieve arbitrary
