@@ -10,24 +10,29 @@ using System.Reflection;
 public interface IExtensionContext
 {
     /// <summary>Gets the test suite class being executed.</summary>
-    Type TestSuiteType { get; }
+    /// <returns>The test suite class being executed.</returns>
+    Type GetTestSuiteType();
 
     /// <summary>Gets the live instance of the test suite.</summary>
-    object TestSuiteInstance { get; }
+    /// <returns>The instance of the test suite bing executed.</returns>
+    object GetTestSuiteInstance();
 
     /// <summary>Gets the test method currently executing (null during suite-level callbacks).</summary>
-    MethodInfo? TestMethod { get; }
+    /// <returns>The test method current executing, or null during suite-level callbacks.</returns>
+    MethodInfo? GetTestMethod();
 
     /// <summary>Gets display name of the current test case, or null at suite level.</summary>
-    string? TestCaseName { get; }
+    /// <returns>Gets the display name of the current est case, or null during suite-level callbacks.</returns>
+    string? GetTestCaseName();
 
     /// <summary>
     /// Gets the raw arguments passed to [TestCase(...)].
     /// Extensions read these in BeforeEach to configure themselves per test.
     /// Arguments not consumed by parameter resolvers are available here.
     /// </summary>
+    /// <returns>Arguments to the test case method that have not been consumed by parameter resolvers.</returns>
 #pragma warning disable CA1819
-    object?[] TestCaseArguments { get; }
+    object?[] GetTestCaseArguments();
 #pragma warning restore CA1819
 
     /// <summary>
