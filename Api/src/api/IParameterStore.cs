@@ -23,7 +23,7 @@ public interface IParameterStore
     /// <typeparam name="T">The expected type of object to retrieve.</typeparam>
     /// <param name="key">The key used when the value was stored.</param>
     /// <returns>The value stored at the specified key, or null if there is no value stored at the key.</returns>
-    T? Retrieve<T>(string key);
+    T? Get<T>(string key);
 
     /// <summary>
     /// Delete the value stored at the specified key and return it.
