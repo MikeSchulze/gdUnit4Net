@@ -31,9 +31,7 @@ public interface IExtensionContext
     /// Arguments not consumed by parameter resolvers are available here.
     /// </summary>
     /// <returns>Arguments to the test case method that have not been consumed by parameter resolvers.</returns>
-#pragma warning disable CA1819
-    object?[] GetTestCaseArguments();
-#pragma warning restore CA1819
+    List<object>[] GetTestCaseArguments();
 
     /// <summary>
     /// Store a value scoped to this extension context (keyed by string).
