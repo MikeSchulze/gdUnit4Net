@@ -12,4 +12,4 @@ namespace GdUnit4.Api;
 ///     Register extensions via <see cref="ExtendWithAttribute{T}" /> or <see cref="RegisterExtensionAttribute" />.
 /// </remarks>
 public interface ITestExtension;
-#pragma warning restore CS1574, CS1584, CS1581, CS1580, CA1040
+#pragma warning restore CA1040
