@@ -35,7 +35,7 @@ public interface IParameterStore
     /// <param name="key">The key specifying the value to be deleted.</param>
     /// <typeparam name="T">The expected type of value stored at the specified key.</typeparam>
     /// <returns>The deleted value, if it exists; null otherwise.</returns>
-    T? Delete<T>(string key);
+    T? Erase<T>(string key);
 
     /// <summary>
     /// Gets the number of entries in the internal data store for this context.
