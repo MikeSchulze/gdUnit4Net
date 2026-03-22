@@ -2,6 +2,7 @@
 // MIT License - See LICENSE file in the repository root for full license text
 namespace GdUnit4.Api;
 
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 /// <summary>
@@ -31,7 +32,7 @@ public interface IExtensionContext
     /// Arguments not consumed by parameter resolvers are available here.
     /// </summary>
     /// <returns>Arguments to the test case method that have not been consumed by parameter resolvers.</returns>
-ReadOnlyCollection<object?> GetTestCaseArguments();
+    ReadOnlyCollection<object?> GetTestCaseArguments();
 
     /// <summary>
     /// Get the parameter store for this extension context, which allows extensions to store and retrieve arbitrary

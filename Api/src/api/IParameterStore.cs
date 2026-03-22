@@ -28,7 +28,7 @@ public interface IParameterStore
     /// <summary>
     /// Delete the value stored at the specified key and return it.
     /// If there is no value stored at the key, returns null.
-    /// Does **not** cascade to suite context like <see cref="Retrieve{T}"/>. This means that if there is not a value stored
+    /// Does **not** cascade to suite context like <see cref="Get{T}"/>. This means that if there is not a value stored
     /// at the specified key in a test case context, this method will return null even if there is a value stored at the
     /// key in the suite context. This ensures that test-level callbacks cannot accidentally delete suite-level values.
     /// </summary>
