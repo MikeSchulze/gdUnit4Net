@@ -18,7 +18,7 @@ using Api;
 ///
 /// <code>
 /// [TestSuite]
-/// [ExtendWith&lt;SomeExtension&gt;]
+/// [ExtendWith<SomeExtension>]
 /// public class SomeTestSuite
 /// {
 ///   [TestCase]
