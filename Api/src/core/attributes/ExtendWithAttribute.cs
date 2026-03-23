@@ -14,6 +14,7 @@ using Api;
 /// Usage:
 ///
 /// <code>
+/// [TestSuite]
 /// [ExtendWith&lt;SomeExtension&gt;]
 /// public class SomeTestSuite
 /// {
