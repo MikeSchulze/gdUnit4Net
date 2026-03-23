@@ -11,6 +11,9 @@ using Api;
 /// Extends the test suite or test method with the specified test extension, hooking it into the test lifecycle
 /// and enabling its callbacks and parameter injection for the annotated class or method.
 ///
+/// Note that extensions registered using this attribute <i>must</i> have a no-argument constructor or the test
+/// framework will be unable to instantiate them.
+///
 /// Usage:
 ///
 /// <code>
@@ -19,7 +22,7 @@ using Api;
 /// public class SomeTestSuite
 /// {
 ///   [TestCase]
-///   [ExtendWith&lt;SomeOtherTest&gt;]
+///   [ExtendWith&lt;SomeOtherExtension&gt;]
 ///   public void SomeTestCase()
 ///   {
 ///   }
