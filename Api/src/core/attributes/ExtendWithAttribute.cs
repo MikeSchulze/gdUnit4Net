@@ -10,6 +10,22 @@ using Api;
 /// <summary>
 /// Extends the test suite or test method with the specified test extension, hooking it into the test lifecycle
 /// and enabling its callbacks and parameter injection for the annotated class or method.
+///
+/// Usage:
+///
+/// <code>
+/// [ExtendWith&lt;SomeExtension&gt;]
+/// public class SomeTestSuite
+/// {
+///   [TestCase]
+///   [ExtendWith&lt;SomeOtherTest&gt;]
+///   public void SomeTestCase()
+///   {
+///   }
+/// }
+/// </code>
+///
+/// As demonstrated, this attribute can be applied to either test cases or suites.
 /// </summary>
 /// <typeparam name="T">The type of the extension to register.</typeparam>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
