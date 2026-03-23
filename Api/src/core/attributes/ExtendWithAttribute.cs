@@ -22,7 +22,6 @@ using Api;
 /// public class SomeTestSuite
 /// {
 ///   [TestCase]
-///   [ExtendWith&lt;SomeOtherExtension&gt;]
 ///   public void SomeTestCase()
 ///   {
 ///   }
