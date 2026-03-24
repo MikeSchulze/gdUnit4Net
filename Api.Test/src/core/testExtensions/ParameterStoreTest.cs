@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
+using System;
 using System.Collections.Generic;
 
 using GdUnit4.Core.TestExtensions;
@@ -46,25 +47,20 @@ public class ParameterStoreTest
     }
 
     [TestCase]
-    public void TestValueReturnsNullForMissingKey()
+    [ThrowsException(typeof(InvalidOperationException))]
+    public void TestValueThrowsForMissingKey()
     {
         var store = new ParameterStore();
-        AssertObject(store.Value<string>("missing")).IsNull();
+        store.Value<string>("missing");
     }
 
     [TestCase]
-    public void TestValueReturnsDefaultForMissingKeyWithValueType()
-    {
-        var store = new ParameterStore();
-        AssertInt(store.Value<int>("missing")).IsEqual(0);
-    }
-
-    [TestCase]
-    public void TestValueReturnsNullWhenTypeMismatch()
+    [ThrowsException(typeof(InvalidOperationException))]
+    public void TestValueThrowsNullWhenTypeMismatch()
     {
         var store = new ParameterStore();
         store.Add("key", "a string");
-        AssertObject(store.Value<int?>("key")).IsNull();
+        store.Value<int?>("key");
     }
 
     [TestCase]
@@ -160,19 +156,19 @@ public class ParameterStoreTest
     }
 
     [TestCase]
-    public void TestRemoveDoesNotCascadeToParent()
+    [ThrowsException(typeof(InvalidOperationException))]
+    public void TestRemoveCascadesToParent()
     {
         var parent = new ParameterStore();
         parent.Add("key", "parent-value");
 
         var child = new ParameterStore(parent);
 
-        // Remove on child should not remove from parent
+        // Remove on child should remove from parent
         child.Remove<string>("key");
 
-        // After child remove the value is still visible via the parent fallback
-        AssertString(child.Value<string>("key")).IsEqual("parent-value");
-        AssertString(parent.Value<string>("key")).IsEqual("parent-value");
+        // After removal from child store, parent should throw if retrieving value
+        parent.Value<string>("key");
     }
 
     [TestCase]
@@ -189,12 +185,13 @@ public class ParameterStoreTest
     }
 
     [TestCase]
-    public void TestValueReturnsNullWhenKeyAbsentFromBothStores()
+    [ThrowsException(typeof(InvalidOperationException))]
+    public void TestValueThrowsWhenKeyAbsentFromBothStores()
     {
         var parent = new ParameterStore();
         var child = new ParameterStore(parent);
 
-        AssertObject(child.Value<string>("missing")).IsNull();
+        child.Value<string>("missing");
     }
 
     [TestCase]
