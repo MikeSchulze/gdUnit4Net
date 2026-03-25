@@ -18,19 +18,22 @@ public interface IParameterStore
         where T : notnull;
 
     /// <summary>
-    /// Retrieve a previously stored value, falls back to suite context if not found.
+    /// Retrieve a previously stored value, falling back to parent store to parent store if not found.
+    ///
+    /// If the key is not found in this store or any parent store, or if the value found is not of type T,
+    /// this method throws an <see cref="InvalidOperationException"/>.
     /// </summary>
     /// <typeparam name="T">The expected type of object to retrieve.</typeparam>
     /// <param name="key">The key used when the value was stored.</param>
     /// <returns>The value stored at the specified key, or null if there is no value stored at the key.</returns>
-    T? Value<T>(string key);
+    /// <exception cref="InvalidOperationException">If there is no value of type T stored in this or a parent store.</exception>
+    T Value<T>(string key);
 
     /// <summary>
     /// Removes the value stored at the specified key and return it.
     /// If there is no value stored at the key, returns null.
-    /// Does **not** cascade to suite context like <see cref="Value{T}"/>. This means that if there is not a value stored
-    /// at the specified key in a test case context, this method will return null even if there is a value stored at the
-    /// key in the suite context. This ensures that test-level callbacks cannot accidentally delete suite-level values.
+    ///
+    /// Like <see cref="Value"/>, this method will remove entries from the parent store if it is not found in the child store.
     /// </summary>
     /// <param name="key">The key specifying the value to be deleted.</param>
     /// <typeparam name="T">The expected type of value stored at the specified key.</typeparam>
