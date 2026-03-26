@@ -22,10 +22,7 @@ public class ExtensionContextTest
                     SourceFile = "",
                     Id = Guid.NewGuid(),
                     ParentId = Guid.NewGuid()
-                },
-                null,
-                null,
-                []);
+                });
 
         var method = typeof(ExtensionContextTest).GetMethod(methodName ?? nameof(MakeContext));
         return new ExtensionContext(

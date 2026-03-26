@@ -34,16 +34,18 @@ internal class ExtensionContext : IExtensionContext
     public ExtensionContext(
         Type testSuiteType,
         TestSuiteNode testSuiteInstance,
-        MethodInfo? testMethod,
-        string? testCaseName,
-        List<object?> testCaseArguments)
+        MethodInfo? testMethod = null,
+        string? testCaseName = null,
+        List<object?>? testCaseArguments = null)
     {
         parameterStore = new ParameterStore();
         this.testSuiteType = testSuiteType;
         this.testSuiteInstance = testSuiteInstance;
         this.testMethod = testMethod;
         this.testCaseName = testCaseName;
-        this.testCaseArguments = new ReadOnlyCollection<object?>(testCaseArguments);
+        this.testCaseArguments = testCaseArguments == null
+            ? new ReadOnlyCollection<object?>([])
+            : new ReadOnlyCollection<object?>(testCaseArguments);
     }
 
     public Type GetTestSuiteType() => testSuiteType;
