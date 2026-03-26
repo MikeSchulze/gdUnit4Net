@@ -16,7 +16,7 @@ public class ExtensionRegistryTest
     #region Helpers
 
     // Used to create ExtensionContext instances for testing without needing a full test execution environment.
-    private static ExtensionContext SuiteContext(Type suiteType) =>
+    private static ExtensionContext CreateSuiteContext(Type suiteType) =>
         new(suiteType, new TestSuiteNode
         {
             ManagedType = "null",
@@ -28,14 +28,14 @@ public class ExtensionRegistryTest
         });
 
 
-    private static Tuple<ExtensionContext, ExtensionContext> TestContext(Type suiteType, string methodName,
+    private static Tuple<ExtensionContext, ExtensionContext> CreateTestContext(Type suiteType, string methodName,
         List<object?>? testCaseArguments = null)
     {
         var testMethod = suiteType.GetMethod(methodName);
         if (testMethod is null)
             throw new InvalidOperationException($"Method '{methodName}' not found on '{suiteType.Name}'");
 
-        var suiteContext = SuiteContext(suiteType);
+        var suiteContext = CreateSuiteContext(suiteType);
         var testContext = new ExtensionContext(suiteContext, testMethod, methodName, testCaseArguments ?? []);
         return new Tuple<ExtensionContext, ExtensionContext>(suiteContext, testContext);
     }
@@ -279,7 +279,7 @@ public class ExtensionRegistryTest
         var suite = new NoExtensionSuite();
         var registry = new ExtensionRegistry(typeof(NoExtensionSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(NoExtensionSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(NoExtensionSuite)));
 
         AssertThat(Log.Count).IsEqual(0);
     }
@@ -291,7 +291,7 @@ public class ExtensionRegistryTest
         var suite = new SingleClassLevelSuite();
         var registry = new ExtensionRegistry(typeof(SingleClassLevelSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(SingleClassLevelSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(SingleClassLevelSuite)));
 
         AssertThat(Log.Count).IsEqual(1);
         AssertThat(Log[0]).IsEqual("A.BeforeAll");
@@ -304,7 +304,7 @@ public class ExtensionRegistryTest
         var suite = new TwoClassLevelSuite();
         var registry = new ExtensionRegistry(typeof(TwoClassLevelSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(TwoClassLevelSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(TwoClassLevelSuite)));
 
         AssertThat(Log.Count).IsEqual(2);
         AssertThat(Log[0]).IsEqual("A.BeforeAll");
@@ -319,7 +319,7 @@ public class ExtensionRegistryTest
         var suite = new InstanceFieldSuite(new CallbackExtension(() => invoked = true));
         var registry = new ExtensionRegistry(typeof(InstanceFieldSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(InstanceFieldSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(InstanceFieldSuite)));
 
         AssertBool(invoked).IsTrue();
     }
@@ -333,7 +333,7 @@ public class ExtensionRegistryTest
         var suite = new StaticFieldSuite();
         var registry = new ExtensionRegistry(typeof(StaticFieldSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(StaticFieldSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(StaticFieldSuite)));
 
         AssertBool(invoked).IsTrue();
     }
@@ -346,7 +346,7 @@ public class ExtensionRegistryTest
         var suite = new InstancePropertySuite(new CallbackExtension(() => invoked = true));
         var registry = new ExtensionRegistry(typeof(InstancePropertySuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(InstancePropertySuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(InstancePropertySuite)));
 
         AssertBool(invoked).IsTrue();
     }
@@ -360,7 +360,7 @@ public class ExtensionRegistryTest
         var suite = new StaticPropertySuite();
         var registry = new ExtensionRegistry(typeof(StaticPropertySuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(StaticPropertySuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(StaticPropertySuite)));
 
         AssertBool(invoked).IsTrue();
     }
@@ -372,7 +372,7 @@ public class ExtensionRegistryTest
         var suite = new InstanceFieldSuite(new LogTestLevelOnly());
         var registry = new ExtensionRegistry(typeof(InstanceFieldSuite), suite);
 
-        await registry.RunBeforeAll(SuiteContext(typeof(InstanceFieldSuite)));
+        await registry.RunBeforeAll(CreateSuiteContext(typeof(InstanceFieldSuite)));
 
         AssertThat(Log.Count).IsEqual(0);
     }
@@ -387,7 +387,7 @@ public class ExtensionRegistryTest
         var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.BeforeEach")));
         var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
 
-        var (_, testContext) = TestContext(
+        var (_, testContext) = CreateTestContext(
             typeof(MethodRegistrationSuite),
             nameof(MethodRegistrationSuite.MethodWithExtension));
 
@@ -405,7 +405,7 @@ public class ExtensionRegistryTest
         var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.BeforeEach")));
         var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
 
-        var (_, testContext) = TestContext(
+        var (_, testContext) = CreateTestContext(
             typeof(MethodRegistrationSuite),
             nameof(MethodRegistrationSuite.PlainMethod));
 
@@ -422,7 +422,7 @@ public class ExtensionRegistryTest
         var suite = new AllExtensionsSuite();
         var registry = new ExtensionRegistry(typeof(AllExtensionsSuite), suite);
 
-        var (_, testContext) = TestContext(typeof(AllExtensionsSuite), nameof(AllExtensionsSuite.TestCase));
+        var (_, testContext) = CreateTestContext(typeof(AllExtensionsSuite), nameof(AllExtensionsSuite.TestCase));
         await registry.RunBeforeEach(testContext);
 
         AssertThat(Log.Count).IsEqual(4);
@@ -442,7 +442,7 @@ public class ExtensionRegistryTest
         var suite = new TwoClassLevelSuite();
         var registry = new ExtensionRegistry(typeof(TwoClassLevelSuite), suite);
 
-        await registry.RunAfterAll(SuiteContext(typeof(TwoClassLevelSuite)));
+        await registry.RunAfterAll(CreateSuiteContext(typeof(TwoClassLevelSuite)));
 
         AssertThat(Log.Count).IsEqual(2);
         AssertThat(Log[0]).IsEqual("B.AfterAll");
@@ -459,7 +459,7 @@ public class ExtensionRegistryTest
         var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.AfterEach")));
         var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
 
-        var (_, testContext) = TestContext(
+        var (_, testContext) = CreateTestContext(
             typeof(MethodRegistrationSuite),
             nameof(MethodRegistrationSuite.MethodWithExtension));
 
@@ -481,7 +481,7 @@ public class ExtensionRegistryTest
         var suite = new NoResolverSuite();
         var registry = new ExtensionRegistry(typeof(NoResolverSuite), suite);
 
-        var (_, testContext) = TestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.NoParams));
+        var (_, testContext) = CreateTestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.NoParams));
 
         var result = registry.ResolveArguments(testContext);
 
@@ -495,7 +495,7 @@ public class ExtensionRegistryTest
         var suite = new NoResolverSuite();
         var registry = new ExtensionRegistry(typeof(NoResolverSuite), suite);
 
-        var (_, testContext) = TestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.StringParam), ["hello"]);
+        var (_, testContext) = CreateTestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.StringParam), ["hello"]);
         var result = registry.ResolveArguments(testContext);
 
         AssertThat(result?.Count).IsEqual(1);
@@ -509,7 +509,7 @@ public class ExtensionRegistryTest
         var suite = new ResolverSuite(new AlwaysStringResolver("resolved"));
         var registry = new ExtensionRegistry(typeof(ResolverSuite), suite);
 
-        var (_, testContext) = TestContext(typeof(ResolverSuite), nameof(ResolverSuite.StringParam), ["raw"]);
+        var (_, testContext) = CreateTestContext(typeof(ResolverSuite), nameof(ResolverSuite.StringParam), ["raw"]);
         var result = registry.ResolveArguments(testContext);
 
         AssertThat(result?.Count).IsEqual(1);
@@ -523,7 +523,7 @@ public class ExtensionRegistryTest
         var suite = new ResolverSuite(new AlwaysStringResolver("resolved"));
         var registry = new ExtensionRegistry(typeof(ResolverSuite), suite);
 
-        var (_, testContext) = TestContext(
+        var (_, testContext) = CreateTestContext(
             typeof(ResolverSuite),
             nameof(ResolverSuite.StringAndIntParams),
             ["resolved", 42]);
@@ -547,7 +547,7 @@ public class ExtensionRegistryTest
         var message = "";
         try
         {
-            var (_, testContext) = TestContext(typeof(ResolverSuite), nameof(ResolverSuite.UnresolvableParam));
+            var (_, testContext) = CreateTestContext(typeof(ResolverSuite), nameof(ResolverSuite.UnresolvableParam));
             registry.ResolveArguments(testContext);
         }
         catch (InvalidOperationException ex)
