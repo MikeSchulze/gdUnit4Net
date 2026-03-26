@@ -49,7 +49,7 @@ internal class ExtensionContext : IExtensionContext
 
     public string? GetTestCaseName() => testCaseName;
 
-    public ReadOnlyCollection<object?> GetTestCaseArguments() => testCaseArguments;
+    public ReadOnlyCollection<object?>? GetTestCaseArguments() => testCaseArguments;
 
     public IParameterStore GetStore() => parameterStore;
 }
