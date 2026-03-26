@@ -19,9 +19,9 @@ internal class ExtensionContext : IExtensionContext
 
     private readonly string? testCaseName;
 
-    private readonly ReadOnlyCollection<object?> testCaseArguments;
+    private readonly ReadOnlyCollection<object?>? testCaseArguments;
 
-    public ExtensionContext(IExtensionContext parentContext, MethodInfo? testMethod, string? testCaseName, List<object?> testCaseArguments)
+    public ExtensionContext(IExtensionContext parentContext, MethodInfo testMethod, string testCaseName, List<object?> testCaseArguments)
     {
         parameterStore = new ParameterStore(parentContext.GetStore());
         testSuiteType = parentContext.GetTestSuiteType();
@@ -31,21 +31,14 @@ internal class ExtensionContext : IExtensionContext
         this.testCaseArguments = new ReadOnlyCollection<object?>(testCaseArguments);
     }
 
-    public ExtensionContext(
-        Type testSuiteType,
-        TestSuiteNode testSuiteInstance,
-        MethodInfo? testMethod = null,
-        string? testCaseName = null,
-        List<object?>? testCaseArguments = null)
+    public ExtensionContext(Type testSuiteType, TestSuiteNode testSuiteInstance)
     {
         parameterStore = new ParameterStore();
         this.testSuiteType = testSuiteType;
         this.testSuiteInstance = testSuiteInstance;
-        this.testMethod = testMethod;
-        this.testCaseName = testCaseName;
-        this.testCaseArguments = testCaseArguments == null
-            ? new ReadOnlyCollection<object?>([])
-            : new ReadOnlyCollection<object?>(testCaseArguments);
+        testMethod = null;
+        testCaseName = null;
+        testCaseArguments = null;
     }
 
     public Type GetTestSuiteType() => testSuiteType;
