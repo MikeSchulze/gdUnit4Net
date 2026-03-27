@@ -8,6 +8,8 @@ namespace GdUnit4;
 /// <summary>
 /// Registers the annotated field or property as a test extension, allowing it to be used for lifecycle callbacks and
 /// parameter injection in the test suite. Using this method allows for the registration of extensions with constructor
+/// Registers the annotated field as a test extension, allowing it to be used for lifecycle callbacks and
+/// parameter injection in the test suite. Using this method allows for the registration of extensions with constructor
 /// arguments.
 ///
 /// Usage:
