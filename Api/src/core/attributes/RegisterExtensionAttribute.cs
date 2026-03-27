@@ -26,5 +26,5 @@ namespace GdUnit4;
 /// }
 /// </code>
 /// </summary>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Field)]
 public sealed class RegisterExtensionAttribute : Attribute;
