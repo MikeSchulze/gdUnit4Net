@@ -7,7 +7,7 @@ using System.Reflection;
 
 using Api;
 
-internal class ExtensionRegistry
+internal sealed class ExtensionRegistry
 {
     private readonly List<ITestExtension> extensions = [];
 
@@ -31,26 +31,18 @@ internal class ExtensionRegistry
     // Collected order: XXX → YYY → Foo → Bar
     internal static List<ITestExtension> CollectExtendWithExtensions(Type type) =>
     [
-        .. Enumerable
-            .SelectMany<Type, ExtendWithBaseAttribute>(GetTypeHierarchy(type), t => t.GetCustomAttributes<ExtendWithBaseAttribute>(inherit: false))
+        .. GetTypeHierarchy(type)
+            .SelectMany<Type, ExtendWithBaseAttribute>(t => t.GetCustomAttributes<ExtendWithBaseAttribute>(false))
             .Select(attr => attr.CreateExtension())
     ];
 
-    internal static List<ITestExtension> CollectRegisterExtensions(Type type)
-    {
-        List<ITestExtension> extensions = [];
-
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
-        {
-            if (!field.IsDefined(typeof(RegisterExtensionAttribute)))
-                continue;
-
-            if (field.GetValue(null) is ITestExtension ext)
-                extensions.Add(ext);
-        }
-
-        return extensions;
-    }
+    internal static List<ITestExtension> CollectRegisterExtensions(Type type) =>
+    [
+        .. type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+            .Where(field => field.IsDefined(typeof(RegisterExtensionAttribute)))
+            .Select(field => field.GetValue(null))
+            .OfType<ITestExtension>()
+    ];
 
     // Walks the inheritance chain from the root base type down to the given type
     private static Stack<Type> GetTypeHierarchy(Type type)

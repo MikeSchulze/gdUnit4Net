@@ -1,9 +1,12 @@
-using System.Threading.Tasks;
-using GdUnit4.Api;
-using GdUnit4.Core.TestExtensions;
 using static GdUnit4.Assertions;
 
 namespace GdUnit4.Tests.Core.TestExtensions;
+
+using System.Threading.Tasks;
+
+using Api;
+
+using GdUnit4.Core.TestExtensions;
 
 [TestSuite]
 public class ExtensionRegistryTest
@@ -12,39 +15,37 @@ public class ExtensionRegistryTest
 
     private abstract class MockExtension : IBeforeEachCallback
     {
-        public Task BeforeEach(IExtensionContext context)
-        {
+        public Task BeforeEach(IExtensionContext context) =>
             // No-op
-            return Task.CompletedTask;
-        }
+            Task.CompletedTask;
     }
 
     private class ExtensionA : MockExtension;
 
     private class ExtensionB : MockExtension;
-    
+
     private class ExtensionC : MockExtension;
 
     private class ExtensionD : MockExtension;
 
     #endregion
-    
-    #region Mock suite classes for testing
-    
-    [ExtendWith<ExtensionA>]
-    private class SuiteWithExtendWith;
 
-    private class SuiteWithRegisterExtensionField
+    #region Mock suite classes for testing
+
+    [ExtendWith<ExtensionA>]
+    private class SuiteWithExtension;
+
+    private class SuiteWithRegisterExtension
     {
-        [RegisterExtension]
-        private static readonly ITestExtension Extension = new ExtensionB();
+        // ReSharper disable once UnusedMember.Local
+        [RegisterExtension] private static readonly ITestExtension Extension = new ExtensionB();
     }
 
     [ExtendWith<ExtensionA>]
-    private class SuiteWithBothRegistrationMethods
+    private class SuiteWithExtensionsAndRegistration
     {
-        [RegisterExtension]
-        private static readonly ITestExtension Extension = new ExtensionB();
+        // ReSharper disable once UnusedMember.Local
+        [RegisterExtension] private static readonly ITestExtension Extension = new ExtensionB();
     }
 
     [ExtendWith<ExtensionA>]
@@ -53,88 +54,76 @@ public class ExtensionRegistryTest
 
     [ExtendWith<ExtensionC>]
     [ExtendWith<ExtensionD>]
-    private class ConcreteSuite : AbstractSuite;
+    private class SuiteWithExtensionsInherits : AbstractSuite;
 
     private class SuiteWithNoExtensions;
-    
+
     #endregion
 
     #region Test setup
 
+    // ReSharper disable once NullableWarningSuppressionIsUsed
     private ExtensionRegistry extensionRegistry = null!;
 
     [BeforeTest]
-    public void CreateExtensionRegistry()
-    {
-        extensionRegistry = new ExtensionRegistry();
-    }
+    public void CreateExtensionRegistry() => extensionRegistry = new ExtensionRegistry();
 
     #endregion
-    
+
     #region Test FindTestExtensions
 
     [TestCase]
-    public void FindTestExtensions_WhenCalledOnSuiteWithNoExtensions_ReturnsEmpty()
+    public void FindTestExtensions_OnSuiteWithNoExtensions()
     {
         var result = extensionRegistry
             .FindTestExtensions(typeof(SuiteWithNoExtensions));
-        
+
         AssertThat(result).IsEmpty();
     }
 
 
     [TestCase]
-    public void FindTestExtensions_WhenCalledOnSuiteWithExtendWith_ReturnsExtension()
+    public void FindTestExtensions_OnSuiteWithExtension()
     {
         var result = extensionRegistry
-            .FindTestExtensions(typeof(SuiteWithExtendWith));
-        
-        AssertThat(result).IsNotEmpty();
-        AssertThat(result[0].GetType())
-            .IsEqual(typeof(ExtensionA));
-    }
-    
-    [TestCase]
-    public void FindTestExtensions_WhenCalledOnSuiteWithBothExtensions_ReturnsExtensionsInCorrectOrder()
-    {
-        var result = extensionRegistry
-            .FindTestExtensions(typeof(SuiteWithBothRegistrationMethods));
-        
-        AssertThat(result).IsNotEmpty();
-        AssertThat(result[0].GetType())
-            .IsEqual(typeof(ExtensionA));
-        AssertThat(result[1].GetType())
-            .IsEqual(typeof(ExtensionB));
+            .FindTestExtensions(typeof(SuiteWithExtension));
+
+        AssertThat(result)
+            .Extract("GetType")
+            .ContainsExactly(typeof(ExtensionA));
     }
 
     [TestCase]
-    public void FindTestExtensions_CollectsInheritedExtensionsInCorrectOrder()
+    public void FindTestExtensions_OnSuiteWithExtensionsAndRegistration()
     {
         var result = extensionRegistry
-            .FindTestExtensions(typeof(ConcreteSuite));
-        
-        AssertThat(result).IsNotEmpty();
-        AssertInt(result.Count).IsEqual(4);
-        AssertThat(result[0].GetType())
-            .IsEqual(typeof(ExtensionA));
-        AssertThat(result[1].GetType())
-            .IsEqual(typeof(ExtensionB));
-        AssertThat(result[2].GetType())
-            .IsEqual(typeof(ExtensionC));
-        AssertThat(result[3].GetType())
-            .IsEqual(typeof(ExtensionD));
+            .FindTestExtensions(typeof(SuiteWithExtensionsAndRegistration));
+
+        AssertThat(result)
+            .Extract("GetType")
+            .ContainsExactly(typeof(ExtensionA), typeof(ExtensionB));
     }
 
     [TestCase]
-    public void FindTestExtensions_WhenCalledOnSuiteWithRegisterExtension_ReturnsExtension()
+    public void FindTestExtensions_OnSuiteWithExtensionsInherits()
     {
         var result = extensionRegistry
-            .FindTestExtensions(typeof(SuiteWithRegisterExtensionField));
-        
-        AssertThat(result).IsNotEmpty();
-        
-        AssertThat(result[0].GetType())
-            .IsEqual(typeof(ExtensionB));
+            .FindTestExtensions(typeof(SuiteWithExtensionsInherits));
+
+        AssertThat(result)
+            .Extract("GetType")
+            .ContainsExactly(typeof(ExtensionA), typeof(ExtensionB), typeof(ExtensionC), typeof(ExtensionD));
+    }
+
+    [TestCase]
+    public void FindTestExtensions_OnSuiteWithRegisterExtension()
+    {
+        var result = extensionRegistry
+            .FindTestExtensions(typeof(SuiteWithRegisterExtension));
+
+        AssertThat(result)
+            .Extract("GetType")
+            .ContainsExactly(typeof(ExtensionB));
     }
 
     #endregion
