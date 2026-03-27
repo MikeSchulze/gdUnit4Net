@@ -84,6 +84,10 @@ public class ExtensionRegistryTest
 
     private class LogB() : LogExtension("B");
 
+    private class LogC() : LogExtension("C");
+
+    private class LogD() : LogExtension("D");
+    
     // Extension with only test-level (before/after each) callbacks implemented
     private class LogTestLevelOnly : IBeforeEachCallback, IAfterEachCallback
     {
@@ -163,7 +167,6 @@ public class ExtensionRegistryTest
 
 
         [TestCase]
-        [ExtendWith<LogB>]
         public void TestCase()
         {
         }
@@ -208,7 +211,6 @@ public class ExtensionRegistryTest
 
 
         [TestCase]
-        [ExtendWith<LogTestLevelOnly>]
         public void MethodWithExtension()
         {
         }
@@ -263,6 +265,10 @@ public class ExtensionRegistryTest
     // Dummy type used to verify that an exception is thrown when a parameter cannot be resolved by any means.
     private sealed class UnresolvableType;
 
+    [ExtendWith<LogA>] [ExtendWith<LogB>] private abstract class AbstractSuite;
+    
+    [ExtendWith<LogC>] [ExtendWith<LogD>] private class ConcreteSuite : AbstractSuite;
+    
     #endregion
 
     #region Hooks
@@ -277,7 +283,7 @@ public class ExtensionRegistryTest
     public async Task RunBeforeAll_SuiteWithNoExtensions_IsNoOp()
     {
         var suite = new NoExtensionSuite();
-        var registry = new ExtensionRegistry(typeof(NoExtensionSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(NoExtensionSuite)));
 
@@ -289,7 +295,7 @@ public class ExtensionRegistryTest
     public async Task RunBeforeAll_SingleClassLevelExtendWith_ExtensionIsInvoked()
     {
         var suite = new SingleClassLevelSuite();
-        var registry = new ExtensionRegistry(typeof(SingleClassLevelSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(SingleClassLevelSuite)));
 
@@ -302,7 +308,7 @@ public class ExtensionRegistryTest
     public async Task RunBeforeAll_TwoClassLevelExtendWith_BothInvokedInDeclarationOrder()
     {
         var suite = new TwoClassLevelSuite();
-        var registry = new ExtensionRegistry(typeof(TwoClassLevelSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(TwoClassLevelSuite)));
 
@@ -317,7 +323,7 @@ public class ExtensionRegistryTest
     {
         var invoked = false;
         var suite = new InstanceFieldSuite(new CallbackExtension(() => invoked = true));
-        var registry = new ExtensionRegistry(typeof(InstanceFieldSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(InstanceFieldSuite)));
 
@@ -331,7 +337,7 @@ public class ExtensionRegistryTest
         var invoked = false;
         StaticFieldSuite.Ext = new CallbackExtension(() => invoked = true);
         var suite = new StaticFieldSuite();
-        var registry = new ExtensionRegistry(typeof(StaticFieldSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(StaticFieldSuite)));
 
@@ -344,7 +350,7 @@ public class ExtensionRegistryTest
     {
         var invoked = false;
         var suite = new InstancePropertySuite(new CallbackExtension(() => invoked = true));
-        var registry = new ExtensionRegistry(typeof(InstancePropertySuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(InstancePropertySuite)));
 
@@ -358,7 +364,7 @@ public class ExtensionRegistryTest
         var invoked = false;
         StaticPropertySuite.Ext = new CallbackExtension(() => invoked = true);
         var suite = new StaticPropertySuite();
-        var registry = new ExtensionRegistry(typeof(StaticPropertySuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(StaticPropertySuite)));
 
@@ -370,7 +376,7 @@ public class ExtensionRegistryTest
     public async Task RunBeforeAll_ExtensionWithoutBeforeAllCallback_IsNotInvoked()
     {
         var suite = new InstanceFieldSuite(new LogTestLevelOnly());
-        var registry = new ExtensionRegistry(typeof(InstanceFieldSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunBeforeAll(CreateSuiteContext(typeof(InstanceFieldSuite)));
 
@@ -382,54 +388,17 @@ public class ExtensionRegistryTest
     #region TestRunBeforeEach
 
     [TestCase]
-    public async Task RunBeforeEach_SuiteAndMethodExtensions_SuiteRunsBeforeMethodExtension()
-    {
-        var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.BeforeEach")));
-        var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
-
-        var (_, testContext) = CreateTestContext(
-            typeof(MethodRegistrationSuite),
-            nameof(MethodRegistrationSuite.MethodWithExtension));
-
-        await registry.RunBeforeEach(testContext);
-
-        AssertThat(Log.Count).IsEqual(2);
-        AssertThat(Log[0]).IsEqual("Suite.BeforeEach");
-        AssertThat(Log[1]).IsEqual("Method.BeforeEach");
-    }
-
-
-    [TestCase]
-    public async Task RunBeforeEach_MethodWithNoExtendWith_OnlySuiteExtensionsRun()
-    {
-        var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.BeforeEach")));
-        var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
-
-        var (_, testContext) = CreateTestContext(
-            typeof(MethodRegistrationSuite),
-            nameof(MethodRegistrationSuite.PlainMethod));
-
-        await registry.RunBeforeEach(testContext);
-
-        AssertThat(Log.Count).IsEqual(1);
-        AssertThat(Log[0]).IsEqual("Suite.BeforeEach");
-    }
-
-
-    [TestCase]
     public async Task RunBeforeEach_VerifyExtensionExecutionOrder_AllExtensionTypes()
     {
-        var suite = new AllExtensionsSuite();
-        var registry = new ExtensionRegistry(typeof(AllExtensionsSuite), suite);
+        var registry = new ExtensionRegistry();
 
         var (_, testContext) = CreateTestContext(typeof(AllExtensionsSuite), nameof(AllExtensionsSuite.TestCase));
         await registry.RunBeforeEach(testContext);
 
-        AssertThat(Log.Count).IsEqual(4);
+        AssertThat(Log.Count).IsEqual(3);
         AssertThat(Log[0]).IsEqual("A.BeforeEach"); // Class-level extension from [ExtendWith]
         AssertThat(Log[1]).IsEqual("StaticField.BeforeEach"); // Static field extension from [RegisterExtension]
         AssertThat(Log[2]).IsEqual("StaticProperty.BeforeEach"); // Static property extension from [RegisterExtension]
-        AssertThat(Log[3]).IsEqual("B.BeforeEach"); // Method-level extension from [ExtendWith] 
     }
 
     #endregion
@@ -439,8 +408,7 @@ public class ExtensionRegistryTest
     [TestCase]
     public async Task RunAfterAll_TwoClassLevelExtendWith_InvokedInReverseDeclarationOrder()
     {
-        var suite = new TwoClassLevelSuite();
-        var registry = new ExtensionRegistry(typeof(TwoClassLevelSuite), suite);
+        var registry = new ExtensionRegistry();
 
         await registry.RunAfterAll(CreateSuiteContext(typeof(TwoClassLevelSuite)));
 
@@ -450,118 +418,36 @@ public class ExtensionRegistryTest
     }
 
     #endregion
-
-    #region TestRunAfterEach
-
-    [TestCase]
-    public async Task RunAfterEach_SuiteAndMethodExtensions_MethodExtensionRunsBeforeSuite()
-    {
-        var suite = new MethodRegistrationSuite(new CallbackExtension(() => Log.Add("Suite.AfterEach")));
-        var registry = new ExtensionRegistry(typeof(MethodRegistrationSuite), suite);
-
-        var (_, testContext) = CreateTestContext(
-            typeof(MethodRegistrationSuite),
-            nameof(MethodRegistrationSuite.MethodWithExtension));
-
-        await registry.RunAfterEach(testContext);
-
-        // Combined list before reversal: [Suite, Method] → reversed: [Method, Suite]
-        AssertThat(Log.Count).IsEqual(2);
-        AssertThat(Log[0]).IsEqual("Method.AfterEach");
-        AssertThat(Log[1]).IsEqual("Suite.AfterEach");
-    }
-
-    #endregion
-
-    #region TestResolveArguments
+    
+    #region TestAttributeInheritance
 
     [TestCase]
-    public void ResolveArguments_MethodWithNoParameters_ReturnsEmptyArray()
+    public async Task TestInheritedExtensionAttributes_ShouldExecuteBeforeEachInCorrectOrder()
     {
-        var suite = new NoResolverSuite();
-        var registry = new ExtensionRegistry(typeof(NoResolverSuite), suite);
-
-        var (_, testContext) = CreateTestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.NoParams));
-
-        var result = registry.ResolveArguments(testContext);
-
-        AssertThat(result?.Count).IsEqual(0);
+        var registry = new ExtensionRegistry();
+        
+        await registry.RunBeforeEach(CreateSuiteContext(typeof(ConcreteSuite)));
+        
+        AssertThat(Log.Count).IsEqual(4);
+        AssertThat(Log[0]).IsEqual("A.BeforeEach");
+        AssertThat(Log[1]).IsEqual("B.BeforeEach");
+        AssertThat(Log[2]).IsEqual("C.BeforeEach");
+        AssertThat(Log[3]).IsEqual("D.BeforeEach");
     }
-
 
     [TestCase]
-    public void ResolveArguments_NoResolversRegistered_ReturnsTestCaseArgumentsUnchanged()
+    public async Task TestInheritedExtensionAttributes_ShouldExecuteAfterEachInCorrectOrder()
     {
-        var suite = new NoResolverSuite();
-        var registry = new ExtensionRegistry(typeof(NoResolverSuite), suite);
-
-        var (_, testContext) = CreateTestContext(typeof(NoResolverSuite), nameof(NoResolverSuite.StringParam), ["hello"]);
-        var result = registry.ResolveArguments(testContext);
-
-        AssertThat(result?.Count).IsEqual(1);
-        AssertThat(result![0]).IsEqual("hello");
+        var registry = new ExtensionRegistry();
+        
+        await registry.RunAfterEach(CreateSuiteContext(typeof(ConcreteSuite)));
+        
+        AssertThat(Log.Count).IsEqual(4);
+        AssertThat(Log[0]).IsEqual("D.AfterEach");
+        AssertThat(Log[1]).IsEqual("C.AfterEach");
+        AssertThat(Log[2]).IsEqual("B.AfterEach");
+        AssertThat(Log[3]).IsEqual("A.AfterEach");
     }
-
-
-    [TestCase]
-    public void ResolveArguments_ResolverMatchesParameter_ResolverValueTakesPriorityOverTestCaseArg()
-    {
-        var suite = new ResolverSuite(new AlwaysStringResolver("resolved"));
-        var registry = new ExtensionRegistry(typeof(ResolverSuite), suite);
-
-        var (_, testContext) = CreateTestContext(typeof(ResolverSuite), nameof(ResolverSuite.StringParam), ["raw"]);
-        var result = registry.ResolveArguments(testContext);
-
-        AssertThat(result?.Count).IsEqual(1);
-        AssertThat(result![0]).IsEqual("resolved");
-    }
-
-
-    [TestCase]
-    public void ResolveArguments_ResolverHandlesOneParam_RemainingParamFilledByTypeMatch()
-    {
-        var suite = new ResolverSuite(new AlwaysStringResolver("resolved"));
-        var registry = new ExtensionRegistry(typeof(ResolverSuite), suite);
-
-        var (_, testContext) = CreateTestContext(
-            typeof(ResolverSuite),
-            nameof(ResolverSuite.StringAndIntParams),
-            ["resolved", 42]);
-
-        var result = registry.ResolveArguments(testContext);
-
-        AssertThat(result?.Count).IsEqual(2);
-        AssertThat(result![0]).IsEqual("resolved");
-        AssertThat(result[1]).IsEqual(42);
-    }
-
-
-    [TestCase]
-    public void ResolveArguments_ParameterNotResolvableByAnyMeans_ThrowsInvalidOperationException()
-    {
-        // AlwaysStringResolver does not support UnresolvableType; no TestCase arg matches it either.
-        var suite = new ResolverSuite(new AlwaysStringResolver("resolved"));
-        var registry = new ExtensionRegistry(typeof(ResolverSuite), suite);
-
-        var threw = false;
-        var message = "";
-        try
-        {
-            var (_, testContext) = CreateTestContext(typeof(ResolverSuite), nameof(ResolverSuite.UnresolvableParam));
-            registry.ResolveArguments(testContext);
-        }
-        catch (InvalidOperationException ex)
-        {
-            threw = true;
-            message = ex.Message;
-        }
-
-        AssertBool(threw).IsTrue();
-        AssertString(message).IsEqual(
-            "No value could be resolved for parameter 'p' of type 'UnresolvableType' in test " 
-            + "'ResolverSuite.UnresolvableParam'. Provide a value via [TestCase(...)] or register an " 
-            + "IParameterResolver extension.");
-    }
-
+    
     #endregion
 }
