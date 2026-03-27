@@ -9,13 +9,11 @@ using Api;
 
 internal class ExtensionRegistry(Type testSuiteType, object testSuiteInstance)
 {
-    private readonly List<ITestExtension> suiteExtensions = CollectSuiteExtensions(testSuiteType, testSuiteInstance);
+    private readonly List<ITestExtension> extensions =[];
 
     public async Task RunBeforeAll(IExtensionContext context)
     {
-        var beforeAllExtensions = suiteExtensions
-            .OfType<IBeforeAllCallback>();
-        foreach (var ext in beforeAllExtensions)
+        foreach (var ext in extensions.OfType<IBeforeAllCallback>())
             await ext.BeforeAll(context).ConfigureAwait(true);
     }
 
@@ -30,11 +28,7 @@ internal class ExtensionRegistry(Type testSuiteType, object testSuiteInstance)
 
     public async Task RunBeforeEach(IExtensionContext context)
     {
-        var testMethod = context.GetTestMethod()
-                         ?? throw new InvalidOperationException("Test method information is required in the extension context for BeforeEach callbacks.");
-        var beforeEachCallbacks = GetExtensionsForMethod(suiteExtensions, testMethod)
-            .OfType<IBeforeEachCallback>();
-        foreach (var ext in beforeEachCallbacks)
+        foreach (var ext in extensions.OfType<IBeforeEachCallback>())
             await ext.BeforeEach(context).ConfigureAwait(true);
     }
 
@@ -120,24 +114,12 @@ internal class ExtensionRegistry(Type testSuiteType, object testSuiteInstance)
             "Provide a value via [TestCase(...)] or register an IParameterResolver extension.");
     }
 
-    private static List<ITestExtension> GetExtensionsForMethod(List<ITestExtension> suiteExtensions, MethodInfo method)
-    {
-        var methodExtensions = new List<ITestExtension>();
-        methodExtensions.AddRange(CollectMethodLevelExtendWithExtensions(method));
 
-        var combined = new List<ITestExtension>(suiteExtensions.Count + methodExtensions.Count);
-        combined.AddRange(suiteExtensions);
-        combined.AddRange(methodExtensions);
-        return combined;
-    }
-
-    private static List<ITestExtension> CollectSuiteExtensions(Type type, object instance)
+    public void FindTestExtensions(Type type, TestSuite suite)
     {
-        var result = new List<ITestExtension>();
-        result.AddRange(CollectClassLevelExtendWithExtensions(type));
+        result.AddRange(CollectTestExtensions(type));
         result.AddRange(CollectFieldLevelRegisterExtensionExtensions(type, instance));
         result.AddRange(CollectPropertyLevelRegisterExtensionExtensions(type, instance));
-        return result;
     }
 
     private static List<ITestExtension> CollectPropertyLevelRegisterExtensionExtensions(Type type, object instance)
@@ -170,34 +152,37 @@ internal class ExtensionRegistry(Type testSuiteType, object testSuiteInstance)
         return fieldLevelRegisterExtensionExtensions;
     }
 
-    private static List<ITestExtension> CollectClassLevelExtendWithExtensions(Type type)
-    {
-        // Class-level [ExtendWith<T>] — one instance per suite, collected in declaration order
-        var classLevelExtendWithAttributes = new List<ITestExtension>();
-        foreach (var attr in type.GetCustomAttributes(inherit: true))
+        // Collects [ExtendWith<T>] extensions base-first, preserving declaration order within each level.
+        //
+        // Example:
+        //   [ExtendWith<XXX>]
+        //   [ExtendWith<YYY>]
+        //   class BaseSuite { }
+        //
+        //   [ExtendWith<Foo>]
+        //   [ExtendWith<Bar>]
+        //   class TestSuiteA : BaseSuite { }
+        //
+        // Collected order: XXX → YYY → Foo → Bar
+        private static List<ITestExtension> CollectTestExtensions(Type type) =>
+        [
+            .. GetTypeHierarchy(type)
+                .SelectMany(t => t.GetCustomAttributes<ExtendWithBaseAttribute>(inherit: false))
+                .Select(attr => attr.CreateExtension())
+        ];
+
+        // Walks the inheritance chain from the root base type down to the given type
+        private static Stack<Type> GetTypeHierarchy(Type type)
         {
-            var attrType = attr.GetType();
-            if (!attrType.IsGenericType || attrType.GetGenericTypeDefinition() != typeof(ExtendWithAttribute<>))
-                continue;
-            var extensionType = attrType.GetGenericArguments()[0];
-            classLevelExtendWithAttributes.Add((ITestExtension)Activator.CreateInstance(extensionType)!);
+            var hierarchy = new Stack<Type>();
+            var current = type;
+            while (current != null && current != typeof(object))
+            {
+                hierarchy.Push(current);
+                current = current.BaseType;
+            }
+
+            return hierarchy;
         }
 
-        return classLevelExtendWithAttributes;
-    }
-
-    private static List<ITestExtension> CollectMethodLevelExtendWithExtensions(MethodInfo method)
-    {
-        var methodLevelExtendWithExtensions = new List<ITestExtension>();
-        foreach (var attr in method.GetCustomAttributes())
-        {
-            var attrType = attr.GetType();
-            if (!attrType.IsGenericType || attrType.GetGenericTypeDefinition() != typeof(ExtendWithAttribute<>))
-                continue;
-            var extensionType = attrType.GetGenericArguments()[0];
-            methodLevelExtendWithExtensions.Add((ITestExtension)Activator.CreateInstance(extensionType)!);
-        }
-
-        return methodLevelExtendWithExtensions;
-    }
 }
