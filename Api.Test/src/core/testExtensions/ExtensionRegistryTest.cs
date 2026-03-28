@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using static GdUnit4.Assertions;
 
 namespace GdUnit4.Tests.Core.TestExtensions;
@@ -13,20 +15,41 @@ public class ExtensionRegistryTest
 {
     #region Mock extension classes for testing
 
-    private abstract class MockExtension : IBeforeEachCallback
+    private abstract class MockExtension(List<Type> invocationLog) 
+        : IBeforeAllCallback, IBeforeEachCallback, IAfterEachCallback, IAfterAllCallback
     {
-        public Task BeforeEach(IExtensionContext context) =>
-            // No-op
-            Task.CompletedTask;
+        public Task BeforeEach(IExtensionContext context)
+        {
+            invocationLog.Add(GetType());
+            return Task.CompletedTask;
+        }
+
+        public Task BeforeAll(IExtensionContext context)
+        {
+            invocationLog.Add(GetType());
+            return Task.CompletedTask;
+        }
+
+        public Task AfterEach(IExtensionContext context)
+        {
+            invocationLog.Add(GetType());
+            return Task.CompletedTask;
+        }
+
+        public Task AfterAll(IExtensionContext context)
+        {
+            invocationLog.Add(GetType());
+            return Task.CompletedTask;
+        }
     }
 
-    private class ExtensionA : MockExtension;
+    private class ExtensionA() : MockExtension(InvokedExtensions);
 
-    private class ExtensionB : MockExtension;
+    private class ExtensionB() : MockExtension(InvokedExtensions);
 
-    private class ExtensionC : MockExtension;
+    private class ExtensionC() : MockExtension(InvokedExtensions);
 
-    private class ExtensionD : MockExtension;
+    private class ExtensionD() : MockExtension(InvokedExtensions);
 
     #endregion
 
@@ -62,11 +85,17 @@ public class ExtensionRegistryTest
 
     #region Test setup
 
+    private static readonly List<Type> InvokedExtensions = [];
+
     // ReSharper disable once NullableWarningSuppressionIsUsed
     private ExtensionRegistry extensionRegistry = null!;
 
     [BeforeTest]
-    public void CreateExtensionRegistry() => extensionRegistry = new ExtensionRegistry();
+    public void SetUpExtensions()
+    {
+        extensionRegistry = new ExtensionRegistry();
+        InvokedExtensions.Clear();
+    }
 
     #endregion
 
@@ -126,5 +155,101 @@ public class ExtensionRegistryTest
             .ContainsExactly(typeof(ExtensionB));
     }
 
+    #endregion
+    
+    #region Test run methods
+
+    [TestCase]
+    public async Task RunBeforeAll_ShouldExecuteExtensionsInCorrectOrder()
+    {
+        extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
+        
+        var context = new ExtensionContext(
+            typeof(SuiteWithExtensionsInherits),
+            new TestSuiteNode
+            {
+                ManagedType = "null",
+                Tests = [],
+                AssemblyPath = "null",
+                SourceFile = "null",
+                Id = Guid.NewGuid(),
+                ParentId = Guid.NewGuid()
+            });
+        
+        await extensionRegistry.RunBeforeAll(context);
+        
+        AssertThat(InvokedExtensions)
+            .ContainsExactly(typeof(ExtensionA), typeof(ExtensionB), typeof(ExtensionC), typeof(ExtensionD));
+    }
+
+    [TestCase]
+    public async Task RunBeforeEach_ShouldExecuteExtensionsInCorrectOrder()
+    {
+        extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
+        
+        var context = new ExtensionContext(
+            typeof(SuiteWithExtensionsInherits),
+            new TestSuiteNode
+            {
+                ManagedType = "null",
+                Tests = [],
+                AssemblyPath = "null",
+                SourceFile = "null",
+                Id = Guid.NewGuid(),
+                ParentId = Guid.NewGuid()
+            });
+        
+        await extensionRegistry.RunBeforeEach(context);
+        
+        AssertThat(InvokedExtensions)
+            .ContainsExactly(typeof(ExtensionA), typeof(ExtensionB), typeof(ExtensionC), typeof(ExtensionD));
+    }
+
+    [TestCase]
+    public async Task RunAfterEach_ShouldExecuteExtensionsInReverseOrder()
+    {
+        extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
+        
+        var context = new ExtensionContext(
+            typeof(SuiteWithExtensionsInherits),
+            new TestSuiteNode
+            {
+                ManagedType = "null",
+                Tests = [],
+                AssemblyPath = "null",
+                SourceFile = "null",
+                Id = Guid.NewGuid(),
+                ParentId = Guid.NewGuid()
+            });
+        
+        await extensionRegistry.RunAfterEach(context);
+        
+        AssertThat(InvokedExtensions)
+            .ContainsExactly(typeof(ExtensionD), typeof(ExtensionC), typeof(ExtensionB), typeof(ExtensionA));
+    }
+
+    [TestCase]
+    public async Task RunAfterAll_ShouldExecuteExtensionsInReverseOrder()
+    {
+        extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
+        
+        var context = new ExtensionContext(
+            typeof(SuiteWithExtensionsInherits),
+            new TestSuiteNode
+            {
+                ManagedType = "null",
+                Tests = [],
+                AssemblyPath = "null",
+                SourceFile = "null",
+                Id = Guid.NewGuid(),
+                ParentId = Guid.NewGuid()
+            });
+        
+        await extensionRegistry.RunAfterAll(context);
+        
+        AssertThat(InvokedExtensions)
+            .ContainsExactly(typeof(ExtensionD), typeof(ExtensionC), typeof(ExtensionB), typeof(ExtensionA));
+    }
+    
     #endregion
 }
