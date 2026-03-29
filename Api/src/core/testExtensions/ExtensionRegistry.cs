@@ -19,6 +19,30 @@ internal sealed class ExtensionRegistry
         return extensions.AsReadOnly();
     }
 
+    public async Task RunBeforeAll(IExtensionContext extensionContext)
+    {
+        foreach (var extension in extensions.OfType<IBeforeAllCallback>())
+            await extension.BeforeAll(extensionContext).ConfigureAwait(true);
+    }
+
+    public async Task RunBeforeEach(IExtensionContext extensionContext)
+    {
+        foreach (var extension in extensions.OfType<IBeforeEachCallback>())
+            await extension.BeforeEach(extensionContext).ConfigureAwait(true);
+    }
+
+    public async Task RunAfterEach(IExtensionContext extensionContext)
+    {
+        foreach (var extension in extensions.OfType<IAfterEachCallback>().Reverse())
+            await extension.AfterEach(extensionContext).ConfigureAwait(true);
+    }
+
+    public async Task RunAfterAll(IExtensionContext extensionContext)
+    {
+        foreach (var extension in extensions.OfType<IAfterAllCallback>().Reverse())
+            await extension.AfterAll(extensionContext).ConfigureAwait(true);
+    }
+
     // Example:
     //   [ExtendWith<XXX>]
     //   [ExtendWith<YYY>]
