@@ -16,7 +16,7 @@ public interface IExtensionContext
 
     /// <summary>Gets the live instance of the test suite.</summary>
     /// <returns>The instance of the test suite bing executed.</returns>
-    TestSuiteNode GetTestSuiteInstance();
+    TestSuiteNode? GetTestSuiteInstance();
 
     /// <summary>Gets the test method currently executing (null during suite-level callbacks).</summary>
     /// <returns>The test method current executing, or null during suite-level callbacks.</returns>

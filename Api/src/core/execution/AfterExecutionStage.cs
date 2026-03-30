@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Api;
+
 using Asserts;
 
 using Reporting;
@@ -20,12 +22,21 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
     {
     }
 
-    public override async Task Execute(ExecutionContext context)
+    public override async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
     {
         context.MemoryPool.SetActive(StageName);
-        await base
-            .Execute(context)
-            .ConfigureAwait(true);
+        try
+        {
+            await base
+                .Execute(context, extensionContext)
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            await context.ExtensionRegistry.RunAfterAll(extensionContext)
+                .ConfigureAwait(true);
+        }
+
         Utils.ClearTempDir();
         await context.MemoryPool
             .Gc()

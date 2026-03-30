@@ -16,6 +16,8 @@ using Monitoring;
 
 using Reporting;
 
+using TestExtensions;
+
 internal sealed class ExecutionContext : IDisposable
 {
     private int iteration;
@@ -36,6 +38,10 @@ internal sealed class ExecutionContext : IDisposable
         Disposables = [];
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
+        ExtensionRegistry = new ExtensionRegistry();
+
+        // Ignore result, extensions are stored in registry as well as returned
+        _ = ExtensionRegistry.FindTestExtensions(TestSuite.Instance.GetType());
     }
 
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments)
@@ -124,6 +130,8 @@ internal sealed class ExecutionContext : IDisposable
     public bool IsSkipped { get; }
 
     public TestReportCollector ReportCollector { get; }
+
+    public ExtensionRegistry ExtensionRegistry { get; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 

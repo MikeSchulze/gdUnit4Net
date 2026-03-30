@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using Api;
+
 using Asserts;
 
 using Reporting;
@@ -22,16 +24,26 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
     {
     }
 
-    public override async Task Execute(ExecutionContext context)
+    public override async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
     {
         if (!context.IsSkipped)
         {
             if (context.IsEngineMode)
                 GodotSignalCollector.Instance.Clean();
             context.MemoryPool.SetActive(StageName);
-            await base
-                .Execute(context)
-                .ConfigureAwait(true);
+
+            try
+            {
+                await base
+                    .Execute(context, extensionContext)
+                    .ConfigureAwait(true);
+            }
+            finally
+            {
+                await context.ExtensionRegistry.RunAfterEach(extensionContext)
+                    .ConfigureAwait(true);
+            }
+
             await context.MemoryPool
                 .Gc()
                 .ConfigureAwait(true);
