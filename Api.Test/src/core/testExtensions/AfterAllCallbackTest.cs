@@ -40,7 +40,6 @@ public class AfterAllCallbackTest
         }
     }
 
-
     [BeforeTest]
     public void ClearFlags()
     {
@@ -50,7 +49,6 @@ public class AfterAllCallbackTest
         Extension.WasInvoked = false;
     }
 
-
     [AfterTest]
     public void BeforeRunningAfterTest_AfterAllCallback_ShouldNotBeInvoked()
     {
@@ -58,7 +56,6 @@ public class AfterAllCallbackTest
         AssertThat(_afterTestRunBeforeAfterAll)
             .IsTrue();
     }
-
 
     [After]
     public void BeforeRunningAfter_AfterAllCallback_ShouldNotBeInvoked()

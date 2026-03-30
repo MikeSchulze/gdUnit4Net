@@ -31,7 +31,6 @@ public class AfterEachCallbackTest
             return Task.CompletedTask;
         }
 
-
         public Task AfterAll(IExtensionContext context)
         {
             _afterEachRunBeforeAfterAll = Extension.WasInvoked;
@@ -40,7 +39,6 @@ public class AfterEachCallbackTest
             return Task.CompletedTask;
         }
     }
-
 
     [BeforeTest]
     public void ClearFlags()
@@ -51,7 +49,6 @@ public class AfterEachCallbackTest
         Extension.WasInvoked = false;
     }
 
-
     [AfterTest]
     public void AfterTest()
     {
@@ -59,7 +56,6 @@ public class AfterEachCallbackTest
         AssertThat(_afterTestRunBeforeAfterEach)
             .IsTrue();
     }
-
 
     [After]
     public void BeforeRunningAfter_AfterEachCallback_ShouldBeInvoked()
