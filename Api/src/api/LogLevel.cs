@@ -20,5 +20,10 @@ public enum LogLevel
     /// <summary>
     ///     Error message.
     /// </summary>
-    Error = 2
+    Error = 2,
+
+    /// <summary>
+    ///     Debug message. Only emitted in DEBUG builds via <see cref="ITestEngineLogger.LogDebug" />.
+    /// </summary>
+    Debug = 3
 }
