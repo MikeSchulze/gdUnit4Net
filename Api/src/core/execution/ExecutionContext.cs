@@ -108,7 +108,7 @@ internal sealed class ExecutionContext : IDisposable
         ExtensionContext = new ExtensionContext(
             context.ExtensionContext,
             testCase.MethodInfo,
-            context.TestCaseName,
+            TestCaseName,
             [.. testCase.Arguments]);
     }
 
