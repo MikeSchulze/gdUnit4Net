@@ -22,7 +22,12 @@ internal sealed class ExecutionContext : IDisposable
 {
     private int iteration;
 
-    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode)
+    public ExecutionContext(
+        TestSuite testInstance,
+        IEnumerable<ITestEventListener> eventListeners,
+        bool reportOrphanNodesEnabled,
+        bool isEngineMode,
+        ExtensionRegistry? extensionRegistry = null)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
         MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
@@ -38,10 +43,19 @@ internal sealed class ExecutionContext : IDisposable
         Disposables = [];
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
-        ExtensionRegistry = new ExtensionRegistry();
 
-        // Ignore result, extensions are stored in registry as well as returned
-        _ = ExtensionRegistry.FindTestExtensions(TestSuite.Instance.GetType());
+        if (extensionRegistry != null)
+        {
+            ExtensionRegistry = extensionRegistry;
+        }
+        else
+        {
+            ExtensionRegistry = new ExtensionRegistry();
+
+            // Ignore result, extensions are stored in registry as well as returned
+            _ = ExtensionRegistry.FindTestExtensions(TestSuite.Instance.GetType());
+        }
+
         ExtensionContext = new ExtensionContext(TestSuite.Instance.GetType());
     }
 
@@ -50,7 +64,8 @@ internal sealed class ExecutionContext : IDisposable
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
-            context.IsEngineMode)
+            context.IsEngineMode,
+            context.ExtensionRegistry)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -75,7 +90,8 @@ internal sealed class ExecutionContext : IDisposable
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
-            context.IsEngineMode)
+            context.IsEngineMode,
+            context.ExtensionRegistry)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -95,7 +111,12 @@ internal sealed class ExecutionContext : IDisposable
     }
 
     public ExecutionContext(ExecutionContext context, TestCase testCase)
-        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
+        : this(
+            context.TestSuite,
+            context.EventListeners,
+            context.ReportOrphanNodesEnabled,
+            context.IsEngineMode,
+            context.ExtensionRegistry)
     {
         context.SubExecutionContexts.Add(this);
         CurrentTestCase = testCase;
