@@ -23,7 +23,8 @@ internal sealed class ExecutionContext : IDisposable
         IEnumerable<ITestEventListener> eventListeners,
         bool reportOrphanNodesEnabled,
         bool isEngineMode,
-        ExtensionRegistry extensionRegistry)
+        ExtensionRegistry extensionRegistry,
+        IExtensionContext extensionContext)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
         MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
@@ -40,16 +41,18 @@ internal sealed class ExecutionContext : IDisposable
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
         ExtensionRegistry = extensionRegistry ?? throw new ArgumentNullException(nameof(extensionRegistry));
-        ExtensionContext = new ExtensionContext(TestSuite.Instance.GetType());
+        ExtensionContext = extensionContext;
     }
 
+    // Child constructors — ExtensionContext is provided by the caller
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments)
         : this(
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
             context.IsEngineMode,
-            context.ExtensionRegistry)
+            context.ExtensionRegistry,
+            context.ExtensionContext)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -61,21 +64,17 @@ internal sealed class ExecutionContext : IDisposable
             ? CurrentTestCase?.TestCaseAttributes.ElementAt(0).Iterations ?? 0
             : 0;
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, TestCaseName, new TestCaseAttribute(methodArguments));
-        ExtensionContext = new ExtensionContext(
-            context.ExtensionContext,
-            context.CurrentTestCase?.MethodInfo!,
-            context.TestCaseName,
-            [.. MethodArguments]);
     }
 
     // used for dynamic datapoint tests
-    public ExecutionContext(ExecutionContext context, string displayName)
+    public ExecutionContext(ExecutionContext context, IExtensionContext extensionContext, string displayName)
         : this(
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
             context.IsEngineMode,
-            context.ExtensionRegistry)
+            context.ExtensionRegistry,
+            extensionContext)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -87,20 +86,16 @@ internal sealed class ExecutionContext : IDisposable
         TestCaseName = context.TestCaseName;
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, displayName, new TestCaseAttribute());
         DisplayName = displayName;
-        ExtensionContext = new ExtensionContext(
-            context.ExtensionContext,
-            context.CurrentTestCase?.MethodInfo!,
-            context.TestCaseName,
-            [.. MethodArguments]);
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase)
+    public ExecutionContext(ExecutionContext context, IExtensionContext extensionContext, TestCase testCase)
         : this(
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
             context.IsEngineMode,
-            context.ExtensionRegistry)
+            context.ExtensionRegistry,
+            extensionContext)
     {
         context.SubExecutionContexts.Add(this);
         CurrentTestCase = testCase;
@@ -110,11 +105,6 @@ internal sealed class ExecutionContext : IDisposable
         IsSkipped = CurrentTestCase?.IsSkipped ?? false;
         TestCaseName = TestCase.BuildDisplayName(testCase.Name, testCase.TestCaseAttribute);
         FullyQualifiedName = TestCase.BuildFullyQualifiedName(TestSuite.Instance.GetType().FullName!, testCase.Name, testCase.TestCaseAttribute);
-        ExtensionContext = new ExtensionContext(
-            context.ExtensionContext,
-            testCase.MethodInfo,
-            TestCaseName,
-            [.. testCase.Arguments]);
     }
 
     public static ExecutionContext? Current
@@ -152,9 +142,9 @@ internal sealed class ExecutionContext : IDisposable
 
     public TestReportCollector ReportCollector { get; }
 
-    private ExtensionRegistry ExtensionRegistry { get; }
+    internal IExtensionContext ExtensionContext { get; }
 
-    private IExtensionContext ExtensionContext { get; }
+    private ExtensionRegistry ExtensionRegistry { get; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 

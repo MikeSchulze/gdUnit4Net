@@ -65,12 +65,14 @@ internal class ExecuteTestSuiteCommand : BaseCommand
 
                 var extensionRegistry = new ExtensionRegistry();
                 _ = extensionRegistry.FindTestExtensions(testSuite.Instance.GetType());
+                var extensionContext = new ExtensionContext(testSuite.Instance.GetType());
                 using ExecutionContext context = new(
                     testSuite,
                     [testEventListener],
                     IsReportOrphanNodesEnabled,
                     IsEngineMode,
-                    extensionRegistry);
+                    extensionRegistry,
+                    extensionContext);
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
                     _ = await GodotObjectExtensions.SyncProcessFrame;
