@@ -31,7 +31,9 @@ internal class AfterExecutionStage : ExecutionStage<AfterAttribute>
         }
         finally
         {
-            await context.ExtensionRegistry.RunAfterAll(context.ExtensionContext)
+            await context
+                .ExtensionRegistry
+                .RunAfterAll(context.ExtensionContext)
                 .ConfigureAwait(true);
         }
 
