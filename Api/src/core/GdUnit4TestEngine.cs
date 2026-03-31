@@ -11,6 +11,8 @@ using Discovery;
 
 using Extensions;
 
+using Logging;
+
 using Runners;
 
 internal sealed class GdUnit4TestEngine : ITestEngine
@@ -22,6 +24,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
     {
         Settings = settings;
         Logger = logger;
+        TestEngineLogger.Register(logger);
     }
 
     private TestEngineSettings Settings { get; }
