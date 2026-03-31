@@ -13,8 +13,6 @@ using Extensions;
 
 using Newtonsoft.Json;
 
-using TestExtensions;
-
 /// <summary>
 ///     Command to execute a test suite with configurable execution options.
 /// </summary>
@@ -72,10 +70,8 @@ internal class ExecuteTestSuiteCommand : BaseCommand
                 if (context.IsEngineMode)
                     _ = await GodotObjectExtensions.SyncProcessFrame;
 
-                var suiteExtensionContext = new ExtensionContext(testSuite.Instance.GetType());
-
                 await new TestSuiteExecutionStage(testSuite)
-                    .Execute(context, suiteExtensionContext)
+                    .Execute(context)
                     .ConfigureAwait(true);
             }
 

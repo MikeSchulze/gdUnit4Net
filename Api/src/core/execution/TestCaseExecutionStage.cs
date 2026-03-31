@@ -5,8 +5,6 @@ namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
 
-using Api;
-
 using Asserts;
 
 using Reporting;
@@ -20,12 +18,12 @@ internal sealed class TestCaseExecutionStage : ExecutionStage<TestCaseAttribute>
     {
     }
 
-    public override async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
+    public override async Task Execute(ExecutionContext context)
     {
         context.MemoryPool.SetActive(StageName, true);
 
         await base
-            .Execute(context, extensionContext)
+            .Execute(context)
             .ConfigureAwait(true);
 
         await context.MemoryPool

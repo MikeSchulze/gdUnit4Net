@@ -5,8 +5,6 @@ namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
 
-using Api;
-
 /// <summary>
 ///     Defines a contract for execution stages in the test framework pipeline.
 /// </summary>
@@ -61,10 +59,6 @@ internal interface IExecutionStage
     ///     The execution context containing test information, configuration, event listeners,
     ///     cancellation tokens, and other data needed for execution.
     /// </param>
-    /// <param name="extensionContext">
-    ///     The extension context providing access to test metadata
-    ///     that may be used during test extension execution.
-    /// </param>
     /// <returns>
     ///     A task representing the asynchronous execution of this stage.
     ///     The task completes when the stage has finished its operations.
@@ -72,5 +66,5 @@ internal interface IExecutionStage
     /// <exception cref="Exceptions.TestFailedException">
     ///     Thrown when test execution fails and cannot continue to subsequent stages.
     /// </exception>
-    Task Execute(ExecutionContext context, IExtensionContext extensionContext);
+    Task Execute(ExecutionContext context);
 }

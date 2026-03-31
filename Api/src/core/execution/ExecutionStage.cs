@@ -10,8 +10,6 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using Api;
-
 using Exceptions;
 
 using Extensions;
@@ -52,7 +50,7 @@ internal abstract class ExecutionStage<T> : IExecutionStage
 
     private TestStageAttribute? StageAttribute { get; set; }
 
-    public virtual async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
+    public virtual async Task Execute(ExecutionContext context)
     {
         // no stage defined?
         if (Method == null)

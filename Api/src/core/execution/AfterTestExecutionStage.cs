@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using Api;
-
 using Asserts;
 
 using Reporting;
@@ -24,7 +22,7 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
     {
     }
 
-    public override async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
+    public override async Task Execute(ExecutionContext context)
     {
         if (!context.IsSkipped)
         {
@@ -35,12 +33,12 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
             try
             {
                 await base
-                    .Execute(context, extensionContext)
+                    .Execute(context)
                     .ConfigureAwait(true);
             }
             finally
             {
-                await context.ExtensionRegistry.RunAfterEach(extensionContext)
+                await context.ExtensionRegistry.RunAfterEach(context.ExtensionContext)
                     .ConfigureAwait(true);
             }
 

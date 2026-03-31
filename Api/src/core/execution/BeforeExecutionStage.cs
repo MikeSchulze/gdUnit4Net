@@ -5,8 +5,6 @@ namespace GdUnit4.Core.Execution;
 
 using System.Threading.Tasks;
 
-using Api;
-
 internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
 {
     public BeforeExecutionStage(TestSuite testSuite)
@@ -14,13 +12,13 @@ internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
     {
     }
 
-    public override async Task Execute(ExecutionContext context, IExtensionContext extensionContext)
+    public override async Task Execute(ExecutionContext context)
     {
         context.MemoryPool.SetActive(StageName, true);
-        await context.ExtensionRegistry.RunBeforeAll(extensionContext)
+        await context.ExtensionRegistry.RunBeforeAll(context.ExtensionContext)
             .ConfigureAwait(true);
         await base
-            .Execute(context, extensionContext)
+            .Execute(context)
             .ConfigureAwait(true);
         context.FireBeforeEvent();
         context.ReportCollector.Clear();
