@@ -14,6 +14,9 @@ internal sealed class GodotLogger : ITestEngineLogger
     {
         switch (logLevel)
         {
+            case LogLevel.Debug:
+                GD.PrintS("[DEBUG]:", message);
+                break;
             case LogLevel.Informational:
                 GD.PrintS(message);
                 break;

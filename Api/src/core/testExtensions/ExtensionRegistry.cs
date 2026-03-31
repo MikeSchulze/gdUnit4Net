@@ -9,10 +9,13 @@ using Api;
 
 internal sealed class ExtensionRegistry
 {
+    private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<ExtensionRegistry>();
+
     private readonly List<ITestExtension> extensions = [];
 
     public ReadOnlyCollection<ITestExtension> FindTestExtensions(Type type)
     {
+        Logger.LogDebug($"Scanning test suite '{type.FullName}' for registered test extensions.");
         extensions.Clear();
         extensions.AddRange(CollectExtendWithExtensions(type));
         extensions.AddRange(CollectRegisterExtensions(type));
