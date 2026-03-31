@@ -15,9 +15,6 @@ concurrency:
   group: ci-pr-${{ github.event.number }}
   cancel-in-progress: true
 
-permissions:
-  actions: write
-  contents: read
 
 jobs:
 
