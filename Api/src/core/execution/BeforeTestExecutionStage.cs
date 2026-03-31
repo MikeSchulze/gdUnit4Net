@@ -19,8 +19,7 @@ internal class BeforeTestExecutionStage : ExecutionStage<BeforeTestAttribute>
         {
             context.MemoryPool.SetActive(StageName, true);
             await context
-                .ExtensionRegistry
-                .RunBeforeEach(context.ExtensionContext)
+                .RunExtensionBeforeEach()
                 .ConfigureAwait(true);
             await base
                 .Execute(context)

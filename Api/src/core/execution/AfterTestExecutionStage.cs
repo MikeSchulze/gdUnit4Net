@@ -39,8 +39,7 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
             finally
             {
                 await context
-                    .ExtensionRegistry
-                    .RunAfterEach(context.ExtensionContext)
+                    .RunExtensionAfterEach()
                     .ConfigureAwait(true);
             }
 

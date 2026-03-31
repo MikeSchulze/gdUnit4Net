@@ -16,8 +16,7 @@ internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
     {
         context.MemoryPool.SetActive(StageName, true);
         await context
-            .ExtensionRegistry
-            .RunBeforeAll(context.ExtensionContext)
+            .RunExtensionBeforeAll()
             .ConfigureAwait(true);
         await base
             .Execute(context)

@@ -3,12 +3,8 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 using Api;
 
@@ -27,7 +23,7 @@ internal sealed class ExecutionContext : IDisposable
         IEnumerable<ITestEventListener> eventListeners,
         bool reportOrphanNodesEnabled,
         bool isEngineMode,
-        ExtensionRegistry? extensionRegistry = null)
+        ExtensionRegistry extensionRegistry)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
         MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
@@ -43,19 +39,7 @@ internal sealed class ExecutionContext : IDisposable
         Disposables = [];
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
-
-        if (extensionRegistry != null)
-        {
-            ExtensionRegistry = extensionRegistry;
-        }
-        else
-        {
-            ExtensionRegistry = new ExtensionRegistry();
-
-            // Ignore result, extensions are stored in registry as well as returned
-            _ = ExtensionRegistry.FindTestExtensions(TestSuite.Instance.GetType());
-        }
-
+        ExtensionRegistry = extensionRegistry ?? throw new ArgumentNullException(nameof(extensionRegistry));
         ExtensionContext = new ExtensionContext(TestSuite.Instance.GetType());
     }
 
@@ -150,7 +134,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public string TestCaseName { get; set; } = string.Empty;
 
-    public object?[] MethodArguments { get; private set; } = [];
+    public object?[] MethodArguments { get; } = [];
 
     public int CurrentIteration
     {
@@ -168,9 +152,9 @@ internal sealed class ExecutionContext : IDisposable
 
     public TestReportCollector ReportCollector { get; }
 
-    public ExtensionRegistry ExtensionRegistry { get; }
+    private ExtensionRegistry ExtensionRegistry { get; }
 
-    public IExtensionContext ExtensionContext { get; }
+    private IExtensionContext ExtensionContext { get; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 
@@ -216,6 +200,14 @@ internal sealed class ExecutionContext : IDisposable
         });
         Stopwatch.Stop();
     }
+
+    public Task RunExtensionBeforeAll() => ExtensionRegistry.RunBeforeAll(ExtensionContext);
+
+    public Task RunExtensionAfterAll() => ExtensionRegistry.RunAfterAll(ExtensionContext);
+
+    public Task RunExtensionBeforeEach() => ExtensionRegistry.RunBeforeEach(ExtensionContext);
+
+    public Task RunExtensionAfterEach() => ExtensionRegistry.RunAfterEach(ExtensionContext);
 
     public bool IsExpectingToFailWithException(Exception? exception, MethodInfo? mi)
     {
