@@ -69,7 +69,6 @@ internal class ExecuteTestSuiteCommand : BaseCommand
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
                     _ = await GodotObjectExtensions.SyncProcessFrame;
-
                 await new TestSuiteExecutionStage(testSuite)
                     .Execute(context)
                     .ConfigureAwait(true);
