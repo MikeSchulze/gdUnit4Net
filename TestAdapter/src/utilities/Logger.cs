@@ -33,11 +33,15 @@ public class Logger : ITestEngineLogger
 
     /// <summary>
     ///     Sends a message to the VS test platform logger with the appropriate level.
+    ///     Debug-level messages are suppressed as the VS test platform has no equivalent level.
     /// </summary>
     /// <param name="logLevel">The severity level of the message.</param>
     /// <param name="message">The message to log.</param>
     public void SendMessage(LogLevel logLevel, string message)
     {
+        if (logLevel == LogLevel.Debug)
+            return;
+
         if (LevelMap.TryGetValue(logLevel, out var testLogLevel))
             delegator.SendMessage(testLogLevel, $"[GdUnit4] {message}");
         else
