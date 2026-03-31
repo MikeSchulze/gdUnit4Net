@@ -45,7 +45,6 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
                 using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
-
                 if (testCase.HasDataPoint)
                 {
                     await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase)
@@ -53,12 +52,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 }
                 else
                 {
-                    await RunTestCase(
-                            stdoutHook,
-                            testCaseContext,
-                            testCase,
-                            testCase.TestCaseAttribute,
-                            testCase.Arguments)
+                    await RunTestCase(stdoutHook, testCaseContext, testCase, testCase.TestCaseAttribute, testCase.Arguments)
                         .ConfigureAwait(true);
                 }
 
