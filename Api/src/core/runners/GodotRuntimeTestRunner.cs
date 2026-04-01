@@ -373,6 +373,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 compileProcess.Kill(true);
             }
 
+            // Ensure all async events (including Exited) are fully processed before reading ExitCode
+            compileProcess.WaitForExit();
             return compileProcess.ExitCode == 0;
         }
 #pragma warning disable CA1031
