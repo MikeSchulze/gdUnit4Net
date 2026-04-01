@@ -29,6 +29,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// </summary>
     internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter_v5";
 
+    private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeTestRunner>();
+
     private readonly TestEngineSettings settings;
     private Process? process;
 
@@ -36,11 +38,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     ///     Initializes a new instance of the <see cref="GodotRuntimeTestRunner" /> class.
     ///     Initializes a new instance of the GodotRuntimeTestRunner.
     /// </summary>
-    /// <param name="logger">The test engine logger for diagnostic output.</param>
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
-    internal GodotRuntimeTestRunner(ITestEngineLogger logger, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor(logger), logger, settings)
+    internal GodotRuntimeTestRunner(IDebuggerFramework debuggerFramework, TestEngineSettings settings)
+        : base(new GodotRuntimeExecutor(), Logger, settings)
     {
         this.settings = settings;
         DebuggerFramework = debuggerFramework;
@@ -372,6 +373,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 compileProcess.Kill(true);
             }
 
+            // Ensure all async events (including Exited) are fully processed before reading ExitCode
+            compileProcess.WaitForExit();
             return compileProcess.ExitCode == 0;
         }
 #pragma warning disable CA1031

@@ -59,7 +59,7 @@ internal sealed class ExtensionRegistry
     internal static List<ITestExtension> CollectExtendWithExtensions(Type type) =>
     [
         .. GetTypeHierarchy(type)
-            .SelectMany<Type, ExtendWithBaseAttribute>(t => t.GetCustomAttributes<ExtendWithBaseAttribute>(false))
+            .SelectMany(t => t.GetCustomAttributes<ExtendWithBaseAttribute>(false))
             .Select(attr => attr.CreateExtension())
     ];
 

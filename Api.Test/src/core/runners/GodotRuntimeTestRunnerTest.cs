@@ -1,4 +1,4 @@
-﻿namespace GdUnit4.Tests.Core.Runners;
+namespace GdUnit4.Tests.Core.Runners;
 
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -24,9 +24,8 @@ public class GodotRuntimeTestRunnerTest
     private string? TestTempDirectory { get; set; }
 
     public required string MockGodotBinPath { get; set; }
-    public required Mock<IDebuggerFramework> DebuggerFrameworkMock { get; set; }
-    public required Mock<ITestEngineLogger> LoggerMock { get; set; }
 
+    public required Mock<IDebuggerFramework> DebuggerFrameworkMock { get; set; }
 
     /// <summary>
     ///     Set up test environment and create mocks
@@ -46,12 +45,10 @@ public class GodotRuntimeTestRunnerTest
             : "mock_godot.sh");
 
         // Setup mocks
-        LoggerMock = new Mock<ITestEngineLogger>();
         DebuggerFrameworkMock = new Mock<IDebuggerFramework>();
     }
 
     private GodotRuntimeTestRunner CreateTestRunner(int timeout) => new(
-        LoggerMock.Object,
         DebuggerFrameworkMock.Object,
         new TestEngineSettings { CompileProcessTimeout = timeout });
 
@@ -77,12 +74,9 @@ public class GodotRuntimeTestRunnerTest
     }
 
     [AfterTest]
-    public void AfterTest()
-    {
+    public void AfterTest() =>
         // Reset mocks to clear any recorded invocations
-        LoggerMock.Reset();
         DebuggerFrameworkMock.Reset();
-    }
 
     /// <summary>
     ///     Test successful execution of InstallTestRunnerClasses
@@ -91,6 +85,8 @@ public class GodotRuntimeTestRunnerTest
     public void ReCompileGodotProject()
     {
         // Arrange
+        using var capture = LogCapture.Watch<GodotRuntimeTestRunner>();
+
         CreateSuccessScript();
 
         // Create a separate temp working directory
@@ -101,11 +97,11 @@ public class GodotRuntimeTestRunnerTest
         var result = CreateTestRunner(1000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
-        AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for successful compilation").IsTrue();
+        AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return true for successful compilation").IsTrue();
 
         // Verify logger was called with success messages
-        VerifyLoggerInfo("Rebuild Godot Project ...");
-        VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ...");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ends with exit code: 0");
     }
 
     /// <summary>
@@ -115,6 +111,8 @@ public class GodotRuntimeTestRunnerTest
     public void ReCompileGodotProjectNearTimeout()
     {
         // Create a script that runs for 4 seconds (near the timeout but should complete)
+        using var capture = LogCapture.Watch<GodotRuntimeTestRunner>();
+
         CreateNearTimeoutScript();
 
         // Create a separate temp working directory
@@ -125,15 +123,16 @@ public class GodotRuntimeTestRunnerTest
         var result = CreateTestRunner(5000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
-        AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true for a process that completes just before timeout").IsTrue();
+        AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return true for a process that completes just before timeout").IsTrue();
 
         // Verify success messages were logged
-        VerifyLoggerInfo("Rebuild Godot Project ...");
-        VerifyLoggerInfo("Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ...");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ends with exit code: 0");
 
         // Verify that no timeout error was logged
-        LoggerMock.Verify(l => l.LogError(It.Is<string>(s =>
-            s.Contains("Godot compilation TIMEOUT"))), Times.Never());
+        AssertThat(capture.EntriesOf(LogLevel.Error).Any(e => e.Message.Contains("Godot compilation TIMEOUT")))
+            .OverrideFailureMessage("No timeout error should have been logged")
+            .IsFalse();
     }
 
     /// <summary>
@@ -143,6 +142,8 @@ public class GodotRuntimeTestRunnerTest
     public void ReCompileGodotProjectTimeout()
     {
         // Arrange
+        using var capture = LogCapture.Watch<GodotRuntimeTestRunner>();
+
         CreateTimeoutScript();
 
         // Create a separate temp working directory
@@ -153,12 +154,12 @@ public class GodotRuntimeTestRunnerTest
         var result = CreateTestRunner(1000).ReCompileGodotProject(workingDirectory, MockGodotBinPath);
 
         // Assert
-        AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on timeout").IsFalse();
+        AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return false on timeout").IsFalse();
 
         // Verify timeout error was logged
-        VerifyLoggerError("Godot compilation TIMEOUT");
+        VerifyLoggerError(capture, "Godot compilation TIMEOUT");
         var errorCode = Environment.OSVersion.Platform == PlatformID.Win32NT ? -1 : 137;
-        VerifyLoggerError($"Rebuild Godot Project ends with exit code: {errorCode}");
+        VerifyLoggerError(capture, $"Rebuild Godot Project ends with exit code: {errorCode}");
 
         // Verify the runner file was cleaned up after timeout
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -188,6 +189,8 @@ public class GodotRuntimeTestRunnerTest
     public void TestInstallTestRunnerCompilationFailure()
     {
         // Create a separate temp working directory
+        using var capture = LogCapture.Watch<GodotRuntimeTestRunner>();
+
         var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_failure");
         Directory.CreateDirectory(workingDirectory);
 
@@ -198,7 +201,7 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on compilation failure").IsFalse();
 
         // Verify error message was logged
-        VerifyLoggerError("dotnet build failed with exit code: 1");
+        VerifyLoggerError(capture, "dotnet build failed with exit code: 1");
 
         // Verify the runner file was cleaned up after failure
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -209,6 +212,8 @@ public class GodotRuntimeTestRunnerTest
     public void TestInstallTestRunnerSuccess()
     {
         // Create a separate temp working directory
+        using var capture = LogCapture.Watch<GodotRuntimeTestRunner>();
+
         var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_failure");
         Directory.CreateDirectory(workingDirectory);
 
@@ -218,8 +223,8 @@ public class GodotRuntimeTestRunnerTest
         // Assert
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
 
-        // Verify error message was logged
-        VerifyLoggerInfo("Installing GdUnit4TestRunnerScene at");
+        // Verify info message was logged
+        VerifyLoggerInfo(capture, "Installing GdUnit4TestRunnerScene at");
 
         // Verify the runner file was created in the correct location
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -332,38 +337,6 @@ public class GodotRuntimeTestRunnerTest
         SetAsExecutable(MockGodotBinPath);
     }
 
-    /// <summary>
-    ///     Create a script that fails with an error code
-    /// </summary>
-    private void CreateFailureScript()
-    {
-        var content = Environment.OSVersion.Platform == PlatformID.Win32NT
-            ?
-            // Windows batch file that exits with error code 1
-            """
-            echo off
-            echo Godot Engine v4 .1.stable.mono - https: //godotengine.org
-            echo Godot Engine v4 .1.stable.mono
-            echo Running...
-            echo
-            echo ERROR: Compilation failed
-            exit 1
-            """
-            :
-            // Unix shell script that exits with error code 1
-            """
-            #!/bin/bash
-            echo 'Godot Engine v4.1.stable.mono - https://godotengine.org'
-            echo 'Godot Engine v4.1.stable.mono'
-            echo 'Running...'
-            echo 'ERROR: Compilation failed'
-            exit 1
-            """;
-
-        File.WriteAllText(MockGodotBinPath, content);
-        SetAsExecutable(MockGodotBinPath);
-    }
-
     [SuppressMessage("Interoperability", "CA1416")]
     private static void SetAsExecutable(string filePath)
     {
@@ -374,54 +347,22 @@ public class GodotRuntimeTestRunnerTest
                 UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
     }
 
-    /// <summary>
-    ///     Verify that logger.LogInfo was called with a message containing the specified text
-    /// </summary>
-    private void VerifyLoggerInfo(string expectedText)
+    private static void VerifyLoggerInfo(LogCapture capture, string expectedText)
+        => AssertThat(capture.EntriesOf(LogLevel.Informational).Any(e => e.Message.Contains(expectedText, StringComparison.Ordinal)))
+            .OverrideFailureMessage(FormatFailure(capture, LogLevel.Informational, expectedText))
+            .IsTrue();
+
+    private static void VerifyLoggerError(LogCapture capture, string expectedText)
+        => AssertThat(capture.EntriesOf(LogLevel.Error).Any(e => e.Message.Contains(expectedText, StringComparison.Ordinal)))
+            .OverrideFailureMessage(FormatFailure(capture, LogLevel.Error, expectedText))
+            .IsTrue();
+
+    private static string FormatFailure(LogCapture capture, LogLevel level, string expectedText)
     {
-        try
-        {
-            LoggerMock.Verify(l => l.LogInfo(It.Is<string>(s => s.Contains(expectedText))), Times.AtLeastOnce());
-        }
-        catch (MockException)
-        {
-            // Capture all invocations to provide context
-            var invocations = LoggerMock.Invocations
-                .Where(i => i.Method.Name == "LogInfo")
-                .Select(i => i.Arguments[0]?.ToString() ?? "null")
-                .ToList();
-
-            var message = $"Expected log message containing '{expectedText}' was not found.\n\n" +
-                          $"Actual LogInfo calls ({invocations.Count}):\n" +
-                          string.Join("\n", invocations.Select((msg, i) => $"  {i + 1}. {msg}"));
-
-            AssertBool(true).OverrideFailureMessage(message).IsFalse();
-        }
-    }
-
-    /// <summary>
-    ///     Verify that logger.LogError was called with a message containing the specified text
-    /// </summary>
-    private void VerifyLoggerError(string expectedText)
-    {
-        try
-        {
-            LoggerMock.Verify(l => l.LogError(It.Is<string>(s => s.Contains(expectedText))), Times.AtLeastOnce());
-        }
-        catch (MockException)
-        {
-            // Capture all invocations to provide context
-            var invocations = LoggerMock.Invocations
-                .Where(i => i.Method.Name == "LogError")
-                .Select(i => i.Arguments[0]?.ToString() ?? "null")
-                .ToList();
-
-            var message = $"Expected error message containing '{expectedText}' was not found.\n\n" +
-                          $"Actual LogError calls ({invocations.Count}):\n" +
-                          string.Join("\n", invocations.Select((msg, i) => $"  {i + 1}. {msg}"));
-
-            AssertBool(true).OverrideFailureMessage(message).IsFalse();
-        }
+        var entries = capture.EntriesOf(level);
+        return $"Expected {level} message containing '{expectedText}' was not found.\n" +
+               $"Actual {level} messages ({entries.Count}):\n" +
+               string.Join("\n", entries.Select((e, i) => $"  {i + 1}. {e.Message}"));
     }
 
     #endregion
