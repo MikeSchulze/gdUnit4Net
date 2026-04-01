@@ -191,7 +191,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
         {
-            var godotRunner = new GodotRuntimeTestRunner(Logger, debuggerFramework, Settings);
+            var godotRunner = new GodotRuntimeTestRunner(debuggerFramework, Settings);
             ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
             _ = ActiveTestRunners.Remove(godotRunner);

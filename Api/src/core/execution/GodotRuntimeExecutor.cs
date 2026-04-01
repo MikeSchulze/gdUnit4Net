@@ -29,8 +29,10 @@ using static Api.ReportType;
 /// </remarks>
 internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
 {
-    public GodotRuntimeExecutor(ITestEngineLogger logger)
-        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
+    private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeExecutor>();
+
+    public GodotRuntimeExecutor()
+        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), Logger)
     {
     }
 
@@ -93,7 +95,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
             return new Response
             {
                 StatusCode = HttpStatusCode.InternalServerError,
-                Payload = JsonConvert.SerializeObject(ex),
+                Payload = JsonConvert.SerializeObject(ex)
             };
         }
 
@@ -134,7 +136,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                 return new Response
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
-                    Payload = JsonConvert.SerializeObject(ex),
+                    Payload = JsonConvert.SerializeObject(ex)
                 };
             }
         }
@@ -142,7 +144,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         return new Response
         {
             StatusCode = HttpStatusCode.InternalServerError,
-            Payload = string.Empty,
+            Payload = string.Empty
         };
     }
 }

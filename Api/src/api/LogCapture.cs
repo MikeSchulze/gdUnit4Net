@@ -113,7 +113,7 @@ public sealed class LogCapture : IDisposable
     /// <summary>Returns all active captures watching <paramref name="type" />.</summary>
     /// <param name="type">The type to look up.</param>
     /// <returns>All active <see cref="LogCapture" /> instances watching <paramref name="type" />.</returns>
-    internal static IEnumerable<LogCapture> GetCaptures(Type type)
+    internal static ICollection<LogCapture> GetCaptures(Type type)
         => Registry.TryGetValue(type, out var captures) ? captures.Keys : [];
 
     /// <summary>Records a single log entry. Called by <see cref="TypedLogger" />.</summary>

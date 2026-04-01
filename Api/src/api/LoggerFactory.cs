@@ -25,12 +25,12 @@ public static class LoggerFactory
     /// </summary>
     /// <typeparam name="T">The class the logger is associated with.</typeparam>
     /// <returns>A class-scoped <see cref="ITestEngineLogger" /> for <typeparamref name="T" />.</returns>
-    public static ITestEngineLogger GetLogger<T>() => new TypedLogger(typeof(T));
+    public static ITestEngineLogger GetLogger<T>() => new TypedLogger(typeof(T), TestEngineLogger.Global);
 
     /// <summary>
     ///     Returns a class-scoped logger for <paramref name="type" />.
     /// </summary>
     /// <param name="type">The class the logger is associated with.</param>
     /// <returns>A class-scoped <see cref="ITestEngineLogger" /> for <paramref name="type" />.</returns>
-    public static ITestEngineLogger GetLogger(Type type) => new TypedLogger(type);
+    public static ITestEngineLogger GetLogger(Type type) => new TypedLogger(type, TestEngineLogger.Global);
 }
