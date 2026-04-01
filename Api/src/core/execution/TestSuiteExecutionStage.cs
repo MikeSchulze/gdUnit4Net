@@ -11,6 +11,8 @@ using Hooks;
 
 using Reporting;
 
+using TestExtensions;
+
 using static Api.ReportType;
 
 internal sealed class TestSuiteExecutionStage : IExecutionStage
@@ -44,7 +46,12 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         {
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
-                using var testCaseContext = new ExecutionContext(testSuiteContext, testCase);
+                var extensionContext = new ExtensionContext(
+                    testSuiteContext.ExtensionContext,
+                    testCase.MethodInfo,
+                    testCase.Name,
+                    [.. testCase.Arguments]);
+                using var testCaseContext = new ExecutionContext(testSuiteContext, extensionContext, testCase);
                 if (testCase.HasDataPoint)
                 {
                     await RunTestCaseWithDataPoint(stdoutHook, testCaseContext, testCase)
@@ -87,7 +94,12 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     await foreach (var dataPointValues in DataPointValueProvider.GetDataAsync(testCase, timeout).ConfigureAwait(false))
                     {
                         var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
-                        using ExecutionContext testCaseContext = new(executionContext, displayName);
+                        var extensionContext = new ExtensionContext(
+                            executionContext.ExtensionContext,
+                            executionContext.CurrentTestCase?.MethodInfo!,
+                            executionContext.TestCaseName,
+                            [.. dataPointValues]);
+                        using ExecutionContext testCaseContext = new(executionContext, extensionContext, displayName);
                         await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
                             .ConfigureAwait(true);
                     }
@@ -110,7 +122,12 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 foreach (var dataPointValues in DataPointValueProvider.GetData(testCase))
                 {
                     var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
-                    using ExecutionContext testCaseContext = new(executionContext, displayName);
+                    var extensionContext = new ExtensionContext(
+                        executionContext.ExtensionContext,
+                        executionContext.CurrentTestCase?.MethodInfo!,
+                        executionContext.TestCaseName,
+                        [.. dataPointValues]);
+                    using ExecutionContext testCaseContext = new(executionContext, extensionContext, displayName);
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
                         .ConfigureAwait(true);
                 }

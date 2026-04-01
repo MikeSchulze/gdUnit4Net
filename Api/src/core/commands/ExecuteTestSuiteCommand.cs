@@ -13,6 +13,8 @@ using Extensions;
 
 using Newtonsoft.Json;
 
+using TestExtensions;
+
 /// <summary>
 ///     Command to execute a test suite with configurable execution options.
 /// </summary>
@@ -61,11 +63,16 @@ internal class ExecuteTestSuiteCommand : BaseCommand
                 if (!IsReportOrphanNodesEnabled)
                     Console.WriteLine("Warning!!! Reporting orphan nodes is disabled. Please check GdUnit settings.");
 
+                var extensionRegistry = new ExtensionRegistry();
+                _ = extensionRegistry.FindTestExtensions(testSuite.Instance.GetType());
+                var extensionContext = new ExtensionContext(testSuite.Instance.GetType());
                 using ExecutionContext context = new(
                     testSuite,
                     [testEventListener],
                     IsReportOrphanNodesEnabled,
-                    IsEngineMode);
+                    IsEngineMode,
+                    extensionRegistry,
+                    extensionContext);
                 context.IsCaptureStdOut = IsCaptureStdOut;
                 if (context.IsEngineMode)
                     _ = await GodotObjectExtensions.SyncProcessFrame;

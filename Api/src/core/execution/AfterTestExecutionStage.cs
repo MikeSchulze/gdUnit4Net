@@ -29,9 +29,20 @@ internal class AfterTestExecutionStage : ExecutionStage<AfterTestAttribute>
             if (context.IsEngineMode)
                 GodotSignalCollector.Instance.Clean();
             context.MemoryPool.SetActive(StageName);
-            await base
-                .Execute(context)
-                .ConfigureAwait(true);
+
+            try
+            {
+                await base
+                    .Execute(context)
+                    .ConfigureAwait(true);
+            }
+            finally
+            {
+                await context
+                    .RunExtensionAfterEach()
+                    .ConfigureAwait(true);
+            }
+
             await context.MemoryPool
                 .Gc()
                 .ConfigureAwait(true);

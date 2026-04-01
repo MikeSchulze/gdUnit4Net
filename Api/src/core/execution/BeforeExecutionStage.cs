@@ -15,6 +15,9 @@ internal class BeforeExecutionStage : ExecutionStage<BeforeAttribute>
     public override async Task Execute(ExecutionContext context)
     {
         context.MemoryPool.SetActive(StageName, true);
+        await context
+            .RunExtensionBeforeAll()
+            .ConfigureAwait(true);
         await base
             .Execute(context)
             .ConfigureAwait(true);

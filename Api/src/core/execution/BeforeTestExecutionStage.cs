@@ -18,6 +18,9 @@ internal class BeforeTestExecutionStage : ExecutionStage<BeforeTestAttribute>
         if (!context.IsSkipped)
         {
             context.MemoryPool.SetActive(StageName, true);
+            await context
+                .RunExtensionBeforeEach()
+                .ConfigureAwait(true);
             await base
                 .Execute(context)
                 .ConfigureAwait(true);

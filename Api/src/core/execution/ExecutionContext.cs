@@ -3,12 +3,8 @@
 
 namespace GdUnit4.Core.Execution;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 using Api;
 
@@ -16,11 +12,19 @@ using Monitoring;
 
 using Reporting;
 
+using TestExtensions;
+
 internal sealed class ExecutionContext : IDisposable
 {
     private int iteration;
 
-    public ExecutionContext(TestSuite testInstance, IEnumerable<ITestEventListener> eventListeners, bool reportOrphanNodesEnabled, bool isEngineMode)
+    public ExecutionContext(
+        TestSuite testInstance,
+        IEnumerable<ITestEventListener> eventListeners,
+        bool reportOrphanNodesEnabled,
+        bool isEngineMode,
+        ExtensionRegistry extensionRegistry,
+        IExtensionContext extensionContext)
     {
         Thread.SetData(Thread.GetNamedDataSlot("ExecutionContext"), this);
         MemoryPool = new MemoryPool(reportOrphanNodesEnabled && isEngineMode);
@@ -36,14 +40,19 @@ internal sealed class ExecutionContext : IDisposable
         Disposables = [];
         FullyQualifiedName = TestSuite.Instance.GetType().FullName!;
         IsEngineMode = isEngineMode;
+        ExtensionRegistry = extensionRegistry ?? throw new ArgumentNullException(nameof(extensionRegistry));
+        ExtensionContext = extensionContext;
     }
 
+    // Child constructors — ExtensionContext is provided by the caller
     public ExecutionContext(ExecutionContext context, params object?[] methodArguments)
         : this(
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
-            context.IsEngineMode)
+            context.IsEngineMode,
+            context.ExtensionRegistry,
+            context.ExtensionContext)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -58,12 +67,14 @@ internal sealed class ExecutionContext : IDisposable
     }
 
     // used for dynamic datapoint tests
-    public ExecutionContext(ExecutionContext context, string displayName)
+    public ExecutionContext(ExecutionContext context, IExtensionContext extensionContext, string displayName)
         : this(
             context.TestSuite,
             context.EventListeners,
             context.ReportOrphanNodesEnabled,
-            context.IsEngineMode)
+            context.IsEngineMode,
+            context.ExtensionRegistry,
+            extensionContext)
     {
         ReportCollector = context.ReportCollector;
         context.SubExecutionContexts.Add(this);
@@ -77,8 +88,14 @@ internal sealed class ExecutionContext : IDisposable
         DisplayName = displayName;
     }
 
-    public ExecutionContext(ExecutionContext context, TestCase testCase)
-        : this(context.TestSuite, context.EventListeners, context.ReportOrphanNodesEnabled, context.IsEngineMode)
+    public ExecutionContext(ExecutionContext context, IExtensionContext extensionContext, TestCase testCase)
+        : this(
+            context.TestSuite,
+            context.EventListeners,
+            context.ReportOrphanNodesEnabled,
+            context.IsEngineMode,
+            context.ExtensionRegistry,
+            extensionContext)
     {
         context.SubExecutionContexts.Add(this);
         CurrentTestCase = testCase;
@@ -107,7 +124,7 @@ internal sealed class ExecutionContext : IDisposable
 
     public string TestCaseName { get; set; } = string.Empty;
 
-    public object?[] MethodArguments { get; private set; } = [];
+    public object?[] MethodArguments { get; } = [];
 
     public int CurrentIteration
     {
@@ -124,6 +141,10 @@ internal sealed class ExecutionContext : IDisposable
     public bool IsSkipped { get; }
 
     public TestReportCollector ReportCollector { get; }
+
+    internal IExtensionContext ExtensionContext { get; }
+
+    private ExtensionRegistry ExtensionRegistry { get; }
 
     private TimeSpan ExecutionTimeout { get; } = TimeSpan.FromSeconds(30);
 
@@ -169,6 +190,14 @@ internal sealed class ExecutionContext : IDisposable
         });
         Stopwatch.Stop();
     }
+
+    public Task RunExtensionBeforeAll() => ExtensionRegistry.RunBeforeAll(ExtensionContext);
+
+    public Task RunExtensionAfterAll() => ExtensionRegistry.RunAfterAll(ExtensionContext);
+
+    public Task RunExtensionBeforeEach() => ExtensionRegistry.RunBeforeEach(ExtensionContext);
+
+    public Task RunExtensionAfterEach() => ExtensionRegistry.RunAfterEach(ExtensionContext);
 
     public bool IsExpectingToFailWithException(Exception? exception, MethodInfo? mi)
     {
