@@ -46,11 +46,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         {
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
-                var extensionContext = new ExtensionContext(
-                    testSuiteContext.ExtensionContext,
-                    testCase.MethodInfo,
-                    testCase.Name,
-                    [.. testCase.Arguments]);
+                var extensionContext = new ExtensionContext(testSuiteContext.ExtensionContext);
                 using var testCaseContext = new ExecutionContext(testSuiteContext, extensionContext, testCase);
                 if (testCase.HasDataPoint)
                 {
@@ -94,11 +90,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     await foreach (var dataPointValues in DataPointValueProvider.GetDataAsync(testCase, timeout).ConfigureAwait(false))
                     {
                         var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
-                        var extensionContext = new ExtensionContext(
-                            executionContext.ExtensionContext,
-                            executionContext.CurrentTestCase?.MethodInfo!,
-                            executionContext.TestCaseName,
-                            [.. dataPointValues]);
+                        var extensionContext = new ExtensionContext(executionContext.ExtensionContext);
                         using ExecutionContext testCaseContext = new(executionContext, extensionContext, displayName);
                         await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
                             .ConfigureAwait(true);
@@ -122,11 +114,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                 foreach (var dataPointValues in DataPointValueProvider.GetData(testCase))
                 {
                     var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
-                    var extensionContext = new ExtensionContext(
-                        executionContext.ExtensionContext,
-                        executionContext.CurrentTestCase?.MethodInfo!,
-                        executionContext.TestCaseName,
-                        [.. dataPointValues]);
+                    var extensionContext = new ExtensionContext(executionContext.ExtensionContext);
                     using ExecutionContext testCaseContext = new(executionContext, extensionContext, displayName);
                     await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
                         .ConfigureAwait(true);

@@ -168,17 +168,7 @@ public class ExtensionRegistryTest
     {
         extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
         
-        var context = new ExtensionContext(
-            typeof(SuiteWithExtensionsInherits),
-            new TestSuiteNode
-            {
-                ManagedType = "null",
-                Tests = [],
-                AssemblyPath = "null",
-                SourceFile = "null",
-                Id = Guid.NewGuid(),
-                ParentId = Guid.NewGuid()
-            });
+        var context = new ExtensionContext();
         
         await extensionRegistry.RunBeforeAll(context);
         
@@ -198,24 +188,9 @@ public class ExtensionRegistryTest
         var testMethod = testSuiteType.GetMethod(nameof(SuiteWithExtensionsInherits.TestMethod))!;
         extensionRegistry.FindTestExtensions(testSuiteType);
         
-        var suiteContext = new ExtensionContext(
-            testSuiteType,
-            new TestSuiteNode
-            {
-                ManagedType = "null",
-                Tests = [],
-                AssemblyPath = "null",
-                SourceFile = "null",
-                Id = Guid.NewGuid(),
-                ParentId = Guid.NewGuid()
-            });
+        var suiteContext = new ExtensionContext();
 
-        var testContext = new ExtensionContext(
-            suiteContext,
-            testMethod,
-            testMethod.Name,
-            []
-        );
+        var testContext = new ExtensionContext(suiteContext);
         
         await extensionRegistry.RunBeforeEach(testContext);
         
@@ -235,24 +210,9 @@ public class ExtensionRegistryTest
         var testMethod = testSuiteType.GetMethod(nameof(SuiteWithExtensionsInherits.TestMethod))!;
         extensionRegistry.FindTestExtensions(testSuiteType);
         
-        var suiteContext = new ExtensionContext(
-            testSuiteType,
-            new TestSuiteNode
-            {
-                ManagedType = "null",
-                Tests = [],
-                AssemblyPath = "null",
-                SourceFile = "null",
-                Id = Guid.NewGuid(),
-                ParentId = Guid.NewGuid()
-            });
+        var suiteContext = new ExtensionContext();
 
-        var testContext = new ExtensionContext(
-            suiteContext,
-            testMethod,
-            testMethod.Name,
-            []
-        );
+        var testContext = new ExtensionContext(suiteContext);
         
         await extensionRegistry.RunAfterEach(testContext);
         
@@ -269,18 +229,8 @@ public class ExtensionRegistryTest
     public async Task RunAfterAll_ShouldExecuteExtensionsInReverseOrder()
     {
         extensionRegistry.FindTestExtensions(typeof(SuiteWithExtensionsInherits));
-        
-        var suiteContext = new ExtensionContext(
-            typeof(SuiteWithExtensionsInherits),
-            new TestSuiteNode
-            {
-                ManagedType = "null",
-                Tests = [],
-                AssemblyPath = "null",
-                SourceFile = "null",
-                Id = Guid.NewGuid(),
-                ParentId = Guid.NewGuid()
-            });
+
+        var suiteContext = new ExtensionContext();
         
         await extensionRegistry.RunAfterAll(suiteContext);
         

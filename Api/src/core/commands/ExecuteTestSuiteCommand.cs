@@ -65,7 +65,7 @@ internal class ExecuteTestSuiteCommand : BaseCommand
 
                 var extensionRegistry = new ExtensionRegistry();
                 _ = extensionRegistry.FindTestExtensions(testSuite.Instance.GetType());
-                var extensionContext = new ExtensionContext(testSuite.Instance.GetType());
+                var extensionContext = new ExtensionContext();
                 using ExecutionContext context = new(
                     testSuite,
                     [testEventListener],
