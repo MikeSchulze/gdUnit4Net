@@ -149,7 +149,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
 
             if (!executionContext.IsSkipped)
             {
-                using ExecutionContext context = new(executionContext, methodArguments);
+                using ExecutionContext context = new(executionContext, executionContext.ResolveArguments(methodArguments));
                 await new TestCaseExecutionStage(context.TestCaseName, testCase, stageAttribute)
                     .Execute(context)
                     .ConfigureAwait(true);

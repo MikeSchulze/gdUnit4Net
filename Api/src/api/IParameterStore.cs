@@ -18,6 +18,14 @@ public interface IParameterStore
         where T : notnull;
 
     /// <summary>
+    /// Return whether this store has a value of the specified type stored at the specified key.
+    /// </summary>
+    /// <param name="key">The key to check.</param>
+    /// <param name="type">The type to check for.</param>
+    /// <returns>`true` if there is a value of the specified type at the specified key, false otherwise.</returns>
+    bool Has(string key, Type type);
+
+    /// <summary>
     /// Retrieve a previously stored value, falling back to parent store to parent store if not found.
     ///
     /// If the key is not found in this store or any parent store, or if the value found is not of type T,
@@ -28,6 +36,18 @@ public interface IParameterStore
     /// <returns>The value stored at the specified key, or null if there is no value stored at the key.</returns>
     /// <exception cref="InvalidOperationException">If there is no value of type T stored in this or a parent store.</exception>
     T Value<T>(string key);
+
+    /// <summary>
+    /// Retrieve a previously stored value, falling back to parent store if not found.
+    ///
+    /// If the key is not found in this store or any parent store, or if the value found is not of type `type`,
+    /// this method throws an <see cref="InvalidOperationException"/>.
+    /// </summary>
+    /// <param name="key">The key used when the value was stored.</param>
+    /// <param name="type">The expected type of object to retrieve.</param>
+    /// <returns>The (untyped) value stored at the key with the specified type.</returns>
+    /// <exception cref="InvalidOperationException">If there is no value of type `type` stored in this or a parent store.</exception>
+    object Value(string key, Type type);
 
     /// <summary>
     /// Removes the value stored at the specified key and return it.

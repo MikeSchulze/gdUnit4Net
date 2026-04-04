@@ -11,18 +11,22 @@ internal class ParameterStore(IParameterStore? parentStore = null) : IParameterS
     public void Add<T>(string key, T value)
         where T : notnull => DataStore[key] = value;
 
-    public T Value<T>(string key)
+    public bool Has(string key, Type type) => DataStore.ContainsKey(key) && type.IsInstanceOfType(DataStore[key]);
+
+    public T Value<T>(string key) => (T)Value(key, typeof(T));
+
+    public object Value(string key, Type type)
     {
         if (!DataStore.TryGetValue(key, out var value))
         {
             return parentStore is not null
-                ? parentStore.Value<T>(key)
+                ? parentStore.Value(key, type)
                 : throw new InvalidOperationException($"No value stored at {key}");
         }
 
-        return value is T typedValue
-            ? typedValue
-            : throw new InvalidOperationException($"Value stored at {key} is not of type {typeof(T)}");
+        return type.IsInstanceOfType(value)
+            ? value
+            : throw new InvalidOperationException($"Value stored at {key} is not of type {type}");
     }
 
     public T? Remove<T>(string key)

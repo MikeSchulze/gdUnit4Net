@@ -7,6 +7,8 @@ using System.Reflection;
 
 using Api;
 
+using Execution;
+
 internal sealed class ExtensionRegistry
 {
     private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<ExtensionRegistry>();
@@ -44,6 +46,37 @@ internal sealed class ExtensionRegistry
     {
         foreach (var extension in extensions.OfType<IAfterAllCallback>().Reverse())
             await extension.AfterAll(extensionContext).ConfigureAwait(true);
+    }
+
+    public object?[] ResolveArgumentsViaExtensions(ExecutionContext context, object?[] methodArguments)
+    {
+        if (context.CurrentTestCase == null || context.CurrentTestCase.HasDataPoint)
+            return [.. methodArguments];
+
+        List<object?> remainingTestCaseArguments = [.. methodArguments];
+        var methodParams = context.CurrentTestCase.MethodInfo.GetParameters();
+
+        var finalArguments = new List<object?>();
+        foreach (var param in methodParams)
+        {
+            var paramContext = new ParameterContext(param);
+
+            var supportingExtension = extensions
+                .OfType<IParameterResolver>()
+                .FirstOrDefault(it => it?.SupportsParameter(paramContext, context.ExtensionContext) ?? false, null);
+
+            if (supportingExtension != null)
+                finalArguments.Add(supportingExtension.ResolveParameter(paramContext, context.ExtensionContext));
+            else if (remainingTestCaseArguments.Count > 0)
+            {
+                finalArguments.Add(remainingTestCaseArguments[0]);
+                remainingTestCaseArguments.RemoveAt(0);
+            }
+            else
+                throw new InvalidOperationException($"No acceptable argument value found for {param}");
+        }
+
+        return [.. finalArguments];
     }
 
     // Example:

@@ -240,6 +240,8 @@ internal sealed class ExecutionContext : IDisposable
     public TimeSpan GetExecutionTimeout(TestCaseAttribute testAttribute) =>
         testAttribute.Timeout == -1 ? ExecutionTimeout : TimeSpan.FromMilliseconds(testAttribute.Timeout);
 
+    public object?[] ResolveArguments(object?[] methodArguments) => ExtensionRegistry.ResolveArgumentsViaExtensions(this, methodArguments);
+
     internal void PrintDebug(string name = "")
         => Console.WriteLine($"{name} test context {TestSuite.Name} {TestCaseName} error: {IsError} failed: {IsFailed} skipped: {IsSkipped}");
 
