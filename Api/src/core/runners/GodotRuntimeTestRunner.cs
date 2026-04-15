@@ -396,14 +396,13 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         try
         {
             Logger.LogInfo("Running dotnet build to ensure dependencies are available...");
-            var arguments = "build --configuration Debug "
-                            + "--verbosity normal "
-                            + "--no-restore "
-                            + "/p:BuildProjectReferences=false " // Don't rebuild project refs
-                            + "/p:_GetChildProjectCopyToOutputDirectoryItems=false " // Don't copy child project items
-                            + "/p:SkipCopyingFrameworkReferences=true " // Skip framework refs (already present)
-                            + "/p:EnforceCodeStyleInBuild=false "
-                            + "/p:TreatWarningsAsErrors=false ";
+            const string arguments = "build --configuration Debug "
+                                     + "--verbosity normal "
+                                     + "/p:BuildProjectReferences=false " // Don't rebuild project refs
+                                     + "/p:_GetChildProjectCopyToOutputDirectoryItems=false " // Don't copy child project items
+                                     + "/p:SkipCopyingFrameworkReferences=true " // Skip framework refs (already present)
+                                     + "/p:EnforceCodeStyleInBuild=false "
+                                     + "/p:TreatWarningsAsErrors=false ";
             var processStartInfo = new ProcessStartInfo("dotnet", arguments)
             {
                 RedirectStandardOutput = true,
@@ -441,21 +440,49 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             restoreProcess.BeginErrorReadLine();
             restoreProcess.BeginOutputReadLine();
 
-            // Wait for restore to complete (should be quick)
-            var completed = restoreProcess.WaitForExit(30000); // 30 second timeout
+            // The rebuild project can take a while, and we need to wait until it finishes
+            // Calculate how many iterations we need based on the compile process timeout
+            const int checkIntervalMs = 100; // Check every 100ms
+            var maxRetries = settings.CompileProcessTimeout / checkIntervalMs;
 
-            if (!completed)
+            var waitRetry = 0;
+            while (!restoreProcess.HasExited && waitRetry++ < maxRetries)
+                Thread.Sleep(checkIntervalMs);
+
+            // If the process has not finished within the timeout period, we kill it manually
+            if (!restoreProcess.HasExited)
             {
-                Logger.LogWarning("dotnet build timed out after 30 seconds");
+                Logger.LogError(
+                    $"""
+
+                     ╔═══════════════════════ dotnet build TIMEOUT ═════════════════════════════════════════════════════════════════════════╗
+
+                       `dotnet build` did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.
+
+                       Possible reasons:
+                       - Your project may be large or complex, requiring more time to build
+                       - Your system may be under heavy load or has limited resources
+
+                       ACTION REQUIRED:
+                       To increase the compilation timeout, set the 'CompileProcessTimeout' property in your GdUnit4 settings.
+
+                       Add or modify the following in your .runsettings file:
+                       <GdUnit4>
+                           <CompileProcessTimeout>60000</CompileProcessTimeout>  <!-- 60 seconds -->
+                       </GdUnit4>
+
+                       The process will now be forcefully terminated, which may result in incomplete compilation.
+
+                     ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+                     """);
+
                 restoreProcess.Kill(true);
-                return false;
             }
 
-            var success = restoreProcess.ExitCode == 0;
-            if (success)
+            if (restoreProcess.ExitCode == 0)
             {
                 Logger.LogInfo("dotnet build completed successfully");
-                return success;
+                return true;
             }
 
             Logger.LogError($"dotnet build failed with exit code: {restoreProcess.ExitCode}");
