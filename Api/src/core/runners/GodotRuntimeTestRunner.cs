@@ -477,6 +477,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                      """);
 
                 restoreProcess.Kill(true);
+                _ = restoreProcess.WaitForExit(5000);
             }
 
             if (restoreProcess.ExitCode == 0)

@@ -209,7 +209,7 @@ public class GodotRuntimeTestRunnerTest
     public void TestInstallTestRunnerSuccess()
     {
         // Create a separate temp working directory
-        var workingDirectory = Path.Combine(Environment.CurrentDirectory, @"..\TestExample");
+        var workingDirectory = Path.Combine(Environment.CurrentDirectory, "../TestExample");
 
         try
         {
@@ -241,7 +241,7 @@ public class GodotRuntimeTestRunnerTest
     public void TestInstallTestRunnerFailsByBuildTimeout()
     {
         // Create a separate temp working directory
-        var workingDirectory = Path.Combine(Environment.CurrentDirectory, @"..\TestExample");
+        var workingDirectory = Path.Combine(Environment.CurrentDirectory, "../TestExample");
 
         try
         {
@@ -270,7 +270,7 @@ public class GodotRuntimeTestRunnerTest
 
     private static void CopyExampleProject(string destDir)
     {
-        var sourceDir = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Example"));
+        var sourceDir = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "../Example"));
         Directory.CreateDirectory(destDir);
         var files = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
 
