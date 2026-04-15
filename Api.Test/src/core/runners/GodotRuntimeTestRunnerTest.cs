@@ -50,10 +50,10 @@ public class GodotRuntimeTestRunnerTest
         DebuggerFrameworkMock = new Mock<IDebuggerFramework>();
     }
 
-    private GodotRuntimeTestRunner CreateTestRunner(int timeout) => new(
+    private GodotRuntimeTestRunner CreateTestRunner(int compileTimeout) => new(
         LoggerMock.Object,
         DebuggerFrameworkMock.Object,
-        new TestEngineSettings { CompileProcessTimeout = timeout });
+        new TestEngineSettings { CompileProcessTimeout = compileTimeout });
 
     /// <summary>
     ///     Clean up after tests
@@ -209,25 +209,82 @@ public class GodotRuntimeTestRunnerTest
     public void TestInstallTestRunnerSuccess()
     {
         // Create a separate temp working directory
-        var workingDirectory = Path.Combine(TestTempDirectory!, "working_dir_failure");
-        Directory.CreateDirectory(workingDirectory);
+        var workingDirectory = Path.Combine(Environment.CurrentDirectory, "../TestExample");
 
-        // Act
-        var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory, false);
+        try
+        {
+            // Copy Example Project into working directory
+            CopyExampleProject(workingDirectory);
 
-        // Assert
-        AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
+            // Act
+            var result = CreateTestRunner(30000).InstallTestRunnerClasses(workingDirectory);
 
-        // Verify error message was logged
-        VerifyLoggerInfo("Installing GdUnit4TestRunnerScene at");
+            // Assert
+            AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
 
-        // Verify the runner file was created in the correct location
-        var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
-        AssertThat(File.Exists(runnerPath)).OverrideFailureMessage($"Runner file should exist at {runnerPath}").IsTrue();
+            // Verify log message
+            VerifyLoggerInfo("Installing GdUnit4TestRunnerScene at");
+            VerifyLoggerInfo("dotnet build completed successfully");
+
+            // Verify the runner file was created in the correct location
+            var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
+            AssertThat(File.Exists(runnerPath)).OverrideFailureMessage($"Runner file should exist at {runnerPath}").IsTrue();
+        }
+        finally
+        {
+            // Cleanup
+            Directory.Delete(workingDirectory, true);
+        }
     }
 
+    [TestCase]
+    public void TestInstallTestRunnerFailsByBuildTimeout()
+    {
+        // Create a separate temp working directory
+        var workingDirectory = Path.Combine(Environment.CurrentDirectory, "../TestExample");
+
+        try
+        {
+            // Copy Example Project into working directory
+            CopyExampleProject(workingDirectory);
+
+            // Act
+            var result = CreateTestRunner(1000).InstallTestRunnerClasses(workingDirectory);
+
+            // Assert
+            AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should fail").IsFalse();
+
+            VerifyLoggerInfo("Installing GdUnit4TestRunnerScene at");
+            // Verify error messages
+            VerifyLoggerError("`dotnet build` did not complete within the configured timeout of 1000ms.");
+            VerifyLoggerError("dotnet build failed with exit code:");
+        }
+        finally
+        {
+            // Cleanup
+            Directory.Delete(workingDirectory, true);
+        }
+    }
 
     #region Helper Methods
+
+    private static void CopyExampleProject(string destDir)
+    {
+        var sourceDir = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "../Example"));
+        Directory.CreateDirectory(destDir);
+        var files = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
+            var relativePath = Path.GetRelativePath(sourceDir, file);
+            if (relativePath.StartsWith(".godot") || relativePath.StartsWith("gdunit4_testadapter_v5"))
+                continue;
+
+            var destFile = Path.Combine(destDir, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(destFile));
+            File.Copy(file, destFile, true);
+        }
+    }
 
     /// <summary>
     ///     Create a script that succeeds quickly
@@ -416,9 +473,9 @@ public class GodotRuntimeTestRunnerTest
                 .Select(i => i.Arguments[0]?.ToString() ?? "null")
                 .ToList();
 
-            var message = $"Expected error message containing '{expectedText}' was not found.\n\n" +
-                          $"Actual LogError calls ({invocations.Count}):\n" +
-                          string.Join("\n", invocations.Select((msg, i) => $"  {i + 1}. {msg}"));
+            var message = $"Expected error message containing \n'{expectedText}'\n was not found.\n\n" +
+                          $"Actual Error entries ({invocations.Count}):\n" +
+                          string.Join("\n", invocations.Select((msg, i) => $"'{msg}'"));
 
             AssertBool(true).OverrideFailureMessage(message).IsFalse();
         }
