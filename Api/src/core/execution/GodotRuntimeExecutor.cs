@@ -29,8 +29,10 @@ using static Api.ReportType;
 /// </remarks>
 internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStream>, ICommandExecutor
 {
-    public GodotRuntimeExecutor(ITestEngineLogger logger)
-        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), logger)
+    private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeExecutor>();
+
+    public GodotRuntimeExecutor()
+        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), Logger)
     {
     }
 

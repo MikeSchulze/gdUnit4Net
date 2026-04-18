@@ -97,8 +97,8 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return true for successful compilation").IsTrue();
 
         // Verify logger was called with success messages
-        AssertLogInfo(capture, "Rebuild Godot Project ...");
-        AssertLogInfo(capture, "Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ...");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ends with exit code: 0");
     }
 
     /// <summary>
@@ -123,8 +123,8 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return true for a process that completes just before timeout").IsTrue();
 
         // Verify success messages were logged
-        AssertLogInfo(capture, "Rebuild Godot Project ...");
-        AssertLogInfo(capture, "Rebuild Godot Project ends with exit code: 0");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ...");
+        VerifyLoggerInfo(capture, "Rebuild Godot Project ends with exit code: 0");
 
         // Verify that no timeout error was logged
         AssertThat(capture.EntriesOf(LogLevel.Error).Any(e => e.Message.Contains("Godot compilation TIMEOUT")))
@@ -153,9 +153,9 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("ReCompileGodotProject should return false on timeout").IsFalse();
 
         // Verify timeout error was logged
-        AssertLogError(capture, "Godot compilation TIMEOUT");
+        VerifyLoggerError(capture, "Godot compilation TIMEOUT");
         var errorCode = Environment.OSVersion.Platform == PlatformID.Win32NT ? -1 : 137;
-        AssertLogError(capture, $"Rebuild Godot Project ends with exit code: {errorCode}");
+        VerifyLoggerError(capture, $"Rebuild Godot Project ends with exit code: {errorCode}");
 
         // Verify the runner file was cleaned up after timeout
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -197,7 +197,7 @@ public class GodotRuntimeTestRunnerTest
         AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return false on compilation failure").IsFalse();
 
         // Verify error message was logged
-        AssertLogError(capture, "dotnet build failed with exit code: 1");
+        VerifyLoggerError(capture, "dotnet build failed with exit code: 1");
 
         // Verify the runner file was cleaned up after failure
         var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -224,8 +224,8 @@ public class GodotRuntimeTestRunnerTest
             AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should return true").IsTrue();
 
             // Verify log message
-            AssertLogInfo(capture, "Installing GdUnit4TestRunnerScene at");
-            AssertLogInfo(capture, "dotnet build completed successfully");
+            VerifyLoggerInfo(capture, "Installing GdUnit4TestRunnerScene at");
+            VerifyLoggerInfo(capture, "dotnet build completed successfully");
 
             // Verify the runner file was created in the correct location
             var runnerPath = Path.Combine(workingDirectory, GodotRuntimeTestRunner.TEMP_TEST_RUNNER_DIR, "GdUnit4TestRunnerScene.cs");
@@ -257,10 +257,10 @@ public class GodotRuntimeTestRunnerTest
             // Assert
             AssertThat(result).OverrideFailureMessage("InstallTestRunnerClasses should fail").IsFalse();
 
-            AssertLogInfo(capture, "Installing GdUnit4TestRunnerScene at");
+            VerifyLoggerInfo(capture, "Installing GdUnit4TestRunnerScene at");
             // Verify error messages
-            AssertLogError(capture, "`dotnet build` did not complete within the configured timeout of 1000ms.");
-            AssertLogError(capture, "dotnet build failed with exit code:");
+            VerifyLoggerError(capture, "`dotnet build` did not complete within the configured timeout of 1000ms.");
+            VerifyLoggerError(capture, "dotnet build failed with exit code:");
         }
         finally
         {
@@ -434,28 +434,22 @@ public class GodotRuntimeTestRunnerTest
                 UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
     }
 
-    private static void AssertLogInfo(LogCapture capture, string expectedText)
-    {
-        var found = capture.Entries.Any(e => e.Level == LogLevel.Informational && e.Message.Contains(expectedText));
-        AssertBool(found)
-            .OverrideFailureMessage(BuildFailureMessage("LogInfo", expectedText, capture, LogLevel.Informational))
+    private static void VerifyLoggerInfo(LogCapture capture, string expectedText)
+        => AssertThat(capture.EntriesOf(LogLevel.Informational).Any(e => e.Message.Contains(expectedText, StringComparison.Ordinal)))
+            .OverrideFailureMessage(FormatFailure(capture, LogLevel.Informational, expectedText))
             .IsTrue();
-    }
 
-    private static void AssertLogError(LogCapture capture, string expectedText)
-    {
-        var found = capture.Entries.Any(e => e.Level == LogLevel.Error && e.Message.Contains(expectedText));
-        AssertBool(found)
-            .OverrideFailureMessage(BuildFailureMessage("LogError", expectedText, capture, LogLevel.Error))
+    private static void VerifyLoggerError(LogCapture capture, string expectedText)
+        => AssertThat(capture.EntriesOf(LogLevel.Error).Any(e => e.Message.Contains(expectedText, StringComparison.Ordinal)))
+            .OverrideFailureMessage(FormatFailure(capture, LogLevel.Error, expectedText))
             .IsTrue();
-    }
 
-    private static string BuildFailureMessage(string level, string expectedText, LogCapture capture, LogLevel logLevel)
+    private static string FormatFailure(LogCapture capture, LogLevel level, string expectedText)
     {
-        var entries = capture.EntriesOf(logLevel).Select(e => e.Message).ToList();
-        return $"Expected {level} containing '{expectedText}' was not found.\n\n" +
-               $"Actual entries ({entries.Count}):\n" +
-               string.Join("\n", entries.Select((msg, i) => $"  {i + 1}. {msg}"));
+        var entries = capture.EntriesOf(level);
+        return $"Expected {level} message containing '{expectedText}' was not found.\n" +
+               $"Actual {level} messages ({entries.Count}):\n" +
+               string.Join("\n", entries.Select((e, i) => $"  {i + 1}. {e.Message}"));
     }
 
     #endregion
