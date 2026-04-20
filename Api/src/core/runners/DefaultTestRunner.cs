@@ -11,6 +11,8 @@ using Api;
 
 using Execution;
 
+using Logging;
+
 /// <summary>
 ///     Default test runner implementation that executes tests directly in the current process.
 /// </summary>
@@ -24,10 +26,11 @@ internal sealed class DefaultTestRunner : BaseTestRunner
     ///     Initializes a new instance of the <see cref="DefaultTestRunner" /> class.
     ///     Initializes a new instance of the DefaultTestRunner.
     /// </summary>
-    /// <param name="logger">The test engine logger for diagnostic output.</param>
+    private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<DefaultTestRunner>();
+
     /// <param name="settings">Test engine configuration settings.</param>
-    internal DefaultTestRunner(ITestEngineLogger logger, TestEngineSettings settings)
-        : base(new DirectCommandExecutor(), logger, settings)
+    internal DefaultTestRunner(TestEngineSettings settings)
+        : base(new DirectCommandExecutor(), settings)
     {
     }
 

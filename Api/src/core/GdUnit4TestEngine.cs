@@ -17,19 +17,18 @@ using Runners;
 
 internal sealed class GdUnit4TestEngine : ITestEngine
 {
+    private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GdUnit4TestEngine>();
+
     private readonly object taskLock = new();
     private CancellationTokenSource? cancellationSource;
 
     public GdUnit4TestEngine(TestEngineSettings settings, ITestEngineLogger logger)
     {
         Settings = settings;
-        Logger = logger;
-        TestEngineLogger.Register(logger);
+        LoggerFactory.Init(logger);
     }
 
     private TestEngineSettings Settings { get; }
-
-    private ITestEngineLogger Logger { get; }
 
     private List<ITestRunner> ActiveTestRunners { get; } = [];
 
@@ -168,15 +167,24 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         => Task.Run(
             () =>
             {
-                Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
+                var assemblyId = Path.GetFileNameWithoutExtension(testAssemblyNode.AssemblyPath);
+                LoggerFactory.BeginScope(assemblyId);
+                try
+                {
+                    Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
 
-                var projectWorkingDir = LookupProjectPath(testAssemblyNode.AssemblyPath);
-                Directory.SetCurrentDirectory(projectWorkingDir);
-                Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
+                    var projectWorkingDir = LookupProjectPath(testAssemblyNode.AssemblyPath);
+                    Directory.SetCurrentDirectory(projectWorkingDir);
+                    Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
 
-                ExecuteEngineTests(testAssemblyNode.Suites, eventListener, debuggerFramework, cancellationToken);
+                    ExecuteEngineTests(testAssemblyNode.Suites, eventListener, debuggerFramework, cancellationToken);
 
-                Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
+                    Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
+                }
+                finally
+                {
+                    LoggerFactory.EndScope();
+                }
             },
             cancellationToken);
 
@@ -200,7 +208,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
         // Run tests that don't require Godot runtime
         if (directExecutorTestSuites.Count > 0)
         {
-            var directRunner = new DefaultTestRunner(Logger, Settings);
+            var directRunner = new DefaultTestRunner(Settings);
             ActiveTestRunners.Add(directRunner);
             directRunner.RunAndWait(directExecutorTestSuites, eventListener, cancellationToken);
             _ = ActiveTestRunners.Remove(directRunner);

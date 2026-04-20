@@ -7,6 +7,7 @@ using System.Linq;
 
 using Api;
 
+using GdUnit4.Core.Logging;
 using GdUnit4.Core.Runners;
 
 using Moq;

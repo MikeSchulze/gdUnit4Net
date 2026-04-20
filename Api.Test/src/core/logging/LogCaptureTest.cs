@@ -7,6 +7,8 @@ namespace GdUnit4.Tests.Core.Logging;
 
 using Api;
 
+using GdUnit4.Core.Logging;
+
 [TestSuite]
 public class LogCaptureTest
 {
