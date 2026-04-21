@@ -3,9 +3,7 @@
 
 namespace GdUnit4.Core.Runners;
 
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 
 using Api;
 
@@ -36,7 +34,7 @@ internal sealed class DefaultTestRunner : BaseTestRunner
 
     public new void RunAndWait(List<TestSuiteNode> testSuiteNodes, ITestEventListener eventListener, CancellationToken cancellationToken)
     {
-        Logger.LogInfo("======== Running GdUnit4 Default Test Runner ========");
+        Logger.LogInfo("Starting DefaultTestRunner");
         base.RunAndWait(testSuiteNodes, eventListener, cancellationToken);
     }
 }

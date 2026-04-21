@@ -33,8 +33,8 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeExecutor>();
 
-    public GodotRuntimeExecutor()
-        : base(new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), Logger)
+    public GodotRuntimeExecutor(string pipeName)
+        : base(new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), Logger)
     {
     }
 
@@ -42,7 +42,6 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            Logger.LogInfo("Starting GodotRuntimeExecutor");
             await Proxy
                 .ConnectAsync(10000)
                 .ConfigureAwait(false);
@@ -58,7 +57,6 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
     {
         try
         {
-            Logger.LogInfo("Stop GodotRuntimeExecutor");
             _ = await ExecuteCommand(new TerminateGodotInstanceCommand(), new NoInteractTestEventListener(), CancellationToken.None)
                 .ConfigureAwait(true);
 

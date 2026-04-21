@@ -17,8 +17,6 @@ using Newtonsoft.Json;
 internal class InOutPipeProxy<TPipe> : IAsyncDisposable
     where TPipe : PipeStream
 {
-    protected const string PIPE_NAME = "gdunit4-message-pipe";
-
     protected InOutPipeProxy(TPipe pipe, ITestEngineLogger logger)
     {
         Logger = logger;
