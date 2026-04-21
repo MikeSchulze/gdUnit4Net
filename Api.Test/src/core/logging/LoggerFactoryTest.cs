@@ -18,8 +18,20 @@ using static Assertions;
 [TestSuite]
 public class LoggerFactoryTest
 {
-    [AfterTest]
-    public void AfterTest() => LoggerFactory.EndScope();
+    #region Dispose
+
+    [TestCase]
+    public void Dispose_ResetsRootToNoOp()
+    {
+        LoggerFactory.Init(new RecordingLogger(new ConcurrentQueue<string>()));
+        AssertThat(LoggerFactory.Root).IsNotInstanceOf<NoOpTestEngineLogger>();
+
+        LoggerFactory.Dispose();
+
+        AssertThat(LoggerFactory.Root).IsInstanceOf<NoOpTestEngineLogger>();
+    }
+
+    #endregion
 
     #region Root
 
@@ -30,10 +42,11 @@ public class LoggerFactoryTest
     [TestCase]
     public void Root_IsNeverAScopeLogger()
     {
-        LoggerFactory.BeginScope("ctx-1");
-
-        // Root is the immutable engine logger — BeginScope must not replace it.
-        AssertThat(LoggerFactory.Root).IsNotInstanceOf<ScopeLogger>();
+        using (LoggerFactory.CreateScope("ctx-1"))
+        {
+            // Root is the immutable engine logger — CreateScope must not replace it.
+            AssertThat(LoggerFactory.Root).IsNotInstanceOf<ScopeLogger>();
+        }
     }
 
     #endregion
@@ -41,29 +54,20 @@ public class LoggerFactoryTest
     #region Current
 
     [TestCase]
-    public void Current_FallsBackToRoot_WhenNoScopeActive()
+    public void CreateScope_SetsCurrent_ToScopeLogger()
     {
-        LoggerFactory.EndScope();
-
-        AssertThat(LoggerFactory.Current).IsSame(LoggerFactory.Root);
-    }
-
-    [TestCase]
-    public void BeginScope_SetsCurrent_ToScopeLogger()
-    {
-        LoggerFactory.BeginScope("ctx-1");
-
-        AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
-        AssertThat(LoggerFactory.GetScope()!.ScopeId).IsEqual("ctx-1");
+        using (LoggerFactory.CreateScope("ctx-1"))
+        {
+            AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
+            AssertThat(LoggerFactory.GetScope()!.ScopeId).IsEqual("ctx-1");
+        }
     }
 
     [TestCase]
     public void EndScope_RestoresCurrent_ToRoot()
     {
-        LoggerFactory.BeginScope("ctx-1");
-        AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
-
-        LoggerFactory.EndScope();
+        using (LoggerFactory.CreateScope("ctx-1"))
+            AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
 
         AssertThat(LoggerFactory.Current).IsSame(LoggerFactory.Root);
     }
@@ -73,7 +77,7 @@ public class LoggerFactoryTest
     #region AsyncLocal isolation across parallel tasks
 
     [TestCase]
-    public void BeginScope_IsolatesScopePerTask()
+    public void CreateScope_IsolatesScopePerTask()
     {
         ScopeLogger? seenByA = null;
         ScopeLogger? seenByB = null;
@@ -82,14 +86,14 @@ public class LoggerFactoryTest
 
         var taskA = Task.Run(() =>
         {
-            LoggerFactory.BeginScope("task-a");
+            using var _ = LoggerFactory.CreateScope("task-a");
             barrier.SignalAndWait(TimeSpan.FromSeconds(5));
             seenByA = LoggerFactory.GetScope();
         });
 
         var taskB = Task.Run(() =>
         {
-            LoggerFactory.BeginScope("task-b");
+            using var _ = LoggerFactory.CreateScope("task-b");
             barrier.SignalAndWait(TimeSpan.FromSeconds(5));
             seenByB = LoggerFactory.GetScope();
         });
@@ -104,7 +108,7 @@ public class LoggerFactoryTest
     }
 
     [TestCase]
-    public void BeginScope_DoesNotLeakIntoSiblingTask()
+    public void CreateScope_DoesNotLeakIntoSiblingTask()
     {
         ScopeLogger? seenByB = null;
 
@@ -122,18 +126,18 @@ public class LoggerFactoryTest
         var taskA = Task.Run(() =>
         {
             bStarted.Wait(TimeSpan.FromSeconds(5));
-            LoggerFactory.BeginScope("task-a");
+            using var _ = LoggerFactory.CreateScope("task-a");
             aBegan.Set();
         });
 
         Task.WaitAll(taskA, taskB);
 
-        // taskB never called BeginScope, so it must not see taskA's scope
+        // taskB never called CreateScope, so it must not see taskA's scope
         AssertThat(seenByB?.ScopeId).IsNotEqual("task-a");
     }
 
     [TestCase]
-    public void BeginScope_LogsAreTaggedAndRoutedToRoot()
+    public void CreateScope_LogsAreTaggedAndRoutedToRoot()
     {
         // Both scope loggers wrap the same immutable root; verify each task's messages
         // arrive at root tagged with the correct [scopeId] and without cross-task bleed.
@@ -145,14 +149,14 @@ public class LoggerFactoryTest
 
             var taskA = Task.Run(() =>
             {
-                LoggerFactory.BeginScope("task-a");
+                using var _ = LoggerFactory.CreateScope("task-a");
                 barrier.SignalAndWait(TimeSpan.FromSeconds(5));
                 LoggerFactory.GetLogger<TaskSourceA>().LogInfo("hello");
             });
 
             var taskB = Task.Run(() =>
             {
-                LoggerFactory.BeginScope("task-b");
+                using var _ = LoggerFactory.CreateScope("task-b");
                 barrier.SignalAndWait(TimeSpan.FromSeconds(5));
                 LoggerFactory.GetLogger<TaskSourceB>().LogInfo("hello");
             });

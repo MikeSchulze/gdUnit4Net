@@ -3,61 +3,63 @@
 
 namespace GdUnit4.Tests.Core.Logging;
 
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+
 using Api;
 
 using GdUnit4.Core.Logging;
-
-using Moq;
-using Moq.Protected;
 
 using static Assertions;
 
 [TestSuite]
 public class ScopeLoggerTest
 {
-    private Mock<ITestEngineLogger> innerMock = null!;
-    private ScopeLogger logger = null!;
+    // TypedLogger<Inner> acts as the ScopeLogger's inner logger so LogCapture
+    // can intercept the already-formatted (tagged) messages.
+    private sealed class Inner;
+
+    private ITestEngineLogger logger = null!;
 
     [Before]
     public void Before()
-    {
-        innerMock = new Mock<ITestEngineLogger>();
-        logger = new ScopeLogger(innerMock.Object, "abc12345");
-    }
-
-    [AfterTest]
-    public void AfterTest() => innerMock.Reset();
+        => logger = new ScopeLogger(LoggerFactory.GetLogger<Inner>(), "abc12345");
 
     #region LogInfo / LogWarning / LogError routing
 
     [TestCase]
     public void LogInfo_TagsMessageWithScopeId()
     {
+        using var capture = LogCapture.Watch<Inner>();
+
         logger.LogInfo("hello");
 
-        innerMock.Protected().Verify("SendMessage", Times.Once(),
-            ItExpr.Is<LogLevel>(l => l == LogLevel.Informational),
-            ItExpr.Is<string>(s => s.Contains("[abc12345]") && s.Contains("hello")));
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("[abc12345] hello");
     }
 
     [TestCase]
     public void LogWarning_TagsMessageWithScopeId()
     {
+        using var capture = LogCapture.Watch<Inner>();
+
         logger.LogWarning("watch out");
 
-        innerMock.Protected().Verify("SendMessage", Times.Once(),
-            ItExpr.Is<LogLevel>(l => l == LogLevel.Warning),
-            ItExpr.Is<string>(s => s.Contains("[abc12345]") && s.Contains("watch out")));
+        AssertThat(capture.EntriesOf(LogLevel.Warning).Select(e => e.Message))
+            .ContainsExactly("[abc12345] watch out");
     }
 
     [TestCase]
     public void LogError_TagsMessageWithScopeId()
     {
+        using var capture = LogCapture.Watch<Inner>();
+
         logger.LogError("boom");
 
-        innerMock.Protected().Verify("SendMessage", Times.Once(),
-            ItExpr.Is<LogLevel>(l => l == LogLevel.Error),
-            ItExpr.Is<string>(s => s.Contains("[abc12345]") && s.Contains("boom")));
+        AssertThat(capture.EntriesOf(LogLevel.Error).Select(e => e.Message))
+            .ContainsExactly("[abc12345] boom");
     }
 
     #endregion
@@ -67,26 +69,82 @@ public class ScopeLoggerTest
     [TestCase]
     public void WithSource_IncludesSourceInTag()
     {
-        var sourceLogger = logger.WithSource("Godot");
+        using var capture = LogCapture.Watch<Inner>();
+        ITestEngineLogger sourceLogger = ((ScopeLogger)logger).WithSource("Godot");
 
         sourceLogger.LogInfo("output");
 
-        innerMock.Protected().Verify("SendMessage", Times.Once(),
-            ItExpr.Is<LogLevel>(l => l == LogLevel.Informational),
-            ItExpr.Is<string>(s => s.Contains("[abc12345]") && s.Contains("Godot") && s.Contains("output")));
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("[abc12345] Godot : output");
     }
 
     [TestCase]
     public void WithSource_DoesNotMutateOriginalLogger()
     {
-        _ = logger.WithSource("Godot");
+        using var capture = LogCapture.Watch<Inner>();
+        _ = ((ScopeLogger)logger).WithSource("Godot");
 
         logger.LogInfo("plain");
 
-        innerMock.Protected().Verify("SendMessage", Times.Once(),
-            ItExpr.Is<LogLevel>(l => l == LogLevel.Informational),
-            ItExpr.Is<string>(s => !s.Contains("Godot") && s.Contains("plain")));
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("[abc12345] plain");
     }
+
+    #endregion
+
+    #region Output / Error process stream handlers
+
+    [TestCase]
+    public void Output_TagsMessageWithScopeId()
+    {
+        using var capture = LogCapture.Watch<Inner>();
+
+        ((ScopeLogger)logger).Output(this, MakeArgs("line from stdout"));
+
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("[abc12345]/out: line from stdout");
+    }
+
+    [TestCase]
+    public void Output_IgnoresNullOrWhitespaceData()
+    {
+        using var capture = LogCapture.Watch<Inner>();
+
+        ((ScopeLogger)logger).Output(this, MakeArgs(null));
+        ((ScopeLogger)logger).Output(this, MakeArgs("   "));
+
+        AssertThat(capture.Entries).IsEmpty();
+    }
+
+    [TestCase]
+    public void Error_TagsMessageWithScopeId()
+    {
+        using var capture = LogCapture.Watch<Inner>();
+
+        ((ScopeLogger)logger).Error(this, MakeArgs("line from stderr"));
+
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("[abc12345]/err: line from stderr");
+    }
+
+    [TestCase]
+    public void Error_IgnoresNullOrWhitespaceData()
+    {
+        using var capture = LogCapture.Watch<Inner>();
+
+        ((ScopeLogger)logger).Error(this, MakeArgs(null));
+        ((ScopeLogger)logger).Error(this, MakeArgs("   "));
+
+        AssertThat(capture.Entries).IsEmpty();
+    }
+
+    private static DataReceivedEventArgs MakeArgs(string? data)
+        => (DataReceivedEventArgs)Activator.CreateInstance(
+            typeof(DataReceivedEventArgs),
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            null,
+            [data],
+            null)!;
 
     #endregion
 
@@ -94,9 +152,7 @@ public class ScopeLoggerTest
 
     [TestCase]
     public void ScopeId_ReturnsConstructorValue()
-    {
-        AssertThat(logger.ScopeId).IsEqual("abc12345");
-    }
+        => AssertThat(((ScopeLogger)logger).ScopeId).IsEqual("abc12345");
 
     #endregion
 }

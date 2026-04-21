@@ -32,7 +32,11 @@ internal sealed class GdUnit4TestEngine : ITestEngine
 
     private List<ITestRunner> ActiveTestRunners { get; } = [];
 
-    public void Dispose() => cancellationSource?.Dispose();
+    public void Dispose()
+    {
+        LoggerFactory.Dispose();
+        cancellationSource?.Dispose();
+    }
 
     public void Cancel()
     {
@@ -168,8 +172,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             () =>
             {
                 var assemblyId = Path.GetFileNameWithoutExtension(testAssemblyNode.AssemblyPath);
-                LoggerFactory.BeginScope(assemblyId);
-                try
+                using (LoggerFactory.CreateScope(assemblyId))
                 {
                     Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
 
@@ -180,10 +183,6 @@ internal sealed class GdUnit4TestEngine : ITestEngine
                     ExecuteEngineTests(testAssemblyNode.Suites, eventListener, debuggerFramework, cancellationToken);
 
                     Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
-                }
-                finally
-                {
-                    LoggerFactory.EndScope();
                 }
             },
             cancellationToken);

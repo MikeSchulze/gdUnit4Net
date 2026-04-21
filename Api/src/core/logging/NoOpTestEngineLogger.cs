@@ -3,6 +3,8 @@
 
 namespace GdUnit4.Core.Logging;
 
+using System.Runtime.CompilerServices;
+
 using Api;
 
 /// <summary>Discards all log messages. Used as the default logger before one is registered.</summary>
@@ -14,6 +16,7 @@ internal sealed class NoOpTestEngineLogger : ITestEngineLogger
     {
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void ITestEngineLogger.SendMessage(LogLevel logLevel, string message)
     {
     }
