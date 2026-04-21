@@ -4,7 +4,7 @@
       "Bash(dotnet build *)",
       "Bash(dotnet test *)",
       "Bash(git stash *)",
-      "Bash(dotnet format *)",
+      "Bash(dotnet format *)"
     ]
   }
 }
