@@ -174,7 +174,7 @@ internal sealed class GdUnit4TestEngine(TestEngineSettings settings, ITestEngine
                     Directory.SetCurrentDirectory(projectWorkingDir);
                     Logger.LogInfo($"Set current working directory to: {projectWorkingDir}");
 
-                    ExecuteEngineTests(testAssemblyNode.Suites, eventListener, debuggerFramework, cancellationToken);
+                    ExecuteEngineTests(assemblyId, testAssemblyNode.Suites, eventListener, debuggerFramework, cancellationToken);
 
                     Logger.LogInfo($"Completed tests for assembly: {testAssemblyNode.AssemblyPath}");
                 }
@@ -182,6 +182,7 @@ internal sealed class GdUnit4TestEngine(TestEngineSettings settings, ITestEngine
             cancellationToken);
 
     private void ExecuteEngineTests(
+        string assemblyId,
         List<TestSuiteNode> testSuiteNodes,
         ITestEventListener eventListener,
         IDebuggerFramework debuggerFramework,
@@ -192,7 +193,7 @@ internal sealed class GdUnit4TestEngine(TestEngineSettings settings, ITestEngine
         // Run tests that require Godot runtime
         if (godotExecutorTestSuites.Count > 0)
         {
-            var godotRunner = new GodotRuntimeTestRunner(debuggerFramework, Settings);
+            var godotRunner = new GodotRuntimeTestRunner(assemblyId, debuggerFramework, Settings);
             ActiveTestRunners.Add(godotRunner);
             godotRunner.RunAndWait(godotExecutorTestSuites, eventListener, cancellationToken);
             _ = ActiveTestRunners.Remove(godotRunner);

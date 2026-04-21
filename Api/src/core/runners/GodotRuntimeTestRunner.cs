@@ -32,18 +32,23 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter_v5";
 
     private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeTestRunner>();
+    private readonly string pipeName;
 
+    private readonly ScopeLogger scope;
     private readonly TestEngineSettings settings;
     private Process? process;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="GodotRuntimeTestRunner" /> class.
     /// </summary>
+    /// <param name="assemblyId">Assembly identifier used to create a unique pipe name, preventing collisions when running multiple assemblies in parallel.</param>
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
-    internal GodotRuntimeTestRunner(IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor(), settings)
+    internal GodotRuntimeTestRunner(string assemblyId, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
+        : base(new GodotRuntimeExecutor($"gdunit4-{assemblyId}"), settings)
     {
+        pipeName = $"gdunit4-{assemblyId}";
+        scope = LoggerFactory.Instance.GetScope() ?? new ScopeLogger(Logger, assemblyId);
         this.settings = settings;
         DebuggerFramework = debuggerFramework;
     }
@@ -77,16 +82,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         }
     }
 
-    private DataReceivedEventHandler StdErrorProcessor => (_, args) =>
-    {
-        var message = args.Data?.Trim();
-        if (string.IsNullOrEmpty(message))
-            return;
-
-        // we do log errors to stdout otherwise running `dotnet test` from console will fail with exit code 1
-        Logger.LogInfo($":stderr: {message}");
-    };
-
     public override void Cancel()
     {
         base.Cancel();
@@ -111,10 +106,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
 
             if (!ReCompileGodotProject(Environment.CurrentDirectory, godotBinary))
                 return;
-            Logger.LogInfo("======== Running GdUnit4 Godot Runtime Test Runner ========");
+            Logger.LogInfo("Starting GodotRuntimeTestRunner");
 
             var processStartInfo =
-                new ProcessStartInfo(godotBinary, BuildGodotArguments(settings))
+                new ProcessStartInfo(godotBinary, BuildGodotArguments())
                 {
                     StandardOutputEncoding = Encoding.Default,
                     RedirectStandardOutput = true,
@@ -126,6 +121,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                     WorkingDirectory = Environment.CurrentDirectory
                 };
 
+            Logger.LogInfo($"Arguments: {processStartInfo.Arguments}");
+
             if (DebuggerFramework.IsDebugProcess)
                 process = DebuggerFramework.LaunchProcessWithDebuggerAttached(processStartInfo);
             else
@@ -135,16 +132,10 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                     StartInfo = processStartInfo,
                     EnableRaisingEvents = true
                 };
-                process.OutputDataReceived += (_, args) =>
-                {
-                    var message = args.Data?.Trim();
-                    if (string.IsNullOrEmpty(message))
-                        return;
-
-                    Logger.LogInfo($":stdout: {message}");
-                };
-                process.ErrorDataReceived += StdErrorProcessor;
-                process.Exited += ExitHandler("GdUnit4 Godot Runtime Test Runner");
+                var godotLogger = scope.WithSource("Godot");
+                process.OutputDataReceived += godotLogger.Output;
+                process.ErrorDataReceived += godotLogger.Error;
+                process.Exited += ExitHandler("GodotRuntimeTestRunner");
                 _ = process.Start();
                 process.BeginErrorReadLine();
                 process.BeginOutputReadLine();
@@ -164,7 +155,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             // If the process not finished until 10 retries, we kill it manually
             if (!process.HasExited)
             {
-                Logger.LogInfo("GdUnit4 Godot Runtime Test Runner is not terminated, force process kill.");
+                Logger.LogWarning("GodotRuntimeTestRunner is not terminated, force process kill.");
                 process.Kill(true);
             }
 
@@ -276,7 +267,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         if (File.Exists(sceneRunnerSource))
             return true;
 
-        Logger.LogInfo($"Installing GdUnit4TestRunnerScene at {destinationFolderPath}");
+        Logger.LogInfo("Installing GdUnit4TestRunner at");
+        Logger.LogInfo(destinationFolderPath);
 
         var assembly = Assembly.GetExecutingAssembly();
         using var stream = assembly.GetManifestResourceStream("GdUnit4.src.core.runners.GdUnit4TestRunnerSceneTemplate.cs");
@@ -310,23 +302,18 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
                 WorkingDirectory = workingDirectory
             };
 
-            Logger.LogInfo($"Working dir {workingDirectory}");
-            Logger.LogInfo($"Rebuild Godot Project ... {godotBinary} {processStartInfo.Arguments}");
+            Logger.LogInfo($"Set working dir {workingDirectory}");
+            Logger.LogInfo("Rebuilding Godot Project ...");
+            Logger.LogInfo($"{godotBinary} {processStartInfo.Arguments}");
             compileProcess.StartInfo = processStartInfo;
             compileProcess.EnableRaisingEvents = true;
-            compileProcess.OutputDataReceived += (_, args) =>
-            {
-                var message = args.Data?.Trim();
-                if (string.IsNullOrEmpty(message))
-                    return;
-
-                Logger.LogInfo($":stdout: {message}");
-            };
-            compileProcess.ErrorDataReceived += StdErrorProcessor;
-            compileProcess.Exited += ExitHandler("Rebuild Godot Project");
+            var compileLogger = scope.WithSource("Godot");
+            compileProcess.OutputDataReceived += compileLogger.Output;
+            compileProcess.ErrorDataReceived += compileLogger.Error;
+            compileProcess.Exited += ExitHandler("Rebuilding Godot Project");
             if (!compileProcess.Start())
             {
-                Logger.LogError("Rebuild Godot Project fails on process start, exit ..");
+                Logger.LogError("Rebuilding Godot Project fails on process start, exit ..");
                 return false;
             }
 
@@ -346,6 +333,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             // If the process has not finished within the timeout period, we kill it manually
             if (!compileProcess.HasExited)
             {
+                Logger.LogError("Godot compilation TIMEOUT");
                 Logger.LogError(
                     $"""
 
@@ -382,7 +370,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         catch (Exception e)
 #pragma warning restore CA1031
         {
-            Logger.LogError($"Install GdUnit4 `TestRunner` fails with: {e.Message}\n {e.StackTrace}");
+            Logger.LogError($"Rebuilding Godot Project fails with: {e.Message}\n {e.StackTrace}");
 
             return false;
         }
@@ -392,8 +380,8 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         }
     }
 
-    private static string BuildGodotArguments(TestEngineSettings testEngineSettings)
-        => $"--path . -d -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {testEngineSettings.Parameters}";
+    private string BuildGodotArguments()
+        => $"--path . -s res://{TEMP_TEST_RUNNER_DIR}/GdUnit4TestRunnerScene.cs {settings.Parameters} --pipe-name {pipeName}";
 
     private bool RunDotnetRestore(string workingDirectory)
     {
@@ -421,19 +409,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             restoreProcess.StartInfo = processStartInfo;
             restoreProcess.EnableRaisingEvents = true;
 
-            restoreProcess.OutputDataReceived += (_, args) =>
-            {
-                var message = args.Data?.Trim();
-                if (!string.IsNullOrEmpty(message))
-                    Logger.LogInfo($":build: {message}");
-            };
-
-            restoreProcess.ErrorDataReceived += (_, args) =>
-            {
-                var message = args.Data?.Trim();
-                if (!string.IsNullOrEmpty(message))
-                    Logger.LogInfo($":stderr: {message}");
-            };
+            var dotnetLogger = scope.WithSource("dotnet");
+            restoreProcess.OutputDataReceived += dotnetLogger.Output;
+            restoreProcess.ErrorDataReceived += dotnetLogger.Error;
 
             if (!restoreProcess.Start())
             {
@@ -456,6 +434,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
             // If the process has not finished within the timeout period, we kill it manually
             if (!restoreProcess.HasExited)
             {
+                Logger.LogError($"`dotnet build` did not complete within the configured timeout of {settings.CompileProcessTimeout}ms.");
                 Logger.LogError(
                     $"""
 
@@ -497,20 +476,20 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         catch (Exception ex)
 #pragma warning restore CA1031
         {
-            Logger.LogError($"Error running build restore: {ex.Message}");
+            Logger.LogError($"Error: restore: {ex.Message}");
             return false;
         }
     }
 
-    private EventHandler ExitHandler(string source = "") => (sender, _) =>
+    private EventHandler ExitHandler(string source) => (sender, _) =>
     {
         Console.Out.Flush();
         if (sender is Process p)
         {
             if (p.ExitCode == 0)
-                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}\n");
+                Logger.LogInfo($"{source} ends with exit code: {p.ExitCode}");
             else
-                Logger.LogError($"{source} ends with exit code: {p.ExitCode}\n");
+                Logger.LogError($"{source} ends with exit code: {p.ExitCode}");
         }
     };
 
@@ -522,8 +501,6 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         {
             processToClose.CancelErrorRead();
             processToClose.CancelOutputRead();
-            processToClose.ErrorDataReceived -= StdErrorProcessor;
-            processToClose.Exited -= ExitHandler();
             processToClose.Dispose();
         }
 #pragma warning disable CA1031

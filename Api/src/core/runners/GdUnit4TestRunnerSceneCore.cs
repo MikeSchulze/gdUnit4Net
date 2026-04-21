@@ -3,12 +3,13 @@
 
 namespace GdUnit4.Core.Runners;
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 using Api;
 
 using Godot;
+
+using Logging;
 
 /// <summary>
 ///     The GdUnit4Net test runner scene.
@@ -41,7 +42,7 @@ public partial class GdUnit4TestRunnerSceneCore : SceneTree
         public TestRunner()
         {
             Logger = new GodotLogger();
-            Server = new GodotGdUnit4RestServer(Logger);
+            Server = new GodotGdUnit4RestServer(Logger, ResolvePipeName());
         }
 
         private ITestEngineLogger Logger { get; }
@@ -56,6 +57,15 @@ public partial class GdUnit4TestRunnerSceneCore : SceneTree
         {
             if (what == NotificationPredelete)
                 Server.Stop();
+        }
+
+        private static string ResolvePipeName()
+        {
+            var args = OS.GetCmdlineArgs();
+            var index = Array.IndexOf(args, "--pipe-name");
+            if (index < 0 || index >= args.Length - 1)
+                throw new InvalidOperationException("Missing required '--pipe-name' argument.");
+            return args[index + 1];
         }
     }
 }
