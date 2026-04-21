@@ -1,11 +1,11 @@
 // Copyright (c) 2025 Mike Schulze
 // MIT License - See LICENSE file in the repository root for full license text
 
+using System.Linq;
+
 using static GdUnit4.Assertions;
 
 namespace GdUnit4.Tests.Core.Logging;
-
-using System.Collections.Generic;
 
 using Api;
 
@@ -14,106 +14,68 @@ using GdUnit4.Core.Logging;
 [TestSuite]
 public class TypedLoggerTest
 {
-    #region Log-source stubs
-
     // Subject owns its logger, mirroring real production code.
     private class Subject
     {
-        // ReSharper disable once UnusedMember.Local
-        internal static readonly ITestEngineLogger _ = LoggerFactory.GetLogger<Subject>();
+        internal static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<Subject>();
     }
 
-    // Records every SendMessage call; used as the backing logger so tests
-    // can verify the level TypedLogger forwards without touching the global logger.
-    private sealed class BackingTestLogger : ITestEngineLogger
-    {
-        public List<LogEntry> Entries { get; } = [];
-
-        void ITestEngineLogger.SendMessage(LogLevel logLevel, string message)
-            => Entries.Add(new LogEntry(logLevel, message, typeof(BackingTestLogger)));
-    }
-
-    #endregion
-
-    #region Forwarding without active capture
+    #region Capture routing
 
     [TestCase]
-    public void SendMessage_WithoutCapture_ErrorIsForwardedAtOriginalLevel()
+    public void Watch_CapturesErrorAtOriginalLevel()
     {
-        var backingLogger = new BackingTestLogger();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
-
-        logger.LogError("boom");
-
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Error, "boom", typeof(BackingTestLogger)));
-    }
-
-    [TestCase]
-    public void SendMessage_WithoutCapture_WarningIsForwardedAtOriginalLevel()
-    {
-        var backingLogger = new BackingTestLogger();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
-
-        logger.LogWarning("caution");
-
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Warning, "caution", typeof(BackingTestLogger)));
-    }
-
-    [TestCase]
-    public void SendMessage_WithoutCapture_InformationalIsForwardedAtOriginalLevel()
-    {
-        var backingLogger = new BackingTestLogger();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
-
-        logger.LogInfo("info");
-
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Informational, "info", typeof(BackingTestLogger)));
-    }
-
-    #endregion
-
-    #region Forwarding with active capture
-
-    [TestCase]
-    public void SendMessage_WithActiveCapture_ErrorIsDemotedToInformationalInBackingLogger()
-    {
-        var backingLogger = new BackingTestLogger();
         using var capture = LogCapture.Watch<Subject>();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
 
-        logger.LogError("boom");
+        Subject.Logger.LogError("boom");
 
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Informational, "[Captured Error] boom", typeof(BackingTestLogger)));
+        AssertThat(capture.EntriesOf(LogLevel.Error).Select(e => e.Message))
+            .ContainsExactly("boom");
     }
 
     [TestCase]
-    public void SendMessage_WithActiveCapture_WarningIsDemotedToInformationalInBackingLogger()
+    public void Watch_CapturesWarningAtOriginalLevel()
     {
-        var backingLogger = new BackingTestLogger();
         using var capture = LogCapture.Watch<Subject>();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
 
-        logger.LogWarning("caution");
+        Subject.Logger.LogWarning("caution");
 
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Informational, "[Captured Warning] caution", typeof(BackingTestLogger)));
+        AssertThat(capture.EntriesOf(LogLevel.Warning).Select(e => e.Message))
+            .ContainsExactly("caution");
     }
 
     [TestCase]
-    public void SendMessage_WithActiveCapture_InformationalIsNotDemotedInBackingLogger()
+    public void Watch_CapturesInformationalAtOriginalLevel()
     {
-        var backingLogger = new BackingTestLogger();
         using var capture = LogCapture.Watch<Subject>();
-        ITestEngineLogger logger = new TypedLogger(typeof(Subject), backingLogger);
 
-        logger.LogInfo("info");
+        Subject.Logger.LogInfo("info");
 
-        AssertThat(backingLogger.Entries)
-            .ContainsExactly(new LogEntry(LogLevel.Informational, "info", typeof(BackingTestLogger)));
+        AssertThat(capture.EntriesOf(LogLevel.Informational).Select(e => e.Message))
+            .ContainsExactly("info");
+    }
+
+    [TestCase]
+    public void Watch_DoesNotCaptureMessagesAfterDispose()
+    {
+        LogCapture capture;
+        using (capture = LogCapture.Watch<Subject>())
+            Subject.Logger.LogError("captured");
+
+        Subject.Logger.LogError("not captured");
+
+        AssertThat(capture.EntriesOf(LogLevel.Error).Select(e => e.Message))
+            .ContainsExactly("captured");
+    }
+
+    [TestCase]
+    public void Watch_DoesNotCaptureMessagesFromOtherSources()
+    {
+        using var capture = LogCapture.Watch<Subject>();
+
+        LoggerFactory.GetLogger<TypedLoggerTest>().LogError("unrelated");
+
+        AssertThat(capture.Entries).IsEmpty();
     }
 
     #endregion

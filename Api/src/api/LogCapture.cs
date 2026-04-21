@@ -28,9 +28,8 @@ using Core.Logging;
 /// </remarks>
 /// <remarks>
 ///     <b>Limitation:</b> only classes that obtain their logger via
-///     <see cref="LoggerFactory.GetLogger{T}" /> are captured. Classes that receive an
+///     <c>LoggerFactory.GetLogger&lt;T&gt;()</c> are captured. Classes that receive an
 ///     <see cref="ITestEngineLogger" /> through constructor injection bypass this mechanism.
-///     Migrate those classes to <c>LoggerFactory.GetLogger&lt;T&gt;()</c> to make them watchable.
 /// </remarks>
 public sealed class LogCapture : IDisposable
 {

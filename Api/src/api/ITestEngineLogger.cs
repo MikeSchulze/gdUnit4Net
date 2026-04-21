@@ -49,9 +49,10 @@ public interface ITestEngineLogger
     }
 
     /// <summary>
-    ///     Sends a message to the enabled loggers.
+    ///     Core dispatch method; routes a message at the given severity level to this logger's output.
+    ///     Implement this to define where log messages are written.
     /// </summary>
-    /// <param name="logLevel">Level of the message.</param>
+    /// <param name="logLevel">Severity level of the message.</param>
     /// <param name="message">The message to be sent.</param>
     protected void SendMessage(LogLevel logLevel, string message);
 }

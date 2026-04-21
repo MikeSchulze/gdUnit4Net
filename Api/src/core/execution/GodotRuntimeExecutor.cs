@@ -11,6 +11,8 @@ using Api;
 
 using Commands;
 
+using Logging;
+
 using Newtonsoft.Json;
 
 using Reporting;
@@ -95,7 +97,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
             return new Response
             {
                 StatusCode = HttpStatusCode.InternalServerError,
-                Payload = JsonConvert.SerializeObject(ex),
+                Payload = JsonConvert.SerializeObject(ex)
             };
         }
 
@@ -136,7 +138,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
                 return new Response
                 {
                     StatusCode = HttpStatusCode.InternalServerError,
-                    Payload = JsonConvert.SerializeObject(ex),
+                    Payload = JsonConvert.SerializeObject(ex)
                 };
             }
         }
@@ -144,7 +146,7 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
         return new Response
         {
             StatusCode = HttpStatusCode.InternalServerError,
-            Payload = string.Empty,
+            Payload = string.Empty
         };
     }
 }

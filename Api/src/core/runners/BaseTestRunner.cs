@@ -13,6 +13,8 @@ using Api;
 
 using Commands;
 
+using Logging;
+
 using Newtonsoft.Json;
 
 /// <summary>
@@ -20,21 +22,19 @@ using Newtonsoft.Json;
 /// </summary>
 internal class BaseTestRunner : ITestRunner
 {
+    private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<BaseTestRunner>();
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="BaseTestRunner" /> class.
     ///     Initializes a new instance of the BaseTestRunner.
     /// </summary>
     /// <param name="executor">The command executor for test operations.</param>
-    /// <param name="logger">The test engine logger for diagnostic output.</param>
     /// <param name="settings">Test engine configuration settings.</param>
-    protected BaseTestRunner(ICommandExecutor executor, ITestEngineLogger logger, TestEngineSettings settings)
+    protected BaseTestRunner(ICommandExecutor executor, TestEngineSettings settings)
     {
         Executor = executor;
-        Logger = logger;
         Settings = settings;
     }
-
-    protected ITestEngineLogger Logger { get; }
 
     private object SyncLock { get; } = new();
 

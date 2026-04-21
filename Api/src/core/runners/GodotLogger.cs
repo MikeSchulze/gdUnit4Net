@@ -10,7 +10,7 @@ using Godot;
 internal sealed class GodotLogger : ITestEngineLogger
 {
     /// <inheritdoc />
-    public void SendMessage(LogLevel logLevel, string message)
+    void ITestEngineLogger.SendMessage(LogLevel logLevel, string message)
     {
         switch (logLevel)
         {

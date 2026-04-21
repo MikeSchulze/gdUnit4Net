@@ -12,6 +12,8 @@ using Api;
 
 using Execution;
 
+using Logging;
+
 using Environment = Environment;
 
 /// <summary>
@@ -29,7 +31,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// </summary>
     internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter_v5";
 
-    private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeTestRunner>();
+    private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeTestRunner>();
 
     private readonly TestEngineSettings settings;
     private Process? process;
@@ -40,7 +42,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
     internal GodotRuntimeTestRunner(IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor(), Logger, settings)
+        : base(new GodotRuntimeExecutor(), settings)
     {
         this.settings = settings;
         DebuggerFramework = debuggerFramework;

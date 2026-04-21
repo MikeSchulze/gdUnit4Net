@@ -7,11 +7,10 @@ using Api;
 
 /// <summary>
 ///     An <see cref="ITestEngineLogger" /> that routes messages to active <see cref="LogCapture" /> scopes
-///     registered for its type, and forwards all messages to the backing backingLogger.
+///     registered for its type, and forwards all messages to the current context logger (or root if none is active).
 /// </summary>
 /// <param name="type">The class this logger is scoped to.</param>
-/// <param name="backingLogger">The backing logger to forward messages to after dispatching to any active captures.</param>
-internal sealed class TypedLogger(Type type, ITestEngineLogger backingLogger) : ITestEngineLogger
+internal sealed class TypedLogger(Type type) : ITestEngineLogger
 {
     void ITestEngineLogger.SendMessage(LogLevel logLevel, string message)
     {
@@ -25,26 +24,26 @@ internal sealed class TypedLogger(Type type, ITestEngineLogger backingLogger) : 
         // Prefix the forwarded message so the original severity remains visible in raw output.
         if (captureSet.Count > 0 && logLevel is LogLevel.Error or LogLevel.Warning)
         {
-            backingLogger.LogInfo($"[Captured {logLevel}] {message}");
+            LoggerFactory.Instance.Current.LogInfo($"[Captured {logLevel}] {message}");
             return;
         }
 
         switch (logLevel)
         {
             case LogLevel.Debug:
-                backingLogger.LogDebug(message);
+                LoggerFactory.Instance.Current.LogDebug(message);
                 break;
             case LogLevel.Informational:
-                backingLogger.LogInfo(message);
+                LoggerFactory.Instance.Current.LogInfo(message);
                 break;
             case LogLevel.Warning:
-                backingLogger.LogWarning(message);
+                LoggerFactory.Instance.Current.LogWarning(message);
                 break;
             case LogLevel.Error:
-                backingLogger.LogError(message);
+                LoggerFactory.Instance.Current.LogError(message);
                 break;
             default:
-                backingLogger.LogInfo(message);
+                LoggerFactory.Instance.Current.LogInfo(message);
                 break;
         }
     }
