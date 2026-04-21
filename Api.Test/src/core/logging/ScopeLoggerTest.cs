@@ -21,11 +21,7 @@ public class ScopeLoggerTest
     // can intercept the already-formatted (tagged) messages.
     private sealed class Inner;
 
-    private ITestEngineLogger logger = null!;
-
-    [Before]
-    public void Before()
-        => logger = new ScopeLogger(LoggerFactory.GetLogger<Inner>(), "abc12345");
+    private readonly ITestEngineLogger logger = new ScopeLogger(LoggerFactory.GetLogger<Inner>(), "abc12345");
 
     #region LogInfo / LogWarning / LogError routing
 

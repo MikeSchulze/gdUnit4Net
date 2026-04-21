@@ -15,26 +15,21 @@ using Logging;
 
 using Runners;
 
-internal sealed class GdUnit4TestEngine : ITestEngine
+internal sealed class GdUnit4TestEngine(TestEngineSettings settings, ITestEngineLogger logger) : ITestEngine
 {
     private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GdUnit4TestEngine>();
 
+    private readonly LoggerFactory loggerFactory = LoggerFactory.WithRootLogger(logger).Build();
     private readonly object taskLock = new();
     private CancellationTokenSource? cancellationSource;
 
-    public GdUnit4TestEngine(TestEngineSettings settings, ITestEngineLogger logger)
-    {
-        Settings = settings;
-        LoggerFactory.Init(logger);
-    }
-
-    private TestEngineSettings Settings { get; }
+    private TestEngineSettings Settings { get; } = settings;
 
     private List<ITestRunner> ActiveTestRunners { get; } = [];
 
     public void Dispose()
     {
-        LoggerFactory.Dispose();
+        loggerFactory.Dispose();
         cancellationSource?.Dispose();
     }
 
@@ -69,9 +64,8 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             {
                 semaphore.Wait(cancellationSource.Token);
 
+                // ReSharper disable once AccessToDisposedClosure
                 var task = ExecuteTestsInAssembly(assemblyNode, eventListener, debuggerFramework, cancellationSource.Token)
-
-                    // ReSharper disable once AccessToDisposedClosure
                     .ContinueWith(_ => semaphore.Release(), cancellationSource.Token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
                 tasks.Add(task);
             }
@@ -172,7 +166,7 @@ internal sealed class GdUnit4TestEngine : ITestEngine
             () =>
             {
                 var assemblyId = Path.GetFileNameWithoutExtension(testAssemblyNode.AssemblyPath);
-                using (LoggerFactory.CreateScope(assemblyId))
+                using (loggerFactory.CreateScope(assemblyId))
                 {
                     Logger.LogInfo($"Starting tests for assembly: {testAssemblyNode.AssemblyPath}");
 

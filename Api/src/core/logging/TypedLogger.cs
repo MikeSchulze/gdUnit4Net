@@ -24,26 +24,26 @@ internal sealed class TypedLogger(Type type) : ITestEngineLogger
         // Prefix the forwarded message so the original severity remains visible in raw output.
         if (captureSet.Count > 0 && logLevel is LogLevel.Error or LogLevel.Warning)
         {
-            LoggerFactory.Current.LogInfo($"[Captured {logLevel}] {message}");
+            LoggerFactory.Instance.Current.LogInfo($"[Captured {logLevel}] {message}");
             return;
         }
 
         switch (logLevel)
         {
             case LogLevel.Debug:
-                LoggerFactory.Current.LogDebug(message);
+                LoggerFactory.Instance.Current.LogDebug(message);
                 break;
             case LogLevel.Informational:
-                LoggerFactory.Current.LogInfo(message);
+                LoggerFactory.Instance.Current.LogInfo(message);
                 break;
             case LogLevel.Warning:
-                LoggerFactory.Current.LogWarning(message);
+                LoggerFactory.Instance.Current.LogWarning(message);
                 break;
             case LogLevel.Error:
-                LoggerFactory.Current.LogError(message);
+                LoggerFactory.Instance.Current.LogError(message);
                 break;
             default:
-                LoggerFactory.Current.LogInfo(message);
+                LoggerFactory.Instance.Current.LogInfo(message);
                 break;
         }
     }

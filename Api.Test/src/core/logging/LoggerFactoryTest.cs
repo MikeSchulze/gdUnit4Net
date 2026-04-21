@@ -18,17 +18,35 @@ using static Assertions;
 [TestSuite]
 public class LoggerFactoryTest
 {
+    [Before]
+    public void Before()
+        => LoggerFactory.WithRootLogger(NoOpTestEngineLogger.Instance).Build();
+
+    #region Builder
+
+    [TestCase]
+    public void Build_InstallsNewSingleton()
+    {
+        var first = LoggerFactory.WithRootLogger(NoOpTestEngineLogger.Instance).Build();
+        var second = LoggerFactory.WithRootLogger(NoOpTestEngineLogger.Instance).Build();
+
+        AssertThat(LoggerFactory.Instance).IsSame(second);
+        AssertThat(second).IsNotSame(first);
+    }
+
+    #endregion
+
     #region Dispose
 
     [TestCase]
     public void Dispose_ResetsRootToNoOp()
     {
-        LoggerFactory.Init(new RecordingLogger(new ConcurrentQueue<string>()));
-        AssertThat(LoggerFactory.Root).IsNotInstanceOf<NoOpTestEngineLogger>();
+        LoggerFactory.WithRootLogger(new RecordingLogger(new ConcurrentQueue<string>())).Build();
+        AssertThat(LoggerFactory.Instance.RootLogger).IsNotInstanceOf<NoOpTestEngineLogger>();
 
-        LoggerFactory.Dispose();
+        LoggerFactory.Instance.Dispose();
 
-        AssertThat(LoggerFactory.Root).IsInstanceOf<NoOpTestEngineLogger>();
+        AssertThat(LoggerFactory.Instance.RootLogger).IsInstanceOf<NoOpTestEngineLogger>();
     }
 
     #endregion
@@ -37,15 +55,15 @@ public class LoggerFactoryTest
 
     [TestCase]
     public void Root_IsNeverNull()
-        => AssertThat(LoggerFactory.Root).IsNotNull();
+        => AssertThat(LoggerFactory.Instance.RootLogger).IsNotNull();
 
     [TestCase]
     public void Root_IsNeverAScopeLogger()
     {
-        using (LoggerFactory.CreateScope("ctx-1"))
+        using (LoggerFactory.Instance.CreateScope("ctx-1"))
         {
             // Root is the immutable engine logger — CreateScope must not replace it.
-            AssertThat(LoggerFactory.Root).IsNotInstanceOf<ScopeLogger>();
+            AssertThat(LoggerFactory.Instance.RootLogger).IsNotInstanceOf<ScopeLogger>();
         }
     }
 
@@ -56,20 +74,20 @@ public class LoggerFactoryTest
     [TestCase]
     public void CreateScope_SetsCurrent_ToScopeLogger()
     {
-        using (LoggerFactory.CreateScope("ctx-1"))
+        using (LoggerFactory.Instance.CreateScope("ctx-1"))
         {
-            AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
-            AssertThat(LoggerFactory.GetScope()!.ScopeId).IsEqual("ctx-1");
+            AssertThat(LoggerFactory.Instance.Current).IsInstanceOf<ScopeLogger>();
+            AssertThat(LoggerFactory.Instance.GetScope()!.ScopeId).IsEqual("ctx-1");
         }
     }
 
     [TestCase]
     public void EndScope_RestoresCurrent_ToRoot()
     {
-        using (LoggerFactory.CreateScope("ctx-1"))
-            AssertThat(LoggerFactory.Current).IsInstanceOf<ScopeLogger>();
+        using (LoggerFactory.Instance.CreateScope("ctx-1"))
+            AssertThat(LoggerFactory.Instance.Current).IsInstanceOf<ScopeLogger>();
 
-        AssertThat(LoggerFactory.Current).IsSame(LoggerFactory.Root);
+        AssertThat(LoggerFactory.Instance.Current).IsSame(LoggerFactory.Instance.RootLogger);
     }
 
     #endregion
@@ -86,16 +104,16 @@ public class LoggerFactoryTest
 
         var taskA = Task.Run(() =>
         {
-            using var _ = LoggerFactory.CreateScope("task-a");
+            using var _ = LoggerFactory.Instance.CreateScope("task-a");
             barrier.SignalAndWait(TimeSpan.FromSeconds(5));
-            seenByA = LoggerFactory.GetScope();
+            seenByA = LoggerFactory.Instance.GetScope();
         });
 
         var taskB = Task.Run(() =>
         {
-            using var _ = LoggerFactory.CreateScope("task-b");
+            using var _ = LoggerFactory.Instance.CreateScope("task-b");
             barrier.SignalAndWait(TimeSpan.FromSeconds(5));
-            seenByB = LoggerFactory.GetScope();
+            seenByB = LoggerFactory.Instance.GetScope();
         });
 
         Task.WaitAll(taskA, taskB);
@@ -112,7 +130,6 @@ public class LoggerFactoryTest
     {
         ScopeLogger? seenByB = null;
 
-        // taskB starts before taskA begins its scope
         var bStarted = new ManualResetEventSlim(false);
         var aBegan = new ManualResetEventSlim(false);
 
@@ -120,13 +137,13 @@ public class LoggerFactoryTest
         {
             bStarted.Set();
             aBegan.Wait(TimeSpan.FromSeconds(5));
-            seenByB = LoggerFactory.GetScope();
+            seenByB = LoggerFactory.Instance.GetScope();
         });
 
         var taskA = Task.Run(() =>
         {
             bStarted.Wait(TimeSpan.FromSeconds(5));
-            using var _ = LoggerFactory.CreateScope("task-a");
+            using var _ = LoggerFactory.Instance.CreateScope("task-a");
             aBegan.Set();
         });
 
@@ -142,21 +159,21 @@ public class LoggerFactoryTest
         // Both scope loggers wrap the same immutable root; verify each task's messages
         // arrive at root tagged with the correct [scopeId] and without cross-task bleed.
         var messages = new ConcurrentQueue<string>();
-        LoggerFactory.Init(new RecordingLogger(messages));
+        LoggerFactory.WithRootLogger(new RecordingLogger(messages)).Build();
         try
         {
             using var barrier = new Barrier(2);
 
             var taskA = Task.Run(() =>
             {
-                using var _ = LoggerFactory.CreateScope("task-a");
+                using var _ = LoggerFactory.Instance.CreateScope("task-a");
                 barrier.SignalAndWait(TimeSpan.FromSeconds(5));
                 LoggerFactory.GetLogger<TaskSourceA>().LogInfo("hello");
             });
 
             var taskB = Task.Run(() =>
             {
-                using var _ = LoggerFactory.CreateScope("task-b");
+                using var _ = LoggerFactory.Instance.CreateScope("task-b");
                 barrier.SignalAndWait(TimeSpan.FromSeconds(5));
                 LoggerFactory.GetLogger<TaskSourceB>().LogInfo("hello");
             });
@@ -165,7 +182,7 @@ public class LoggerFactoryTest
         }
         finally
         {
-            LoggerFactory.Init(NoOpTestEngineLogger.Instance);
+            LoggerFactory.Instance.Dispose();
         }
 
         AssertThat(messages.OrderBy(m => m).ToList())
