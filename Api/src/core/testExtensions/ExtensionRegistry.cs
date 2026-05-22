@@ -66,14 +66,21 @@ internal sealed class ExtensionRegistry
                 .FirstOrDefault(it => it?.SupportsParameter(paramContext, context.ExtensionContext) ?? false, null);
 
             if (supportingExtension != null)
-                finalArguments.Add(supportingExtension.ResolveParameter(paramContext, context.ExtensionContext));
-            else if (remainingTestCaseArguments.Count > 0)
             {
-                finalArguments.Add(remainingTestCaseArguments[0]);
-                remainingTestCaseArguments.RemoveAt(0);
+                finalArguments.Add(supportingExtension.ResolveParameter(paramContext, context.ExtensionContext));
             }
             else
-                throw new InvalidOperationException($"No acceptable argument value found for {param}");
+            {
+                var idx = remainingTestCaseArguments
+                    .FindIndex(arg => arg != null && param.ParameterType.IsInstanceOfType(arg));
+                if (idx >= 0)
+                {
+                    finalArguments.Add(remainingTestCaseArguments[idx]);
+                    remainingTestCaseArguments.RemoveAt(idx);
+                }
+                else
+                    throw new InvalidOperationException($"No acceptable argument value found for {param}");
+            }
         }
 
         return [.. finalArguments];

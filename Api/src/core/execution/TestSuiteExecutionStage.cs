@@ -46,7 +46,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
         {
             foreach (var testCase in testSuiteContext.TestSuite.TestCases)
             {
-                var extensionContext = new ExtensionContext(testSuiteContext.ExtensionContext);
+                var extensionContext = new ExtensionContext(testSuiteContext.ExtensionContext, testCase.Arguments);
                 using var testCaseContext = new ExecutionContext(testSuiteContext, extensionContext, testCase);
                 if (testCase.HasDataPoint)
                 {
@@ -90,7 +90,7 @@ internal sealed class TestSuiteExecutionStage : IExecutionStage
                     await foreach (var dataPointValues in DataPointValueProvider.GetDataAsync(testCase, timeout).ConfigureAwait(false))
                     {
                         var displayName = TestCase.BuildDisplayName(testCase.Name, new TestCaseAttribute(dataPointValues));
-                        var extensionContext = new ExtensionContext(executionContext.ExtensionContext);
+                        var extensionContext = new ExtensionContext(executionContext.ExtensionContext, dataPointValues);
                         using ExecutionContext testCaseContext = new(executionContext, extensionContext, displayName);
                         await RunTestCase(stdoutHook, testCaseContext, testCase, testAttribute, dataPointValues)
                             .ConfigureAwait(true);
