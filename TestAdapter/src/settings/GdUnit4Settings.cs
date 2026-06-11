@@ -38,7 +38,7 @@ public enum DisplayNameOptions
 ///     &lt;CaptureStdOut&gt;true&lt;/CaptureStdOut&gt;
 ///     &lt;Parameters&gt;--verbose --headless&lt;/Parameters&gt;
 ///     &lt;CompileProcessTimeout&gt;30000&lt;/CompileProcessTimeout&gt;
-///     &lt;RuntimeConnectTimeout&gt;10000&lt;/RuntimeConnectTimeout&gt;
+///     &lt;GodotConnectTimeout&gt;10000&lt;/GodotConnectTimeout&gt;
 ///   &lt;/GdUnit4&gt;
 /// &lt;/RunSettings&gt;
 /// </code>
@@ -144,7 +144,7 @@ public class GdUnit4Settings : TestRunSettings
     ///     before running tests that require the Godot runtime. Increase it for environments where the
     ///     Godot host needs more time to start.
     /// </remarks>
-    public int RuntimeConnectTimeout { get; init; } = 10000;
+    public int GodotConnectTimeout { get; init; } = 10000;
 
     /// <summary>
     ///     Converts the current settings instance to an XML element for inclusion in .runsettings files.

@@ -122,6 +122,9 @@ Create a `.runsettings` file in your solution root:
         
         <!-- Compilation timeout for large projects (milliseconds) -->
         <CompileProcessTimeout>20000</CompileProcessTimeout>
+        
+        <!-- Connect timeout to the Godot runtime host for slow or variable environments (milliseconds) -->
+        <GodotConnectTimeout>10000</GodotConnectTimeout>
     </GdUnit4>
 </RunSettings>
 ```
@@ -134,6 +137,7 @@ Create a `.runsettings` file in your solution root:
 | `DisplayName`           | Test name format in results                       | `SimpleName` | `FullyQualifiedName`     |
 | `CaptureStdOut`         | Capture test output in results                    | `false`      | `true`                   |
 | `CompileProcessTimeout` | Godot compilation timeout (ms)                    | `20000`      | `30000`                  |
+| `GodotConnectTimeout`   | Godot runtime host connect timeout (ms)           | `10000`      | `60000`                  |
 
 ### Using .runsettings
 

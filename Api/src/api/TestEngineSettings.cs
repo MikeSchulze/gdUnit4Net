@@ -79,5 +79,5 @@ public sealed class TestEngineSettings
     ///     Default value is 10000 milliseconds (10 seconds).
     ///     Set to a higher value for environments where the Godot host needs more time to start.
     /// </remarks>
-    public int RuntimeConnectTimeout { get; init; } = 10000;
+    public int GodotConnectTimeout { get; init; } = 10000;
 }

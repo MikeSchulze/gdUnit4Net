@@ -109,7 +109,7 @@ public class GdUnit4TestExecutor : ITestExecutor2, IDisposable
                 ? DEFAULT_SESSION_TIMEOUT
                 : runConfiguration.TestSessionTimeout),
             CompileProcessTimeout = settings.CompileProcessTimeout,
-            RuntimeConnectTimeout = settings.RuntimeConnectTimeout
+            GodotConnectTimeout = settings.GodotConnectTimeout
         };
 
         testEngine = ITestEngine.GetInstance(engineSettings, Log);
