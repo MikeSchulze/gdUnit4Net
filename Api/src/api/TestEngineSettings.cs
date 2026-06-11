@@ -69,4 +69,15 @@ public sealed class TestEngineSettings
     ///     Set to a higher value for projects that require more compilation time.
     /// </remarks>
     public int CompileProcessTimeout { get; init; } = 120000;
+
+    /// <summary>
+    ///     Gets the maximum duration allowed to connect to the Godot runtime host in milliseconds.
+    /// </summary>
+    /// <remarks>
+    ///     Applies when connecting to the launched Godot runtime host over a named pipe.
+    ///     After this timeout period expires, the connection attempt is aborted.
+    ///     Default value is 10000 milliseconds (10 seconds).
+    ///     Set to a higher value for environments where the Godot host needs more time to start.
+    /// </remarks>
+    public int GodotConnectTimeout { get; init; } = 10000;
 }

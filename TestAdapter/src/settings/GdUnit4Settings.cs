@@ -38,6 +38,7 @@ public enum DisplayNameOptions
 ///     &lt;CaptureStdOut&gt;true&lt;/CaptureStdOut&gt;
 ///     &lt;Parameters&gt;--verbose --headless&lt;/Parameters&gt;
 ///     &lt;CompileProcessTimeout&gt;30000&lt;/CompileProcessTimeout&gt;
+///     &lt;GodotConnectTimeout&gt;10000&lt;/GodotConnectTimeout&gt;
 ///   &lt;/GdUnit4&gt;
 /// &lt;/RunSettings&gt;
 /// </code>
@@ -46,6 +47,7 @@ public enum DisplayNameOptions
 ///     - Standard output capture for debugging purposes
 ///     - Additional parameters passed to the Godot engine during test execution
 ///     - Compilation timeout for projects that require extended build times
+///     - Connect timeout for the Godot runtime host on slow or variable environments
 ///     These settings are loaded by <see cref="GdUnit4SettingsProvider" /> during test discovery and execution.
 /// </remarks>
 [XmlRoot(RUN_SETTINGS_XML_NODE)]
@@ -130,6 +132,19 @@ public class GdUnit4Settings : TestRunSettings
     /// </code>
     /// </example>
     public int CompileProcessTimeout { get; init; } = 120000;
+
+    /// <summary>
+    ///     Gets the maximum duration allowed to connect to the Godot runtime host in milliseconds.
+    /// </summary>
+    /// <value>
+    ///     The timeout value in milliseconds. Default is 10000 milliseconds (10 seconds).
+    /// </value>
+    /// <remarks>
+    ///     This timeout applies when connecting to the launched Godot runtime host over a named pipe
+    ///     before running tests that require the Godot runtime. Increase it for environments where the
+    ///     Godot host needs more time to start.
+    /// </remarks>
+    public int GodotConnectTimeout { get; init; } = 10000;
 
     /// <summary>
     ///     Converts the current settings instance to an XML element for inclusion in .runsettings files.

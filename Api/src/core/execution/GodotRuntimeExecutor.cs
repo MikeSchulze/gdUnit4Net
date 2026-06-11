@@ -33,17 +33,18 @@ internal sealed class GodotRuntimeExecutor : InOutPipeProxy<NamedPipeClientStrea
 {
     private static new readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeExecutor>();
 
-    public GodotRuntimeExecutor(string pipeName)
+    private readonly int connectTimeout;
+
+    public GodotRuntimeExecutor(string pipeName, int connectTimeout)
         : base(new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation), Logger)
-    {
-    }
+        => this.connectTimeout = connectTimeout;
 
     public async Task StartAsync()
     {
         try
         {
             await Proxy
-                .ConnectAsync(10000)
+                .ConnectAsync(connectTimeout)
                 .ConfigureAwait(false);
         }
         catch (Exception e)
