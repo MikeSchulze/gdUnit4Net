@@ -45,7 +45,7 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
     internal GodotRuntimeTestRunner(string assemblyId, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor($"gdunit4-{assemblyId}"), settings)
+        : base(new GodotRuntimeExecutor($"gdunit4-{assemblyId}", settings.RuntimeConnectTimeout), settings)
     {
         pipeName = $"gdunit4-{assemblyId}";
         scope = LoggerFactory.Instance.GetScope() ?? new ScopeLogger(Logger, assemblyId);
