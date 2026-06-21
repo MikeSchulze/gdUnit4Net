@@ -1,3 +1,9 @@
+v3.1.0
+* GD-446: Fixing nuget packaging by exclude `Microsoft.NET.Test.Sdk`, `coverlet.collector` and `Godot.SourceGenerators`
+          Microsoft.NET.Test.Sdk, coverlet.collector and Godot.SourceGenerators are no longer transitively exported by gdUnit4.test.adapter.
+          If your project relies on either, add them explicitly to your .csproj.
+
+
 v3.0.1
 
 ✨ Improvements

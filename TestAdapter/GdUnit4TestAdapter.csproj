@@ -5,7 +5,7 @@
     <Description>
       GdUnit4 Test Adapter is the test adapter to run GdUnit4 tests in C#.
     </Description>
-    <Copyright>© 2024 Mike Schulze</Copyright>
+    <Copyright>© 2026 Mike Schulze</Copyright>
     <Authors>Mike Schulze</Authors>
   </PropertyGroup>
 
@@ -48,11 +48,17 @@
 
   <ItemGroup>
     <PackageReference Include="GodotSharp"/>
-    <PackageReference Include="Godot.SourceGenerators"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="Godot.SourceGenerators">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" PrivateAssets="None"/>
     <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" PrivateAssets="None"/>
-    <PackageReference Include="coverlet.collector"/>
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json"/>
     <ProjectReference Include="..\Api\GdUnit4Api.csproj"/>
 

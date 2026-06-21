@@ -38,9 +38,13 @@ public sealed class SceneRunnerInputEventIntegrationTest
     private void AssertInitialMouseState()
     {
         foreach (MouseButton button in Enum.GetValues(typeof(MouseButton)))
+        {
+            // MouseButton.None is not a valid button; Godot 4.5+ throws an error when passed to mouse_button_to_mask
+            if (button == MouseButton.None) continue;
             AssertThat(Input.IsMouseButtonPressed(button))
                 .OverrideFailureMessage($"Expect MouseButton {button} is not 'IsMouseButtonPressed'")
                 .IsFalse();
+        }
         AssertThat((long)Input.GetMouseButtonMask()).IsEqual(0L);
     }
 
@@ -48,6 +52,8 @@ public sealed class SceneRunnerInputEventIntegrationTest
     {
         foreach (Key key in Enum.GetValues(typeof(Key)))
         {
+            // Key.None is not a physical key; querying it triggers a Godot error
+            if (key == Key.None) continue;
             AssertThat(Input.IsKeyPressed(key))
                 .OverrideFailureMessage($"Expect key {key} is not 'IsKeyPressed'")
                 .IsFalse();
