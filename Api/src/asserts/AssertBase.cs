@@ -3,8 +3,6 @@
 
 namespace GdUnit4.Asserts;
 
-using CommandLine;
-
 using Core.Execution.Exceptions;
 using Core.Extensions;
 
@@ -26,6 +24,8 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
     protected string CurrentFailureMessage { get; set; } = string.Empty;
 
     protected string AppendingFailureMessage { get; set; } = string.Empty;
+
+    private TAssert Self => (TAssert)(object)this;
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     /// <inheritdoc />
@@ -34,7 +34,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
         var result = Comparable.IsEqual(Current, expected);
         if (!result.Valid)
             ThrowTestFailureReport(AssertFailures.IsEqual(Current, expected), Current, expected);
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     /// <inheritdoc />
@@ -43,7 +43,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
         var result = Comparable.IsEqual(Current, expected);
         if (result.Valid)
             ThrowTestFailureReport(AssertFailures.IsNotEqual(Current, expected), Current, expected);
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     /// <inheritdoc />
@@ -51,7 +51,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
     {
         if (Current != null)
             ThrowTestFailureReport(AssertFailures.IsNull(Current), Current, null);
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     /// <inheritdoc />
@@ -59,7 +59,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
     {
         if (Current == null)
             ThrowTestFailureReport(AssertFailures.IsNotNull(), Current, null);
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     /// <inheritdoc />
@@ -67,7 +67,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         CustomFailureMessage = message;
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     /// <inheritdoc />
@@ -75,7 +75,7 @@ public abstract class AssertBase<TValue, TAssert> : IAssertBase<TValue, TAssert>
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
         AppendingFailureMessage = message;
-        return this.Cast<TAssert>();
+        return Self;
     }
 
     internal static bool IsSame<TLeft, TRight>(TLeft lKey, TRight rKey)

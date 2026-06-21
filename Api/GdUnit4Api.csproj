@@ -5,7 +5,7 @@
     <Description>
       GdUnit4 API is the C# extention to enable GdUnit4 to run/write unit tests in C#.
     </Description>
-    <Copyright>© 2025 Mike Schulze</Copyright>
+    <Copyright>© 2026 Mike Schulze</Copyright>
     <Authors>Mike Schulze</Authors>
   </PropertyGroup>
 
@@ -48,9 +48,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="CommandLineParser"/>
     <PackageReference Include="Newtonsoft.Json"/>
-    <PackageReference Include="Moq"/>
     <!-- Content Include=".gitignore" -->
     <Content Include="../LICENSE"/>
     <None Include="README.md" Pack="true" PackagePath="/"/>

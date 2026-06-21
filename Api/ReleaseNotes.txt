@@ -16,6 +16,8 @@ v5.1.0
 * GD-366: Fixing `NO Godot C# SUPPORT NOT DETECTED` by increasing the used timeout to capture the supported arguments
 * GD-436: Fixing named pipe collision when running multiple assemblies in parallel
 * GD-437: Fixing respect CompileProcessTimeout in dotnet build step
+* GD-446: Removed unused dependencies `Moq` and `CommandLineParser` from gdUnit4.api.
+          If your project relies on either, add them explicitly to your .csproj.
 
 ✨ Improvements
 * GD-311: Verify the Godot binary has C# support before running godot runtime tests to avoid invalid test execution.
@@ -31,6 +33,13 @@ v5.1.0
     ```
 * GD-332: Do not allow returning null values on AutoFree to avoid spamming warnings
 * GD-426: Add ambient LoggerFactory and LogCapture for testing
+* GD-443: Make Godot runtime connect timeout configurable in ``.runsettings`
+   ```
+   <!-- GdUnit4-specific configuration -->
+       <GdUnit4>
+            <GodotConnectTimeout>10000</GodotConnectTimeout>
+       </GdUnit4>
+   ```
 
 v5.0.0
 
