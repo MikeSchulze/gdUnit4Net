@@ -4,8 +4,6 @@ namespace GdUnit4.Asserts;
 
 using System.Collections;
 
-using CommandLine;
-
 using Constraints;
 
 /// <inheritdoc cref="IDictionaryAssert{TKey,TValue}" />
@@ -197,7 +195,7 @@ public sealed class DictionaryAssert<TKey, TValue> : AssertBase<IEnumerable, IDi
     private TValue? TryGetValue(TKey key)
     {
         if (Current != null)
-            return Current[key].Cast<TValue>();
+            return (TValue)Current[key]!;
         return CurrentTyped?.ContainsKey(key) == true ? CurrentTyped[key] : default;
     }
 
