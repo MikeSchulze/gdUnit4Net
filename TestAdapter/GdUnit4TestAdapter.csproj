@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <Title>gdUnit4 TestAdapter</Title>
     <Version>$(GdUnitTestAdapterVersion)</Version>
     <Description>
@@ -67,6 +68,10 @@
     <None Include="../LICENSE" Pack="true" PackagePath="/"/>
     <None Include="../CONTRIBUTING.md" Pack="true" PackagePath="/"/>
     <None Include="../icon.png" Pack="true" PackagePath="/"/>
+    <!-- Override Microsoft.CodeCoverage's CopyTraceDataCollectorArtifacts target to prevent
+         non-16KB-aligned .so files from being included in the publish output.
+         See build/gdUnit4.test.adapter.targets for details. -->
+    <None Include="build/gdUnit4.test.adapter.targets" Pack="true" PackagePath="build/"/>
   </ItemGroup>
 
 </Project>

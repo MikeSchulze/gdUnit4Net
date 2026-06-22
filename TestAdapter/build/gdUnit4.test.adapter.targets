@@ -1,0 +1,27 @@
+<!--
+  gdUnit4.test.adapter.targets
+
+  Overrides Microsoft.CodeCoverage's CopyTraceDataCollectorArtifacts target, which is defined
+  in Microsoft.CodeCoverage.targets (AfterTargets="ComputeFilesToPublish") and copies its entire
+  build/ folder — including libInstrumentationEngine.so and libCoverageInstrumentationMethod.so —
+  into the dotnet publish output.
+
+  When building a Godot Android project, Godot's export plugin picks up every .so from the
+  publish output and copies it into android/build/libs/release/arm64-v8a/, where Gradle packages
+  it into the final AAB. Those two pre-built Microsoft binaries lack the 16KB ELF segment
+  alignment required for Android 15+ (API 35) devices, causing Google Play and Android Studio
+  to reject the bundle.
+
+  These files are developer diagnostic tools (CLR profiler / code coverage instrumentation)
+  with no role in a shipped Android application. Suppressing the copy is safe for all Godot
+  mobile (and desktop) consumers of this package.
+
+  Because NuGet imports package .targets files in dependency-graph order (transitive
+  dependencies first), this file is imported after Microsoft.CodeCoverage.targets, so the
+  empty target defined here wins.
+-->
+<Project>
+  <Target Name="CopyTraceDataCollectorArtifacts" AfterTargets="ComputeFilesToPublish">
+    <!-- Intentionally empty: suppresses non-16KB-aligned native libs from publish output. -->
+  </Target>
+</Project>

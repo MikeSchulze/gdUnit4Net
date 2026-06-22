@@ -1,3 +1,11 @@
+v3.1.1
+* GD-448: Fix non-16KB-aligned native libs being included in Android export publish output.
+          A bundled `.targets` file now suppresses Microsoft.CodeCoverage's `CopyTraceDataCollectorArtifacts`
+          target so that `libInstrumentationEngine.so` and `libCoverageInstrumentationMethod.so` are not
+          copied into the `dotnet publish` output. This prevents Google Play and Android Studio from
+          rejecting AABs built for Android 15+ (API 35) devices. Code coverage collection during test
+          runs is unaffected.
+
 v3.1.0
 * GD-446: Fixing nuget packaging by exclude `Microsoft.NET.Test.Sdk`, `coverlet.collector` and `Godot.SourceGenerators`
           Microsoft.NET.Test.Sdk, coverlet.collector and Godot.SourceGenerators are no longer transitively exported by gdUnit4.test.adapter.
