@@ -116,3 +116,31 @@ jobs:
           fail-on-error: 'false'
           fail-on-empty: 'false'
           use-actions-summary: 'false'
+
+      # publish Example Tests results
+      - name: Download Example tests artifacts
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: artifact_example_tests_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: godot-gdunit-labs/gdUnit4Net
+          run-id: ${{ github.event.inputs.workflow_run_id || github.event.workflow_run.id }}
+
+      - name: Publish Example Test Results
+        uses: dorny/test-reporter@v3.0.0
+        with:
+          name: report_example_tests_Godot${{ matrix.godot-version }}-${{ matrix.godot-status }}
+          path: './home/runner/work/gdUnit4Net/gdUnit4Net/Example/TestResults/test-result.trx'
+          reporter: dotnet-trx
+          fail-on-error: 'false'
+          fail-on-empty: 'false'
+          use-actions-summary: 'false'
+
+      - name: Publish Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: './home/runner/work/gdUnit4Net/gdUnit4Net/Example/TestResults/**/*.cobertura.xml'
+          badge: true
+          format: markdown
+          output: both
+          hide-complexity: true

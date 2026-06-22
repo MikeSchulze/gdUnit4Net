@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <Title>gdUnit4 TestAdapter</Title>
     <Version>$(GdUnitTestAdapterVersion)</Version>
     <Description>

@@ -3,7 +3,7 @@
     <RunConfiguration>
         <MaxCpuCount>1</MaxCpuCount>
         <ResultsDirectory>./TestResults</ResultsDirectory>
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <TestSessionTimeout>180000</TestSessionTimeout>
         <TreatNoTestsAsError>true</TreatNoTestsAsError>
     </RunConfiguration>
@@ -27,6 +27,16 @@
             </Logger>
         </Loggers>
     </LoggerRunSettings>
+
+    <DataCollectionRunSettings>
+        <DataCollectors>
+            <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0">
+                <Configuration>
+                    <Format>cobertura</Format>
+                </Configuration>
+            </DataCollector>
+        </DataCollectors>
+    </DataCollectionRunSettings>
 
     <GdUnit4>
         <!-- Additonal Godot runtime parameters-->
