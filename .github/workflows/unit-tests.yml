@@ -51,7 +51,7 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: 'global.json'
 
@@ -107,7 +107,7 @@ jobs:
           godot-bin-name: 'linux_x86_64'
           godot-cache-path: '~/godot-linux'
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: 'global.json'
 
@@ -167,7 +167,7 @@ jobs:
           godot-bin-name: 'linux_x86_64'
           godot-cache-path: '~/godot-linux'
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: 'global.json'
 
