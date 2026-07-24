@@ -31,6 +31,16 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// </summary>
     internal const string TEMP_TEST_RUNNER_DIR = "gdunit4_testadapter_v5";
 
+    /// <summary>
+    ///     Name of the optional environment variable holding an additional pipe name discriminator.
+    /// </summary>
+    private const string PIPE_SUFFIX_ENV_VAR = "GDUNIT4_PIPE_SUFFIX";
+
+    /// <summary>
+    ///     Maximum number of characters taken from <see cref="PIPE_SUFFIX_ENV_VAR" /> to keep the pipe name short.
+    /// </summary>
+    private const int PIPE_SUFFIX_MAX_LENGTH = 16;
+
     private static readonly ITestEngineLogger Logger = LoggerFactory.GetLogger<GodotRuntimeTestRunner>();
     private readonly string pipeName;
 
@@ -45,9 +55,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
     internal GodotRuntimeTestRunner(string assemblyId, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor($"gdunit4-{assemblyId}"), settings)
+        : base(new GodotRuntimeExecutor(BuildPipeName(assemblyId)), settings)
     {
-        pipeName = $"gdunit4-{assemblyId}";
+        pipeName = BuildPipeName(assemblyId);
         scope = LoggerFactory.Instance.GetScope() ?? new ScopeLogger(Logger, assemblyId);
         this.settings = settings;
         DebuggerFramework = debuggerFramework;
@@ -378,6 +388,37 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
         {
             CloseProcess(compileProcess);
         }
+    }
+
+    /// <summary>
+    ///     Builds the named pipe identifier of the IPC channel between the test host and the Godot runtime process.
+    /// </summary>
+    /// <remarks>
+    ///     Scoping the name by assembly prevents collisions between different assemblies running in parallel, but two
+    ///     concurrent runs of the <b>same</b> assembly - e.g. from separate checkouts or worktrees of one project - still
+    ///     derive the same name. Setting <c>GDUNIT4_PIPE_SUFFIX</c> appends a caller supplied discriminator to close that
+    ///     gap. If the variable is unset, empty or contains no usable characters, the resulting name is unchanged.
+    /// </remarks>
+    /// <param name="assemblyId">Assembly identifier the pipe name is scoped to.</param>
+    /// <returns>The pipe name used by both the pipe client and the spawned Godot runtime pipe server.</returns>
+    private static string BuildPipeName(string assemblyId)
+    {
+        var suffix = Environment.GetEnvironmentVariable(PIPE_SUFFIX_ENV_VAR);
+        if (string.IsNullOrEmpty(suffix))
+            return $"gdunit4-{assemblyId}";
+
+        var sanitized = new StringBuilder(PIPE_SUFFIX_MAX_LENGTH);
+        foreach (var character in suffix)
+        {
+            if (sanitized.Length == PIPE_SUFFIX_MAX_LENGTH)
+                break;
+            if (char.IsAsciiLetterOrDigit(character) || character is '_' or '-')
+                _ = sanitized.Append(character);
+        }
+
+        return sanitized.Length == 0
+            ? $"gdunit4-{assemblyId}"
+            : $"gdunit4-{assemblyId}-{sanitized}";
     }
 
     private string BuildGodotArguments()
