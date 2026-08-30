@@ -76,6 +76,11 @@ public class GodotRuntimeTestRunnerTest
     [AfterTest]
     public void AfterTest() => DebuggerFrameworkMock.Reset();
 
+    [TestCase]
+    public void PipeNameIsUniqueToCurrentTestHostProcess()
+        => AssertThat(GodotRuntimeTestRunner.BuildPipeName("assemblyId"))
+            .IsEqual($"gdunit4-assemblyId-{Environment.ProcessId}");
+
     /// <summary>
     ///     Test successful execution of InstallTestRunnerClasses
     /// </summary>

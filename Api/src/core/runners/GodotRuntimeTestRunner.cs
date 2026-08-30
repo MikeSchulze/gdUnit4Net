@@ -45,9 +45,18 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     /// <param name="debuggerFramework">Framework for debugging support.</param>
     /// <param name="settings">Test engine configuration settings.</param>
     internal GodotRuntimeTestRunner(string assemblyId, IDebuggerFramework debuggerFramework, TestEngineSettings settings)
-        : base(new GodotRuntimeExecutor($"gdunit4-{assemblyId}", settings.GodotConnectTimeout), settings)
+        : this(assemblyId, debuggerFramework, settings, BuildPipeName(assemblyId))
     {
-        pipeName = $"gdunit4-{assemblyId}";
+    }
+
+    private GodotRuntimeTestRunner(
+        string assemblyId,
+        IDebuggerFramework debuggerFramework,
+        TestEngineSettings settings,
+        string uniquePipeName)
+        : base(new GodotRuntimeExecutor(uniquePipeName, settings.GodotConnectTimeout), settings)
+    {
+        pipeName = uniquePipeName;
         scope = LoggerFactory.Instance.GetScope() ?? new ScopeLogger(Logger, assemblyId);
         this.settings = settings;
         DebuggerFramework = debuggerFramework;
@@ -56,6 +65,9 @@ internal sealed class GodotRuntimeTestRunner : BaseTestRunner
     private object ProcessLock { get; } = new();
 
     private IDebuggerFramework DebuggerFramework { get; }
+
+    internal static string BuildPipeName(string assemblyId)
+        => $"gdunit4-{assemblyId}-{Environment.ProcessId}";
 
     /// <summary>
     ///     Gets the path to the Godot executable from environment variables.
